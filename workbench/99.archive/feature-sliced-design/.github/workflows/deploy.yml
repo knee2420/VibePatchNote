@@ -1,0 +1,48 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: |
+          npm install -g corepack@latest
+          corepack enable
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: .
+
+      # Social preview images are rendered at build time and cached by content hash.
+      - name: Retrieve social preview cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.astro-og-canvas
+          key: og-images-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            og-images-${{ github.ref_name }}-
+            og-images-main-
+
+      - name: Build static
+        run: pnpm build
+        working-directory: .
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.6.1
+        with:
+          branch: gh-pages
+          folder: ./build
+

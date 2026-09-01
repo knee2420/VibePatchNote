@@ -1,0 +1,235 @@
+// @ts-check
+import { defineConfig } from "astro/config";
+import starlight from "@astrojs/starlight";
+import remarkHeaderId from "remark-heading-id";
+import starlightLlmsTxt from "starlight-llms-txt";
+import starlightLinksValidator from "starlight-links-validator";
+import starlightPageContextAction from "starlight-page-context-action";
+import lunaria from "@lunariajs/starlight";
+
+// https://astro.build/config
+export default defineConfig({
+    outDir: "./build",
+    publicDir: "./static",
+    site: "https://fsd.how",
+    vite: {
+        resolve: {
+            alias: {
+                "@": new URL("./src", import.meta.url).pathname,
+            },
+        },
+    },
+    markdown: {
+        // @ts-ignore
+        remarkPlugins: [remarkHeaderId],
+    },
+    integrations: [
+        starlight({
+            favicon: "/img/favicon/adaptive.svg",
+            title: "Feature-Sliced Design",
+            description: "Architectural methodology for frontend projects",
+            defaultLocale: "root",
+            customCss: ["./src/styles/custom.css"],
+            components: {
+                /* Adds the per-page social preview image, see `src/pages/og/[...path].ts`. */
+                Head: "./src/shared/ui/Head.astro",
+                ThemeProvider: "./src/shared/ui/ThemeProvider.astro",
+            },
+            logo: {
+                src: "./static/img/brand/logo-primary.png",
+                replacesTitle: true,
+            },
+            plugins: [
+                starlightLlmsTxt(),
+                starlightPageContextAction({
+                    position: "below-toc",
+                    sticky: true,
+                    actions: {
+                        copy: true,
+                        scrollTop: true,
+                        viewMarkdown: false,
+                        chatgpt: false,
+                        claude: false,
+                        t3chat: false,
+                    },
+                }),
+                starlightLinksValidator({
+                    errorOnFallbackPages: false,
+                    errorOnInconsistentLocale: true,
+                }),
+                lunaria({ route: "translation-status" }),
+            ],
+            locales: {
+                root: {
+                    label: "English",
+                    lang: "en",
+                },
+                ru: {
+                    label: "Русский",
+                },
+                uz: {
+                    label: "O'zbekcha",
+                },
+                kr: {
+                    label: "한국어",
+                    lang: "ko",
+                },
+                ja: {
+                    label: "日本語",
+                },
+                vi: {
+                    label: "Tiếng Việt",
+                },
+                zh: {
+                    label: "中文",
+                },
+                tr: {
+                    label: "Türkçe",
+                },
+            },
+            social: [
+                {
+                    icon: "github",
+                    label: "GitHub",
+                    href: "https://github.com/feature-sliced/documentation",
+                },
+                {
+                    icon: "discord",
+                    label: "Discord",
+                    href: "https://discord.gg/S8MzWTUsmp",
+                },
+            ],
+            sidebar: [
+                {
+                    label: "Get Started",
+                    translations: {
+                        ru: "Начало работы",
+                        ja: "はじめに",
+                        tr: "Başlangıç",
+                    },
+                    autogenerate: { directory: "docs/get-started" },
+                },
+                {
+                    label: "Guides",
+                    translations: {
+                        ru: "Гайды",
+                        ja: "ガイド",
+                        tr: "Rehberler",
+                    },
+                    items: [
+                        {
+                            label: "Examples",
+                            translations: {
+                                ru: "Примеры",
+                                ja: "例",
+                                tr: "Örnekler",
+                            },
+                            autogenerate: { directory: "docs/guides/examples" },
+                        },
+                        {
+                            label: "Migration",
+                            translations: {
+                                ru: "Миграция",
+                                ja: "移行",
+                                uz: "Migratsiya",
+                                tr: "Geçiş",
+                            },
+                            autogenerate: {
+                                directory: "docs/guides/migration",
+                            },
+                        },
+                        {
+                            label: "Tech",
+                            translations: {
+                                ru: "Технологии",
+                                ja: "技術",
+                                uz: "Texnologiya",
+                                tr: "Teknolojiler",
+                            },
+                            autogenerate: { directory: "docs/guides/tech" },
+                        },
+                        {
+                            label: "Code smells & Issues",
+                            translations: {
+                                ru: "Известные проблемы",
+                                ja: "コード臭いと問題",
+                                uz: "Muammolar",
+                                tr: "Bilinen Sorunlar",
+                            },
+                            autogenerate: { directory: "docs/guides/issues" },
+                        },
+                    ],
+                },
+                {
+                    label: "Reference",
+                    translations: {
+                        ru: "Справочник",
+                        ja: "参考書",
+                        tr: "Referans",
+                    },
+                    autogenerate: { directory: "docs/reference" },
+                },
+                {
+                    label: "Resources",
+                    translations: {
+                        ru: "Ресурсы",
+                        tr: "Kaynaklar",
+                    },
+                    items: [
+                        {
+                            slug: "docs/llms",
+                        },
+                        {
+                            slug: "docs/branding",
+                        },
+                        {
+                            label: "Translation Status",
+                            link: "/translation-status/",
+                        },
+                    ],
+                },
+                {
+                    label: "About",
+                    translations: {
+                        ru: "О нас",
+                        ja: "メソッドについて",
+                        tr: "Hakkında",
+                    },
+                    items: [
+                        {
+                            slug: "docs/about/mission",
+                        },
+                        {
+                            slug: "docs/about/motivation",
+                        },
+                        {
+                            slug: "docs/about/alternatives",
+                        },
+                        {
+                            label: "Understanding",
+                            translations: {
+                                ru: "Понимание",
+                                ja: "理解",
+                                tr: "Anlama",
+                            },
+                            autogenerate: {
+                                directory: "docs/about/understanding",
+                            },
+                            collapsed: true,
+                        },
+                        {
+                            label: "Promote",
+                            translations: {
+                                ru: "Продвижение",
+                                ja: "プロモート",
+                                tr: "Tanıtım",
+                            },
+                            autogenerate: { directory: "docs/about/promote" },
+                            collapsed: true,
+                        },
+                    ],
+                },
+            ],
+        }),
+    ],
+});
