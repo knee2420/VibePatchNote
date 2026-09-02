@@ -2,10 +2,11 @@ import { useMemo, useRef, useState } from 'react';
 import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
 import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
 import { ResourceCardNode } from '@/entities/resource-card/ui/ResourceCardNode';
+import { ReferenceDocumentNode } from '@/entities/reference-document/ui/ReferenceDocumentNode';
 import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
 
 export function HybridEditorBoard() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useHybridEditorState();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } = useHybridEditorState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -13,6 +14,7 @@ export function HybridEditorBoard() {
   const nodeTypes = useMemo(() => ({
     segment: SegmentNode,
     resourceCard: ResourceCardNode,
+    referenceDocument: ReferenceDocumentNode,
   }), []);
 
   const handleFileUploadClick = () => {
@@ -39,7 +41,20 @@ export function HybridEditorBoard() {
 
       const data = await response.json();
       alert(`업로드 성공! Job ID: ${data.job_id}`);
-      // TODO: Use the returned data to add a new ResourceCardNode to the canvas
+      
+      // Create a local object URL to display the PDF immediately
+      const objectUrl = URL.createObjectURL(file);
+      
+      // Add a new ReferenceDocumentNode to the canvas
+      addNode({
+        id: `reference-${Date.now()}`,
+        type: 'referenceDocument',
+        position: { x: Math.random() * 100 + 100, y: Math.random() * 100 + 100 },
+        data: {
+          title: file.name,
+          url: objectUrl
+        }
+      });
     } catch (error) {
       console.error('File upload error:', error);
       alert('파일 업로드 중 오류가 발생했습니다.');

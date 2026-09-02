@@ -1,8 +1,9 @@
-import { Handle, Position, type NodeProps, type Node } from '@xyflow/react';
+import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 import type { ResourceCardData } from '../model/types';
 
-export function ResourceCardNode({ data, selected }: NodeProps<Node<ResourceCardData, "resourceCard">>) {
-  
+export function ResourceCardNode({ id, data, selected }: NodeProps<Node<ResourceCardData, "resourceCard">>) {
+  const { setNodes } = useReactFlow();
+
   const getBadgeColor = (type: string) => {
     switch (type) {
       case 'knowledge': return 'bg-amber-200 text-amber-800';
@@ -19,11 +20,20 @@ export function ResourceCardNode({ data, selected }: NodeProps<Node<ResourceCard
       transition-all duration-200
     `}>
       {/* Post-it Note Header */}
-      <div className="px-3 py-2 border-b border-amber-200/50 flex justify-between items-start">
-        <h4 className="font-semibold text-amber-900 text-sm leading-tight">{data.title}</h4>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ml-2 ${getBadgeColor(data.type)}`}>
-          {data.type}
-        </span>
+      <div className="px-3 py-2 border-b border-amber-200/50 flex justify-between items-start group">
+        <div className="flex-1 min-w-0 pr-2">
+          <h4 className="font-semibold text-amber-900 text-sm leading-tight truncate">{data.title}</h4>
+          <span className={`inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium ${getBadgeColor(data.type)}`}>
+            {data.type}
+          </span>
+        </div>
+        <button
+          onClick={() => setNodes((nds) => nds.filter((node) => node.id !== id))}
+          className="text-amber-700/50 hover:text-red-500 transition-colors p-1 rounded hover:bg-amber-200/50 opacity-0 group-hover:opacity-100"
+          title="삭제"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
       
       {/* Post-it Content */}

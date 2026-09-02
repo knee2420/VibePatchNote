@@ -33,11 +33,16 @@ export function useHybridEditorState() {
     []
   );
 
+  const addNode = useCallback((node: Node) => {
+    setNodes((nds) => [...nds, node]);
+  }, []);
+
   return {
     nodes,
     edges,
     onNodesChange,
     onEdgesChange,
-    onConnect
+    onConnect,
+    addNode
   };
 }
