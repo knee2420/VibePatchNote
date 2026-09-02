@@ -1,0 +1,23 @@
+---
+type: card
+title: "Session Store"
+description: "session_store.py 모듈의 1:1 매핑 지식 카드"
+resource: "../../../../../../../99.archive/dify/api/core/workflow/nodes/agent_v2/session_store.py"
+timestamp: "2026-09-02"
+---
+
+# summary
+이 카드는 `session_store.py` 원문의 핵심 아키텍처와 인터페이스를 1:1로 매핑하여 캡슐화한다. 원문의 클래스와 함수 구조를 분석하여 요소화했다.
+
+# elements
+| id | kind | label | 무엇이 들어있나 | anchor |
+|---|---|---|---|---|
+| E1 | 아키텍처 | WorkflowAgentSessionScope | WorkflowAgentSessionScope 클래스 정의 및 추상화 | `## class WorkflowAgentSessionScope` |
+| E2 | 아키텍처 | StoredWorkflowAgentSession | StoredWorkflowAgentSession 클래스 정의 및 추상화 | `## class StoredWorkflowAgentSession` |
+| E3 | 아키텍처 | WorkflowAgentWorkspaceStore | WorkflowAgentWorkspaceStore 클래스 정의 및 추상화 | `## class WorkflowAgentWorkspaceStore` |
+
+# 밖으로
+- ⚠️ 이 카드는 기계적으로 1:1 매핑된 뼈대 카드이며, 상세 맥락은 원문을 참조.
+
+# 원문
+[session_store.py](../../../../../../../99.archive/dify/api/core/workflow/nodes/agent_v2/session_store.py)
