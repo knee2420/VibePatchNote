@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
 from pydantic import BaseModel
+from app.services.upload_svc import save_uploaded_file
 
 router = APIRouter()
 
@@ -7,22 +8,28 @@ class UploadResponse(BaseModel):
     status: str
     job_id: str
     message: str
+    file_path: str = None
 
 @router.post("/", response_model=UploadResponse)
 async def upload_reference_document(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     """
-    Phase 1 & 2 Entrypoint
-    Uploads a document, triggers Dify for Reference Classification,
-    Goal Reverse-Engineering, Schema Extraction, and Scaffold Extraction.
+    Phase 1 Entrypoint
+    Uploads a document and saves it locally.
+    Delegates file processing to the native workflow engine asynchronously.
     """
-    # TODO: Save file temporarily
-    # TODO: Invoke Services (Dify Classifier -> Dify Workflow)
-    # TODO: Trigger Semantic Tagging (Phase 3) asynchronously
+    # 1. Save file via service layer
+    try:
+        saved_path = save_uploaded_file(file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="File saving failed")
+
+    # TODO: Trigger Native Workflow Engine asynchronously
     
     return UploadResponse(
         status="processing",
-        job_id="dummy-job-1234",
-        message="Reference document uploaded and extraction pipeline started."
+        job_id="native-job-1234",
+        message="Reference document uploaded successfully.",
+        file_path=saved_path
     )
 
 @router.get("/status/{job_id}")
