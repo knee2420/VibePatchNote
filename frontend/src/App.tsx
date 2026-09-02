@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { HybridEditorBoard } from "@/widgets/hybrid-editor-board/ui/HybridEditorBoard"
 
 interface HealthStatus {
   status: string
@@ -14,6 +15,7 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(false)
   const [testInput, setTestInput] = useState<string>("")
   const [apiError, setApiError] = useState<string | null>(null)
+  const [showEditor, setShowEditor] = useState<boolean>(false)
 
   const checkBackendHealth = async () => {
     setLoading(true)
@@ -41,6 +43,19 @@ export default function App() {
     checkBackendHealth()
   }, [])
 
+  if (showEditor) {
+    return (
+      <div className="w-full h-screen bg-slate-50">
+        <div className="absolute top-4 right-4 z-50">
+          <Button onClick={() => setShowEditor(false)} variant="outline" className="shadow-sm">
+            대시보드로 돌아가기
+          </Button>
+        </div>
+        <HybridEditorBoard />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 antialiased selection:bg-purple-500 selection:text-white">
       <div className="max-w-4xl w-full space-y-8">
@@ -55,6 +70,11 @@ export default function App() {
           <p className="text-slate-400 text-lg max-w-2xl mx-auto">
             React + TypeScript + Vite + ShadCN UI + FastAPI 개발 환경이 구성되었습니다.
           </p>
+          <div className="pt-4">
+            <Button onClick={() => setShowEditor(true)} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-full shadow-lg shadow-blue-900/50">
+              🚀 하이브리드 에디터 보드 열기
+            </Button>
+          </div>
         </div>
 
         {/* Tech Stack Grid */}
