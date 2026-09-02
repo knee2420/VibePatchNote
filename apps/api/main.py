@@ -1,33 +1,31 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes import upload, hitl, templates
 
 app = FastAPI(
-    title="VibePatchNote API",
-    description="Backend API for VibePatchNote application",
-    version="0.1.0",
+    title="Document Builder Backend Harness",
+    description="FastAPI Orchestrator for Dify + Antigravity Pipeline",
+    version="0.1.0"
 )
 
 # CORS configuration
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Adjust for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include Routers
+app.include_router(upload.router, prefix="/api/v1/upload", tags=["Upload & Analyze"])
+app.include_router(hitl.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
+app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to VibePatchNote API"}
-
-
-@app.get("/api/health")
+@app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "VibePatchNote Backend"}
+    return {"status": "ok", "service": "Document Builder Backend Harness"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

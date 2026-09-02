@@ -1,16 +1,12 @@
 {
-  "name": "vibepatchnote-monorepo",
+  "name": "document-builder-monorepo",
   "private": true,
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
-    "build": "turbo run build",
     "dev": "turbo run dev",
+    "build": "turbo run build",
     "lint": "turbo run lint"
   },
   "devDependencies": {
-    "turbo": "^2.3.0"
-  },
-  "packageManager": "pnpm@9.0.0"
+    "turbo": "latest"
+  }
 }

@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       turbo:
-        specifier: ^2.3.0
+        specifier: latest
         version: 2.10.12
 
   apps/web:
@@ -29,9 +29,6 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^3.31.0
         version: 3.31.0
-      '@vibe/editor-core':
-        specifier: workspace:*
-        version: link:../../packages/editor-core
       '@xyflow/react':
         specifier: ^12.11.6
         version: 12.11.6(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -99,22 +96,6 @@ importers:
       vite:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@24.13.3)(jiti@2.7.0)
-
-  packages/editor-core:
-    dependencies:
-      '@tiptap/pm':
-        specifier: ^3.31.0
-        version: 3.31.0
-      '@tiptap/react':
-        specifier: ^3.31.0
-        version: 3.31.0(@floating-ui/dom@1.8.0)(@tiptap/core@3.31.0(@tiptap/pm@3.31.0))(@tiptap/pm@3.31.0)(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@tiptap/starter-kit':
-        specifier: ^3.31.0
-        version: 3.31.0
-    devDependencies:
-      typescript:
-        specifier: ~6.0.2
-        version: 6.0.3
 
 packages:
 
