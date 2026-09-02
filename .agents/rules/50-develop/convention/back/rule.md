@@ -12,12 +12,14 @@ description: "백엔드 아키텍처 및 네이티브 파이프라인 컨벤션"
   - `app/core/workflow/engine.py` 등 내부 엔진 골격을 활용하여 DAG(Directed Acyclic Graph) 실행 패턴을 직접 구현합니다.
   - "Dify를 도배하지 마라"는 규칙을 준수하여 시스템을 스탠드얼론(Standalone)으로 유지합니다.
 
-## 2. FastAPI 라우터 및 스키마 분리
-* **원칙:** 라우팅 로직과 데이터 검증 로직을 철저히 분리합니다.
+## 2. 도메인 주도 설계 (Domain-Driven Design) 기반 구조
+* **원칙:** 백엔드의 디렉토리 구조는 기능(Domain) 단위 패키지로 분할되어야 합니다. 파일 타입(`routes`, `schemas`, `services`)별로 그룹화하는 구조는 지양합니다.
 * **계층 구조:**
-  - `app/api/routes/`: 엔드포인트 및 HTTP 요청/응답 처리 로직만 담당.
-  - `app/schemas/`: Pydantic 기반의 데이터 검증(Validation) 및 직렬화/역직렬화 담당.
-  - `app/services/`: 실제 비즈니스 로직(Extraction, Semantic Tagging 등) 담당.
+  - 각 도메인 패키지 (예: `app/workspaces/`, `app/documents/`) 내부에 해당 도메인의 로직을 응집시킵니다.
+  - 패키지 내부 구성:
+    - `router.py`: 엔드포인트 및 HTTP 요청/응답 처리 로직만 담당. 비즈니스 로직을 직접 수행하지 않고 `service.py`로 위임합니다.
+    - `schemas.py`: 해당 도메인의 Pydantic 기반 데이터 검증 및 직렬화/역직렬화 담당. DB 모델과 분리.
+    - `service.py`: 도메인의 핵심 비즈니스 로직 전담.
 
 ## 3. 에러 핸들링 및 로깅
 * **원칙:** 사용자나 시스템 디버깅을 위해 명확한 HTTP Status Code와 상세 에러 메시지를 반환해야 합니다.
@@ -25,9 +27,10 @@ description: "백엔드 아키텍처 및 네이티브 파이프라인 컨벤션"
 
 ## 4. 디렉터리 레이어별 상세 컨벤션 (Directory Breakdown)
 
-### 4.1  pp/api/routes
-- **역할:** FastAPI의 라우터(APIRouter)가 위치하며, 클라이언트의 HTTP 요청을 받고 응답을 반환합니다.
-- **규칙:** 데이터베이스 조회나 무거운 추출 로직을 직접 수행하지 않고 services 레이어로 위임합니다.
+### 4.1 도메인 패키지 내부 컨벤션
+- **`router.py`**: FastAPI의 라우터(APIRouter)가 위치하며, 클라이언트의 HTTP 요청을 받고 응답을 반환합니다. 데이터베이스 조회나 무거운 추출 로직을 직접 수행하지 않고 `service.py`로 위임합니다.
+- **`schemas.py`**: Pydantic 모델을 사용해 HTTP 요청 및 응답 데이터의 유효성 검증을 정의합니다.
+- **`service.py`**: 비즈니스 로직의 핵심이며, 라우터에서 전달받은 파라미터를 기반으로 워크플로우 엔진을 호출하거나 데이터를 가공합니다.
 
 ### 4.2 `app/core` (시스템 코어 및 네이티브 파이프라인)
 - **역할:** 비즈니스 도메인과 독립적인 시스템 인프라 로직, 전역 설정(Config) 및 AI 워크플로우/에이전트의 심장부가 위치합니다.
@@ -38,10 +41,5 @@ description: "백엔드 아키텍처 및 네이티브 파이프라인 컨벤션"
     - `core/workflow/nodes/`: 워크플로우 엔진에 플러그인(Plug-in)처럼 결합될 개별 실행 단위(Action Node)들이 정의되는 공간입니다.
 - **규칙:** 특정 도메인(예: 웹소설 특정 기능)의 종속적인 비즈니스 로직을 `core` 하위에 직접 작성하지 마십시오. 범용적으로 재사용 가능한 파이프라인 엔진과 인프라 코드만 허용됩니다.
 
-### 4.3  pp/schemas
-- **역할:** Pydantic 모델을 사용해 HTTP 요청(Request) 및 응답(Response) 데이터의 구조와 유효성 검증(Validation)을 정의합니다.
-- **규칙:** DB ORM 모델(필요 시)과 철저히 분리하여, API 스펙을 명확히 합니다.
-
-### 4.4  pp/services
-- **역할:** 비즈니스 로직의 핵심 (예: extraction_svc.py, semantic_svc.py).
-- **규칙:** outes에서 전달받은 파라미터를 기반으로 워크플로우 엔진을 호출하거나, 데이터를 가공하는 무거운 로직을 전담합니다.
+### 4.3 `app/models.py` (전역 모델)
+- **역할:** 여러 도메인에서 공통으로 사용되는 Pydantic 글로벌 모델이나 전역 스키마가 위치합니다.

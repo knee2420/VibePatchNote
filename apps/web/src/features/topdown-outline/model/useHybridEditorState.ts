@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { 
   type Node, 
   type Edge, 
@@ -25,7 +26,8 @@ interface HybridEditorState {
 }
 
 export const useHybridEditorState = create<HybridEditorState>()(
-  (set, get) => ({
+  persist(
+    (set, get) => ({
     activeSessionId: null,
     activeSessionTitle: 'Untitled Session',
     nodes: [],
@@ -51,5 +53,9 @@ export const useHybridEditorState = create<HybridEditorState>()(
     setActiveSessionTitle: (title) => {
       set({ activeSessionTitle: title });
     },
-  })
+  }),
+  {
+    name: 'hybrid-editor-storage',
+  }
+)
 );

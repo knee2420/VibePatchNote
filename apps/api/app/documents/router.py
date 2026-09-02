@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from app.services.upload_svc import save_uploaded_file
+import os
+from .service import save_uploaded_file, UPLOAD_DIR
 
 router = APIRouter()
 
@@ -8,9 +10,9 @@ class UploadResponse(BaseModel):
     status: str
     job_id: str
     message: str
-    file_path: str = None
+    file_url: str = None
 
-@router.post("/", response_model=UploadResponse)
+@router.post("/upload", response_model=UploadResponse)
 async def upload_reference_document(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     """
     Phase 1 Entrypoint
@@ -29,7 +31,7 @@ async def upload_reference_document(background_tasks: BackgroundTasks, file: Upl
         status="processing",
         job_id="native-job-1234",
         message="Reference document uploaded successfully.",
-        file_path=saved_path
+        file_url=f"http://127.0.0.1:8000/api/v1/documents/files/{file.filename}"
     )
 
 @router.get("/status/{job_id}")
@@ -38,3 +40,13 @@ async def get_extraction_status(job_id: str):
     Checks the status of the extraction pipeline.
     """
     return {"status": "completed", "progress": 100}
+
+@router.get("/files/{filename}")
+async def get_uploaded_file(filename: str):
+    """
+    Serves an uploaded file for the frontend to render.
+    """
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)

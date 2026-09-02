@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
 import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
 import { ResourceCardNode } from '@/entities/resource-card/ui/ResourceCardNode';
@@ -7,10 +7,30 @@ import { useHybridEditorState } from '@/features/topdown-outline/model/useHybrid
 import { SessionListSheet } from '@/features/workspace/ui/SessionListSheet';
 
 export function HybridEditorBoard() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, clearSession, activeSessionTitle } = useHybridEditorState();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, clearSession, activeSessionId, activeSessionTitle } = useHybridEditorState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false);
+
+  // Auto-save logic (debounced)
+  useEffect(() => {
+    if (!activeSessionId) return;
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        await fetch(`http://127.0.0.1:8000/api/v1/workspaces/${activeSessionId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: activeSessionTitle, nodes, edges }),
+        });
+        console.log('Auto-saved session to backend.');
+      } catch (e) {
+        console.error('Auto-save failed:', e);
+      }
+    }, 1500);
+
+    return () => clearTimeout(timeoutId);
+  }, [nodes, edges, activeSessionId, activeSessionTitle]);
 
   // Define node types for React Flow
   const nodeTypes = useMemo(() => ({
@@ -32,7 +52,7 @@ export function HybridEditorBoard() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/upload', {
+      const response = await fetch('http://127.0.0.1:8000/api/v1/documents/upload', {
         method: 'POST',
         body: formData,
       });
@@ -44,9 +64,6 @@ export function HybridEditorBoard() {
       const data = await response.json();
       alert(`업로드 성공! Job ID: ${data.job_id}`);
       
-      // Create a local object URL to display the PDF immediately
-      const objectUrl = URL.createObjectURL(file);
-      
       // Add a new ReferenceDocumentNode to the canvas
       addNode({
         id: `reference-${Date.now()}`,
@@ -54,7 +71,7 @@ export function HybridEditorBoard() {
         position: { x: Math.random() * 100 + 100, y: Math.random() * 100 + 100 },
         data: {
           title: file.name,
-          url: objectUrl
+          url: data.file_url
         }
       });
     } catch (error) {

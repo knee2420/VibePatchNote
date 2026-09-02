@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import upload, hitl, templates, workspaces
+from app.documents import router as upload_router
+from app.rag import router as hitl_router
+from app.templates import router as templates_router
+from app.workspaces import router as workspaces_router
 
 app = FastAPI(
     title="Document Builder Backend Harness",
@@ -18,10 +21,10 @@ app.add_middleware(
 )
 
 # Include Routers
-app.include_router(upload.router, prefix="/api/v1/upload", tags=["Upload & Analyze"])
-app.include_router(hitl.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
-app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
-app.include_router(workspaces.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])
+app.include_router(upload_router.router, prefix="/api/v1/documents", tags=["Upload & Analyze"])
+app.include_router(hitl_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
+app.include_router(templates_router.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
+app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])
 
 @app.get("/health")
 def health_check():

@@ -1,0 +1,37 @@
+{
+    "default-session-1": {
+        "id": "default-session-1",
+        "title": "\uae30\ubcf8 \ud29c\ud1a0\ub9ac\uc5bc \uc138\uc158",
+        "description": "\uc774\uac83\uc740 \uc11c\ubc84 \uc2dc\uc791 \uc2dc \uc0dd\uc131\ub41c \uae30\ubcf8 \uc138\uc158\uc785\ub2c8\ub2e4.",
+        "nodes": [
+            {
+                "id": "reference-1788357216875",
+                "type": "referenceDocument",
+                "position": {
+                    "x": 118.70827535646251,
+                    "y": 153.15459569442228
+                },
+                "data": {
+                    "title": "Atticus LLC_ Invoice 000081709.pdf",
+                    "url": "http://127.0.0.1:8000/api/v1/documents/files/Atticus LLC_ Invoice 000081709.pdf"
+                },
+                "measured": {
+                    "width": 600,
+                    "height": 800
+                }
+            }
+        ],
+        "edges": [],
+        "created_at": "2026-09-02T13:52:39.808038",
+        "updated_at": "2026-09-02T13:54:11.115643"
+    },
+    "215b5acc-5e81-40ee-932a-ac5f2ce11d2f": {
+        "id": "215b5acc-5e81-40ee-932a-ac5f2ce11d2f",
+        "title": "New Session",
+        "description": "",
+        "nodes": [],
+        "edges": [],
+        "created_at": "2026-09-02T13:53:42.204446",
+        "updated_at": "2026-09-02T13:54:07.569862"
+    }
+}
