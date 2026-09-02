@@ -4,11 +4,13 @@ import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
 import { ResourceCardNode } from '@/entities/resource-card/ui/ResourceCardNode';
 import { ReferenceDocumentNode } from '@/entities/reference-document/ui/ReferenceDocumentNode';
 import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
+import { SessionListSheet } from '@/features/workspace/ui/SessionListSheet';
 
 export function HybridEditorBoard() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } = useHybridEditorState();
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, clearSession, activeSessionTitle } = useHybridEditorState();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false);
 
   // Define node types for React Flow
   const nodeTypes = useMemo(() => ({
@@ -72,9 +74,27 @@ export function HybridEditorBoard() {
       <div className="bg-white border-b px-6 py-4 flex justify-between items-center z-10 shadow-sm">
         <div>
           <h1 className="text-xl font-bold text-slate-800">Hybrid Editing Board</h1>
-          <p className="text-sm text-slate-500">React Flow + Tiptap Integration</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-slate-500">{activeSessionTitle || 'React Flow + Tiptap Integration'}</p>
+            <button 
+              onClick={() => setIsSessionSheetOpen(true)}
+              className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200 transition font-medium ml-2"
+            >
+              세션 목록
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <button 
+            onClick={() => {
+              if (confirm('현재 세션을 초기화하시겠습니까? 모든 노드가 삭제됩니다.')) {
+                clearSession();
+              }
+            }}
+            className="px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition font-medium mr-2"
+          >
+            초기화
+          </button>
           <input 
             type="file" 
             className="hidden" 
@@ -103,6 +123,7 @@ export function HybridEditorBoard() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
         />
+        <SessionListSheet isOpen={isSessionSheetOpen} onClose={() => setIsSessionSheetOpen(false)} />
       </div>
     </div>
   );

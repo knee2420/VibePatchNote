@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { create } from 'zustand';
 import { 
   type Node, 
   type Edge, 
@@ -10,39 +10,46 @@ import {
   type Connection
 } from '@xyflow/react';
 
-// Start with a clean slate
-const initialNodes: Node[] = [];
-const initialEdges: Edge[] = [];
-
-export function useHybridEditorState() {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
-
-  const onNodesChange: OnNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
-
-  const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
-    []
-  );
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    []
-  );
-
-  const addNode = useCallback((node: Node) => {
-    setNodes((nds) => [...nds, node]);
-  }, []);
-
-  return {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    addNode
-  };
+interface HybridEditorState {
+  activeSessionId: string | null;
+  activeSessionTitle: string;
+  nodes: Node[];
+  edges: Edge[];
+  onNodesChange: OnNodesChange;
+  onEdgesChange: OnEdgesChange;
+  onConnect: (connection: Connection) => void;
+  addNode: (node: Node) => void;
+  clearSession: () => void;
+  loadSession: (id: string | null, title: string, nodes: Node[], edges: Edge[]) => void;
+  setActiveSessionTitle: (title: string) => void;
 }
+
+export const useHybridEditorState = create<HybridEditorState>()(
+  (set, get) => ({
+    activeSessionId: null,
+    activeSessionTitle: 'Untitled Session',
+    nodes: [],
+    edges: [],
+    onNodesChange: (changes) => {
+      set({ nodes: applyNodeChanges(changes, get().nodes) });
+    },
+    onEdgesChange: (changes) => {
+      set({ edges: applyEdgeChanges(changes, get().edges) });
+    },
+    onConnect: (connection) => {
+      set({ edges: addEdge(connection, get().edges) });
+    },
+    addNode: (node) => {
+      set({ nodes: [...get().nodes, node] });
+    },
+    clearSession: () => {
+      set({ activeSessionId: null, activeSessionTitle: 'Untitled Session', nodes: [], edges: [] });
+    },
+    loadSession: (id, title, nodes, edges) => {
+      set({ activeSessionId: id, activeSessionTitle: title, nodes, edges });
+    },
+    setActiveSessionTitle: (title) => {
+      set({ activeSessionTitle: title });
+    },
+  })
+);
