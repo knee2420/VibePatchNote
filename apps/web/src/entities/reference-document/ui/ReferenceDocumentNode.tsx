@@ -1,5 +1,8 @@
-import { memo } from 'react';
+import { memo, useState, useMemo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
+import { ChevronRight, ChevronLeft, Trash2, BookOpen } from 'lucide-react';
+
+import { viewerRegistry } from '@vibe/document-viewer';
 
 import type { ReferenceDocumentData } from '../model/types';
 
@@ -17,6 +20,15 @@ export const ReferenceDocumentNode = memo(function ReferenceDocumentNode({
   selected,
 }: NodeProps<Node<ReferenceDocumentData, 'referenceDocument'>>) {
   const { setNodes } = useReactFlow();
+  const [isSpread, setIsSpread] = useState(false);
+  const [pageCount, setPageCount] = useState<number | null>(null);
+
+  const viewerDef = useMemo(
+    () => viewerRegistry.get(data.fileType, data.url || data.title),
+    [data.fileType, data.url, data.title]
+  );
+
+  const ViewerComponent = viewerDef.component;
 
   const handleDelete = () => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
@@ -30,56 +42,70 @@ export const ReferenceDocumentNode = memo(function ReferenceDocumentNode({
   return (
     <div
       className={`
-      rounded-md shadow-xs border w-[600px] h-[800px] flex flex-col [contain:layout_style_paint]
+      rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style_paint]
       ${currentTheme.container}
-      ${selected ? '!border-blue-500 shadow-lg ring-2 ring-blue-300' : ''}
-      transition-colors duration-200
+      ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300' : ''}
+      ${isSpread ? 'w-[1400px] max-w-[92vw] h-[860px]' : 'w-[600px] h-[800px]'}
+      transition-[width,height] duration-300 ease-out
     `}
     >
       {/* Header acting as a safe drag area */}
       <div
-        className={`px-4 py-3 border-b flex justify-between items-center rounded-t-md cursor-grab active:cursor-grabbing select-none ${currentTheme.header}`}
+        className={`px-4 py-3 border-b flex justify-between items-center rounded-t-[10px] cursor-grab active:cursor-grabbing select-none ${currentTheme.header}`}
       >
-        <h4 className="font-semibold text-sm truncate pr-4" title={data.title}>
-          📄 {data.title}
-        </h4>
-        <button
-          onClick={handleDelete}
-          className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded hover:bg-slate-200"
-          title="삭제"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="flex items-center gap-2 min-w-0 pr-3">
+          <BookOpen className="w-4 h-4 shrink-0 text-blue-600" />
+          <h4 className="font-bold text-sm truncate" title={data.title}>
+            {data.title}
+          </h4>
+          {pageCount && (
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-200/80 font-medium text-slate-600 shrink-0">
+              {pageCount}p
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={handleDelete}
+            className="text-slate-400 hover:text-rose-500 transition-colors p-1.5 rounded-md hover:bg-slate-200/60 nodrag"
+            title="문서 카드 삭제"
           >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Dynamic Pluggable Viewer Body */}
+      <ViewerComponent
+        url={data.url}
+        title={data.title}
+        isSpread={isSpread}
+        selected={selected}
+        onPageCountChange={setPageCount}
+      />
+
+      {/* Horizontal Spread Toggle Button (Floating at Right Border) */}
+      {viewerDef.canSpread && (
+        <button
+          onClick={() => setIsSpread((prev) => !prev)}
+          className={`
+            absolute -right-4 top-1/2 -translate-y-1/2 z-30 nodrag
+            w-9 h-9 rounded-full bg-white border-2 shadow-lg flex items-center justify-center
+            transition-all duration-200 cursor-pointer
+            ${
+              isSpread
+                ? 'border-blue-500 text-blue-600 hover:bg-blue-50 hover:scale-110'
+                : 'border-slate-300 text-slate-600 hover:border-blue-400 hover:text-blue-500 hover:scale-110'
+            }
+          `}
+          title={isSpread ? '세로 기본 모드로 접기' : '전체 페이지를 가로로 펼치기 (Unfold)'}
+        >
+          {isSpread ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
         </button>
-      </div>
+      )}
 
-      {/* Iframe Content with pointer-events protection for smooth canvas dragging */}
-      <div className="flex-1 p-0 overflow-hidden rounded-b-md relative">
-        <iframe
-          src={data.url}
-          className={`w-full h-full border-none ${selected ? 'pointer-events-auto' : 'pointer-events-none'}`}
-          title={data.title}
-        />
-        {!selected && (
-          <div 
-            className="absolute inset-0 bg-transparent cursor-pointer"
-            title="클릭하여 문서 인터랙션 활성화"
-          />
-        )}
-      </div>
-
+      {/* React Flow Handles */}
       <Handle type="source" position={Position.Right} id="right" className="bg-blue-500 w-3 h-3 rounded-full" />
       <Handle type="target" position={Position.Left} id="left" className="bg-blue-500 w-3 h-3 rounded-full" />
     </div>

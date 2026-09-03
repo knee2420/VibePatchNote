@@ -9,9 +9,10 @@ description: "전체 프로젝트 아키텍처 및 개발 아웃라인, 공통 �
 ## 1. 아키텍처 기반: 모노레포 (Turborepo)
 * **원칙:** 기능의 재사용성을 극대화하고 서비스 간 결합도를 낮추기 위해 **Turborepo 기반의 모노레포 아키텍처**를 강제합니다.
 * **구조 (개발 아웃라인 틀):**
-  - `apps/web`: 프론트엔드 애플리케이션 (React, Vite 등)
+  - `apps/web`: 프론트엔드 애플리케이션 (React 19, Vite, Tailwind v4, React Flow)
   - `apps/api`: 백엔드 애플리케이션 (FastAPI)
-  - `packages/ui`: 공통 UI 컴포넌트 패키지 (향후 분리 시)
+  - `packages/document-viewer`: **호스트 비의존적 범용 문서 뷰어 및 플러그인 엔진 (`@vibe/document-viewer`)** (PDF 가로/세로 스프레드 뷰어, 전략 패턴 레지스트리)
+  - `packages/ui`: 공통 UI 디자인 시스템 컴포넌트 패키지 (향후 분리 시)
   - `packages/config`: ESLint, TypeScript 등 공통 환경 설정 패키지
 * **인용:** [Turborepo - The monorepo solution](../../../../workbench/96.data_pipeline/turborepo/03_the_monorepo_solution/C-03_the_monorepo_solution.md)
 

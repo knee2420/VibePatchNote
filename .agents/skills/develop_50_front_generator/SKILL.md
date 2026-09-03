@@ -10,10 +10,11 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 
 ## 📋 [Frontend Development Checklist]
 
-### 1. FSD (Feature-Sliced Design) 레이어 검증
+### 1. FSD (Feature-Sliced Design) 레이어 및 패키지 연동 검증
 - [ ] **레이어 적합성:** 구현하려는 기능이 어느 레이어(`app`, `pages`, `widgets`, `features`, `entities`, `shared`)에 속하는지 정확히 식별했는가?
 - [ ] **단방향 의존성:** 상위 레이어가 하위 레이어를 참조하고 있는가? (예: `entities` 안에서 `features`나 `widgets`를 Import하는 Cross-import 위반이 없는가?)
 - [ ] **Public API 노출:** 모듈 외부로 노출할 때는 개별 파일 경로가 아닌 해당 슬라이스의 `index.ts` (Public API)를 통해서만 내보내고(Export) 참조(Import)했는가?
+- [ ] **공용 패키지(packages/*) 참조:** 여러 앱에서 재사용되는 모듈은 `@vibe/*` 워크스페이스 패키지로 추출되어 FSD 계층에서 라이브러리처럼 참조되고 있는가?
 
 ### 2. AHA (Avoid Hasty Abstractions) 원칙 준수
 - [ ] **복제(Duplication) 허용:** 코드가 비슷해 보인다고 섣불리 `shared/`나 공통 Hook으로 추출하지 않았는가?
@@ -25,10 +26,12 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 
 ### 4. 코드 컨벤션 (Google TS Style Guide)
 - [ ] **네이밍 규칙:** 인터페이스 및 타입은 `PascalCase`, 변수 및 함수는 `camelCase`를 엄격히 지켰는가?
-- [ ] **Import 구조:** 서드파티 라이브러리(NPM) Import 블록과 내부 모듈(`@/...`) Import 블록을 시각적으로 한 줄 띄워 분리했는가?
+- [ ] **Import 구조:** 서드파티 라이브러리(NPM) Import 블록과 워크스페이스 패키지(`@vibe/...`), 내부 모듈(`@/...`) Import 블록을 시각적으로 한 줄 띄워 분리했는가?
 
-### 5. 모노레포 위치 검증
-- [ ] **경로 확인:** 프론트엔드 코드를 작성하는 위치가 최상단의 `frontend/`가 아니라 반드시 `apps/web/src/` 내부인지 확인했는가?
+### 5. 모노레포 위치 검증 (Apps vs Packages)
+- [ ] **경로 확인:** 
+  - 단일 웹앱 전용 코드는 최상단 `frontend/`가 아니라 반드시 `apps/web/src/` 내부에 위치하는가?
+  - 캔버스 상태나 특정 앱에 결합되지 않고 여러 앱/툴에서 공통으로 쓰이는 범용 UI/엔진(예: 문서 뷰어 등)은 `packages/[패키지명]/src/`에 위치하고, `apps/web`에서 `workspace:*`로 연결되었는가?
 
 ### 6. Component 기획 및 데이터 반영
 - [ ] **CRUD + Entity 데이터 반영:** 새로운 Component를 기획하거나 구현할 때, 생성(Create) 뿐만 아니라 읽기(Read), 수정(Update), 삭제(Delete) 및 연관된 상태(Entity Data) 반영이 세트로 함께 고려되었는가? (예: 노드를 추가했다면 이를 삭제할 수단이 마련되어 있는가?)

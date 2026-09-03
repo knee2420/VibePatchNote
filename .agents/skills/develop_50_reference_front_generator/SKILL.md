@@ -39,7 +39,7 @@ flowchart TD
    - 상태(State) 머신 (예: `Select Mode` vs `Hand/Pan Mode`, `Active`, `Disabled`).
    - 마우스/키보드 입력 (드래그, 클릭, 단축키 힌트 등).
 4. **당사 프로젝트(VibePatchNote) 기술 스택 매핑 (Tech Mapping):** 
-   - 완전히 새로운 코드를 짜지 않고, 기존에 설치된 패키지(`@xyflow/react`, `zustand`, `lucide-react`, `shadcn/ui` 등)의 어떤 내장 사양과 일대일 매핑되는지 사전 점검.
+   - 완전히 새로운 코드를 짜지 않고, 기존에 설치된 패키지(`@xyflow/react`, `zustand`, `lucide-react`, `shadcn/ui` 등) 및 워크스페이스 공용 패키지(`@vibe/document-viewer` 등)의 어떤 내장 사양과 일대일 매핑되는지 사전 점검.
 5. **기능 분할 및 UI 리스트업 (Feature Breakdown List):** 
    - 세부 단위 기능들을 불릿 포인트로 일목요연하게 정리하여 개발 착수 전 제시.
 
@@ -55,6 +55,7 @@ flowchart TD
 - [ ] **레이어 적합성:** 구현하려는 기능이 어느 레이어(`app`, `pages`, `widgets`, `features`, `entities`, `shared`)에 속하는지 정확히 식별했는가?
 - [ ] **단방향 의존성:** 상위 레이어가 하위 레이어를 참조하고 있는가? (Cross-import 위반이 없는가?)
 - [ ] **Public API 노출:** 모듈 외부로 노출할 때는 개별 파일 경로가 아닌 해당 슬라이스의 `index.ts` (Public API)를 통해서만 내보내고(Export) 참조(Import)했는가?
+- [ ] **공용 패키지(packages/*) 활용:** 호스트 비의존적 뷰어나 공통 모듈은 `@vibe/*` 패키지로 추출 또는 연동되었는가?
 
 ### 2. AHA (Avoid Hasty Abstractions) 원칙 준수
 - [ ] **복제(Duplication) 허용:** 코드가 비슷해 보인다고 섣불리 `shared/`나 공통 Hook으로 과도하게 추출하지 않았는가?
@@ -66,10 +67,12 @@ flowchart TD
 
 ### 4. 코드 컨벤션 (Google TS Style Guide)
 - [ ] **네이밍 규칙:** 인터페이스 및 타입은 `PascalCase`, 변수 및 함수는 `camelCase`를 엄격히 지켰는가?
-- [ ] **Import 구조:** 서드파티 라이브러리(NPM) Import 블록과 내부 모듈(`@/...`) Import 블록을 시각적으로 한 줄 띄워 분리했는가?
+- [ ] **Import 구조:** 서드파티 라이브러리(NPM) Import 블록과 워크스페이스 패키지(`@vibe/...`), 내부 모듈(`@/...`) Import 블록을 시각적으로 한 줄 띄워 분리했는가?
 
-### 5. 모노레포 위치 검증
-- [ ] **경로 확인:** 프론트엔드 코드를 작성하는 위치가 최상단의 `frontend/`가 아니라 반드시 `apps/web/src/` 내부인지 확인했는가?
+### 5. 모노레포 위치 검증 (Apps vs Packages)
+- [ ] **경로 확인:** 
+  - 단일 웹앱 전용 코드는 최상단 `frontend/`가 아니라 반드시 `apps/web/src/` 내부에 위치하는가?
+  - 여러 툴에서 공통으로 쓰이는 범용 UI/엔진(예: 문서 뷰어 등)은 `packages/[패키지명]/src/`에 위치하고 `apps/web`에서 `workspace:*`로 연동되었는가?
 
 ### 6. Component 기획 및 데이터 반영
 - [ ] **CRUD + Entity 데이터 반영:** 새로운 Component를 기획하거나 구현할 때, 생성(Create) 뿐만 아니라 읽기(Read), 수정(Update), 삭제(Delete) 및 연관된 상태(Entity Data) 반영이 세트로 함께 고려되었는가?

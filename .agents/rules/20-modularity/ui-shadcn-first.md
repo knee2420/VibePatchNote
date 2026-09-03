@@ -2,7 +2,7 @@
 
 ## 원칙
 1. **기존 컴포넌트 우선 확인**:
-   - 새로운 UI 컴포넌트가 필요할 때, 먼저 `frontend/src/components/ui/`에 이미 설치되어 있는 컴포넌트(Button, Card, Input, Badge 등)가 있는지 확인합니다.
+   - 새로운 UI 컴포넌트가 필요할 때, 먼저 `apps/web/src/components/ui/`에 이미 설치되어 있는 컴포넌트(Button, Card, Input, Badge 등)가 있는지 확인합니다.
 
 2. **ShadCN 공식 레지스트리 우선 고려**:
    - 기존 설치 항목에 없다면 처음부터 새로 만들지 않고, ShadCN 공식 컴포넌트 목록에 존재하는지 확인합니다.

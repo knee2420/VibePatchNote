@@ -22,6 +22,8 @@
     "radix-ui": "^1.6.7",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-pdf": "^10.5.0",
+    "@vibe/document-viewer": "workspace:*",
     "react-router-dom": "^7.18.3",
     "shadcn": "^4.19.1",
     "tailwind-merge": "^3.6.0",

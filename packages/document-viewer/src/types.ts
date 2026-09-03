@@ -1,12 +1,5 @@
 import type { ComponentType } from 'react';
 
-export interface ReferenceDocumentData extends Record<string, unknown> {
-  title: string;
-  url: string;
-  fileType?: string; // 'pdf' | 'text' | 'image' | 'default' 등
-  size?: number;
-}
-
 export interface DocumentViewerProps {
   url: string;
   title: string;
