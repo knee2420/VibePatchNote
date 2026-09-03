@@ -1,7 +1,8 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Pencil, Check, X } from 'lucide-react';
 import { ReactFlowProvider } from '@xyflow/react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
 import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
@@ -23,8 +24,16 @@ import {
   CanvasSearchModal 
 } from '@/features/canvas-toolbar';
 
+const NODE_TYPES = {
+  segment: SegmentNode,
+  resourceCard: ResourceCardNode,
+  referenceDocument: ReferenceDocumentNode,
+};
+
 function HybridEditorBoardContent() {
   const navigate = useNavigate();
+  const [isInitialLoaded, setIsInitialLoaded] = useState(false);
+
   const { 
     nodes, 
     edges, 
@@ -33,10 +42,25 @@ function HybridEditorBoardContent() {
     onConnect, 
     addNode, 
     clearSession, 
+    loadSession,
     activeSessionId, 
     activeSessionTitle,
     setActiveSessionTitle,
-  } = useHybridEditorState();
+  } = useHybridEditorState(
+    useShallow((s) => ({
+      nodes: s.nodes,
+      edges: s.edges,
+      onNodesChange: s.onNodesChange,
+      onEdgesChange: s.onEdgesChange,
+      onConnect: s.onConnect,
+      addNode: s.addNode,
+      clearSession: s.clearSession,
+      loadSession: s.loadSession,
+      activeSessionId: s.activeSessionId,
+      activeSessionTitle: s.activeSessionTitle,
+      setActiveSessionTitle: s.setActiveSessionTitle,
+    }))
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isManualUploading, setIsManualUploading] = useState(false);
@@ -66,9 +90,37 @@ function HybridEditorBoardContent() {
 
   const isUploading = isManualUploading || isDropUploading;
 
-  // Auto-save logic (debounced)
+  // Restore session from backend on initial mount
   useEffect(() => {
-    if (!activeSessionId) return;
+    let isCancelled = false;
+    async function restoreSession() {
+      if (!activeSessionId) {
+        setIsInitialLoaded(true);
+        return;
+      }
+      try {
+        const res = await fetch(`http://localhost:8000/api/v1/workspaces/${activeSessionId}`);
+        if (res.ok && !isCancelled) {
+          const data = await res.json();
+          if (data.nodes && data.nodes.length > 0) {
+            loadSession(data.id, data.title, data.nodes, data.edges || []);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to restore session from backend:', err);
+      } finally {
+        if (!isCancelled) setIsInitialLoaded(true);
+      }
+    }
+    restoreSession();
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeSessionId, loadSession]);
+
+  // Auto-save logic: 초기 복원이 완료된 후에만 안전하게 백엔드 동기화!
+  useEffect(() => {
+    if (!isInitialLoaded || !activeSessionId) return;
 
     const timeoutId = setTimeout(async () => {
       try {
@@ -81,17 +133,10 @@ function HybridEditorBoardContent() {
       } catch (e) {
         console.error('Auto-save failed:', e);
       }
-    }, 1500);
+    }, 2000);
 
     return () => clearTimeout(timeoutId);
-  }, [nodes, edges, activeSessionId, activeSessionTitle]);
-
-  // Define node types for React Flow
-  const nodeTypes = useMemo(() => ({
-    segment: SegmentNode,
-    resourceCard: ResourceCardNode,
-    referenceDocument: ReferenceDocumentNode,
-  }), []);
+  }, [nodes, edges, activeSessionId, activeSessionTitle, isInitialLoaded]);
 
   const handleFileUploadClick = () => {
     fileInputRef.current?.click();
@@ -297,7 +342,7 @@ function HybridEditorBoardContent() {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          nodeTypes={nodeTypes}
+          nodeTypes={NODE_TYPES}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}

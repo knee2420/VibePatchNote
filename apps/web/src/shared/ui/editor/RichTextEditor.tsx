@@ -9,6 +9,8 @@ interface RichTextEditorProps {
   className?: string;
 }
 
+const EXTENSIONS = [StarterKit];
+
 export function RichTextEditor({
   initialContent = '',
   onChange,
@@ -16,7 +18,7 @@ export function RichTextEditor({
   className = '',
 }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: EXTENSIONS,
     content: initialContent,
     editable: !readOnly,
     onUpdate: ({ editor }) => {

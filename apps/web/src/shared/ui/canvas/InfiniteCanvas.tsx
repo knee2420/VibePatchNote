@@ -36,6 +36,8 @@ interface InfiniteCanvasProps {
   canvasMode?: 'select' | 'hand';
 }
 
+const DEFAULT_SNAP_GRID: [number, number] = [20, 20];
+
 export function InfiniteCanvas({
   nodes,
   edges,
@@ -50,7 +52,7 @@ export function InfiniteCanvas({
   onDragLeave,
   onDrop,
   snapToGrid = true,
-  snapGrid = [20, 20],
+  snapGrid = DEFAULT_SNAP_GRID,
   showDots = true,
   showMiniMap = true,
   isReadOnly = false,
@@ -67,6 +69,18 @@ export function InfiniteCanvas({
       onDrop={onDrop}
     >
       <style>{`
+        /* GPU Hardware Acceleration for 60fps Viewport Panning */
+        .react-flow__viewport {
+          will-change: transform;
+          transform: translateZ(0);
+        }
+
+        /* Prevent iframes from stealing mouse events during panning / dragging */
+        .canvas-mode-hand iframe,
+        .react-flow__pane:active ~ .react-flow__viewport iframe {
+          pointer-events: none !important;
+        }
+
         /* Hand (Pan) Mode */
         .canvas-mode-hand .react-flow__pane {
           cursor: grab !important;
@@ -108,9 +122,10 @@ export function InfiniteCanvas({
         selectionOnDrag={canvasMode === 'select' && !isReadOnly}
         selectionMode={SelectionMode.Partial}
         panActivationKeyCode="Space"
+        elevateNodesOnSelect={false}
         fitView
       >
-        {showDots && <Background variant={BackgroundVariant.Dots} gap={12} size={1} />}
+        {showDots && <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="#cbd5e1" />}
         <Controls />
         {showMiniMap && <MiniMap />}
         {children}
