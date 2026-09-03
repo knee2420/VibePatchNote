@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { 
   ReactFlow, 
   Background, 
@@ -56,14 +56,40 @@ export function InfiniteCanvas({
   isReadOnly = false,
   canvasMode = 'select',
 }: InfiniteCanvasProps) {
+  const [isSelecting, setIsSelecting] = useState(false);
+
   return (
     <div 
-      className={`w-full h-full min-h-[600px] bg-slate-50 relative ${className}`}
+      className={`w-full h-full min-h-[600px] bg-slate-50 relative canvas-mode-${canvasMode} ${isSelecting ? 'is-selecting' : ''} ${className}`}
       onDragEnter={onDragEnter}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
     >
+      <style>{`
+        /* Hand (Pan) Mode */
+        .canvas-mode-hand .react-flow__pane {
+          cursor: grab !important;
+        }
+        .canvas-mode-hand .react-flow__pane:active,
+        .canvas-mode-hand .react-flow__pane.dragging {
+          cursor: grabbing !important;
+        }
+
+        /* Select Mode: 평소에는 일반 마우스 커서 (기본 화살표) */
+        .canvas-mode-select .react-flow__pane,
+        .canvas-mode-select .react-flow__pane.selection {
+          cursor: default !important;
+        }
+
+        /* 마우스를 누르고 있거나(:active) 실제로 네모박스를 그리는 중일 때만 crosshair */
+        .canvas-mode-select .react-flow__pane:active,
+        .canvas-mode-select.is-selecting .react-flow__pane,
+        .canvas-mode-select.is-selecting .react-flow__pane.selection,
+        .react-flow__selection {
+          cursor: crosshair !important;
+        }
+      `}</style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -71,6 +97,8 @@ export function InfiniteCanvas({
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        onSelectionStart={() => setIsSelecting(true)}
+        onSelectionEnd={() => setIsSelecting(false)}
         snapToGrid={snapToGrid}
         snapGrid={snapGrid}
         nodesDraggable={!isReadOnly}

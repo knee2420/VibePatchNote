@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { X, Save, Plus, Trash2, Pencil, Check } from 'lucide-react';
+
 import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
-import { X, Save, Plus, Trash2 } from 'lucide-react';
 
 interface WorkspaceSession {
   id: string;
   title: string;
   description?: string;
-  nodes: any[];
-  edges: any[];
+  nodes: unknown[];
+  edges: unknown[];
   created_at: string;
   updated_at: string;
 }
@@ -15,7 +16,17 @@ interface WorkspaceSession {
 export function SessionListSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [sessions, setSessions] = useState<WorkspaceSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { loadSession, activeSessionId, activeSessionTitle, nodes, edges } = useHybridEditorState();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
+
+  const { 
+    loadSession, 
+    activeSessionId, 
+    activeSessionTitle, 
+    setActiveSessionTitle, 
+    nodes, 
+    edges 
+  } = useHybridEditorState();
 
   const fetchSessions = async () => {
     setIsLoading(true);
@@ -75,6 +86,47 @@ export function SessionListSheet({ isOpen, onClose }: { isOpen: boolean; onClose
     }
   };
 
+  const handleStartEdit = (session: WorkspaceSession, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(session.id);
+    setEditingTitle(session.title);
+  };
+
+  const handleSaveTitle = async (session: WorkspaceSession, e?: React.SyntheticEvent) => {
+    if (e) e.stopPropagation();
+    const trimmed = editingTitle.trim();
+    if (!trimmed) {
+      setEditingId(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/workspaces/${session.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: trimmed, nodes: session.nodes, edges: session.edges }),
+      });
+
+      if (res.ok) {
+        setSessions((prev) =>
+          prev.map((s) => (s.id === session.id ? { ...s, title: trimmed } : s))
+        );
+        if (activeSessionId === session.id) {
+          setActiveSessionTitle(trimmed);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update session title:', err);
+    } finally {
+      setEditingId(null);
+    }
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(null);
+  };
+
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!confirm('정말 이 세션을 삭제하시겠습니까?')) return;
@@ -92,13 +144,14 @@ export function SessionListSheet({ isOpen, onClose }: { isOpen: boolean; onClose
   };
 
   const handleLoad = (session: WorkspaceSession) => {
-    loadSession(session.id, session.title, session.nodes, session.edges);
+    if (editingId === session.id) return;
+    loadSession(session.id, session.title, session.nodes as any, session.edges as any);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/30 backdrop-blur-xs transition-opacity">
       <div className="w-[400px] h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         <div className="p-4 border-b flex justify-between items-center bg-slate-50">
           <h2 className="text-lg font-bold text-slate-800">워크스페이스 목록</h2>
@@ -122,17 +175,67 @@ export function SessionListSheet({ isOpen, onClose }: { isOpen: boolean; onClose
           ) : sessions.length === 0 ? (
             <p className="text-sm text-slate-500 text-center py-8">저장된 세션이 없습니다.</p>
           ) : (
-            sessions.map(s => (
+            sessions.map((s) => (
               <div 
                 key={s.id} 
                 onClick={() => handleLoad(s)}
-                className={`p-4 rounded-lg border cursor-pointer transition ${
-                  activeSessionId === s.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                  activeSessionId === s.id ? 'border-blue-500 bg-blue-50/70 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-slate-800 truncate pr-2">{s.title}</h3>
-                  <button onClick={(e) => handleDelete(s.id, e)} className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-slate-200 transition">
+                  {editingId === s.id ? (
+                    <div className="flex items-center gap-1.5 flex-1 pr-2" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="text"
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveTitle(s, e);
+                          if (e.key === 'Escape') setEditingId(null);
+                        }}
+                        autoFocus
+                        className="flex-1 px-2 py-1 text-sm font-semibold text-slate-800 bg-white border border-blue-400 rounded-md outline-none ring-2 ring-blue-200"
+                      />
+                      <button
+                        onClick={(e) => handleSaveTitle(s, e)}
+                        className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                        title="저장"
+                      >
+                        <Check size={14} />
+                      </button>
+                      <button
+                        onClick={handleCancelEdit}
+                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-md transition"
+                        title="취소"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0 pr-2 group">
+                      <h3 
+                        className="font-semibold text-slate-800 truncate"
+                        title={s.title}
+                        onDoubleClick={(e) => handleStartEdit(s, e)}
+                      >
+                        {s.title}
+                      </h3>
+                      <button
+                        onClick={(e) => handleStartEdit(s, e)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-600 hover:bg-slate-200 rounded transition"
+                        title="세션 이름 수정"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={(e) => handleDelete(s.id, e)} 
+                    className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-slate-200 transition shrink-0"
+                    title="세션 삭제"
+                  >
                     <Trash2 size={16} />
                   </button>
                 </div>
