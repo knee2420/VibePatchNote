@@ -95,7 +95,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   // 라벨 인라인 편집 문자열
   const [editingLabel, setEditingLabel] = useState<string>('');
 
-  // Shift 키 누름 상태
+  // Shift 키 누름 상태 (Shift + 드래그 시에만 신규 영역 생성)
   const [isShiftDown, setIsShiftDown] = useState(false);
 
   // 신규 영역 드래그 생성(Create) 상태
@@ -133,7 +133,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     }
   }, [selectedSegment]);
 
-  // Shift 키 감지 (편집 모드일 때만 드래그 생성 지원)
+  // Shift 키 감지 (Shift 누를 때만 마우스 커서 crosshair로 전환 및 신규 생성 대기)
   useEffect(() => {
     if (!isEditMode) return;
 
@@ -178,6 +178,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
       setSelectedId(null);
       setIsEditingToolbarOpen(false);
       setResizingState(null);
+      setIsShiftDown(false);
     }
   }, [isEditMode]);
 
@@ -218,12 +219,24 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     return { x, y };
   }, []);
 
-  // 1. 신규 세그먼트 드래그 생성 시작
+  // 1. 신규 세그먼트 드래그 생성 시작 (Shift 누른 상태에서만 발동, 그냥 클릭 시에는 선택 해제)
   const handleContainerMouseDown = (e: React.MouseEvent) => {
-    if (!isEditMode || (!isShiftDown && !e.shiftKey)) {
+    if (!isEditMode) return;
+    // 기존 세그먼트 박스나 핸들을 클릭한 경우에는 해당 요소의 핸들러가 처리하도록 패스
+    if (e.target !== containerRef.current) return;
+
+    // [요청 반영] Shift 키를 누르지 않고 빈 공간을 클릭하면 -> 선택 해제만 수행!
+    const isShiftActive = isShiftDown || e.shiftKey;
+    if (!isShiftActive) {
+      setSelectedId(null);
+      setIsEditingToolbarOpen(false);
       return;
     }
+
+    // Shift 키가 눌려있을 때만 신규 영역 드래그 생성 활성화!
     e.stopPropagation();
+    e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
     setSelectedId(null);
     setIsEditingToolbarOpen(false);
 
@@ -373,8 +386,9 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
       ref={containerRef}
       onMouseDown={handleContainerMouseDown}
       className={`
-        absolute inset-0 z-10 select-none overflow-visible
-        ${isEditMode && isShiftDown ? 'pointer-events-auto cursor-crosshair' : 'pointer-events-none cursor-default'}
+        absolute inset-0 z-10 select-none overflow-visible nodrag nopan
+        ${isEditMode ? 'pointer-events-auto' : 'pointer-events-none'}
+        ${isEditMode && isShiftDown ? 'cursor-crosshair' : 'cursor-default'}
       `}
     >
       {/* 1. 세그먼트 바운딩 박스 목록 */}
@@ -435,7 +449,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               <div
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="absolute top-1 right-1 h-5 bg-slate-900/90 backdrop-blur-xs text-white rounded flex items-center gap-1 px-1.5 z-30 shadow-md nodrag nopan pointer-events-auto"
+                className="absolute top-1 right-1 h-5 bg-slate-900/90 backdrop-blur-xs text-white rounded flex items-center gap-1 px-1.5 z-35 shadow-md nodrag nopan pointer-events-auto"
               >
                 <button
                   onClick={() => setIsEditingToolbarOpen((prev) => !prev)}
@@ -468,7 +482,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               </div>
             )}
 
-            {/* 기본 라벨 뱃지 (선택되지 않았거나, 툴바가 닫혀있을 때 표시) */}
+            {/* 기본 라벨 뱃지 (상단 테두리와 겹치지 않게 -top-5에 플로팅) */}
             {(!isSelected || !isEditingToolbarOpen) && (
               <div
                 onDoubleClick={(e) => {
@@ -478,8 +492,8 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
                   setIsEditingToolbarOpen(true);
                 }}
                 className={`
-                  absolute -top-3 left-1.5 px-1.5 py-0.2 rounded text-[10px] font-bold tracking-tight shadow-xs
-                  flex items-center gap-1 transition-transform duration-150 pointer-events-none
+                  absolute -top-5 left-0 px-1.5 py-0.2 rounded text-[10px] font-bold tracking-tight shadow-xs
+                  flex items-center gap-1 transition-transform duration-150 pointer-events-none z-20
                   ${styleConfig.badgeBg} ${styleConfig.badgeText}
                   ${isHovered && isEditMode ? 'scale-105 shadow-md' : 'opacity-90'}
                 `}
@@ -497,74 +511,93 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               </div>
             )}
 
-            {/* [D-9 해결] 8방향 리사이즈 핸들러 (24px 투명 히트박스로 빗나가지 않는 쾌적한 조작감!) */}
+            {/* 4면 전체(상/하/좌/우) 풀-에지 리사이즈 & 4모서리 핸들러 */}
             {isSelected && isEditMode && (
               <>
-                {/* 모서리 4개 (w-6 h-6 투명 히트박스 안에 화이트 도트 렌더링) */}
+                {/* 1) 4개 모서리 (Corner: z-40 최상위로 액션바나 뱃지에 절대 가려지지 않음) */}
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('tl', seg, e)}
-                  className="absolute -top-3 -left-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-30 nodrag nopan group/handle"
-                  title="크기 조절"
+                  className="absolute -top-3 -left-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-40 nodrag nopan group/handle"
+                  title="크기 조절 (좌상단)"
                 >
                   <div className="w-2.5 h-2.5 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/handle:scale-125 transition-transform" />
                 </div>
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('tr', seg, e)}
-                  className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center cursor-nesw-resize z-30 nodrag nopan group/handle"
-                  title="크기 조절"
+                  className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center cursor-nesw-resize z-40 nodrag nopan group/handle"
+                  title="크기 조절 (우상단)"
                 >
                   <div className="w-2.5 h-2.5 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/handle:scale-125 transition-transform" />
                 </div>
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('br', seg, e)}
-                  className="absolute -bottom-3 -right-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-30 nodrag nopan group/handle"
-                  title="크기 조절"
+                  className="absolute -bottom-3 -right-3 w-6 h-6 flex items-center justify-center cursor-nwse-resize z-40 nodrag nopan group/handle"
+                  title="크기 조절 (우하단)"
                 >
                   <div className="w-2.5 h-2.5 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/handle:scale-125 transition-transform" />
                 </div>
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('bl', seg, e)}
-                  className="absolute -bottom-3 -left-3 w-6 h-6 flex items-center justify-center cursor-nesw-resize z-30 nodrag nopan group/handle"
-                  title="크기 조절"
+                  className="absolute -bottom-3 -left-3 w-6 h-6 flex items-center justify-center cursor-nesw-resize z-40 nodrag nopan group/handle"
+                  title="크기 조절 (좌하단)"
                 >
                   <div className="w-2.5 h-2.5 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/handle:scale-125 transition-transform" />
                 </div>
 
-                {/* 4면 전체(상/하/좌/우) 풀-에지 리사이즈 & 선명한 알약(Pill) 핸들 */}
-                {/* 1) 상단 변 (Top Edge 전체 + 중앙 Pill 핸들) */}
+                {/* 2) 상단 변 (Top Edge: 테두리 선 전체 ↕ + 가로 정중앙 알약 핸들) */}
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('t', seg, e)}
-                  className="absolute -top-2 left-3 right-3 h-4 flex items-center justify-center cursor-ns-resize z-25 nodrag nopan group/top-edge"
-                  title="상단 높이 조절 (선 전체 드래그 가능)"
+                  style={{ top: '-4px', left: '0px', right: '0px', height: '8px' }}
+                  className="absolute cursor-ns-resize z-30 nodrag nopan group/top-edge"
+                  title="상단 높이 조절"
                 >
-                  <div className="w-8 h-2 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/top-edge:scale-115 group-hover/top-edge:bg-purple-50 transition-transform" />
+                  <div className="w-full h-full bg-transparent group-hover/top-edge:bg-purple-500/50 transition-colors" />
+                  <div
+                    style={{ left: '50%', transform: 'translateX(-50%)', top: '1px' }}
+                    className="absolute w-8 h-2 bg-white border-2 border-purple-600 rounded-full shadow-md pointer-events-none group-hover/top-edge:scale-115 transition-transform"
+                  />
                 </div>
 
-                {/* 2) 하단 변 (Bottom Edge 전체 + 중앙 Pill 핸들) */}
+                {/* 3) 하단 변 (Bottom Edge: 테두리 선 전체 ↕ + 가로 정중앙 알약 핸들) */}
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('b', seg, e)}
-                  className="absolute -bottom-2 left-3 right-3 h-4 flex items-center justify-center cursor-ns-resize z-25 nodrag nopan group/bottom-edge"
-                  title="하단 높이 조절 (선 전체 드래그 가능)"
+                  style={{ bottom: '-4px', left: '0px', right: '0px', height: '8px' }}
+                  className="absolute cursor-ns-resize z-30 nodrag nopan group/bottom-edge"
+                  title="하단 높이 조절"
                 >
-                  <div className="w-8 h-2 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/bottom-edge:scale-115 group-hover/bottom-edge:bg-purple-50 transition-transform" />
+                  <div className="w-full h-full bg-transparent group-hover/bottom-edge:bg-purple-500/50 transition-colors" />
+                  <div
+                    style={{ left: '50%', transform: 'translateX(-50%)', bottom: '1px' }}
+                    className="absolute w-8 h-2 bg-white border-2 border-purple-600 rounded-full shadow-md pointer-events-none group-hover/bottom-edge:scale-115 transition-transform"
+                  />
                 </div>
 
-                {/* 3) 좌측 변 (Left Edge 전체 + 중앙 Pill 핸들) */}
+                {/* 4) 좌측 변 (Left Edge: 테두리 선 전체 ↔ + 세로 정중앙 알약 핸들) */}
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('l', seg, e)}
-                  className="absolute top-3 bottom-3 -left-2 w-4 flex items-center justify-center cursor-ew-resize z-25 nodrag nopan group/left-edge"
-                  title="좌측 너비 조절 (선 전체 드래그 가능)"
+                  style={{ left: '-4px', top: '0px', bottom: '0px', width: '8px' }}
+                  className="absolute cursor-ew-resize z-30 nodrag nopan group/left-edge"
+                  title="좌측 너비 조절"
                 >
-                  <div className="w-2 h-8 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/left-edge:scale-115 group-hover/left-edge:bg-purple-50 transition-transform" />
+                  <div className="w-full h-full bg-transparent group-hover/left-edge:bg-purple-500/50 transition-colors" />
+                  <div
+                    style={{ top: '50%', transform: 'translateY(-50%)', left: '1px' }}
+                    className="absolute w-2 h-8 bg-white border-2 border-purple-600 rounded-full shadow-md pointer-events-none group-hover/left-edge:scale-115 transition-transform"
+                  />
                 </div>
 
-                {/* 4) 우측 변 (Right Edge 전체 + 중앙 Pill 핸들) */}
+                {/* 5) 우측 변 (Right Edge: 테두리 선 전체 ↔ + 세로 정중앙 알약 핸들) */}
                 <div
                   onMouseDown={(e) => handleHandleMouseDown('r', seg, e)}
-                  className="absolute top-3 bottom-3 -right-2 w-4 flex items-center justify-center cursor-ew-resize z-25 nodrag nopan group/right-edge"
-                  title="우측 너비 조절 (선 전체 드래그 가능)"
+                  style={{ right: '-4px', top: '0px', bottom: '0px', width: '8px' }}
+                  className="absolute cursor-ew-resize z-30 nodrag nopan group/right-edge"
+                  title="우측 너비 조절"
                 >
-                  <div className="w-2 h-8 bg-white border-2 border-purple-600 rounded-full shadow-md group-hover/right-edge:scale-115 group-hover/right-edge:bg-purple-50 transition-transform" />
+                  <div className="w-full h-full bg-transparent group-hover/right-edge:bg-purple-500/50 transition-colors" />
+                  <div
+                    style={{ top: '50%', transform: 'translateY(-50%)', right: '1px' }}
+                    className="absolute w-2 h-8 bg-white border-2 border-purple-600 rounded-full shadow-md pointer-events-none group-hover/right-edge:scale-115 transition-transform"
+                  />
                 </div>
               </>
             )}
