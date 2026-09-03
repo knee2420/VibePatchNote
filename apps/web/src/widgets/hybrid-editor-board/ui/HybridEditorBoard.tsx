@@ -1,16 +1,51 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
+import { ReactFlowProvider } from '@xyflow/react';
+
 import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
 import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
 import { ResourceCardNode } from '@/entities/resource-card/ui/ResourceCardNode';
 import { ReferenceDocumentNode } from '@/entities/reference-document/ui/ReferenceDocumentNode';
 import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
 import { SessionListSheet } from '@/features/workspace/ui/SessionListSheet';
+import { 
+  useCanvasFileDrop, 
+  CanvasDropOverlay, 
+  uploadDocumentApi, 
+  fileDropRegistry 
+} from '@/features/canvas-file-drop';
 
-export function HybridEditorBoard() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, clearSession, activeSessionId, activeSessionTitle } = useHybridEditorState();
+function HybridEditorBoardContent() {
+  const { 
+    nodes, 
+    edges, 
+    onNodesChange, 
+    onEdgesChange, 
+    onConnect, 
+    addNode, 
+    clearSession, 
+    activeSessionId, 
+    activeSessionTitle 
+  } = useHybridEditorState();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isManualUploading, setIsManualUploading] = useState(false);
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false);
+
+  const {
+    isDraggingOver,
+    isUploading: isDropUploading,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    supportedExtensions,
+  } = useCanvasFileDrop({
+    onNodeCreated: (newNode) => {
+      addNode(newNode);
+    },
+  });
+
+  const isUploading = isManualUploading || isDropUploading;
 
   // Auto-save logic (debounced)
   useEffect(() => {
@@ -47,39 +82,37 @@ export function HybridEditorBoard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
+    setIsManualUploading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/v1/documents/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const uploadResult = await uploadDocumentApi(file);
+      const handler = fileDropRegistry.getHandler(file);
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
+      if (handler) {
+        const newNode = handler.createNode({
+          file,
+          uploadResult,
+          position: { x: Math.random() * 100 + 100, y: Math.random() * 100 + 100 },
+        });
+        addNode(newNode);
+      } else {
+        addNode({
+          id: `reference-${Date.now()}`,
+          type: 'referenceDocument',
+          position: { x: Math.random() * 100 + 100, y: Math.random() * 100 + 100 },
+          data: {
+            title: file.name,
+            url: uploadResult.file_url,
+          },
+        });
       }
 
-      const data = await response.json();
-      alert(`업로드 성공! Job ID: ${data.job_id}`);
-      
-      // Add a new ReferenceDocumentNode to the canvas
-      addNode({
-        id: `reference-${Date.now()}`,
-        type: 'referenceDocument',
-        position: { x: Math.random() * 100 + 100, y: Math.random() * 100 + 100 },
-        data: {
-          title: file.name,
-          url: data.file_url
-        }
-      });
+      alert(`업로드 성공! [${file.name}]`);
     } catch (error) {
       console.error('File upload error:', error);
       alert('파일 업로드 중 오류가 발생했습니다.');
     } finally {
-      setIsUploading(false);
-      // Reset input so the same file can be selected again
+      setIsManualUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -139,9 +172,25 @@ export function HybridEditorBoard() {
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        />
+        <CanvasDropOverlay 
+          isDraggingOver={isDraggingOver} 
+          supportedExtensions={supportedExtensions} 
         />
         <SessionListSheet isOpen={isSessionSheetOpen} onClose={() => setIsSessionSheetOpen(false)} />
       </div>
     </div>
+  );
+}
+
+export function HybridEditorBoard() {
+  return (
+    <ReactFlowProvider>
+      <HybridEditorBoardContent />
+    </ReactFlowProvider>
   );
 }

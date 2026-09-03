@@ -23,6 +23,10 @@ interface InfiniteCanvasProps {
   nodeTypes?: NodeTypes;
   children?: ReactNode;
   className?: string;
+  onDragEnter?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
 }
 
 export function InfiniteCanvas({
@@ -33,10 +37,20 @@ export function InfiniteCanvas({
   onConnect,
   nodeTypes,
   children,
-  className = ''
+  className = '',
+  onDragEnter,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: InfiniteCanvasProps) {
   return (
-    <div className={`w-full h-full min-h-[600px] bg-slate-50 ${className}`}>
+    <div 
+      className={`w-full h-full min-h-[600px] bg-slate-50 relative ${className}`}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
