@@ -30,7 +30,7 @@ export const ReferenceDocumentNode = memo(function ReferenceDocumentNode({
   return (
     <div
       className={`
-      rounded-md shadow-xs border w-[600px] h-[800px] flex flex-col
+      rounded-md shadow-xs border w-[600px] h-[800px] flex flex-col [contain:layout_style_paint]
       ${currentTheme.container}
       ${selected ? '!border-blue-500 shadow-lg ring-2 ring-blue-300' : ''}
       transition-colors duration-200

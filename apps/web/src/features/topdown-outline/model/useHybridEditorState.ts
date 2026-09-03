@@ -27,6 +27,13 @@ interface HybridEditorState {
   setActiveSessionTitle: (title: string) => void;
 }
 
+// rAF Batching buffers to eliminate micro-stutters under high-polling mouse movements
+let pendingNodeChanges: Parameters<HybridEditorState['onNodesChange']>[0] = [];
+let nodeChangesRafId: number | null = null;
+
+let pendingEdgeChanges: Parameters<HybridEditorState['onEdgesChange']>[0] = [];
+let edgeChangesRafId: number | null = null;
+
 export const useHybridEditorState = create<HybridEditorState>()(
   persist(
     (set, get) => ({
@@ -35,10 +42,26 @@ export const useHybridEditorState = create<HybridEditorState>()(
     nodes: [],
     edges: [],
     onNodesChange: (changes) => {
-      set({ nodes: applyNodeChanges(changes, get().nodes) });
+      pendingNodeChanges.push(...changes);
+      if (nodeChangesRafId === null) {
+        nodeChangesRafId = requestAnimationFrame(() => {
+          const currentChanges = pendingNodeChanges;
+          pendingNodeChanges = [];
+          nodeChangesRafId = null;
+          set({ nodes: applyNodeChanges(currentChanges, get().nodes) });
+        });
+      }
     },
     onEdgesChange: (changes) => {
-      set({ edges: applyEdgeChanges(changes, get().edges) });
+      pendingEdgeChanges.push(...changes);
+      if (edgeChangesRafId === null) {
+        edgeChangesRafId = requestAnimationFrame(() => {
+          const currentChanges = pendingEdgeChanges;
+          pendingEdgeChanges = [];
+          edgeChangesRafId = null;
+          set({ edges: applyEdgeChanges(currentChanges, get().edges) });
+        });
+      }
     },
     onConnect: (connection) => {
       set({ edges: addEdge(connection, get().edges) });

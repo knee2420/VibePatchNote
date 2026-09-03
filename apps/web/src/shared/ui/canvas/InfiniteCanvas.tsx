@@ -37,6 +37,7 @@ interface InfiniteCanvasProps {
 }
 
 const DEFAULT_SNAP_GRID: [number, number] = [20, 20];
+const DEFAULT_EDGE_OPTIONS = { type: 'smoothstep', animated: false };
 
 export function InfiniteCanvas({
   nodes,
@@ -122,6 +123,8 @@ export function InfiniteCanvas({
         selectionOnDrag={canvasMode === 'select' && !isReadOnly}
         selectionMode={SelectionMode.Partial}
         panActivationKeyCode="Space"
+        nodeDragThreshold={2}
+        defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         elevateNodesOnSelect={false}
         fitView
       >

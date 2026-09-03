@@ -25,7 +25,7 @@ export const SegmentNode = memo(function SegmentNode({ id, data, selected }: Nod
   return (
     <div
       className={`
-      rounded-lg shadow-md border-2 w-[500px] flex flex-col
+      rounded-lg shadow-md border-2 w-[500px] flex flex-col [contain:layout_style_paint]
       ${currentTheme.container}
       ${selected ? '!border-blue-500 ring-2 ring-blue-300' : ''}
       transition-colors duration-200
