@@ -5,6 +5,7 @@ export interface DocumentViewerProps {
   title: string;
   isSpread?: boolean;
   onPageCountChange?: (count: number) => void;
+  onDimensionsChange?: (dimensions: { width: number; height: number; aspectRatio: number }) => void;
 }
 
 export interface ViewerDefinition {

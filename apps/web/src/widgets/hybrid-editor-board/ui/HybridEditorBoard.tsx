@@ -4,11 +4,11 @@ import { ChevronLeft, Pencil, Check, X } from 'lucide-react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
-import { SegmentNode } from '@/entities/segment/ui/SegmentNode';
-import { ResourceCardNode } from '@/entities/resource-card/ui/ResourceCardNode';
-import { ReferenceDocumentNode } from '@/entities/reference-document/ui/ReferenceDocumentNode';
-import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
+import { InfiniteCanvas } from '@/shared/ui';
+import { SegmentNode } from '@/entities/segment';
+import { ResourceCardNode } from '@/entities/resource-card';
+import { ReferenceDocumentCard as ReferenceDocumentNode } from '@/widgets/reference-document-card';
+import { useCanvasStore as useHybridEditorState } from '@/entities/canvas-board';
 import { SessionListSheet } from '@/features/workspace/ui/SessionListSheet';
 import { 
   useCanvasFileDrop, 

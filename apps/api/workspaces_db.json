@@ -8,8 +8,8 @@
                 "id": "ref-pdf-1788403699878-oww2",
                 "type": "referenceDocument",
                 "position": {
-                    "x": 2220,
-                    "y": 260
+                    "x": 1720,
+                    "y": 220
                 },
                 "data": {
                     "title": "\ud504\ub85c\uc81d\ud2b8 \ub9e4\ub2c8\uc800\uc758 5\ub300 \ud544\uc218 \uad00\ub9ac \ubb38\uc11c.pdf",
@@ -18,8 +18,8 @@
                     "size": 1115340
                 },
                 "measured": {
-                    "width": 600,
-                    "height": 800
+                    "width": 556,
+                    "height": 814
                 },
                 "selected": false,
                 "dragging": false
@@ -28,8 +28,8 @@
                 "id": "ref-pdf-1788403709347-l7bs",
                 "type": "referenceDocument",
                 "position": {
-                    "x": 960,
-                    "y": 260
+                    "x": 600,
+                    "y": 220
                 },
                 "data": {
                     "title": "Atticus LLC_ Invoice 000081709.pdf",
@@ -38,18 +38,18 @@
                     "size": 31554
                 },
                 "measured": {
-                    "width": 640,
-                    "height": 910
+                    "width": 556,
+                    "height": 814
                 },
-                "selected": true,
+                "selected": false,
                 "dragging": false
             },
             {
                 "id": "ref-img-1788403719021-usxf",
                 "type": "referenceDocument",
                 "position": {
-                    "x": 1600,
-                    "y": 260
+                    "x": 1160,
+                    "y": 220
                 },
                 "data": {
                     "title": "res_AI\uc2e0\uc138\uacc4_\ud540\ud130\ub808\uc2a4\ud2b8-\uad6c\uae00AIstudio.jpg",
@@ -58,8 +58,8 @@
                     "size": 47288
                 },
                 "measured": {
-                    "width": 600,
-                    "height": 800
+                    "width": 550,
+                    "height": 477
                 },
                 "selected": false,
                 "dragging": false
@@ -67,15 +67,6 @@
         ],
         "edges": [],
         "created_at": "2026-09-02T13:52:39.808038",
-        "updated_at": "2026-09-03T04:21:28.613500"
-    },
-    "cda3a4a8-b203-4974-8cc0-8101f6bb24b5": {
-        "id": "cda3a4a8-b203-4974-8cc0-8101f6bb24b5",
-        "title": "test_tuto2",
-        "description": "",
-        "nodes": [],
-        "edges": [],
-        "created_at": "2026-09-03T02:50:08.728887",
-        "updated_at": "2026-09-03T02:53:24.083405"
+        "updated_at": "2026-09-03T05:04:31.432800"
     }
 }
