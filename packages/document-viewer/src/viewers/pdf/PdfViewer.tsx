@@ -1,14 +1,19 @@
 import { useState, useCallback, memo } from 'react';
-import { Document, Page } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 import './pdfWorkerSetup';
 import type { DocumentViewerProps } from '../../types';
+import { PdfSegmentOverlay } from './PdfSegmentOverlay';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export const PdfViewer = memo(function PdfViewer({
   url,
   isSpread = false,
+  segments = [],
   onPageCountChange,
+  onDimensionsChange,
 }: DocumentViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -26,6 +31,14 @@ export const PdfViewer = memo(function PdfViewer({
     console.error('Failed to load PDF:', error);
     setLoadError('PDF 문서를 로드하지 못했습니다.');
   }, []);
+
+  const handlePageLoadSuccess = (page: { width: number; height: number }) => {
+    onDimensionsChange?.({
+      width: page.width,
+      height: page.height,
+      aspectRatio: page.width / page.height,
+    });
+  };
 
   if (loadError) {
     return (
@@ -65,13 +78,14 @@ export const PdfViewer = memo(function PdfViewer({
                   key={`page_${pageNumber}`}
                   className="shrink-0 flex flex-col items-center group/page"
                 >
-                  {/* Page Canvas Container */}
-                  <div className="bg-white rounded-md shadow-md border border-slate-200 overflow-hidden transition-shadow group-hover/page:shadow-lg">
+                  {/* Page Canvas Container (relative for exact coordinate overlay sync) */}
+                  <div className="relative bg-white rounded-md shadow-md border border-slate-200 overflow-hidden transition-shadow group-hover/page:shadow-lg">
                     <Page
                       pageNumber={pageNumber}
                       width={isSpread ? 380 : 520}
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
+                      onLoadSuccess={index === 0 ? handlePageLoadSuccess : undefined}
                       loading={
                         <div
                           className="bg-white flex items-center justify-center text-slate-300"
@@ -83,6 +97,12 @@ export const PdfViewer = memo(function PdfViewer({
                           <Loader2 className="w-4 h-4 animate-spin" />
                         </div>
                       }
+                    />
+
+                    {/* Page Embedded Segment Overlay */}
+                    <PdfSegmentOverlay
+                      pageNumber={pageNumber}
+                      segments={segments}
                     />
                   </div>
 

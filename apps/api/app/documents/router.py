@@ -2,10 +2,21 @@
 from fastapi import APIRouter, BackgroundTasks, File, UploadFile
 from fastapi.responses import FileResponse
 
-from .schemas import ExtractionStatusResponse, UploadResponse
-from .service import build_public_file_url, resolve_uploaded_file, save_uploaded_file
+from .schemas import (
+    ExtractionStatusResponse,
+    ScanDocumentRequest,
+    ScanDocumentResponse,
+    UploadResponse,
+)
+from .service import (
+    ExtractionService,
+    build_public_file_url,
+    resolve_uploaded_file,
+    save_uploaded_file,
+)
 
 router = APIRouter()
+extraction_service = ExtractionService()
 
 
 @router.post("/upload", response_model=UploadResponse)
@@ -30,6 +41,17 @@ async def upload_reference_document(
     )
 
 
+@router.post("/scan", response_model=ScanDocumentResponse)
+async def scan_document_segments(req: ScanDocumentRequest):
+    """
+    Phase 2 Entrypoint
+    업로드된 문서를 agy-cli 워크플로우 엔진으로 분석하여
+    표, 개조식 목록, 섹션 바운딩 박스를 추출합니다.
+    """
+    result = await extraction_service.scan_document_segments(req.filename)
+    return ScanDocumentResponse(**result)
+
+
 @router.get("/status/{job_id}", response_model=ExtractionStatusResponse)
 async def get_extraction_status(job_id: str):
     """
@@ -44,3 +66,4 @@ async def get_uploaded_file(filename: str):
     Serves an uploaded file for the frontend to render.
     """
     return FileResponse(resolve_uploaded_file(filename))
+

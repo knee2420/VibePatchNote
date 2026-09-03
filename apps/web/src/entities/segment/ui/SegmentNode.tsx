@@ -42,7 +42,7 @@ export const SegmentNode = memo(function SegmentNode({
       className={`
       group/node rounded-lg shadow-md border-2 flex flex-col relative [contain:layout_style_paint]
       ${currentTheme.container}
-      ${selected ? '!border-blue-500 ring-2 ring-blue-300' : ''}
+      ${selected ? '!border-blue-500 ring-2 ring-blue-300 nowheel' : ''}
       ${customSize ? '' : 'w-[500px]'}
       ${isResizing ? '' : 'transition-colors duration-200'}
     `}
@@ -78,7 +78,7 @@ export const SegmentNode = memo(function SegmentNode({
       </div>
 
       {/* Content Area (Lazy Tiptap Editor for 60fps performance) */}
-      <div className="p-4 nodrag nopan flex-1 overflow-auto flex flex-col">
+      <div className={`p-4 nodrag nopan flex-1 overflow-auto flex flex-col ${selected ? 'nowheel' : ''}`}>
         {isEditing ? (
           <div onBlur={() => setIsEditing(false)} className="flex-1 flex flex-col">
             <RichTextEditor

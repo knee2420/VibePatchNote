@@ -1,6 +1,8 @@
+from pathlib import Path
 from typing import Any, Dict
 
 from app.models import DocumentMeta
+from .nodes.segment_scan_node import SegmentScanNode
 
 
 class NativeWorkflowEngine:
@@ -10,8 +12,7 @@ class NativeWorkflowEngine:
     """
 
     def __init__(self) -> None:
-        # Setup graph topology and initialize states
-        pass
+        self.scan_node = SegmentScanNode()
 
     async def execute_classification_node(self, document_text: str) -> Dict[str, Any]:
         """
@@ -28,3 +29,9 @@ class NativeWorkflowEngine:
         """
         # TODO: Implement sequence of Node executions.
         return {"status": "success", "scaffold_tree": {}}
+
+    async def execute_segment_scan(self, file_path: Path) -> Dict[str, Any]:
+        """
+        Executes the Document Segment Scan Node via agy-cli.
+        """
+        return self.scan_node.execute(file_path)

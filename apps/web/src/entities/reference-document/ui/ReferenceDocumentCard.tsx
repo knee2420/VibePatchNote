@@ -5,6 +5,7 @@ import { viewerRegistry } from '@vibe/document-viewer';
 
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
+import { useDocumentScan } from '../model/useDocumentScan';
 import type { ReferenceDocumentData } from '../model/types';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
@@ -21,7 +22,7 @@ const themeStyles: Record<string, { container: string; header: string }> = {
  * ReferenceDocumentCard (FSD Entity UI)
  *
  * 참고 문서 도메인의 캔버스 노드 표현. 뷰어 엔진(`@vibe/document-viewer`)을 조합해
- * 크기 핏 / 휠 가로채기 / 펼침 앵커 및 테두리 마우스 리사이징을 제공합니다.
+ * 크기 핏 / 휠 가로채기 / 펼침 앵커 / 마우스 리사이징 및 문서 영역 스캔(agy-cli)을 제공합니다.
  */
 export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   id,
@@ -54,6 +55,28 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
   // Canvas Wheel Feature Hook
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });
+
+  // 문서 영역 스캔 훅 (agy-cli 백엔드 파이프라인 연동)
+  const { isScanning, segments, scanDocument } = useDocumentScan({
+    onSuccess: (loaded) => {
+      alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`);
+    },
+    onError: () => {
+      alert('문서 영역 스캔 중 오류가 발생했습니다.');
+    },
+  });
+
+  const filename = useMemo(() => {
+    if (data.url) {
+      const clean = data.url.split('?')[0];
+      return clean.split('/').pop() || data.title;
+    }
+    return data.title;
+  }, [data.url, data.title]);
+
+  const handleScan = useCallback(() => {
+    scanDocument(filename);
+  }, [scanDocument, filename]);
 
   // 사용자가 수동 리사이즈한 경우 프리셋 토글 시 크기 리셋 -> 자동 맞춤(Fit/Spread) 우선권 복원
   const resetCustomDimensions = useCallback(() => {
@@ -112,7 +135,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       className={`
         group/node rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style]
         ${currentTheme.container}
-        ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300 z-30' : 'z-10 hover:z-20'}
+        ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300 z-30 nowheel' : 'z-10 hover:z-20'}
         ${customSize ? '' : dimensionClass}
         ${isResizing ? '' : 'transition-[width,height] duration-300 ease-out'}
       `}
@@ -145,16 +168,23 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         viewerDefId={viewerDef.id}
         isFitContent={isFitContent}
         headerThemeClass={currentTheme.header}
+        isScanning={isScanning}
+        hasSegments={segments.length > 0}
         onToggleFit={onToggleFitWithReset}
+        onScan={handleScan}
         onDelete={handleDelete}
       />
 
       {/* Dynamic Pluggable Viewer Body Wrapper with Wheel Interception */}
-      <div className="flex-1 w-full h-full overflow-hidden flex flex-col nodrag nopan" onWheel={handleNodeWheel}>
+      <div
+        className={`flex-1 w-full h-full overflow-hidden flex flex-col nodrag nopan ${selected ? 'nowheel' : ''}`}
+        onWheel={handleNodeWheel}
+      >
         <ViewerComponent
           url={data.url}
           title={data.title}
           isSpread={isSpread}
+          segments={segments}
           onPageCountChange={setPageCount}
           onDimensionsChange={setDimensions}
         />

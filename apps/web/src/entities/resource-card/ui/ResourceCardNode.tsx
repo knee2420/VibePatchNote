@@ -27,7 +27,7 @@ export const ResourceCardNode = memo(function ResourceCardNode({
     <div
       className={`
       bg-amber-100 rounded-md shadow-xs border w-[250px] flex flex-col cursor-grab active:cursor-grabbing select-none [contain:layout_style_paint]
-      ${selected ? 'border-amber-500 shadow-md ring-2 ring-amber-300' : 'border-amber-300'}
+      ${selected ? 'border-amber-500 shadow-md ring-2 ring-amber-300 nowheel' : 'border-amber-300'}
       transition-colors duration-150
     `}
     >

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Trash2, BookOpen, Scaling, Image as ImageIcon } from 'lucide-react';
+import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2 } from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
   title: string;
@@ -7,7 +7,10 @@ interface ReferenceCardHeaderProps {
   viewerDefId: string;
   isFitContent: boolean;
   headerThemeClass: string;
+  isScanning?: boolean;
+  hasSegments?: boolean;
   onToggleFit: () => void;
+  onScan?: () => void;
   onDelete: () => void;
 }
 
@@ -17,7 +20,10 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   viewerDefId,
   isFitContent,
   headerThemeClass,
+  isScanning = false,
+  hasSegments = false,
   onToggleFit,
+  onScan,
   onDelete,
 }: ReferenceCardHeaderProps) {
   return (
@@ -43,6 +49,40 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
+        {/* Scan & Analyze Button (AI/agy-cli Structure Detection) */}
+        {onScan && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onScan();
+            }}
+            disabled={isScanning}
+            className={`
+              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+              ${
+                isScanning
+                  ? 'text-purple-600 bg-purple-100 animate-pulse'
+                  : hasSegments
+                  ? 'text-purple-600 bg-purple-100 hover:bg-purple-200'
+                  : 'text-slate-400 hover:text-purple-600 hover:bg-purple-50'
+              }
+            `}
+            title={
+              isScanning
+                ? 'agy-cli 문서 영역 분석 중...'
+                : hasSegments
+                ? '문서 영역 재스캔 (agy-cli 분석)'
+                : '스캔 혹은 문서 분석 (표, 개조식 목록, 섹션 감지)'
+            }
+          >
+            {isScanning ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+            ) : (
+              <ScanText className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
+
         {/* Fit to Content Toggle Button */}
         <button
           onClick={onToggleFit}
@@ -71,3 +111,4 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
     </div>
   );
 });
+

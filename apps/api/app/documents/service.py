@@ -68,3 +68,22 @@ class ExtractionService:
         tree = await self.workflow_engine.execute_extraction_pipeline(document_text, meta)
 
         return {"meta": meta, "tree": tree}
+
+    async def scan_document_segments(self, filename: str) -> dict:
+        """
+        업로드된 문서를 찾아 NativeWorkflowEngine의 세그먼트 스캔 노드를 실행합니다.
+        """
+        # 경로 안전성 검증
+        file_path = resolve_uploaded_file(filename)
+
+        # 워크플로우 엔진 호출
+        raw_result = await self.workflow_engine.execute_segment_scan(file_path)
+
+        segments = raw_result.get("segments", [])
+        return {
+            "status": "completed",
+            "document_title": raw_result.get("document_title", file_path.name),
+            "total_segments": len(segments),
+            "segments": segments,
+        }
+
