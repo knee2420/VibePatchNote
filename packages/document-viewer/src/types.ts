@@ -14,6 +14,10 @@ export interface DocumentViewerProps {
   title: string;
   isSpread?: boolean;
   segments?: ViewerSegment[];
+  isEditMode?: boolean;
+  onUpdateSegment?: (updated: ViewerSegment) => void;
+  onCreateSegment?: (created: ViewerSegment) => void;
+  onDeleteSegment?: (segmentId: string) => void;
   onPageCountChange?: (count: number) => void;
   onDimensionsChange?: (dimensions: { width: number; height: number; aspectRatio: number }) => void;
 }

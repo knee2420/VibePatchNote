@@ -6,7 +6,7 @@ import { viewerRegistry } from '@vibe/document-viewer';
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
 import { useDocumentScan } from '../model/useDocumentScan';
-import type { ReferenceDocumentData } from '../model/types';
+import type { ReferenceDocumentData, DocumentSegmentItem } from '../model/types';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
 
@@ -29,7 +29,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   data,
   selected = false,
 }: NodeProps<Node<ReferenceDocumentData, 'referenceDocument'>>) {
-  const { setNodes } = useReactFlow();
+  const { setNodes, updateNodeData } = useReactFlow();
   const [isResizing, setIsResizing] = useState(false);
   const [customSize, setCustomSize] = useState<{ width: number; height: number } | null>(null);
 
@@ -56,9 +56,32 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   // Canvas Wheel Feature Hook
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });
 
+  // 세그먼트 영역 편집 모드 토글 (방안 B)
+  const [isEditMode, setIsEditMode] = useState(false);
+  const handleToggleEditMode = useCallback(() => {
+    setIsEditMode((prev) => !prev);
+  }, []);
+
+  // [R1 해결] FSD 준수 이벤트 브릿지로 zustand SSOT 스토어 및 React Flow 동시 갱신
+  const syncSegmentsToNode = useCallback(
+    (newSegments: DocumentSegmentItem[]) => {
+      updateNodeData(id, { segments: newSegments });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('vibe:update-node-data', {
+            detail: { id, data: { segments: newSegments } },
+          })
+        );
+      }
+    },
+    [id, updateNodeData]
+  );
+
   // 문서 영역 스캔 훅 (agy-cli 백엔드 파이프라인 연동)
-  const { isScanning, segments, scanDocument } = useDocumentScan({
+  const { isScanning, segments, setSegments, scanDocument } = useDocumentScan({
+    initialSegments: data.segments,
     onSuccess: (loaded) => {
+      syncSegmentsToNode(loaded);
       alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`);
     },
     onError: () => {
@@ -77,6 +100,43 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   const handleScan = useCallback(() => {
     scanDocument(filename);
   }, [scanDocument, filename]);
+
+  // [R4 해결] updater 내부에서 side effect를 부르지 않고 순수 갱신 후 커밋
+  const handleUpdateSegment = useCallback(
+    (updated: DocumentSegmentItem) => {
+      let nextSegments: DocumentSegmentItem[] = [];
+      setSegments((prev) => {
+        nextSegments = prev.map((s) => (s.id === updated.id ? updated : s));
+        return nextSegments;
+      });
+      syncSegmentsToNode(nextSegments);
+    },
+    [setSegments, syncSegmentsToNode]
+  );
+
+  const handleCreateSegment = useCallback(
+    (created: DocumentSegmentItem) => {
+      let nextSegments: DocumentSegmentItem[] = [];
+      setSegments((prev) => {
+        nextSegments = [...prev, created];
+        return nextSegments;
+      });
+      syncSegmentsToNode(nextSegments);
+    },
+    [setSegments, syncSegmentsToNode]
+  );
+
+  const handleDeleteSegment = useCallback(
+    (segmentId: string) => {
+      let nextSegments: DocumentSegmentItem[] = [];
+      setSegments((prev) => {
+        nextSegments = prev.filter((s) => s.id !== segmentId);
+        return nextSegments;
+      });
+      syncSegmentsToNode(nextSegments);
+    },
+    [setSegments, syncSegmentsToNode]
+  );
 
   // 사용자가 수동 리사이즈한 경우 프리셋 토글 시 크기 리셋 -> 자동 맞춤(Fit/Spread) 우선권 복원
   const resetCustomDimensions = useCallback(() => {
@@ -170,8 +230,10 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         headerThemeClass={currentTheme.header}
         isScanning={isScanning}
         hasSegments={segments.length > 0}
+        isEditMode={isEditMode}
         onToggleFit={onToggleFitWithReset}
         onScan={handleScan}
+        onToggleEditMode={handleToggleEditMode}
         onDelete={handleDelete}
       />
 
@@ -185,6 +247,10 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           title={data.title}
           isSpread={isSpread}
           segments={segments}
+          isEditMode={isEditMode}
+          onUpdateSegment={handleUpdateSegment}
+          onCreateSegment={handleCreateSegment}
+          onDeleteSegment={handleDeleteSegment}
           onPageCountChange={setPageCount}
           onDimensionsChange={setDimensions}
         />

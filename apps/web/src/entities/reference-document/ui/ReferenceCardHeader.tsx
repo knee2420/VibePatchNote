@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2 } from 'lucide-react';
+import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2, Edit3 } from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
   title: string;
@@ -9,8 +9,10 @@ interface ReferenceCardHeaderProps {
   headerThemeClass: string;
   isScanning?: boolean;
   hasSegments?: boolean;
+  isEditMode?: boolean;
   onToggleFit: () => void;
   onScan?: () => void;
+  onToggleEditMode?: () => void;
   onDelete: () => void;
 }
 
@@ -22,8 +24,10 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   headerThemeClass,
   isScanning = false,
   hasSegments = false,
+  isEditMode = false,
   onToggleFit,
   onScan,
+  onToggleEditMode,
   onDelete,
 }: ReferenceCardHeaderProps) {
   return (
@@ -80,6 +84,27 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
             ) : (
               <ScanText className="w-3.5 h-3.5" />
             )}
+          </button>
+        )}
+
+        {/* Mask Edit Mode Toggle Button (Visible when segments exist) */}
+        {hasSegments && onToggleEditMode && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleEditMode();
+            }}
+            className={`
+              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+              ${
+                isEditMode
+                  ? 'text-purple-700 bg-purple-200/90 ring-1 ring-purple-400 font-semibold'
+                  : 'text-slate-400 hover:text-purple-600 hover:bg-purple-50'
+              }
+            `}
+            title={isEditMode ? '영역 편집 모드 끄기 (뷰 모드로 전환)' : '영역 편집 모드 켜기 (크기 조절 및 라벨 수정)'}
+          >
+            <Edit3 className="w-3.5 h-3.5" />
           </button>
         )}
 

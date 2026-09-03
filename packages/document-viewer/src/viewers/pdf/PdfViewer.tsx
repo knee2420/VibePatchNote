@@ -12,6 +12,10 @@ export const PdfViewer = memo(function PdfViewer({
   url,
   isSpread = false,
   segments = [],
+  isEditMode = false,
+  onUpdateSegment,
+  onCreateSegment,
+  onDeleteSegment,
   onPageCountChange,
   onDimensionsChange,
 }: DocumentViewerProps) {
@@ -103,6 +107,10 @@ export const PdfViewer = memo(function PdfViewer({
                     <PdfSegmentOverlay
                       pageNumber={pageNumber}
                       segments={segments}
+                      isEditMode={isEditMode}
+                      onUpdateSegment={onUpdateSegment}
+                      onCreateSegment={onCreateSegment}
+                      onDeleteSegment={onDeleteSegment}
                     />
                   </div>
 

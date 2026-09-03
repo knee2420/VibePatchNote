@@ -126,6 +126,7 @@ export function InfiniteCanvas({
         nodeDragThreshold={2}
         defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         elevateNodesOnSelect={false}
+        deleteKeyCode={null}
         fitView
       >
         {showDots && <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="#cbd5e1" />}

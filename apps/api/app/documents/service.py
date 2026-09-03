@@ -72,18 +72,41 @@ class ExtractionService:
     async def scan_document_segments(self, filename: str) -> dict:
         """
         업로드된 문서를 찾아 NativeWorkflowEngine의 세그먼트 스캔 노드를 실행합니다.
+        이미 분석된 문서라면 캐시 파일(.segments.json)에서 0.001초 만에 즉시 반환합니다.
         """
+        import json
+
         # 경로 안전성 검증
         file_path = resolve_uploaded_file(filename)
+        cache_file = file_path.with_name(f"{file_path.name}.segments.json")
 
-        # 워크플로우 엔진 호출
+        # 1. 캐시 히트 (Disk Cache Hit)
+        if cache_file.exists():
+            try:
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+                return cached_data
+            except Exception:
+                pass  # 캐시 손상 시 재분석 진행
+
+        # 2. 워크플로우 엔진 호출 (Cache Miss)
         raw_result = await self.workflow_engine.execute_segment_scan(file_path)
 
         segments = raw_result.get("segments", [])
-        return {
+        response_data = {
             "status": "completed",
             "document_title": raw_result.get("document_title", file_path.name),
             "total_segments": len(segments),
             "segments": segments,
         }
+
+        # 3. 캐시 저장
+        try:
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(response_data, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+        return response_data
+
 
