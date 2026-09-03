@@ -1,3 +1,3 @@
-export * from './model/types';
-// Backward compatibility for existing imports
-export { ReferenceDocumentCard as ReferenceDocumentNode } from '@/widgets/reference-document-card';
+export { ReferenceDocumentCard } from './ui/ReferenceDocumentCard';
+export { REFERENCE_DOCUMENT_NODE_TYPE } from './model/types';
+export type { ReferenceDocumentData } from './model/types';

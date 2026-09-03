@@ -8,6 +8,8 @@ description: "사용자가 백엔드 코어(Native Workflow Engine, Antigravity 
 이 스킬은 사용자가 백엔드(`apps/api/app/core`)의 **AI 에이전트 생성, 파이프라인(DAG), 워크플로우 엔진, 프롬프트 엔지니어링** 기능 구현을 지시할 때 발동합니다.
 에이전트는 코드 작성을 전후하여 반드시 아래의 **체크리스트**를 스스로 점검하고 결과를 사용자에게 보고해야 합니다.
 
+> ⛔ **선행 조건:** 이 체크리스트는 [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md)의 요약 점검표입니다. 충돌 시 `00-core`가 우선합니다.
+
 ## 📋 [LLM / Workflow Engine Development Checklist]
 
 ### 1. Native Workflow Engine 독립성
@@ -25,7 +27,8 @@ description: "사용자가 백엔드 코어(Native Workflow Engine, Antigravity 
 - [ ] **경계 준수:** 각 도메인의 라우터(`router.py`)가 갖는 HTTP 입출력 제어 코드가 엔진 내부에 섞이지 않고, 순수하게 파라미터만 전달받아 실행되도록 설계했는가?
 
 ### 5. 모노레포 위치 검증
-- [ ] **경로 확인:** 워크플로우와 AI 코어 코드가 반드시 `apps/api/app/core/` (또는 지정된 하위 폴더) 내부에 배치되었는가?
+- [ ] **경로 확인:** 워크플로우와 AI 코어 코드가 반드시 `apps/api/app/core/` 내부에 배치되었는가? (`core/workflow/`, `core/workflow/nodes/`, `core/antigravity/`)
+- [ ] **설정 분리:** API 키·엔드포인트·타임아웃 등 환경 의존 값을 코드에 하드코딩하지 않고 `apps/api/app/core/config.py`를 경유했는가?
 
 ---
 

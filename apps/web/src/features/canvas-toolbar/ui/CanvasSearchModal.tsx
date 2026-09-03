@@ -2,12 +2,16 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, X, FileText, StickyNote, File } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
-import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
+import { useCanvasBoardStore } from '@/entities/canvas-board';
+import { REFERENCE_DOCUMENT_NODE_TYPE } from '@/entities/reference-document';
+import { SEGMENT_NODE_TYPE } from '@/entities/segment';
+
 import { useCanvasMode } from '../model/useCanvasMode';
 
 export function CanvasSearchModal() {
   const { isSearchOpen, setIsSearchOpen } = useCanvasMode();
-  const { nodes, setNodes } = useHybridEditorState();
+  const nodes = useCanvasBoardStore((s) => s.nodes);
+  const setNodes = useCanvasBoardStore((s) => s.setNodes);
   const { setCenter } = useReactFlow();
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -90,8 +94,8 @@ export function CanvasSearchModal() {
           ) : (
             filteredNodes.map((n) => {
               const title = String(n.data?.title || '제목 없음');
-              const isRef = n.type === 'referenceDocument';
-              const isSegment = n.type === 'segment';
+              const isRef = n.type === REFERENCE_DOCUMENT_NODE_TYPE;
+              const isSegment = n.type === SEGMENT_NODE_TYPE;
 
               return (
                 <button

@@ -11,7 +11,7 @@ trigger: always_on
 
 2. **효율적 자원 활용 (No Browser Auto-Verification)**:
    - 에이전트 자체적으로 웹브라우저 서브에이전트를 띄워 검증하는 절차는 토큰 낭비 방지를 위해 수행하지 않습니다.
-   - 빌드(`tsc`, `npm run build`), 유닛 테스트, 정적 분석 등을 통해 효율적으로 검증합니다.
+   - 빌드/타입체크/린트(`pnpm build`, `pnpm typecheck`, `pnpm lint`), 유닛 테스트, 정적 분석 등을 통해 효율적으로 검증합니다.
 
 3. **주력 모델 기준 준수**:
    - 주력 모델: [Gemma4 31b, Gemini-3.5-flash, Gemini-3.1-pro, Gemini-3.5-flash-lite]

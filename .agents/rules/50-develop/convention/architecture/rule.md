@@ -13,13 +13,13 @@ description: "전체 프로젝트 아키텍처 및 개발 아웃라인, 공통 �
   - `apps/api`: 백엔드 애플리케이션 (FastAPI)
   - `packages/document-viewer`: **호스트 비의존적 범용 문서 뷰어 및 플러그인 엔진 (`@vibe/document-viewer`)** (PDF 가로/세로 스프레드 뷰어, 전략 패턴 레지스트리)
   - `packages/ui`: 공통 UI 디자인 시스템 컴포넌트 패키지 (향후 분리 시)
-  - `packages/config`: ESLint, TypeScript 등 공통 환경 설정 패키지
-* **인용:** [Turborepo - The monorepo solution](../../../../workbench/96.data_pipeline/turborepo/03_the_monorepo_solution/C-03_the_monorepo_solution.md)
+  - `packages/config`: TypeScript 등 공통 환경 설정 패키지 (`@vibe/config` — `tsconfig/base.json`, `react-app.json`, `react-library.json`)
+* **인용:** [Turborepo - The monorepo solution](../../../../../workbench/96.data_pipeline/turborepo/03_the_monorepo_solution/C-03_the_monorepo_solution.md)
 
 ## 2. 공통 커밋 컨벤션 (Conventional Commits)
 * **원칙:** 기계와 사람이 모두 읽기 쉽도록 일관된 커밋 메시지 룰을 적용합니다.
 * **포맷:** `type(scope): subject` 형식 준수 (`feat`, `fix`, `chore`, `docs`, `refactor` 등)
-* **인용:** [Conventional Commits](../../../../workbench/96.data_pipeline/conventional-commits/C-conventional-commits.md)
+* **인용:** [Conventional Commits](../../../../../workbench/96.data_pipeline/conventional-commits/C-conventional-commits.md)
 
 ## 3. 개발 아웃라인 (Development Workflow)
 1. **분석 (Map):** 요구사항 카드를 읽고 목표 아키텍처(FSD, 모노레포 등)에 부합하는지 1차 판단.

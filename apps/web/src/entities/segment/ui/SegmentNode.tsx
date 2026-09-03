@@ -1,7 +1,8 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 
-import { RichTextEditor } from '@/shared/ui/editor/RichTextEditor';
+import { RichTextEditor } from '@/shared/ui';
+
 import type { SegmentData } from '../model/types';
 
 const themeStyles: Record<string, { container: string; header: string }> = {

@@ -9,6 +9,8 @@ description: "사용자가 특정 서비스(옵시디언, 헵타베이스, 피�
 
 에이전트는 **절대로 바로 코드 작성에 착수하지 않으며**, 반드시 **[1단계: Reference UI 사전 조사 및 기능 명세서 리스트업]**을 선행하여 채팅창에 보고하고 얼라인한 뒤 개발을 진행해야 합니다.
 
+> ⛔ **선행 조건:** Step 2의 체크리스트는 [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md)의 요약 점검표입니다. 충돌 시 `00-core`가 우선합니다.
+
 ---
 
 ## 🧭 [전체 워크플로우 (2-Step Process)]
@@ -18,7 +20,7 @@ flowchart TD
     A["사용자: 특정 서비스 UI 레퍼런스 제시"] --> B["[Step 1] Reference UI 사전 조사 & 기능 명세서 리스트업"]
     B --> C["채팅창에 UI 분석 결과 보고 (사용자 피드백 / 얼라인)"]
     C --> D["[Step 2] Frontend Development Checklist 준수하며 구현"]
-    D --> E["컴파일 / 린트 / 터미널 에러 무결성 검증"]
+    D --> E["pnpm lint / typecheck / build 게이트 통과"]
     E --> F["최종 구현 완료 및 체크리스트 점검 보고"]
 ```
 
@@ -53,9 +55,12 @@ flowchart TD
 
 ### 1. FSD (Feature-Sliced Design) 레이어 검증
 - [ ] **레이어 적합성:** 구현하려는 기능이 어느 레이어(`app`, `pages`, `widgets`, `features`, `entities`, `shared`)에 속하는지 정확히 식별했는가?
-- [ ] **단방향 의존성:** 상위 레이어가 하위 레이어를 참조하고 있는가? (Cross-import 위반이 없는가?)
-- [ ] **Public API 노출:** 모듈 외부로 노출할 때는 개별 파일 경로가 아닌 해당 슬라이스의 `index.ts` (Public API)를 통해서만 내보내고(Export) 참조(Import)했는가?
+- [ ] **단방향 의존성:** import가 오직 `app → pages → widgets → features → entities → shared` 방향(오른쪽)으로만 향하는가?
+- [ ] **동일 레이어 격리:** 같은 레이어의 다른 슬라이스를 참조하지 않았는가? (`features/A` → `features/B` 금지. Public API 경유라도 금지)
+- [ ] **Public API 노출:** 모듈 외부로 노출할 때는 개별 파일 경로가 아닌 해당 슬라이스의 `index.ts` (Public API)를 통해서만 내보내고(Export) 참조(Import)했는가? 새 슬라이스에 `index.ts`를 함께 만들었는가?
 - [ ] **공용 패키지(packages/*) 활용:** 호스트 비의존적 뷰어나 공통 모듈은 `@vibe/*` 패키지로 추출 또는 연동되었는가?
+- [ ] **통신 경로 단일화:** 백엔드 호출을 `shared/api`의 `httpClient`로만 했는가? `fetch()` 직접 호출·호스트 하드코딩이 없는가?
+- [ ] **로직/뷰 분리:** 통신·상태 로직을 JSX가 아니라 `features/*/model/use*.ts` 훅에 두었는가?
 
 ### 2. AHA (Avoid Hasty Abstractions) 원칙 준수
 - [ ] **복제(Duplication) 허용:** 코드가 비슷해 보인다고 섣불리 `shared/`나 공통 Hook으로 과도하게 추출하지 않았는가?
@@ -71,14 +76,14 @@ flowchart TD
 
 ### 5. 모노레포 위치 검증 (Apps vs Packages)
 - [ ] **경로 확인:** 
-  - 단일 웹앱 전용 코드는 최상단 `frontend/`가 아니라 반드시 `apps/web/src/` 내부에 위치하는가?
+  - 단일 웹앱 전용 코드는 반드시 `apps/web/src/` 내부의 알맞은 FSD 레이어에 위치하는가?
   - 여러 툴에서 공통으로 쓰이는 범용 UI/엔진(예: 문서 뷰어 등)은 `packages/[패키지명]/src/`에 위치하고 `apps/web`에서 `workspace:*`로 연동되었는가?
 
 ### 6. Component 기획 및 데이터 반영
 - [ ] **CRUD + Entity 데이터 반영:** 새로운 Component를 기획하거나 구현할 때, 생성(Create) 뿐만 아니라 읽기(Read), 수정(Update), 삭제(Delete) 및 연관된 상태(Entity Data) 반영이 세트로 함께 고려되었는가?
 
 ### 7. shadcn/ui 컴포넌트 재사용성
-- [ ] **기존 UI 컴포넌트 활용:** 새로운 UI 요소를 개발하기 전에 shadcn/ui(또는 사전에 정의된 Design System)에서 가져와서 사용할 수 있는 컴포넌트인지 확인했는가? 직접 구현하기 전 최대한 기존 UI 라이브러리(shadcn)를 활용하고 있는가?
+- [ ] **기존 UI 컴포넌트 활용:** 새로운 UI 요소를 개발하기 전에 `apps/web/src/shared/ui/`에 이미 있는 컴포넌트인지 먼저 확인했는가? 없다면 `pnpm -F @vibe/web exec shadcn@latest add [이름]`으로 추가했는가?
 
 ### 8. 외부 패키지 및 라이브러리 도입
 - [ ] **오픈소스 우선 고려 및 사전 승인:** 구현 범위가 크거나 복잡한 기능의 경우, 직접 구현하기 전에 우리 스펙에 맞는 검증된 패키지나 오픈소스를 우선적으로 고민했는가? 단, **임의로 바로 설치하지 않고 반드시 선행 조사 후 채팅창에 리스트업하여 사용자의 승인을 먼저 구했는가?**
@@ -87,8 +92,11 @@ flowchart TD
 - [ ] **기존 라이브러리 및 스펙 우선 확인:** 기능을 새롭게 처음부터 구현하려고 하지 말고, 기존에 이미 설치된 패키지나 라이브러리, 그리고 기존에 있는 구성으로부터 스펙 명세서와 기준 설명서를 먼저 확인했는가?
 - [ ] **기설치 사양 최우선 고려:** 완전히 새로운 코드를 밑바닥부터 작성하기 전에, 최대한 이미 설치된 사양(React Flow 내장 기능, Lucide 아이콘 등)과 기존 환경을 우선적으로 고려했는가?
 
-### 10. 무결성 검증 (터미널 및 린트)
-- [ ] **빌드 및 린트 통과:** `pnpm -F frontend build`와 `pnpm -F frontend lint`를 수행하여 컴파일 에러나 경고/버그가 발생하지 않음을 직접 확인했는가?
+### 10. 무결성 검증 (완료 게이트)
+- [ ] **게이트 실행:** 루트에서 `pnpm lint && pnpm typecheck && pnpm build`를 **실제로 실행**하여 통과를 확인했는가?
+- [ ] **린트 에러 0:** `pnpm lint`의 에러가 0인가? (FSD 레이어 위반이 여기서 에러로 잡힙니다)
+- [ ] **우회 금지:** 경계 규칙을 `oxlint-disable` / `eslint-disable` 주석으로 끄지 않았는가?
+- [ ] **동작 확인:** 레퍼런스대로 실제 화면에서 동작하는지 확인했는가? (빌드 통과 ≠ 동작 확인)
 
 ---
 

@@ -1,22 +1,12 @@
-import type { ComponentType } from 'react';
+import type { NodeTheme } from '@/shared/model';
+
+/** React Flow 노드 타입 레지스트리 키 (영속 데이터에 저장되므로 변경 금지). */
+export const REFERENCE_DOCUMENT_NODE_TYPE = 'referenceDocument';
 
 export interface ReferenceDocumentData extends Record<string, unknown> {
   title: string;
   url: string;
   fileType?: string; // 'pdf' | 'text' | 'image' | 'default' 등
   size?: number;
-}
-
-export interface DocumentViewerProps {
-  url: string;
-  title: string;
-  isSpread?: boolean;
-  selected?: boolean;
-  onPageCountChange?: (count: number) => void;
-}
-
-export interface ViewerDefinition {
-  id: string;
-  canSpread: boolean; // 가로 펼치기(Spread) 지원 여부
-  component: ComponentType<DocumentViewerProps>;
+  theme?: NodeTheme;
 }

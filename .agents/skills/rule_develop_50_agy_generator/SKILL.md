@@ -1,5 +1,5 @@
 ---
-name: rule_develop_50_generator
+name: rule_develop_50_agy_generator
 description: "사용자가 에이전트에게 agy-cli 관련 트러블슈팅 사례나 스크립팅 활용법을 'rules에 등록해'라고 지시할 때 발동합니다. 50-develop/agy-cli 규칙 저장소의 1가이드=1폴더 원칙을 엄격하게 준수하여 문서화하고 예제를 격리합니다."
 ---
 

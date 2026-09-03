@@ -1,21 +1,24 @@
-from fastapi import APIRouter, HTTPException, status
+"""workspaces 도메인 엔드포인트. 비즈니스 로직은 service 에 위임합니다."""
 from typing import List
-from .schemas import WorkspaceSessionCreate, WorkspaceSessionUpdate, WorkspaceSessionResponse
+
+from fastapi import APIRouter, HTTPException, status
+
 from . import service
+from .schemas import WorkspaceSessionCreate, WorkspaceSessionResponse, WorkspaceSessionUpdate
 
 router = APIRouter()
 
-@router.post("/", response_model=WorkspaceSessionResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=WorkspaceSessionResponse, status_code=status.HTTP_201_CREATED)
 async def create_workspace(data: WorkspaceSessionCreate):
     """
     Creates a new empty workspace session.
     """
     try:
         return service.create_workspace(data)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to create workspace")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to create workspace: {exc}") from exc
 
-@router.get("/", response_model=List[WorkspaceSessionResponse])
+@router.get("", response_model=List[WorkspaceSessionResponse])
 async def list_workspaces():
     """
     Retrieves all workspace sessions.

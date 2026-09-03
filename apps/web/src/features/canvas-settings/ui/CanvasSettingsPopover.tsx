@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Settings, Check, Grid, Eye, Map, Lock, Unlock, RotateCcw } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Eye, Grid, Lock, Map, RotateCcw, Settings, Unlock } from 'lucide-react';
 
 import { useCanvasSettings } from '../model/useCanvasSettings';
+import { SettingsToggleRow } from './SettingsToggleRow';
 
 interface CanvasSettingsPopoverProps {
   onClearSession?: () => void;
@@ -49,7 +50,9 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
         title="캔버스 뷰 & 환경 설정"
         aria-label="Canvas settings"
       >
-        <Settings className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`} />
+        <Settings
+          className={`w-4 h-4 transition-transform duration-300 ${isOpen ? 'rotate-45' : ''}`}
+        />
       </button>
 
       {isOpen && (
@@ -59,77 +62,35 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
           </div>
 
           <div className="py-1">
-            {/* 그리드에 맞추기 */}
-            <button
-              onClick={toggleSnapToGrid}
-              className="w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-blue-50/80 flex items-center justify-between group transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <Grid className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                <span>그리드에 맞추기</span>
-              </div>
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                snapToGrid ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
-              }`}>
-                {snapToGrid && <Check className="w-3 h-3 stroke-[3]" />}
-              </div>
-            </button>
-
-            {/* 도트 배경 표시 */}
-            <button
-              onClick={toggleShowDots}
-              className="w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-blue-50/80 flex items-center justify-between group transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <Eye className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                <span>도트 배경 표시</span>
-              </div>
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                showDots ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
-              }`}>
-                {showDots && <Check className="w-3 h-3 stroke-[3]" />}
-              </div>
-            </button>
-
-            {/* 미니맵 표시 */}
-            <button
-              onClick={toggleShowMiniMap}
-              className="w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-blue-50/80 flex items-center justify-between group transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <Map className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                <span>미니맵 표시</span>
-              </div>
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                showMiniMap ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'
-              }`}>
-                {showMiniMap && <Check className="w-3 h-3 stroke-[3]" />}
-              </div>
-            </button>
+            <SettingsToggleRow
+              icon={Grid}
+              label="그리드에 맞추기"
+              checked={snapToGrid}
+              onToggle={toggleSnapToGrid}
+            />
+            <SettingsToggleRow
+              icon={Eye}
+              label="도트 배경 표시"
+              checked={showDots}
+              onToggle={toggleShowDots}
+            />
+            <SettingsToggleRow
+              icon={Map}
+              label="미니맵 표시"
+              checked={showMiniMap}
+              onToggle={toggleShowMiniMap}
+            />
 
             <div className="my-1 border-t border-slate-100" />
 
-            {/* 읽기 전용 모드 */}
-            <button
-              onClick={toggleReadOnly}
-              className={`w-full px-3 py-2 text-left text-xs font-medium flex items-center justify-between group transition-colors ${
-                isReadOnly ? 'text-amber-700 hover:bg-amber-50' : 'text-slate-700 hover:bg-blue-50/80'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                {isReadOnly ? (
-                  <Lock className="w-4 h-4 text-amber-600" />
-                ) : (
-                  <Unlock className="w-4 h-4 text-slate-400 group-hover:text-blue-600 transition-colors" />
-                )}
-                <span>읽기 전용 (캔버스 잠금)</span>
-              </div>
-              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                isReadOnly ? 'bg-amber-600 border-amber-600 text-white' : 'border-slate-300 bg-white'
-              }`}>
-                {isReadOnly && <Check className="w-3 h-3 stroke-[3]" />}
-              </div>
-            </button>
+            <SettingsToggleRow
+              icon={Unlock}
+              activeIcon={Lock}
+              label="읽기 전용 (캔버스 잠금)"
+              checked={isReadOnly}
+              onToggle={toggleReadOnly}
+              accent="amber"
+            />
 
             {onClearSession && (
               <>

@@ -7,7 +7,9 @@ import {
   Palette
 } from 'lucide-react';
 
-import { useNodeActions, type NodeTheme } from '../model/useNodeActions';
+import type { NodeTheme } from '@/shared/model';
+
+import { useNodeActions } from '../model/useNodeActions';
 
 const THEME_OPTIONS: { id: NodeTheme; name: string; bgClass: string; borderClass: string }[] = [
   { id: 'default', name: '기본 (화이트)', bgClass: 'bg-white', borderClass: 'border-slate-300' },
@@ -30,6 +32,12 @@ export function CanvasNodeActionBar() {
   } = useNodeActions();
 
   if (!hasSelection) return null;
+
+  const handleDelete = () => {
+    if (confirm(`선택한 ${selectedCount}개 카드를 삭제하시겠습니까?`)) {
+      deleteSelected();
+    }
+  };
 
   return (
     <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 animate-in fade-in slide-in-from-top-3 duration-200">
@@ -91,7 +99,7 @@ export function CanvasNodeActionBar() {
 
         {/* 🗑️ 선택 카드 일괄 삭제 */}
         <button
-          onClick={deleteSelected}
+          onClick={handleDelete}
           className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
           title="선택된 카드 일괄 삭제"
         >

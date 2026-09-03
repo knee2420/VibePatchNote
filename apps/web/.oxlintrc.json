@@ -1,8 +1,287 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
+  "plugins": [
+    "react",
+    "typescript",
+    "oxc",
+    "import"
+  ],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ],
+    "import/no-cycle": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": [
+              "@/app/**"
+            ],
+            "message": "FSD: app 레이어는 어떤 하위 레이어에서도 import 할 수 없습니다."
+          },
+          {
+            "group": [
+              "@/pages/*/**",
+              "@/widgets/*/**",
+              "@/features/*/**",
+              "@/entities/*/**"
+            ],
+            "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+          },
+          {
+            "group": [
+              "@/components/**",
+              "@/lib/**",
+              "@/hooks/**"
+            ],
+            "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/app/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**"
+                ],
+                "message": "FSD: app 레이어는 app 를 import 할 수 없습니다. (app 내부는 상대경로로 참조하세요)"
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/pages/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/pages/**"
+                ],
+                "message": "FSD: pages 레이어는 app, pages 를 import 할 수 없습니다. 같은 레이어 간 cross-import 도 금지입니다."
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/widgets/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/pages/**",
+                  "@/widgets/**"
+                ],
+                "message": "FSD: widgets 레이어는 app, pages, widgets 를 import 할 수 없습니다. 같은 레이어 간 cross-import 도 금지입니다."
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/features/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/pages/**",
+                  "@/widgets/**",
+                  "@/features/**"
+                ],
+                "message": "FSD: features 레이어는 app, pages, widgets, features 를 import 할 수 없습니다. 같은 레이어 간 cross-import 도 금지입니다."
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/entities/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/pages/**",
+                  "@/widgets/**",
+                  "@/features/**",
+                  "@/entities/**"
+                ],
+                "message": "FSD: entities 레이어는 app, pages, widgets, features, entities 를 import 할 수 없습니다. 같은 레이어 간 cross-import 도 금지입니다."
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/shared/**"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "@/app/**",
+                  "@/pages/**",
+                  "@/widgets/**",
+                  "@/features/**",
+                  "@/entities/**"
+                ],
+                "message": "FSD: shared 레이어는 app, pages, widgets, features, entities 를 import 할 수 없습니다."
+              },
+              {
+                "group": [
+                  "@/pages/*/**",
+                  "@/widgets/*/**",
+                  "@/features/*/**",
+                  "@/entities/*/**"
+                ],
+                "message": "FSD: 슬라이스 내부 경로 직접 참조 금지. Public API(@/<layer>/<slice>)만 사용하세요."
+              },
+              {
+                "group": [
+                  "@/components/**",
+                  "@/lib/**",
+                  "@/hooks/**"
+                ],
+                "message": "FSD: 레거시 경로입니다. @/shared/ui, @/shared/lib 를 사용하세요."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

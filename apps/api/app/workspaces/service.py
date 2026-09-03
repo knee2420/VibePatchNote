@@ -1,17 +1,20 @@
-from typing import List, Optional
-from datetime import datetime
-import uuid
-from .schemas import WorkspaceSessionCreate, WorkspaceSessionUpdate, WorkspaceSessionResponse
-
+"""workspaces 도메인의 비즈니스 로직."""
 import json
-import os
-from fastapi import HTTPException
+import uuid
+from datetime import datetime, timezone
+from typing import List, Optional
 
-DB_FILE = "workspaces_db.json"
+from app.core.config import settings
+
+from .schemas import WorkspaceSessionCreate, WorkspaceSessionResponse, WorkspaceSessionUpdate
+
+# 실행 위치와 무관하게 항상 같은 파일을 바라보도록 절대 경로를 사용합니다.
+DB_FILE = settings.db_file
+
 
 def load_db():
-    if not os.path.exists(DB_FILE):
-        now = datetime.utcnow()
+    if not DB_FILE.exists():
+        now = datetime.now(timezone.utc)
         initial_db = {
             "default-session-1": {
                 "id": "default-session-1",
@@ -23,14 +26,17 @@ def load_db():
                 "updated_at": now.isoformat()
             }
         }
+        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(initial_db, f, indent=4)
         return initial_db
-        
+
     with open(DB_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 def save_db(db_data):
+    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(DB_FILE, "w", encoding="utf-8") as f:
         json.dump(db_data, f, indent=4)
 
@@ -44,7 +50,7 @@ def _dict_to_model(data: dict) -> WorkspaceSessionResponse:
 def create_workspace(data: WorkspaceSessionCreate) -> WorkspaceSessionResponse:
     db = load_db()
     session_id = str(uuid.uuid4())
-    now_dt = datetime.utcnow()
+    now_dt = datetime.now(timezone.utc)
     new_session_dict = {
         "id": session_id,
         "title": data.title,
@@ -72,7 +78,7 @@ def update_workspace(session_id: str, data: WorkspaceSessionUpdate) -> Optional[
     db = load_db()
     if session_id not in db:
         # Upsert: Create missing session to recover orphaned frontend states
-        now_dt = datetime.utcnow()
+        now_dt = datetime.now(timezone.utc)
         db[session_id] = {
             "id": session_id,
             "title": data.title if data.title else "Recovered Session",
@@ -93,7 +99,7 @@ def update_workspace(session_id: str, data: WorkspaceSessionUpdate) -> Optional[
     if data.edges is not None:
         session["edges"] = data.edges
         
-    session["updated_at"] = datetime.utcnow().isoformat()
+    session["updated_at"] = datetime.now(timezone.utc).isoformat()
     save_db(db)
     return _dict_to_model(session)
 

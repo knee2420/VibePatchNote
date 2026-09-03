@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "lucide-react": "^1.38.0",
-    "react-pdf": "^10.4.1"
+    "react-pdf": "^10.5.0"
   },
   "peerDependencies": {
     "react": "^19.0.0 || ^18.0.0",
@@ -22,6 +22,12 @@
   "devDependencies": {
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "typescript": "^5.9.3"
+    "oxlint": "^1.79.0",
+    "typescript": "~6.0.2"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint"
   }
 }

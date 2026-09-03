@@ -1,39 +1,44 @@
+"""rag(HITL) 도메인 엔드포인트. 비즈니스 로직은 service 에 위임합니다."""
 from fastapi import APIRouter
-from pydantic import BaseModel
-from typing import Dict, Any, List
+
+from .schemas import (
+    EnrichedTreeResponse,
+    MutationResponse,
+    SegmentUpdatePayload,
+    TreeUpdatePayload,
+)
+from .service import semantic_service
 
 router = APIRouter()
 
-class TreeUpdatePayload(BaseModel):
-    document_id: str
-    updated_tree: Dict[str, Any]
 
-class SegmentUpdatePayload(BaseModel):
-    document_id: str
-    segment_id: str
-    new_bounds: Dict[str, Any]
-
-@router.get("/{document_id}")
+@router.get("/{document_id}", response_model=EnrichedTreeResponse)
 async def get_enriched_tree(document_id: str):
     """
     Returns the enriched tree JSON (Phase 3 output) to the frontend Visualizer.
     """
-    return {"document_id": document_id, "tree": {}, "status": "success"}
+    return EnrichedTreeResponse(**await semantic_service.get_enriched_tree(document_id))
 
-@router.post("/update-segment")
+
+@router.post("/update-segment", response_model=MutationResponse)
 async def update_segment_boundary(payload: SegmentUpdatePayload):
     """
     Phase 4: HITL Segment Visualizer Feedback
     Receives manual adjustments to segment boundaries (Split/Merge).
     """
-    # TODO: Update DB and recalculate children
-    return {"status": "success", "message": "Segment updated"}
+    message = await semantic_service.update_segment_boundary(
+        payload.document_id, payload.segment_id, payload.new_bounds
+    )
+    return MutationResponse(status="success", message=message)
 
-@router.post("/update-tree")
+
+@router.post("/update-tree", response_model=MutationResponse)
 async def update_modular_tree(payload: TreeUpdatePayload):
     """
     Phase 4: Modular Tree Builder Feedback
     Receives the reordered/restructured tree from the frontend.
     """
-    # TODO: Upsert new tree structure to DB
-    return {"status": "success", "message": "Tree structure saved"}
+    message = await semantic_service.update_modular_tree(
+        payload.document_id, payload.updated_tree
+    )
+    return MutationResponse(status="success", message=message)

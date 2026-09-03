@@ -1,32 +1,39 @@
-# React + TypeScript + Vite
+# @vibe/web
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+VibePatchNote 프론트엔드. **FSD(Feature-Sliced Design)** 레이어를 따릅니다.
 
-Currently, two official plugins are available:
+## 레이어
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+`app` ➔ `pages` ➔ `widgets` ➔ `features` ➔ `entities` ➔ `shared`
 
-## React Compiler
+| 레이어 | 역할 |
+| --- | --- |
+| `app` | 진입점, 전역 Provider, 라우팅, 글로벌 스타일 |
+| `pages` | 라우트 단위 화면. widgets/features 조합만 담당 |
+| `widgets` | 여러 feature/entity 를 묶은 독립 UI 블록 |
+| `features` | 사용자 동작 단위 비즈니스 로직 (`ui`/`model`/`api`) |
+| `entities` | 도메인 객체 + 기본 노드 뷰 |
+| `shared` | `api`(httpClient) / `config`(env) / `lib` / `model` / `ui` |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 규칙
 
-## Expanding the Oxlint configuration
+1. **하위 → 상위 import 금지.** entities 가 features 를 참조할 수 없습니다.
+2. **동일 레이어 cross-import 금지.** `features/A` 는 `features/B` 를 참조할 수 없습니다.
+3. **Public API 경유.** `@/features/workspace` 는 되지만 `@/features/workspace/ui/...` 는 금지입니다.
+4. **백엔드 호출은 `shared/api` 의 `httpClient` 만.** 호스트 하드코딩 금지.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+위 규칙은 `.oxlintrc.json` 이 린트 에러로 차단합니다.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## 명령어
+
+```bash
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+```bash
+pnpm typecheck
+```
+
+```bash
+pnpm lint
+```

@@ -1,11 +1,15 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
+from app.models import DocumentMeta
+
 
 class NativeWorkflowEngine:
     """
     Our native internal workflow engine, borrowing structural concepts from Dify's DAG execution.
     Manages node execution, state passing, and LLM invocation for the extraction pipeline.
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         # Setup graph topology and initialize states
         pass
 
@@ -14,9 +18,11 @@ class NativeWorkflowEngine:
         Executes the Reference Classification and Goal Reverse-Engineering Node.
         """
         # TODO: Implement local LLM call or Antigravity SDK invocation here.
-        return {"domain": "youtube_script", "goal": "informative_review"}
+        meta = DocumentMeta(domain="youtube_script", goal="informative_review")
+        return meta.model_dump()
 
-    async def execute_extraction_pipeline(self, document_text: str, meta: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute_extraction_pipeline(self, document_text: str,
+                                          meta: Dict[str, Any]) -> Dict[str, Any]:
         """
         Executes the DAG for Dynamic Schema Extraction -> Global Scaffold Extraction.
         """

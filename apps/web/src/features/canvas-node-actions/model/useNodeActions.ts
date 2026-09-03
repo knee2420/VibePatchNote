@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
-import { useHybridEditorState } from '@/features/topdown-outline/model/useHybridEditorState';
 
-export type NodeTheme = 'default' | 'yellow' | 'green' | 'blue' | 'purple';
+import { useCanvasBoardStore } from '@/entities/canvas-board';
+import type { NodeTheme } from '@/shared/model';
 
 export function useNodeActions() {
-  const { nodes, setNodes, removeNodes } = useHybridEditorState();
+  const nodes = useCanvasBoardStore((s) => s.nodes);
+  const setNodes = useCanvasBoardStore((s) => s.setNodes);
+  const removeNodes = useCanvasBoardStore((s) => s.removeNodes);
 
   const selectedNodes = nodes.filter((n) => n.selected);
   const targetNodes = selectedNodes.length > 0 ? selectedNodes : nodes;
@@ -122,13 +124,10 @@ export function useNodeActions() {
     [targetNodes, setNodes]
   );
 
-  // 5. 🗑️ 선택 카드 일괄 삭제
+  // 5. 🗑️ 선택 카드 일괄 삭제 (확인창 노출은 UI 책임)
   const deleteSelected = useCallback(() => {
     if (selectedNodes.length === 0) return;
-    const count = selectedNodes.length;
-    if (confirm(`선택한 ${count}개 카드를 삭제하시겠습니까?`)) {
-      removeNodes(selectedNodes.map((n) => n.id));
-    }
+    removeNodes(selectedNodes.map((n) => n.id));
   }, [selectedNodes, removeNodes]);
 
   // Deselect all nodes

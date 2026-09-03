@@ -7,9 +7,11 @@
 
 ## 핵심 행동 수칙 (Action)
 1. **자율 검증 (Self-Verification 필수):** 코드를 작성하거나 수정한 뒤, "완료했습니다"라고 보고하기 전에 **반드시 터미널 명령어를 통해 스스로 코드를 검증**해야 합니다. 사용자의 브라우저나 콘솔 확인에 의존하지 마십시오.
-2. **검증 수단 (Tools):** 
-   - 프론트엔드/패키지 작업 후: `pnpm -F frontend build` (TypeScript + Vite 빌드) 및 `pnpm -F frontend lint` (Oxlint) 실행. 공용 패키지 수정 시 전체 워크스페이스 검증을 위해 `pnpm build` 실행.
-   - 백엔드 작업 후: 파이썬 구문 체크나 테스트 스크립트 실행
+2. **검증 수단 (Tools):** 게이트의 정본은 [`00-core/rule.md` §6](../00-core/rule.md)이며, 아래는 그 요약입니다.
+   - **기본(권장):** 루트에서 `pnpm lint && pnpm typecheck && pnpm build` — turbo가 전 워크스페이스를 검증합니다.
+   - 특정 패키지만 빠르게 볼 때: `pnpm -F @vibe/web lint`, `pnpm -F @vibe/web typecheck` (패키지명은 `@vibe/web`, `@vibe/api`, `@vibe/document-viewer`)
+   - **`pnpm lint`의 에러 0은 필수입니다.** FSD 레이어 위반이 여기서 에러로 잡힙니다.
+   - 백엔드 작업 후: 앱 임포트 확인(`python -c "import main"`) 및 변경한 엔드포인트 실제 호출 검증
 3. **무한 픽스 루프 (Endless Fix Loop):** 
    - 실행한 백그라운드 태스크의 결과가 에러(Exit code 1 등)로 반환되면, 즉시 로그를 분석하여 오류를 수정합니다.
    - 수정한 뒤 **다시 검증 명령어를 실행**합니다. 

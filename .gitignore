@@ -18,6 +18,11 @@ build/
 .env.*
 !.env.example
 
+# Runtime data (백엔드 로컬 저장소 / 사용자 업로드 산출물)
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+apps/api/workspaces_db.json
+
 # IDE / OS
 .DS_Store
 Thumbs.db

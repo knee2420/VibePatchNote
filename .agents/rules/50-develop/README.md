@@ -9,6 +9,11 @@
 ```text
 50-develop/
 ├── README.md               # 현재 문서 (구조 및 원칙 안내)
+├── auto-fix-loop.md        # 무결성 검증 자율 루프
+├── convention/             # 파트별 개발 컨벤션
+│   ├── architecture/rule.md
+│   ├── front/rule.md
+│   └── back/rule.md
 └── [주제별_카테고리]/      # 예: agy-cli/
     └── [가이드_이름]/      # 예: 01_scripting_guide/
         ├── rule.md         # 가이드 본문 (해결책, 원칙, 규칙 설명)
@@ -16,6 +21,8 @@
             ├── test_pdf_reader.py
             └── pdf_output.md
 ```
+
+> 이 폴더의 규칙은 [`00-core`](../00-core/rule.md)보다 **하위**입니다. 충돌 시 `00-core`를 따릅니다.
 
 ## 📝 관리 규칙
 1. **격리성(Isolation) 유지:** 수많은 예제 코드와 데이터가 뒤섞이는 것을 원천 차단하기 위해, 반드시 각 가이드 폴더 하위의 `examples` 디렉터리 내부에 종속되도록 구성합니다.

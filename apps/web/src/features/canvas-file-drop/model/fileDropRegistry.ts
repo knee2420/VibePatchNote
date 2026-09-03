@@ -1,5 +1,5 @@
 import type { FileDropHandler } from './types';
-import { defaultHandlers, defaultFallbackHandler } from '../handlers';
+import { defaultFallbackHandler, defaultHandlers } from './handlers';
 
 export class FileDropRegistry {
   private handlers = new Map<string, FileDropHandler>();

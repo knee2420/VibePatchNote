@@ -1,3 +1,5 @@
+import { httpClient } from '@/shared/api';
+
 import type { UploadResult } from '../model/types';
 
 export interface DocumentUploadResponse extends UploadResult {
@@ -7,21 +9,10 @@ export interface DocumentUploadResponse extends UploadResult {
   job_id: string;
 }
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
-
-export async function uploadDocumentApi(file: File): Promise<DocumentUploadResponse> {
+/** 레퍼런스 문서를 백엔드에 업로드하고 노드 생성에 필요한 메타를 돌려받습니다. */
+export function uploadDocumentApi(file: File): Promise<DocumentUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/documents/upload`, {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const errorDetail = await response.text().catch(() => 'Network response was not ok');
-    throw new Error(`Upload failed (${response.status}): ${errorDetail}`);
-  }
-
-  return response.json();
+  return httpClient.postFormData<DocumentUploadResponse>('/api/v1/documents/upload', formData);
 }

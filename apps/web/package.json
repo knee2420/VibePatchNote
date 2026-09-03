@@ -1,11 +1,12 @@
 {
-  "name": "frontend",
+  "name": "@vibe/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -15,6 +16,7 @@
     "@tiptap/pm": "^3.31.0",
     "@tiptap/react": "^3.31.0",
     "@tiptap/starter-kit": "^3.31.0",
+    "@vibe/document-viewer": "workspace:*",
     "@xyflow/react": "^12.11.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -23,7 +25,6 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-pdf": "^10.5.0",
-    "@vibe/document-viewer": "workspace:*",
     "react-router-dom": "^7.18.3",
     "shadcn": "^4.19.1",
     "tailwind-merge": "^3.6.0",
