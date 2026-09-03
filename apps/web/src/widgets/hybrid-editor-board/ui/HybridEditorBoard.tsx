@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 import { ReactFlowProvider } from '@xyflow/react';
 
 import { InfiniteCanvas } from '@/shared/ui/canvas/InfiniteCanvas';
@@ -13,8 +15,16 @@ import {
   uploadDocumentApi, 
   fileDropRegistry 
 } from '@/features/canvas-file-drop';
+import { useCanvasSettings, CanvasSettingsPopover } from '@/features/canvas-settings';
+import { CanvasNodeActionBar } from '@/features/canvas-node-actions';
+import { 
+  useCanvasMode, 
+  CanvasLeftToolbar, 
+  CanvasSearchModal 
+} from '@/features/canvas-toolbar';
 
 function HybridEditorBoardContent() {
+  const navigate = useNavigate();
   const { 
     nodes, 
     edges, 
@@ -30,6 +40,12 @@ function HybridEditorBoardContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isManualUploading, setIsManualUploading] = useState(false);
   const [isSessionSheetOpen, setIsSessionSheetOpen] = useState(false);
+
+  // Canvas View & Environment Settings
+  const { snapToGrid, snapGrid, showDots, showMiniMap, isReadOnly } = useCanvasSettings();
+
+  // Canvas Interaction Mode (Select vs Hand/Pan)
+  const { mode } = useCanvasMode();
 
   const {
     isDraggingOver,
@@ -121,50 +137,71 @@ function HybridEditorBoardContent() {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="bg-white border-b px-6 py-4 flex justify-between items-center z-10 shadow-sm">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800">Hybrid Editing Board</h1>
-          <div className="flex items-center gap-2">
-            <p className="text-sm text-slate-500">{activeSessionTitle || 'React Flow + Tiptap Integration'}</p>
-            <button 
-              onClick={() => setIsSessionSheetOpen(true)}
-              className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200 transition font-medium ml-2"
-            >
-              세션 목록
-            </button>
+      {/* Top Header */}
+      <div className="bg-white border-b px-4 py-2.5 flex justify-between items-center z-10 shadow-xs">
+        <div className="flex items-center gap-3">
+          {/* Compact Return to Dashboard Button */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1 text-slate-500 hover:text-slate-900 hover:bg-slate-100 px-2 py-1.5 rounded-lg text-xs font-medium transition"
+            title="대시보드로 돌아가기"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="font-semibold">대시보드</span>
+          </button>
+
+          <div className="h-4 w-px bg-slate-200" />
+
+          <div>
+            <h1 className="text-sm font-bold text-slate-800 leading-tight">Hybrid Editing Board</h1>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-slate-500">{activeSessionTitle || 'React Flow + Tiptap Integration'}</p>
+              <button 
+                onClick={() => setIsSessionSheetOpen(true)}
+                className="px-1.5 py-0.2 bg-blue-50 text-blue-700 text-[10px] rounded hover:bg-blue-100 transition font-medium"
+              >
+                세션 목록
+              </button>
+            </div>
           </div>
         </div>
+
         <div className="flex gap-2 items-center">
-          <button 
-            onClick={() => {
-              if (confirm('현재 세션을 초기화하시겠습니까? 모든 노드가 삭제됩니다.')) {
-                clearSession();
-              }
-            }}
-            className="px-3 py-2 text-sm text-slate-500 hover:text-red-600 transition font-medium mr-2"
-          >
-            초기화
-          </button>
           <input 
             type="file" 
             className="hidden" 
             ref={fileInputRef} 
             onChange={handleFileChange} 
           />
-          <button 
-            onClick={handleFileUploadClick}
-            disabled={isUploading}
-            className="px-4 py-2 bg-blue-50 text-blue-600 font-medium rounded-md hover:bg-blue-100 transition disabled:opacity-50"
-          >
-            {isUploading ? '업로드 중...' : '+ 레퍼런스 업로드'}
-          </button>
-          <button className="px-4 py-2 bg-amber-50 text-amber-600 font-medium rounded-md hover:bg-amber-100 transition">
-            + 지식 카드 추가
-          </button>
+
+          {isUploading && (
+            <span className="text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md animate-pulse font-medium border border-blue-100">
+              업로드 중...
+            </span>
+          )}
+
+          {/* Obsidian Style View & Environment Settings Popover */}
+          <CanvasSettingsPopover
+            onClearSession={() => {
+              if (confirm('현재 세션을 초기화하시겠습니까? 모든 노드가 삭제됩니다.')) {
+                clearSession();
+              }
+            }}
+          />
         </div>
       </div>
       
-      <div className="flex-1 relative">
+      {/* Canvas Viewport Area */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Heptabase Left Tool Dock (Select, Hand, Upload, Cards, Search) */}
+        <CanvasLeftToolbar onUploadClick={handleFileUploadClick} />
+
+        {/* Floating Node Action Toolbar (Appears when cards are selected) */}
+        <CanvasNodeActionBar />
+
+        {/* Global Node Search Modal (Triggered by Search tool or Ctrl+K) */}
+        <CanvasSearchModal />
+
         <InfiniteCanvas
           nodes={nodes}
           edges={edges}
@@ -176,6 +213,12 @@ function HybridEditorBoardContent() {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          snapToGrid={snapToGrid}
+          snapGrid={snapGrid}
+          showDots={showDots}
+          showMiniMap={showMiniMap}
+          isReadOnly={isReadOnly}
+          canvasMode={mode}
         />
         <CanvasDropOverlay 
           isDraggingOver={isDraggingOver} 

@@ -1,6 +1,14 @@
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 import type { ReferenceDocumentData } from '../model/types';
 
+const themeStyles: Record<string, { container: string; header: string }> = {
+  default: { container: 'bg-white border-slate-300', header: 'bg-slate-50 border-slate-200 text-slate-700' },
+  yellow: { container: 'bg-amber-50/70 border-amber-300', header: 'bg-amber-100 border-amber-200 text-amber-900' },
+  green: { container: 'bg-emerald-50/70 border-emerald-300', header: 'bg-emerald-100 border-emerald-200 text-emerald-900' },
+  blue: { container: 'bg-sky-50/70 border-sky-300', header: 'bg-sky-100 border-sky-200 text-sky-900' },
+  purple: { container: 'bg-purple-50/70 border-purple-300', header: 'bg-purple-100 border-purple-200 text-purple-900' },
+};
+
 export function ReferenceDocumentNode({ id, data, selected }: NodeProps<Node<ReferenceDocumentData, "referenceDocument">>) {
   const { setNodes } = useReactFlow();
 
@@ -8,15 +16,18 @@ export function ReferenceDocumentNode({ id, data, selected }: NodeProps<Node<Ref
     setNodes((nds) => nds.filter((node) => node.id !== id));
   };
 
+  const currentTheme = typeof data.theme === 'string' && themeStyles[data.theme] ? themeStyles[data.theme] : themeStyles.default;
+
   return (
     <div className={`
-      bg-white rounded-md shadow-sm border w-[600px] h-[800px] flex flex-col
-      ${selected ? 'border-blue-500 shadow-lg ring-2 ring-blue-300' : 'border-slate-300'}
+      rounded-md shadow-sm border w-[600px] h-[800px] flex flex-col
+      ${currentTheme.container}
+      ${selected ? '!border-blue-500 shadow-lg ring-2 ring-blue-300' : ''}
       transition-all duration-200
     `}>
       {/* Header acting as a safe drag area */}
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex justify-between items-center rounded-t-md cursor-grab active:cursor-grabbing">
-        <h4 className="font-semibold text-slate-700 text-sm truncate pr-4" title={data.title}>
+      <div className={`px-4 py-3 border-b flex justify-between items-center rounded-t-md cursor-grab active:cursor-grabbing ${currentTheme.header}`}>
+        <h4 className="font-semibold text-sm truncate pr-4" title={data.title}>
           📄 {data.title}
         </h4>
         <button

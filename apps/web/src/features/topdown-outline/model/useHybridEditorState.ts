@@ -20,6 +20,8 @@ interface HybridEditorState {
   onEdgesChange: OnEdgesChange;
   onConnect: (connection: Connection) => void;
   addNode: (node: Node) => void;
+  setNodes: (updater: Node[] | ((prev: Node[]) => Node[])) => void;
+  removeNodes: (ids: string[]) => void;
   clearSession: () => void;
   loadSession: (id: string | null, title: string, nodes: Node[], edges: Edge[]) => void;
   setActiveSessionTitle: (title: string) => void;
@@ -43,6 +45,20 @@ export const useHybridEditorState = create<HybridEditorState>()(
     },
     addNode: (node) => {
       set({ nodes: [...get().nodes, node] });
+    },
+    setNodes: (updater) => {
+      const currentNodes = get().nodes;
+      const nextNodes = typeof updater === 'function' ? updater(currentNodes) : updater;
+      set({ nodes: nextNodes });
+    },
+    removeNodes: (ids) => {
+      const idSet = new Set(ids);
+      set({
+        nodes: get().nodes.filter((node) => !idSet.has(node.id)),
+        edges: get().edges.filter(
+          (edge) => !idSet.has(edge.source) && !idSet.has(edge.target)
+        ),
+      });
     },
     clearSession: () => {
       set({ activeSessionId: null, activeSessionTitle: 'Untitled Session', nodes: [], edges: [] });

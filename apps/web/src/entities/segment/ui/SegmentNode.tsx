@@ -3,22 +3,32 @@ import { RichTextEditor } from '@/shared/ui/editor/RichTextEditor';
 import type { SegmentData } from '../model/types';
 import { useState } from 'react';
 
+const themeStyles: Record<string, { container: string; header: string }> = {
+  default: { container: 'bg-white border-slate-200', header: 'bg-slate-100 border-slate-200 text-slate-700' },
+  yellow: { container: 'bg-amber-50/80 border-amber-300', header: 'bg-amber-100 border-amber-200 text-amber-900' },
+  green: { container: 'bg-emerald-50/80 border-emerald-300', header: 'bg-emerald-100 border-emerald-200 text-emerald-900' },
+  blue: { container: 'bg-sky-50/80 border-sky-300', header: 'bg-sky-100 border-sky-200 text-sky-900' },
+  purple: { container: 'bg-purple-50/80 border-purple-300', header: 'bg-purple-100 border-purple-200 text-purple-900' },
+};
+
 export function SegmentNode({ data, selected }: NodeProps<Node<SegmentData, "segment">>) {
   const [content, setContent] = useState(data.content);
+  const currentTheme = typeof data.theme === 'string' && themeStyles[data.theme] ? themeStyles[data.theme] : themeStyles.default;
 
   return (
     <div className={`
-      bg-white rounded-lg shadow-md border-2 w-[500px] flex flex-col
-      ${selected ? 'border-blue-500' : 'border-slate-200'}
+      rounded-lg shadow-md border-2 w-[500px] flex flex-col
+      ${currentTheme.container}
+      ${selected ? '!border-blue-500 ring-2 ring-blue-300' : ''}
       transition-colors duration-200
     `}>
       {/* Target handle for top-down structural connection */}
       <Handle type="target" position={Position.Top} className="w-16 h-2 bg-blue-300 rounded-none border-none" />
       
       {/* Node Header (Drag Handle) */}
-      <div className="bg-slate-100 px-4 py-2 rounded-t-lg border-b border-slate-200 flex justify-between items-center nodrag">
-        <h3 className="font-bold text-slate-700 text-sm">{data.title}</h3>
-        <div className="text-xs text-slate-400">Section</div>
+      <div className={`px-4 py-2 rounded-t-lg border-b flex justify-between items-center nodrag ${currentTheme.header}`}>
+        <h3 className="font-bold text-sm">{data.title}</h3>
+        <div className="text-xs opacity-60">Section</div>
       </div>
       
       {/* Content Area (Rich Text Editor) */}
