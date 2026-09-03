@@ -1,5 +1,5 @@
 import { memo, useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { Trash2, Check, X, Sparkles, Edit3, Magnet } from 'lucide-react';
+import { Trash2, Check, X, Sparkles, Magnet, Edit3 } from 'lucide-react';
 import type { ViewerSegment } from '../../types';
 
 interface PdfSegmentOverlayProps {
@@ -90,8 +90,8 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
 
   // 선택된 세그먼트 ID (리사이징/이동 대상)
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  // 라벨/타입 편집 툴바 열림 여부
-  const [isEditingToolbarOpen, setIsEditingToolbarOpen] = useState(false);
+  // 더블클릭 시 라벨/타입 편집 모드 활성화 여부
+  const [isEditing, setIsEditing] = useState(false);
 
   // 호버 중인 세그먼트 ID
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -170,7 +170,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     const handleClickOutside = (e: MouseEvent) => {
       if (activeBoxRef.current && !activeBoxRef.current.contains(e.target as Node)) {
         setSelectedId(null);
-        setIsEditingToolbarOpen(false);
+        setIsEditing(false);
       }
     };
 
@@ -184,7 +184,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   useEffect(() => {
     if (!isEditMode) {
       setSelectedId(null);
-      setIsEditingToolbarOpen(false);
+      setIsEditing(false);
       setResizingState(null);
       setIsShiftDown(false);
       setActiveGuideX(null);
@@ -197,7 +197,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') {
         if (e.key === 'Escape') {
-          setIsEditingToolbarOpen(false);
+          setIsEditing(false);
         }
         return;
       }
@@ -207,10 +207,10 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
         e.stopPropagation();
         onDeleteSegment?.(selectedId);
         setSelectedId(null);
-        setIsEditingToolbarOpen(false);
+        setIsEditing(false);
       } else if (e.key === 'Escape') {
         setSelectedId(null);
-        setIsEditingToolbarOpen(false);
+        setIsEditing(false);
       }
     };
 
@@ -285,7 +285,6 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     const isShiftActive = isShiftDown || e.shiftKey;
     if (!isShiftActive) {
       setSelectedId(null);
-      setIsEditingToolbarOpen(false);
       return;
     }
 
@@ -294,7 +293,6 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     e.preventDefault();
     e.nativeEvent.stopImmediatePropagation();
     setSelectedId(null);
-    setIsEditingToolbarOpen(false);
 
     if (containerRef.current) {
       containerRectRef.current = containerRef.current.getBoundingClientRect();
@@ -495,7 +493,6 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
           };
           onCreateSegment?.(newSegment);
           setSelectedId(newId);
-          setIsEditingToolbarOpen(true);
         }
         setCreateStart(null);
         setCreateCurrent(null);
@@ -530,6 +527,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
         label: editingLabel.trim(),
       });
     }
+    setIsEditing(false);
   };
 
   const handleChangeType = (newType: string) => {
@@ -604,13 +602,15 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               if (!isEditMode) return;
               e.stopPropagation();
               setSelectedId(seg.id);
+              setIsEditing(false);
               onSelectSegment?.(seg);
             }}
             onDoubleClick={(e) => {
               if (!isEditMode) return;
               e.stopPropagation();
               setSelectedId(seg.id);
-              setIsEditingToolbarOpen(true);
+              setEditingLabel(seg.label);
+              setIsEditing(true);
             }}
             onMouseEnter={() => setHoveredId(seg.id)}
             onMouseLeave={() => setHoveredId(null)}
@@ -628,70 +628,162 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               ${isHovered && !isSelected && isEditMode ? styleConfig.hoverBg : ''}
             `}
           >
-            {/* [D-7 해결] 상단 잘림 방지: 박스 안쪽 상단 우측에 깔끔하게 인라인 임베드된 액션 버튼 바 */}
-            {isSelected && isEditMode && (
+            {/* 기본 라벨 뱃지 (상단 테두리와 겹치지 않게 -top-5에 플로팅) */}
+            <div
+              className={`
+                absolute -top-5 left-0 px-1.5 py-0.2 rounded text-[10px] font-bold tracking-tight shadow-xs
+                flex items-center gap-1 transition-transform duration-150 pointer-events-none z-20
+                ${styleConfig.badgeBg} ${styleConfig.badgeText}
+                ${isHovered && isEditMode ? 'scale-105 shadow-md' : 'opacity-90'}
+              `}
+            >
+              <span className="uppercase text-[9px] opacity-85">{styleConfig.defaultLabel}</span>
+              <span className="max-w-[140px] truncate font-medium">{seg.label}</span>
+            </div>
+
+            {/* [우측 바깥 플로팅 패널] 호버 미리보기 / 클릭 고정 스캐폴드 / 더블클릭 라벨·타입 편집 */}
+            {isEditMode && !isCurrentlyResizing && !isCreating && (isHovered || isSelected) && (
               <div
                 onClick={(e) => e.stopPropagation()}
                 onMouseDown={(e) => e.stopPropagation()}
-                className="absolute top-1 right-1 h-5 bg-slate-900/90 backdrop-blur-xs text-white rounded flex items-center gap-1 px-1.5 z-35 shadow-md nodrag nopan pointer-events-auto"
-              >
-                <button
-                  onClick={() => setIsEditingToolbarOpen((prev) => !prev)}
-                  className={`p-0.5 rounded hover:text-purple-300 ${isEditingToolbarOpen ? 'text-purple-400' : 'text-slate-300'}`}
-                  title="라벨/타입 수정 (더블클릭)"
-                >
-                  <Edit3 className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={() => {
-                    onDeleteSegment?.(seg.id);
-                    setSelectedId(null);
-                    setIsEditingToolbarOpen(false);
-                  }}
-                  className="p-0.5 rounded text-slate-300 hover:text-rose-400 transition-colors"
-                  title="세그먼트 삭제 (Del)"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedId(null);
-                    setIsEditingToolbarOpen(false);
-                  }}
-                  className="p-0.5 rounded text-slate-300 hover:text-white transition-colors"
-                  title="선택 해제 (Esc)"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            )}
-
-            {/* 기본 라벨 뱃지 (상단 테두리와 겹치지 않게 -top-5에 플로팅) */}
-            {(!isSelected || !isEditingToolbarOpen) && (
-              <div
-                onDoubleClick={(e) => {
-                  if (!isEditMode) return;
-                  e.stopPropagation();
-                  setSelectedId(seg.id);
-                  setIsEditingToolbarOpen(true);
+                style={{
+                  backgroundColor: '#0f172a',
+                  color: '#ffffff',
+                  boxShadow: '0 12px 30px -5px rgba(0, 0, 0, 0.5), 0 4px 12px -2px rgba(0, 0, 0, 0.3)',
                 }}
-                className={`
-                  absolute -top-5 left-0 px-1.5 py-0.2 rounded text-[10px] font-bold tracking-tight shadow-xs
-                  flex items-center gap-1 transition-transform duration-150 pointer-events-none z-20
-                  ${styleConfig.badgeBg} ${styleConfig.badgeText}
-                  ${isHovered && isEditMode ? 'scale-105 shadow-md' : 'opacity-90'}
-                `}
+                className="absolute left-full ml-3 top-0 z-50 min-w-[240px] max-w-[300px] rounded-lg border border-slate-700 p-3 nodrag nopan pointer-events-auto animate-in fade-in zoom-in-95 duration-150 text-white"
               >
-                <span className="uppercase text-[9px] opacity-85">{styleConfig.defaultLabel}</span>
-                <span className="max-w-[140px] truncate font-medium">{seg.label}</span>
-              </div>
-            )}
+                {/* 상단 헤더: 타입 뱃지 + (선택 상태 시: 편집, 삭제, 닫기 액션 버튼) */}
+                <div className="flex items-center justify-between gap-1 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${styleConfig.badgeBg} ${styleConfig.badgeText}`}>
+                      {seg.type}
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-200 truncate max-w-[130px]">
+                      {seg.label}
+                    </span>
+                  </div>
 
-            {/* 호버 요약 툴팁 (편집 모드 & 선택되지 않고 호버 중일 때만) */}
-            {seg.content_summary && isHovered && !isSelected && isEditMode && !isCurrentlyResizing && (
-              <div className="absolute left-1 top-full mt-1 z-30 bg-slate-900/95 backdrop-blur-xs text-white text-[11px] leading-snug p-2.5 rounded-md shadow-xl max-w-[250px] pointer-events-none border border-slate-700/60 animate-in fade-in zoom-in-95 duration-150">
-                <p className="font-semibold text-purple-300 mb-0.5">{seg.label}</p>
-                <p className="text-slate-200 text-[10px] line-clamp-3">{seg.content_summary}</p>
+                  {/* 선택 상태 시 액션 버튼 */}
+                  {isSelected && (
+                    <div className="flex items-center gap-1">
+                      {!isEditing && (
+                        <button
+                          onClick={() => {
+                            setEditingLabel(seg.label);
+                            setIsEditing(true);
+                          }}
+                          className="p-1 rounded text-slate-400 hover:text-purple-300 hover:bg-slate-800 transition-colors cursor-pointer"
+                          title="라벨/타입 편집 (더블클릭)"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          onDeleteSegment?.(seg.id);
+                          setSelectedId(null);
+                          setIsEditing(false);
+                        }}
+                        className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors cursor-pointer"
+                        title="세그먼트 삭제 (Del)"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedId(null);
+                          setIsEditing(false);
+                        }}
+                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                        title="선택 해제 (Esc)"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 본문 영역: 상태별 분기 */}
+                {isSelected && isEditing ? (
+                  /* 3단계: [더블클릭] 라벨 및 타입 편집 모드 */
+                  <div className="space-y-2.5">
+                    {/* 라벨 텍스트 수정 인풋 */}
+                    <div className="flex items-center gap-1 bg-slate-800/90 rounded px-2 py-1.5 border border-purple-500/50 focus-within:border-purple-400">
+                      <input
+                        type="text"
+                        value={editingLabel}
+                        onChange={(e) => setEditingLabel(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveLabel();
+                          } else if (e.key === 'Escape') {
+                            setIsEditing(false);
+                          }
+                        }}
+                        placeholder="라벨 입력..."
+                        className="w-full bg-transparent text-xs text-white outline-none font-medium placeholder:text-slate-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleSaveLabel}
+                        className="text-emerald-400 hover:text-emerald-300 p-0.5 rounded cursor-pointer"
+                        title="저장 (Enter)"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* 타입 변경 스위처 */}
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {TYPE_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => handleChangeType(opt.id)}
+                          className={`
+                            px-1.5 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer
+                            ${seg.type === opt.id ? `${opt.color} text-white shadow-xs ring-1 ring-white/40 scale-105` : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'}
+                          `}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* 요약 내용 (존재 시) */}
+                    {seg.content_summary && (
+                      <p className="text-[10px] text-slate-300 leading-relaxed bg-slate-800/50 p-2 rounded border border-slate-700/50 line-clamp-3">
+                        {seg.content_summary}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  /* 1 & 2단계: [호버 및 단일 클릭] 스캐폴드 정보 뷰 모드 */
+                  <div className="space-y-1.5">
+                    {/* 라벨 명칭 */}
+                    <p className="text-xs font-bold text-purple-300">
+                      {seg.label}
+                    </p>
+
+                    {/* 스캐폴드 요약 본문 */}
+                    {seg.content_summary ? (
+                      <p className="text-[11px] text-slate-200 leading-relaxed bg-slate-800/40 p-2 rounded border border-slate-700/40 line-clamp-4">
+                        {seg.content_summary}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-slate-400 italic">내용 요약 없음</p>
+                    )}
+
+                    {/* 상태별 가이드 힌트 */}
+                    <p className="text-[9px] text-slate-400 pt-0.5">
+                      {isSelected ? (
+                        <span className="text-purple-400 font-medium">💡 더블 클릭하여 라벨 및 타입 편집</span>
+                      ) : (
+                        <span>클릭하여 정보 고정 · 더블클릭하여 편집</span>
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -786,70 +878,6 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               </>
             )}
 
-            {/* 3. [Labeling & Type Editing] 슬림 플로팅 미니 툴바 */}
-            {isSelected && isEditMode && isEditingToolbarOpen && (
-              <div
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-40 bg-slate-900/95 backdrop-blur-md text-white px-3 py-2 rounded-lg shadow-2xl border border-slate-700/80 flex items-center gap-2 nodrag nopan animate-in fade-in zoom-in-95 duration-150 whitespace-nowrap"
-              >
-                {/* 라벨 텍스트 수정 인풋 */}
-                <div className="flex items-center gap-1 bg-slate-800/90 rounded px-2 py-1 border border-slate-700">
-                  <input
-                    type="text"
-                    value={editingLabel}
-                    onChange={(e) => setEditingLabel(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSaveLabel();
-                        setIsEditingToolbarOpen(false);
-                      } else if (e.key === 'Escape') {
-                        setIsEditingToolbarOpen(false);
-                      }
-                    }}
-                    onBlur={handleSaveLabel}
-                    placeholder="라벨 입력..."
-                    className="w-32 bg-transparent text-xs text-white outline-none font-medium"
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => {
-                      handleSaveLabel();
-                      setIsEditingToolbarOpen(false);
-                    }}
-                    className="text-emerald-400 hover:text-emerald-300 p-0.5 rounded"
-                    title="저장 (Enter)"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* 타입(Type) 변경 스위처 */}
-                <div className="flex items-center gap-1">
-                  {TYPE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => handleChangeType(opt.id)}
-                      className={`
-                        px-1.5 py-0.5 rounded text-[10px] font-bold transition-all
-                        ${seg.type === opt.id ? `${opt.color} text-white shadow-xs ring-1 ring-white/40 scale-105` : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'}
-                      `}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* 닫기 버튼 */}
-                <button
-                  onClick={() => setIsEditingToolbarOpen(false)}
-                  className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-800 transition-colors"
-                  title="닫기 (Esc)"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
         );
       })}

@@ -115,7 +115,7 @@ export const PdfViewer = memo(function PdfViewer({
                   className="shrink-0 flex flex-col items-center group/page"
                 >
                   {/* Page Canvas Container (relative for exact coordinate overlay sync) */}
-                  <div className="relative bg-white rounded-md shadow-md border border-slate-200 overflow-hidden transition-shadow group-hover/page:shadow-lg">
+                  <div className="relative bg-white rounded-md shadow-md border border-slate-200 overflow-visible transition-shadow group-hover/page:shadow-lg">
                     <Page
                       pageNumber={pageNumber}
                       width={isSpread ? 380 : 520}
