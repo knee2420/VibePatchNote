@@ -3,6 +3,12 @@ import type { NodeTheme } from '@/shared/model';
 /** React Flow 노드 타입 레지스트리 키 (영속 데이터에 저장되므로 변경 금지). */
 export const REFERENCE_DOCUMENT_NODE_TYPE = 'referenceDocument';
 
+/**
+ * 참고 문서 카드의 기본 크기(px).
+ * 카드 자신의 레이아웃 계산과 캔버스 정렬 계산이 같은 값을 봐야 하므로 여기가 단일 출처입니다.
+ */
+export const REFERENCE_CARD_SIZE = { width: 600, height: 800 } as const;
+
 export interface DocumentSegmentItem {
   id: string;
   page: number;

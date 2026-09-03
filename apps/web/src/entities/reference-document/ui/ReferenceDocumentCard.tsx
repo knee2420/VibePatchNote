@@ -1,48 +1,44 @@
-import { memo, useMemo, useState, useCallback } from 'react';
-import { Handle, Position, useReactFlow, NodeResizer, type NodeProps, type Node } from '@xyflow/react';
+import { memo, useCallback, useMemo } from 'react';
+import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 
 import { viewerRegistry } from '@vibe/document-viewer';
 
+import { useCanvasSettings } from '@/shared/model';
+
 import { useDocumentLayout } from '../lib/useDocumentLayout';
+import { useNodeResize } from '../lib/useNodeResize';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
-import { useDocumentScan } from '../model/useDocumentScan';
-import type { ReferenceDocumentData, DocumentSegmentItem } from '../model/types';
-import { useCanvasSettings } from '@/shared/model/useCanvasSettings';
+import { useSegmentEditing } from '../model/useSegmentEditing';
+import { REFERENCE_DOCUMENT_NODE_TYPE, type ReferenceDocumentData } from '../model/types';
+import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
-
-const themeStyles: Record<string, { container: string; header: string }> = {
-  default: { container: 'bg-white border-slate-300', header: 'bg-slate-50 border-slate-200 text-slate-700' },
-  yellow: { container: 'bg-amber-50/70 border-amber-300', header: 'bg-amber-100 border-amber-200 text-amber-900' },
-  green: { container: 'bg-emerald-50/70 border-emerald-300', header: 'bg-emerald-100 border-emerald-200 text-emerald-900' },
-  blue: { container: 'bg-sky-50/70 border-sky-300', header: 'bg-sky-100 border-sky-200 text-sky-900' },
-  purple: { container: 'bg-purple-50/70 border-purple-300', header: 'bg-purple-100 border-purple-200 text-purple-900' },
-};
+import { getReferenceCardTheme } from './referenceCardTheme';
 
 /**
  * ReferenceDocumentCard (FSD Entity UI)
  *
  * 참고 문서 도메인의 캔버스 노드 표현. 뷰어 엔진(`@vibe/document-viewer`)을 조합해
- * 크기 핏 / 휠 가로채기 / 펼침 앵커 / 마우스 리사이징 및 문서 영역 스캔(agy-cli)을 제공합니다.
+ * 크기 핏 / 휠 가로채기 / 펼침 앵커 / 마우스 리사이징 및 문서 영역 스캔을 제공합니다.
+ * 상태·통신 로직은 전부 훅이 소유하고, 이 컴포넌트는 조합과 렌더링만 담당합니다.
  */
 export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   id,
   data,
   selected = false,
-}: NodeProps<Node<ReferenceDocumentData, 'referenceDocument'>>) {
-  const { setNodes, updateNodeData } = useReactFlow();
+}: NodeProps<Node<ReferenceDocumentData, typeof REFERENCE_DOCUMENT_NODE_TYPE>>) {
+  const { setNodes } = useReactFlow();
   const enableSmartSnap = useCanvasSettings((s) => s.enableSmartSnap);
-  const [isResizing, setIsResizing] = useState(false);
-  const [customSize, setCustomSize] = useState<{ width: number; height: number } | null>(null);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
     [data.fileType, data.url, data.title]
   );
-
   const ViewerComponent = viewerDef.component;
 
-  // Layout & Dimension Feature Hook
+  const { isResizing, customSize, onResizeStart, onResize, onResizeEnd, resetCustomSize } =
+    useNodeResize(id);
+
   const {
     isSpread,
     isFitContent,
@@ -55,191 +51,86 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     dimensionStyle,
   } = useDocumentLayout({ viewerDefId: viewerDef.id });
 
-  // Canvas Wheel Feature Hook
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });
 
-  // 세그먼트 영역 편집 모드 토글 (방안 B)
-  const [isEditMode, setIsEditMode] = useState(false);
-  const handleToggleEditMode = useCallback(() => {
-    setIsEditMode((prev) => !prev);
-  }, []);
-
-  // [R1 해결] FSD 준수 이벤트 브릿지로 zustand SSOT 스토어 및 React Flow 동시 갱신
-  const syncSegmentsToNode = useCallback(
-    (newSegments: DocumentSegmentItem[]) => {
-      updateNodeData(id, { segments: newSegments });
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
-          new CustomEvent('vibe:update-node-data', {
-            detail: { id, data: { segments: newSegments } },
-          })
-        );
-      }
-    },
-    [id, updateNodeData]
-  );
-
-  // 문서 영역 스캔 훅 (agy-cli 백엔드 파이프라인 연동)
-  const { isScanning, segments, setSegments, scanDocument } = useDocumentScan({
+  const {
+    segments,
+    isScanning,
+    isEditMode,
+    scan,
+    toggleEditMode,
+    updateSegment,
+    createSegment,
+    deleteSegment,
+  } = useSegmentEditing({
+    nodeId: id,
+    title: data.title,
+    url: data.url,
     initialSegments: data.segments,
-    onSuccess: (loaded) => {
-      syncSegmentsToNode(loaded);
-      alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`);
-    },
-    onError: () => {
-      alert('문서 영역 스캔 중 오류가 발생했습니다.');
-    },
+    onScanSuccess: (loaded) =>
+      alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`),
+    onScanError: () => alert('문서 영역 스캔 중 오류가 발생했습니다.'),
   });
 
-  const filename = useMemo(() => {
-    if (data.url) {
-      const clean = data.url.split('?')[0];
-      return clean.split('/').pop() || data.title;
-    }
-    return data.title;
-  }, [data.url, data.title]);
-
-  const handleScan = useCallback(() => {
-    scanDocument(filename);
-  }, [scanDocument, filename]);
-
-  // [R4 해결] updater 내부에서 side effect를 부르지 않고 순수 갱신 후 커밋
-  const handleUpdateSegment = useCallback(
-    (updated: DocumentSegmentItem) => {
-      let nextSegments: DocumentSegmentItem[] = [];
-      setSegments((prev) => {
-        nextSegments = prev.map((s) => (s.id === updated.id ? updated : s));
-        return nextSegments;
-      });
-      syncSegmentsToNode(nextSegments);
-    },
-    [setSegments, syncSegmentsToNode]
-  );
-
-  const handleCreateSegment = useCallback(
-    (created: DocumentSegmentItem) => {
-      let nextSegments: DocumentSegmentItem[] = [];
-      setSegments((prev) => {
-        nextSegments = [...prev, created];
-        return nextSegments;
-      });
-      syncSegmentsToNode(nextSegments);
-    },
-    [setSegments, syncSegmentsToNode]
-  );
-
-  const handleDeleteSegment = useCallback(
-    (segmentId: string) => {
-      let nextSegments: DocumentSegmentItem[] = [];
-      setSegments((prev) => {
-        nextSegments = prev.filter((s) => s.id !== segmentId);
-        return nextSegments;
-      });
-      syncSegmentsToNode(nextSegments);
-    },
-    [setSegments, syncSegmentsToNode]
-  );
-
-  // 사용자가 수동 리사이즈한 경우 프리셋 토글 시 크기 리셋 -> 자동 맞춤(Fit/Spread) 우선권 복원
-  const resetCustomDimensions = useCallback(() => {
-    setCustomSize(null);
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === id) {
-          return {
-            ...node,
-            width: undefined,
-            height: undefined,
-            style: {
-              ...node.style,
-              width: undefined,
-              height: undefined,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, [id, setNodes]);
-
+  // 프리셋 토글 시에는 수동 크기를 버리고 자동 맞춤 우선권을 복원합니다.
   const onToggleSpreadWithReset = useCallback(() => {
-    resetCustomDimensions();
+    resetCustomSize();
     handleToggleSpread();
-  }, [resetCustomDimensions, handleToggleSpread]);
+  }, [resetCustomSize, handleToggleSpread]);
 
   const onToggleFitWithReset = useCallback(() => {
-    resetCustomDimensions();
+    resetCustomSize();
     handleToggleFit();
-  }, [resetCustomDimensions, handleToggleFit]);
+  }, [resetCustomSize, handleToggleFit]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
-  };
+  }, [id, setNodes]);
 
-  const currentTheme =
-    typeof data.theme === 'string' && themeStyles[data.theme]
-      ? themeStyles[data.theme]
-      : themeStyles.default;
+  const theme = getReferenceCardTheme(data.theme);
 
-  const containerStyle = useMemo(() => {
-    if (customSize) {
-      return {
-        width: `${customSize.width}px`,
-        height: `${customSize.height}px`,
-      };
-    }
-    return dimensionStyle;
-  }, [customSize, dimensionStyle]);
+  const containerStyle = useMemo(
+    () =>
+      customSize
+        ? { width: `${customSize.width}px`, height: `${customSize.height}px` }
+        : dimensionStyle,
+    [customSize, dimensionStyle]
+  );
 
   return (
     <div
       style={containerStyle}
       className={`
         group/node rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style]
-        ${currentTheme.container}
+        ${theme.container}
         ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300 z-30 nowheel' : 'z-10 hover:z-20'}
         ${customSize ? '' : dimensionClass}
         ${isResizing ? '' : 'transition-[width,height] duration-300 ease-out'}
       `}
     >
-      {/* 테두리 마우스 호버 및 선택 시 나타나는 크기 조절 핸들 */}
-      <NodeResizer
-        minWidth={360}
-        minHeight={260}
-        isVisible={true}
-        onResizeStart={() => setIsResizing(true)}
-        onResize={(_, params) => {
-          setCustomSize({ width: params.width, height: params.height });
-        }}
-        onResizeEnd={(_, params) => {
-          setIsResizing(false);
-          setCustomSize({ width: params.width, height: params.height });
-        }}
-        lineClassName={`border-blue-500 pointer-events-none transition-opacity duration-150 ${
-          selected ? 'opacity-90' : 'opacity-0 group-hover/node:opacity-60'
-        }`}
-        handleClassName={`!w-2.5 !h-2.5 !bg-white !border-2 !border-blue-500 !rounded-full shadow-xs transition-opacity duration-150 ${
-          selected ? '!opacity-100' : '!opacity-0 group-hover/node:!opacity-100'
-        }`}
+      <CardResizeFrame
+        selected={selected}
+        onResizeStart={onResizeStart}
+        onResize={onResize}
+        onResizeEnd={onResizeEnd}
       />
 
-      {/* Composed Header */}
       <ReferenceCardHeader
         title={data.title}
         pageCount={pageCount}
         viewerDefId={viewerDef.id}
         isFitContent={isFitContent}
-        headerThemeClass={currentTheme.header}
+        headerThemeClass={theme.header}
         isScanning={isScanning}
         hasSegments={segments.length > 0}
         isEditMode={isEditMode}
         onToggleFit={onToggleFitWithReset}
-        onScan={handleScan}
-        onToggleEditMode={handleToggleEditMode}
+        onScan={scan}
+        onToggleEditMode={toggleEditMode}
         onDelete={handleDelete}
       />
 
-      {/* Dynamic Pluggable Viewer Body Wrapper with Wheel Interception */}
+      {/* 플러그인 뷰어 본문 + 휠 가로채기 래퍼 */}
       <div
         className={`flex-1 w-full h-full overflow-hidden flex flex-col nodrag nopan ${selected ? 'nowheel' : ''}`}
         onWheel={handleNodeWheel}
@@ -251,15 +142,15 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           segments={segments}
           isEditMode={isEditMode}
           enableSmartSnap={enableSmartSnap}
-          onUpdateSegment={handleUpdateSegment}
-          onCreateSegment={handleCreateSegment}
-          onDeleteSegment={handleDeleteSegment}
+          onUpdateSegment={updateSegment}
+          onCreateSegment={createSegment}
+          onDeleteSegment={deleteSegment}
           onPageCountChange={setPageCount}
           onDimensionsChange={setDimensions}
         />
       </div>
 
-      {/* Independent Spread Anchor (Visible only when 2+ pages) */}
+      {/* 2페이지 이상일 때만 보이는 펼침 앵커 */}
       {viewerDef.canSpread && (
         <NodeSpreadAnchor
           isSpread={isSpread}
@@ -269,7 +160,6 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         />
       )}
 
-      {/* React Flow Handles */}
       <Handle type="source" position={Position.Right} id="right" className="bg-blue-500 w-3 h-3 rounded-full" />
       <Handle type="target" position={Position.Left} id="left" className="bg-blue-500 w-3 h-3 rounded-full" />
     </div>

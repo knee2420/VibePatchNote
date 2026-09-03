@@ -112,16 +112,3 @@ export const useCanvasBoardStore = create<CanvasBoardState>()(
     }
   )
 );
-
-// FSD 경계를 준수하면서 노드 컴포넌트에서 zustand nodes.data를 안전하게 갱신할 수 있는 글로벌 이벤트 브릿지 (R1 해결)
-if (typeof window !== 'undefined') {
-  window.addEventListener('vibe:update-node-data', (e: Event) => {
-    const customEvent = e as CustomEvent<{ id: string; data: Record<string, unknown> }>;
-    if (!customEvent.detail?.id) return;
-    const { id, data } = customEvent.detail;
-    useCanvasBoardStore.getState().setNodes((nodes) =>
-      nodes.map((n) => (n.id === id ? { ...n, data: { ...n.data, ...data } } : n))
-    );
-  });
-}
-

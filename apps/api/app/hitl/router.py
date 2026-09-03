@@ -1,4 +1,4 @@
-"""rag(HITL) 도메인 엔드포인트. 비즈니스 로직은 service 에 위임합니다."""
+"""hitl(Human-in-the-Loop) 도메인 엔드포인트. 비즈니스 로직은 service 에 위임합니다."""
 from fastapi import APIRouter
 
 from .schemas import (

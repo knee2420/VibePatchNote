@@ -8,9 +8,9 @@ import { ResourceCardNode, RESOURCE_CARD_NODE_TYPE } from '@/entities/resource-c
 import { SegmentNode, SEGMENT_NODE_TYPE } from '@/entities/segment';
 import { CanvasDropOverlay, useCanvasFileDrop } from '@/features/canvas-file-drop';
 import { CanvasNodeActionBar } from '@/features/canvas-node-actions';
-import { useCanvasSettings } from '@/features/canvas-settings';
 import { CanvasLeftToolbar, CanvasSearchModal, useCanvasMode } from '@/features/canvas-toolbar';
 import { SessionListSheet, useSessionActions, useSessionSync } from '@/features/workspace';
+import { useCanvasSettings } from '@/shared/model';
 import { InfiniteCanvas } from '@/shared/ui';
 
 import { useBoardFileUpload } from '../model/useBoardFileUpload';

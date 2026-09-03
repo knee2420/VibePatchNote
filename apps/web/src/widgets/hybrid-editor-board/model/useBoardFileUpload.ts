@@ -1,8 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
-import { REFERENCE_DOCUMENT_NODE_TYPE } from '@/entities/reference-document';
-import { fileDropRegistry, uploadDocumentApi } from '@/features/canvas-file-drop';
+import { uploadFileToNode } from '@/features/canvas-file-drop';
 
 function randomBoardPosition() {
   return {
@@ -18,7 +17,8 @@ interface UseBoardFileUploadOptions {
 
 /**
  * 툴바의 업로드 버튼(파일 선택 다이얼로그) 경로를 담당합니다.
- * 드래그&드롭 경로는 `features/canvas-file-drop` 이 별도로 처리합니다.
+ * 드래그&드롭 경로는 `features/canvas-file-drop` 이 별도로 처리하며,
+ * 업로드→노드 생성 절차 자체는 두 경로가 같은 함수를 공유합니다.
  */
 export function useBoardFileUpload({ onSuccess, onError }: UseBoardFileUploadOptions = {}) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -36,21 +36,13 @@ export function useBoardFileUpload({ onSuccess, onError }: UseBoardFileUploadOpt
 
       setIsUploading(true);
       try {
-        const uploadResult = await uploadDocumentApi(file);
-        const handler = fileDropRegistry.getHandler(file);
-        const position = randomBoardPosition();
-
-        if (handler) {
-          addNode(handler.createNode({ file, uploadResult, position }));
-        } else {
-          addNode({
-            id: `reference-${Date.now()}`,
-            type: REFERENCE_DOCUMENT_NODE_TYPE,
-            position,
-            data: { title: file.name, url: uploadResult.file_url },
-          });
+        const node = await uploadFileToNode(file, randomBoardPosition());
+        if (!node) {
+          onError?.(file, new Error(`지원하지 않는 파일 형식입니다: ${file.name}`));
+          return;
         }
 
+        addNode(node);
         onSuccess?.(file);
       } catch (error) {
         console.error('File upload error:', error);

@@ -1,13 +1,13 @@
 import { memo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 
-import type { ResourceCardData } from '../model/types';
+import { RESOURCE_CARD_NODE_TYPE, type ResourceCardData } from '../model/types';
 
 export const ResourceCardNode = memo(function ResourceCardNode({
   id,
   data,
   selected,
-}: NodeProps<Node<ResourceCardData, 'resourceCard'>>) {
+}: NodeProps<Node<ResourceCardData, typeof RESOURCE_CARD_NODE_TYPE>>) {
   const { setNodes } = useReactFlow();
 
   const getBadgeColor = (type: string) => {

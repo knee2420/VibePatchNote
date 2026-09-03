@@ -1,37 +1,32 @@
-from pathlib import Path
-from typing import Any, Dict
+"""
+Native Workflow Engine — 외부 Dify 클라이언트 의존 없이 DAG 실행 흐름을 통제하는 오케스트레이터.
 
-from app.models import DocumentMeta
-from .nodes.segment_scan_node import SegmentScanNode
+이 엔진은 도메인 중립입니다. "무엇을 분석할지"는 각 도메인 서비스가 프롬프트로 주입하며,
+엔진은 "어떤 노드를 어떤 순서로 실행할지"만 책임집니다.
+"""
+import asyncio
+import logging
+from typing import Any, Dict, Optional
+
+from .nodes import AgentJsonNode
+
+logger = logging.getLogger(__name__)
 
 
 class NativeWorkflowEngine:
     """
-    Our native internal workflow engine, borrowing structural concepts from Dify's DAG execution.
-    Manages node execution, state passing, and LLM invocation for the extraction pipeline.
+    내부 워크플로우 엔진. Dify 의 DAG 실행 개념만 차용하고 구현은 전부 자체 소유입니다.
+    노드 실행/상태 전달/에이전트 호출을 관장합니다.
     """
 
-    def __init__(self) -> None:
-        self.scan_node = SegmentScanNode()
+    def __init__(self, agent_node: Optional[AgentJsonNode] = None) -> None:
+        self.agent_node = agent_node or AgentJsonNode()
 
-    async def execute_classification_node(self, document_text: str) -> Dict[str, Any]:
+    async def execute_agent_json(self, prompt: str) -> Optional[Dict[str, Any]]:
         """
-        Executes the Reference Classification and Goal Reverse-Engineering Node.
-        """
-        # TODO: Implement local LLM call or Antigravity SDK invocation here.
-        meta = DocumentMeta(domain="youtube_script", goal="informative_review")
-        return meta.model_dump()
+        단일 에이전트 노드를 실행해 JSON 결과를 돌려줍니다.
 
-    async def execute_extraction_pipeline(self, document_text: str,
-                                          meta: Dict[str, Any]) -> Dict[str, Any]:
+        CLI 호출은 블로킹 서브프로세스이므로 별도 스레드에서 실행합니다.
+        (그렇지 않으면 타임아웃 동안 FastAPI 이벤트 루프 전체가 멈춥니다.)
         """
-        Executes the DAG for Dynamic Schema Extraction -> Global Scaffold Extraction.
-        """
-        # TODO: Implement sequence of Node executions.
-        return {"status": "success", "scaffold_tree": {}}
-
-    async def execute_segment_scan(self, file_path: Path) -> Dict[str, Any]:
-        """
-        Executes the Document Segment Scan Node via agy-cli.
-        """
-        return self.scan_node.execute(file_path)
+        return await asyncio.to_thread(self.agent_node.execute, prompt)

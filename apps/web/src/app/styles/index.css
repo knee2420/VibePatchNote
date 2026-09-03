@@ -128,3 +128,45 @@
     @apply font-sans;
     }
 }
+/* ---------------------------------------------------------------------------
+ * 캔버스(React Flow) 전역 규칙
+ *
+ * 이전에는 InfiniteCanvas 컴포넌트가 렌더링할 때마다 <style> 태그를 주입했습니다.
+ * 전역 CSS 는 app 레이어의 책임이므로 여기로 옮깁니다.
+ * ------------------------------------------------------------------------- */
+
+/* 60fps 뷰포트 패닝을 위한 GPU 가속 */
+.react-flow__viewport {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 패닝/드래그 중 iframe 이 마우스 이벤트를 가로채지 못하게 차단 */
+.canvas-mode-hand iframe,
+.react-flow__pane:active ~ .react-flow__viewport iframe {
+    pointer-events: none !important;
+}
+
+/* Hand(Pan) 모드 */
+.canvas-mode-hand .react-flow__pane {
+    cursor: grab !important;
+}
+
+.canvas-mode-hand .react-flow__pane:active,
+.canvas-mode-hand .react-flow__pane.dragging {
+    cursor: grabbing !important;
+}
+
+/* Select 모드: 평소에는 기본 화살표 커서 */
+.canvas-mode-select .react-flow__pane,
+.canvas-mode-select .react-flow__pane.selection {
+    cursor: default !important;
+}
+
+/* 마우스를 누르고 있거나 실제로 선택 박스를 그리는 중일 때만 crosshair */
+.canvas-mode-select .react-flow__pane:active,
+.canvas-mode-select.is-selecting .react-flow__pane,
+.canvas-mode-select.is-selecting .react-flow__pane.selection,
+.react-flow__selection {
+    cursor: crosshair !important;
+}

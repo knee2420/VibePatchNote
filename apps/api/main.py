@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.documents import router as documents_router
-from app.rag import router as rag_router
+from app.hitl import router as hitl_router
 from app.templates import router as templates_router
 from app.workspaces import router as workspaces_router
 
@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Upload & Analyze"])
-app.include_router(rag_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
+app.include_router(hitl_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
 app.include_router(templates_router.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
 app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])
 

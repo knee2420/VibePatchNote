@@ -1,12 +1,12 @@
 import { useState, useCallback, memo } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { Document } from 'react-pdf';
 import { Loader2, AlertCircle } from 'lucide-react';
 
+// 워커 설정은 이 모듈 import 만으로 1회 수행됩니다. (SSOT: pdfWorkerSetup.ts)
 import './pdfWorkerSetup';
 import type { DocumentViewerProps } from '../../types';
-import { PdfSegmentOverlay } from './PdfSegmentOverlay';
-
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+import { PdfPage } from './PdfPage';
+import { usePdfTextLines, type PdfPageInfo } from './usePdfTextLines';
 
 export const PdfViewer = memo(function PdfViewer({
   url,
@@ -22,8 +22,7 @@ export const PdfViewer = memo(function PdfViewer({
 }: DocumentViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  // 페이지별 텍스트 라인 Y좌표 캐시 (0~1000 정규화 스냅 가이드용)
-  const [pageTextYMap, setPageTextYMap] = useState<Record<number, number[]>>({});
+  const { textLinesByPage, collectTextLines } = usePdfTextLines();
 
   const handleDocumentLoadSuccess = useCallback(
     ({ numPages: pages }: { numPages: number }) => {
@@ -40,7 +39,7 @@ export const PdfViewer = memo(function PdfViewer({
   }, []);
 
   const handlePageLoadSuccess = useCallback(
-    (page: any, pageNumber: number) => {
+    (page: PdfPageInfo, pageNumber: number) => {
       if (pageNumber === 1) {
         onDimensionsChange?.({
           width: page.width,
@@ -48,32 +47,9 @@ export const PdfViewer = memo(function PdfViewer({
           aspectRatio: page.width / page.height,
         });
       }
-
-      // PDF 텍스트 엔진에서 각 줄의 Y좌표를 0~1000 정규화 좌표로 비동기 추출
-      if (typeof page.getTextContent === 'function') {
-        page.getTextContent()
-          .then((textContent: any) => {
-            const pageHeight = page.view ? page.view[3] : page.height || 1000;
-            const ySet = new Set<number>();
-            const items = textContent.items || [];
-            for (const item of items) {
-              if (item.transform && item.str && item.str.trim()) {
-                const ty = item.transform[5];
-                const normY = Math.max(0, Math.min(1000, Math.round(((pageHeight - ty) / pageHeight) * 1000)));
-                ySet.add(normY);
-              }
-            }
-            setPageTextYMap((prev) => ({
-              ...prev,
-              [pageNumber]: Array.from(ySet).sort((a, b) => a - b),
-            }));
-          })
-          .catch(() => {
-            // 텍스트 없는 스캔 이미지 PDF의 경우 무시 (기존 세그먼트 앵커 활용)
-          });
-      }
+      collectTextLines(page, pageNumber);
     },
-    [onDimensionsChange]
+    [onDimensionsChange, collectTextLines]
   );
 
   if (loadError) {
@@ -110,51 +86,20 @@ export const PdfViewer = memo(function PdfViewer({
             {Array.from({ length: numPages }, (_, index) => {
               const pageNumber = index + 1;
               return (
-                <div
+                <PdfPage
                   key={`page_${pageNumber}`}
-                  className="shrink-0 flex flex-col items-center group/page"
-                >
-                  {/* Page Canvas Container (relative for exact coordinate overlay sync) */}
-                  <div className="relative bg-white rounded-md shadow-md border border-slate-200 overflow-visible transition-shadow group-hover/page:shadow-lg">
-                    <Page
-                      pageNumber={pageNumber}
-                      width={isSpread ? 380 : 520}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
-                      loading={
-                        <div
-                          className="bg-white flex items-center justify-center text-slate-300"
-                          style={{
-                            width: isSpread ? 380 : 520,
-                            height: isSpread ? 530 : 730,
-                          }}
-                        >
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        </div>
-                      }
-                    />
-
-                    {/* Page Embedded Segment Overlay */}
-                    <PdfSegmentOverlay
-                      pageNumber={pageNumber}
-                      segments={segments}
-                      textLines={pageTextYMap[pageNumber]}
-                      isEditMode={isEditMode}
-                      enableSnap={enableSmartSnap}
-                      onUpdateSegment={onUpdateSegment}
-                      onCreateSegment={onCreateSegment}
-                      onDeleteSegment={onDeleteSegment}
-                    />
-                  </div>
-
-                  {/* Page Indicator Badge */}
-                  {numPages > 1 && (
-                    <div className={`${isSpread ? 'mt-1.5' : 'mt-2'} px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium tracking-wider shadow-2xs`}>
-                      {pageNumber} / {numPages}
-                    </div>
-                  )}
-                </div>
+                  pageNumber={pageNumber}
+                  totalPages={numPages}
+                  isSpread={isSpread}
+                  segments={segments}
+                  textLines={textLinesByPage[pageNumber]}
+                  isEditMode={isEditMode}
+                  enableSnap={enableSmartSnap}
+                  onLoadSuccess={handlePageLoadSuccess}
+                  onUpdateSegment={onUpdateSegment}
+                  onCreateSegment={onCreateSegment}
+                  onDeleteSegment={onDeleteSegment}
+                />
               );
             })}
           </div>
@@ -163,3 +108,6 @@ export const PdfViewer = memo(function PdfViewer({
     </div>
   );
 });
+
+// react-pdf 의 Page 렌더 결과를 검사할 때 쓰는 최소 타입을 재수출합니다.
+export type { PdfPageInfo };

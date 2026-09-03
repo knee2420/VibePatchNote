@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 
+import { REFERENCE_CARD_SIZE } from '../model/types';
+
 interface UseDocumentLayoutProps {
   viewerDefId: string;
 }
@@ -52,10 +54,13 @@ export function useDocumentLayout({ viewerDefId }: UseDocumentLayoutProps) {
       };
     }
 
-    // 3. 기본 카드 크기
+    // 3. 기본 카드 크기 (REFERENCE_CARD_SIZE 와 같은 값)
     return {
-      dimensionClass: 'w-[600px] h-[800px]',
-      dimensionStyle: undefined,
+      dimensionClass: '',
+      dimensionStyle: {
+        width: `${REFERENCE_CARD_SIZE.width}px`,
+        height: `${REFERENCE_CARD_SIZE.height}px`,
+      },
     };
   }, [isSpread, isFitContent, viewerDefId, dimensions]);
 

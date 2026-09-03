@@ -1,9 +1,9 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow, NodeResizer, type NodeProps, type Node } from '@xyflow/react';
 
-import { RichTextEditor } from '@/shared/ui/editor/RichTextEditor';
+import { RichTextEditor } from '@/shared/ui';
 
-import type { SegmentData } from '../model/types';
+import { SEGMENT_NODE_TYPE, type SegmentData } from '../model/types';
 
 const themeStyles: Record<string, { container: string; header: string }> = {
   default: { container: 'bg-white border-slate-200', header: 'bg-slate-100 border-slate-200 text-slate-700' },
@@ -17,7 +17,7 @@ export const SegmentNode = memo(function SegmentNode({
   id,
   data,
   selected,
-}: NodeProps<Node<SegmentData, 'segment'>>) {
+}: NodeProps<Node<SegmentData, typeof SEGMENT_NODE_TYPE>>) {
   const { updateNodeData } = useReactFlow();
   const [content, setContent] = useState(data.content || '');
   const [isEditing, setIsEditing] = useState(false);

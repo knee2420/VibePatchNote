@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Eye, Grid, Lock, Magnet, Map, RotateCcw, Settings, Unlock } from 'lucide-react';
 
-import { useCanvasSettings } from '../model/useCanvasSettings';
+import { useCanvasSettings } from '@/shared/model';
 import { SettingsToggleRow } from './SettingsToggleRow';
 
 interface CanvasSettingsPopoverProps {

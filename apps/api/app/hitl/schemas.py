@@ -1,4 +1,4 @@
-"""rag(HITL) 도메인의 요청/응답 스키마."""
+"""hitl(Human-in-the-Loop) 도메인의 요청/응답 스키마."""
 from typing import Any, Dict
 
 from pydantic import BaseModel

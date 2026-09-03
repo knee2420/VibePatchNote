@@ -1,7 +1,7 @@
 """templates 도메인의 비즈니스 로직."""
 from typing import List
 
-from app.models import BlankTemplate
+from .schemas import BlankTemplate
 
 
 class TemplateService:
