@@ -5,7 +5,7 @@
 - 개발 빌드 및 프로덕션 번들에 절대 포함되지 않으며, 프로젝트의 핵심 지식 베이스로 기능합니다.
 
 ## 디렉토리 체계 요약
-- **`03.patch_note/`**: 타임라인별 불변 패치노트 카드(Immutable Patch Card) 및 변경 이력 아카이브 (`YYYY-MM-DD/` 날짜별 디렉토리).
+- **`03.patch_note/`**: 타임라인별 불변 패치노트 카드(Immutable Patch Card) 및 변경 이력 아카이브 (`03-patch-note.md` 가이드 준수).
 - **`96.data_pipeline/`**: 고밀도 지식 카드(C-XX) 및 인덱스 기반 메타 데이터베이스 (`pipeline_96_generator` / `pipeline_96_reader` 대상).
 - **`97.reference/`**: 외부 레퍼런스, 표준 아키텍처 가이드, 벤치마킹 자료 보관.
 - **`98.collection/`**: 원본 수집 자료, 도메인 실데이터 저장소.

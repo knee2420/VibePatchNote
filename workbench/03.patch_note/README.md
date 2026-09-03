@@ -86,6 +86,8 @@ workbench/03.patch_note/
 | **03** | [`patch_note_micro_stutter_tuning.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_micro_stutter_tuning.md) | `v1.2.0-butter-smooth` | 2차 심화 튜닝 (rAF 이벤트 배칭으로 마우스 폴링 스터터 제거, CSS contain 격리로 리플로우 0ms, 손떨림 방지 임계값 적용) |
 | **04** | [`patch_note_document_viewer_package.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_document_viewer_package.md) | `v1.3.0-viewer-package` | PDF 가로 스프레드 엔진 및 `@vibe/document-viewer` 공용 워크스페이스 패키지 추출 (Turborepo 솔루션 준수) |
 | **05** | [`patch_note_rules_skills_packages_sync.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_rules_skills_packages_sync.md) | `v1.3.1-rules-sync` | `.agents` Rules & Skills 전수 조사 및 모노레포(`packages/*`) 사양 거버넌스 동기화 |
+| **06** | [`patch_note_node_spread_anchor.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_node_spread_anchor.md) | `v1.4.0-spread-anchor` | 독립형 `<NodeSpreadAnchor>` 컴포넌트 분리 및 2페이지 이상 조건부 노출 인터랙션 고도화 |
+| **07** | [`patch_note_autofit_and_wheel_scroll.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_autofit_and_wheel_scroll.md) | `v1.5.0-fit-wheel-refactor` | 콘텐츠 크기 자동 맞춤(Auto-fit), 선택 노드 휠 스크롤 연동 및 공용 패키지-호스트 관심사 분리 |
 
 ---
 

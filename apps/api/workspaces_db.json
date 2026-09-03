@@ -28,7 +28,7 @@
                 "id": "ref-pdf-1788403709347-l7bs",
                 "type": "referenceDocument",
                 "position": {
-                    "x": 980,
+                    "x": 960,
                     "y": 260
                 },
                 "data": {
@@ -38,10 +38,10 @@
                     "size": 31554
                 },
                 "measured": {
-                    "width": 600,
-                    "height": 800
+                    "width": 640,
+                    "height": 910
                 },
-                "selected": false,
+                "selected": true,
                 "dragging": false
             },
             {
@@ -67,7 +67,7 @@
         ],
         "edges": [],
         "created_at": "2026-09-02T13:52:39.808038",
-        "updated_at": "2026-09-03T03:54:16.517012"
+        "updated_at": "2026-09-03T04:21:28.613500"
     },
     "cda3a4a8-b203-4974-8cc0-8101f6bb24b5": {
         "id": "cda3a4a8-b203-4974-8cc0-8101f6bb24b5",

@@ -37,7 +37,7 @@ export const PdfViewer = memo(function PdfViewer({
   }
 
   return (
-    <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-100/70 rounded-b-md select-none nodrag nopan">
+    <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-100/70 rounded-b-md select-none">
       <Document
         file={url}
         onLoadSuccess={handleDocumentLoadSuccess}
@@ -54,8 +54,8 @@ export const PdfViewer = memo(function PdfViewer({
           <div
             className={`w-full h-full p-4 ${
               isSpread
-                ? 'flex flex-row items-start gap-6 overflow-x-auto overflow-y-hidden'
-                : 'flex flex-col items-center gap-6 overflow-y-auto overflow-x-hidden'
+                ? 'flex flex-row items-start gap-6 overflow-x-auto overflow-y-hidden scrollbar-thin'
+                : 'flex flex-col items-center gap-6 overflow-y-auto overflow-x-hidden scrollbar-thin'
             }`}
           >
             {Array.from({ length: numPages }, (_, index) => {
@@ -87,9 +87,11 @@ export const PdfViewer = memo(function PdfViewer({
                   </div>
 
                   {/* Page Indicator Badge */}
-                  <div className="mt-2 px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium tracking-wider shadow-2xs">
-                    {pageNumber} / {numPages}
-                  </div>
+                  {numPages > 1 && (
+                    <div className="mt-2 px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium tracking-wider shadow-2xs">
+                      {pageNumber} / {numPages}
+                    </div>
+                  )}
                 </div>
               );
             })}

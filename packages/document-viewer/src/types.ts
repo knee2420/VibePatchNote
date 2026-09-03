@@ -4,7 +4,6 @@ export interface DocumentViewerProps {
   url: string;
   title: string;
   isSpread?: boolean;
-  selected?: boolean;
   onPageCountChange?: (count: number) => void;
 }
 
