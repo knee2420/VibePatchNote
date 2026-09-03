@@ -52,10 +52,10 @@ export const PdfViewer = memo(function PdfViewer({
       >
         {numPages && (
           <div
-            className={`w-full h-full p-4 ${
+            className={`w-full h-full ${
               isSpread
-                ? 'flex flex-row items-start gap-6 overflow-x-auto overflow-y-hidden scrollbar-thin'
-                : 'flex flex-col items-center gap-6 overflow-y-auto overflow-x-hidden scrollbar-thin'
+                ? 'px-4 pt-3 pb-1.5 flex flex-row items-start gap-5 overflow-x-auto overflow-y-hidden scrollbar-thin'
+                : 'p-4 flex flex-col items-center gap-6 overflow-y-auto overflow-x-hidden scrollbar-thin'
             }`}
           >
             {Array.from({ length: numPages }, (_, index) => {
@@ -88,7 +88,7 @@ export const PdfViewer = memo(function PdfViewer({
 
                   {/* Page Indicator Badge */}
                   {numPages > 1 && (
-                    <div className="mt-2 px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium tracking-wider shadow-2xs">
+                    <div className={`${isSpread ? 'mt-1.5' : 'mt-2'} px-2.5 py-0.5 rounded-full bg-slate-200/80 text-slate-600 text-[11px] font-medium tracking-wider shadow-2xs`}>
                       {pageNumber} / {numPages}
                     </div>
                   )}

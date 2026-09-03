@@ -22,7 +22,7 @@ export function useDocumentLayout({ viewerDefId }: UseDocumentLayoutProps) {
   const { dimensionClass, dimensionStyle } = useMemo(() => {
     if (isSpread) {
       return {
-        dimensionClass: 'w-[1400px] max-w-[92vw] h-[860px]',
+        dimensionClass: 'w-[1400px] max-w-[92vw] h-[645px]',
         dimensionStyle: undefined,
       };
     }

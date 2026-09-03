@@ -1,5 +1,5 @@
-import { memo, useMemo } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
+import { memo, useMemo, useState, useCallback } from 'react';
+import { Handle, Position, useReactFlow, NodeResizer, type NodeProps, type Node } from '@xyflow/react';
 
 import { viewerRegistry } from '@vibe/document-viewer';
 
@@ -21,7 +21,7 @@ const themeStyles: Record<string, { container: string; header: string }> = {
  * ReferenceDocumentCard (FSD Entity UI)
  *
  * 참고 문서 도메인의 캔버스 노드 표현. 뷰어 엔진(`@vibe/document-viewer`)을 조합해
- * 크기 핏 / 휠 가로채기 / 펼침 앵커를 제공합니다.
+ * 크기 핏 / 휠 가로채기 / 펼침 앵커 및 테두리 마우스 리사이징을 제공합니다.
  */
 export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   id,
@@ -29,6 +29,8 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   selected = false,
 }: NodeProps<Node<ReferenceDocumentData, 'referenceDocument'>>) {
   const { setNodes } = useReactFlow();
+  const [isResizing, setIsResizing] = useState(false);
+  const [customSize, setCustomSize] = useState<{ width: number; height: number } | null>(null);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
@@ -53,6 +55,38 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   // Canvas Wheel Feature Hook
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });
 
+  // 사용자가 수동 리사이즈한 경우 프리셋 토글 시 크기 리셋 -> 자동 맞춤(Fit/Spread) 우선권 복원
+  const resetCustomDimensions = useCallback(() => {
+    setCustomSize(null);
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            width: undefined,
+            height: undefined,
+            style: {
+              ...node.style,
+              width: undefined,
+              height: undefined,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  }, [id, setNodes]);
+
+  const onToggleSpreadWithReset = useCallback(() => {
+    resetCustomDimensions();
+    handleToggleSpread();
+  }, [resetCustomDimensions, handleToggleSpread]);
+
+  const onToggleFitWithReset = useCallback(() => {
+    resetCustomDimensions();
+    handleToggleFit();
+  }, [resetCustomDimensions, handleToggleFit]);
+
   const handleDelete = () => {
     setNodes((nds) => nds.filter((node) => node.id !== id));
   };
@@ -62,17 +96,48 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       ? themeStyles[data.theme]
       : themeStyles.default;
 
+  const containerStyle = useMemo(() => {
+    if (customSize) {
+      return {
+        width: `${customSize.width}px`,
+        height: `${customSize.height}px`,
+      };
+    }
+    return dimensionStyle;
+  }, [customSize, dimensionStyle]);
+
   return (
     <div
-      style={dimensionStyle}
+      style={containerStyle}
       className={`
         group/node rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style]
         ${currentTheme.container}
         ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300 z-30' : 'z-10 hover:z-20'}
-        ${dimensionClass}
-        transition-[width,height] duration-300 ease-out
+        ${customSize ? '' : dimensionClass}
+        ${isResizing ? '' : 'transition-[width,height] duration-300 ease-out'}
       `}
     >
+      {/* 테두리 마우스 호버 및 선택 시 나타나는 크기 조절 핸들 */}
+      <NodeResizer
+        minWidth={360}
+        minHeight={260}
+        isVisible={true}
+        onResizeStart={() => setIsResizing(true)}
+        onResize={(_, params) => {
+          setCustomSize({ width: params.width, height: params.height });
+        }}
+        onResizeEnd={(_, params) => {
+          setIsResizing(false);
+          setCustomSize({ width: params.width, height: params.height });
+        }}
+        lineClassName={`border-blue-500 pointer-events-none transition-opacity duration-150 ${
+          selected ? 'opacity-90' : 'opacity-0 group-hover/node:opacity-60'
+        }`}
+        handleClassName={`!w-2.5 !h-2.5 !bg-white !border-2 !border-blue-500 !rounded-full shadow-xs transition-opacity duration-150 ${
+          selected ? '!opacity-100' : '!opacity-0 group-hover/node:!opacity-100'
+        }`}
+      />
+
       {/* Composed Header */}
       <ReferenceCardHeader
         title={data.title}
@@ -80,7 +145,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         viewerDefId={viewerDef.id}
         isFitContent={isFitContent}
         headerThemeClass={currentTheme.header}
-        onToggleFit={handleToggleFit}
+        onToggleFit={onToggleFitWithReset}
         onDelete={handleDelete}
       />
 
@@ -101,7 +166,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           isSpread={isSpread}
           pageCount={pageCount || 1}
           selected={selected}
-          onToggle={handleToggleSpread}
+          onToggle={onToggleSpreadWithReset}
         />
       )}
 
