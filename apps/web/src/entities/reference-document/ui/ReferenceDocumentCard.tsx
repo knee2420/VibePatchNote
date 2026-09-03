@@ -7,6 +7,7 @@ import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
 import { useDocumentScan } from '../model/useDocumentScan';
 import type { ReferenceDocumentData, DocumentSegmentItem } from '../model/types';
+import { useCanvasSettings } from '@/shared/model/useCanvasSettings';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
 
@@ -30,6 +31,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   selected = false,
 }: NodeProps<Node<ReferenceDocumentData, 'referenceDocument'>>) {
   const { setNodes, updateNodeData } = useReactFlow();
+  const enableSmartSnap = useCanvasSettings((s) => s.enableSmartSnap);
   const [isResizing, setIsResizing] = useState(false);
   const [customSize, setCustomSize] = useState<{ width: number; height: number } | null>(null);
 
@@ -248,6 +250,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           isSpread={isSpread}
           segments={segments}
           isEditMode={isEditMode}
+          enableSmartSnap={enableSmartSnap}
           onUpdateSegment={handleUpdateSegment}
           onCreateSegment={handleCreateSegment}
           onDeleteSegment={handleDeleteSegment}

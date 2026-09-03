@@ -9,6 +9,9 @@ export function useNodeWheelScroll({ selected, isSpread }: UseNodeWheelScrollPro
   const handleNodeWheel = useCallback(
     (e: React.WheelEvent<HTMLDivElement>) => {
       if (!selected) return;
+      // Ctrl/Cmd 키가 눌려있을 때는 캔버스 줌인/줌아웃이 우선 동작하도록 통과
+      if (e.ctrlKey || e.metaKey) return;
+
       // 캔버스 줌/팬 이벤트로 버블링되는 것을 호스트 차원에서 차단
       e.stopPropagation();
 

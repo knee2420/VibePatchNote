@@ -1,11 +1,13 @@
 import { memo, useMemo, useState, useRef, useEffect, useCallback } from 'react';
-import { Trash2, Check, X, Sparkles, Edit3 } from 'lucide-react';
+import { Trash2, Check, X, Sparkles, Edit3, Magnet } from 'lucide-react';
 import type { ViewerSegment } from '../../types';
 
 interface PdfSegmentOverlayProps {
   pageNumber: number;
   segments?: ViewerSegment[];
+  textLines?: number[];
   isEditMode?: boolean;
+  enableSnap?: boolean;
   onUpdateSegment?: (updated: ViewerSegment) => void;
   onCreateSegment?: (created: ViewerSegment) => void;
   onDeleteSegment?: (segmentId: string) => void;
@@ -69,7 +71,9 @@ const TYPE_OPTIONS = [
 export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   pageNumber,
   segments = [],
+  textLines = [],
   isEditMode = false,
+  enableSnap = true,
   onUpdateSegment,
   onCreateSegment,
   onDeleteSegment,
@@ -86,7 +90,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
 
   // 선택된 세그먼트 ID (리사이징/이동 대상)
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  // 라벨/타입 편집 툴바 열림 여부 (더블클릭 또는 편집 버튼 클릭 시에만 true!)
+  // 라벨/타입 편집 툴바 열림 여부
   const [isEditingToolbarOpen, setIsEditingToolbarOpen] = useState(false);
 
   // 호버 중인 세그먼트 ID
@@ -102,6 +106,10 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   const [isCreating, setIsCreating] = useState(false);
   const [createStart, setCreateStart] = useState<{ x: number; y: number } | null>(null);
   const [createCurrent, setCreateCurrent] = useState<{ x: number; y: number } | null>(null);
+
+  // 스마트 마그넷 스냅 가이드선 활성화 좌표
+  const [activeGuideX, setActiveGuideX] = useState<number | null>(null);
+  const [activeGuideY, setActiveGuideY] = useState<number | null>(null);
 
   // [C-1] 로컬 드래프트 상태: 드래그 중에는 상위 스토어를 전혀 건드리지 않고 여기서만 60fps로 갱신!
   const [resizingState, setResizingState] = useState<{
@@ -179,6 +187,8 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
       setIsEditingToolbarOpen(false);
       setResizingState(null);
       setIsShiftDown(false);
+      setActiveGuideX(null);
+      setActiveGuideY(null);
     }
   }, [isEditMode]);
 
@@ -210,6 +220,53 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
 
   const clamp = (val: number, min = 0, max = 1000) => Math.max(min, Math.min(max, Math.round(val)));
 
+  // 자석(Smart Magnet) 스냅 대상 가이드 라인 목록 (기존 세그먼트 경계선 + PDF 텍스트 줄 Y좌표)
+  const snapAnchors = useMemo(() => {
+    const xList: number[] = [];
+    const yList: number[] = [];
+
+    // 1. 현재 페이지의 기존 세그먼트 경계선 (특히 표 테두리 xmin, xmax는 가장 중요한 자석!)
+    pageSegments.forEach((seg) => {
+      if (resizingState && seg.id === resizingState.segmentId) return;
+      const [ymin, xmin, ymax, xmax] = seg.box_2d;
+      xList.push(xmin, xmax);
+      yList.push(ymin, ymax);
+    });
+
+    // 2. PDF 텍스트 엔진에서 추출된 텍스트 라인들의 Y 경계
+    if (textLines && textLines.length > 0) {
+      yList.push(...textLines);
+    }
+
+    const xUnique = Array.from(new Set(xList)).sort((a, b) => a - b);
+    const yUnique = Array.from(new Set(yList)).sort((a, b) => a - b);
+
+    return { xList: xUnique, yList: yUnique };
+  }, [pageSegments, resizingState, textLines]);
+
+  // 스냅 임계값 (0~1000 좌표계에서 20: 약 2% = 15~20px 내 접근 시 착 감김)
+  const SNAP_THRESHOLD = 20;
+
+  const getSnapCoord = useCallback(
+    (coord: number, targets: number[]) => {
+      let minDiff = SNAP_THRESHOLD + 1;
+      let snappedVal = coord;
+      let targetFound: number | null = null;
+
+      for (const t of targets) {
+        const diff = Math.abs(coord - t);
+        if (diff <= SNAP_THRESHOLD && diff < minDiff) {
+          minDiff = diff;
+          snappedVal = t;
+          targetFound = t;
+        }
+      }
+
+      return { val: snappedVal, snapped: targetFound !== null, target: targetFound };
+    },
+    []
+  );
+
   // 클라이언트 마우스 좌표를 0~1000 정규화 좌표로 변환 (캐시된 rect 우선 활용으로 강제 리플로우 방지 C-5)
   const clientToNormalized = useCallback((clientX: number, clientY: number) => {
     const rect = containerRectRef.current || containerRef.current?.getBoundingClientRect();
@@ -219,13 +276,12 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     return { x, y };
   }, []);
 
-  // 1. 신규 세그먼트 드래그 생성 시작 (Shift 누른 상태에서만 발동, 그냥 클릭 시에는 선택 해제)
+  // 1. 신규 세그먼트 드래그 생성 시작 (Shift 누른 상태에서만 발동)
   const handleContainerMouseDown = (e: React.MouseEvent) => {
     if (!isEditMode) return;
-    // 기존 세그먼트 박스나 핸들을 클릭한 경우에는 해당 요소의 핸들러가 처리하도록 패스
     if (e.target !== containerRef.current) return;
 
-    // [요청 반영] Shift 키를 누르지 않고 빈 공간을 클릭하면 -> 선택 해제만 수행!
+    // Shift 키를 누르지 않고 빈 공간을 클릭하면 -> 선택 해제만 수행!
     const isShiftActive = isShiftDown || e.shiftKey;
     if (!isShiftActive) {
       setSelectedId(null);
@@ -245,9 +301,22 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     }
 
     const norm = clientToNormalized(e.clientX, e.clientY);
+    let startX = norm.x;
+    let startY = norm.y;
+
+    // [요구사항 2] 마우스를 처음 누르는 시작점(Start)에도 즉시 자석 스냅 적용!
+    if (enableSnap && !e.altKey) {
+      const snapX = getSnapCoord(startX, snapAnchors.xList);
+      const snapY = getSnapCoord(startY, snapAnchors.yList);
+      startX = snapX.val;
+      startY = snapY.val;
+      setActiveGuideX(snapX.target);
+      setActiveGuideY(snapY.target);
+    }
+
     setIsCreating(true);
-    setCreateStart(norm);
-    setCreateCurrent(norm);
+    setCreateStart({ x: startX, y: startY });
+    setCreateCurrent({ x: startX, y: startY });
   };
 
   // 2. 리사이즈 / 이동 시작 (드래그 시작 시점 1회만 rect 캐시 C-5)
@@ -272,7 +341,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     });
   };
 
-  // 전역 마우스 무브 / 업 리스너 (C-1, C-4, C-5 해결: 오직 로컬 드래프트만 갱신!)
+  // 전역 마우스 무브 / 업 리스너 (스마트 마그넷 스냅 탑재)
   useEffect(() => {
     if (!isCreating && !resizingState) return;
 
@@ -280,34 +349,121 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
       const rect = containerRectRef.current;
       if (!rect) return;
 
+      const isSnapActive = enableSnap && !e.altKey;
+
+      // 1) 신규 영역 드래그 생성 중 자석 스냅
       if (isCreating && createStart) {
-        const x = clamp(((e.clientX - rect.left) / rect.width) * 1000);
-        const y = clamp(((e.clientY - rect.top) / rect.height) * 1000);
+        let x = clamp(((e.clientX - rect.left) / rect.width) * 1000);
+        let y = clamp(((e.clientY - rect.top) / rect.height) * 1000);
+
+        if (isSnapActive) {
+          const snapX = getSnapCoord(x, snapAnchors.xList);
+          const snapY = getSnapCoord(y, snapAnchors.yList);
+          x = snapX.val;
+          y = snapY.val;
+          setActiveGuideX(snapX.target);
+          setActiveGuideY(snapY.target);
+        } else {
+          setActiveGuideX(null);
+          setActiveGuideY(null);
+        }
+
         setCreateCurrent({ x, y });
         return;
       }
 
+      // 2) 기존 세그먼트 리사이징 / 이동 중 자석 스냅
       if (resizingState) {
         const deltaX = ((e.clientX - resizingState.startClientX) / rect.width) * 1000;
         const deltaY = ((e.clientY - resizingState.startClientY) / rect.height) * 1000;
         const [initYmin, initXmin, initYmax, initXmax] = resizingState.initialBox;
 
         let [ymin, xmin, ymax, xmax] = [initYmin, initXmin, initYmax, initXmax];
-        const minSize = 25;
+        const minSize = 20;
+
+        let guideX: number | null = null;
+        let guideY: number | null = null;
 
         if (resizingState.handle === 'move') {
           const w = initXmax - initXmin;
           const h = initYmax - initYmin;
-          xmin = clamp(initXmin + deltaX, 0, 1000 - w);
-          ymin = clamp(initYmin + deltaY, 0, 1000 - h);
+          let nextXmin = clamp(initXmin + deltaX, 0, 1000 - w);
+          let nextYmin = clamp(initYmin + deltaY, 0, 1000 - h);
+
+          if (isSnapActive) {
+            // 좌측 또는 우측 테두리 자석 스냅
+            const snapL = getSnapCoord(nextXmin, snapAnchors.xList);
+            const snapR = getSnapCoord(nextXmin + w, snapAnchors.xList);
+            if (snapL.snapped) {
+              nextXmin = snapL.val;
+              guideX = snapL.target;
+            } else if (snapR.snapped) {
+              nextXmin = snapR.val - w;
+              guideX = snapR.target;
+            }
+
+            // 상단 또는 하단 테두리 자석 스냅
+            const snapT = getSnapCoord(nextYmin, snapAnchors.yList);
+            const snapB = getSnapCoord(nextYmin + h, snapAnchors.yList);
+            if (snapT.snapped) {
+              nextYmin = snapT.val;
+              guideY = snapT.target;
+            } else if (snapB.snapped) {
+              nextYmin = snapB.val - h;
+              guideY = snapB.target;
+            }
+          }
+
+          xmin = nextXmin;
+          ymin = nextYmin;
           xmax = xmin + w;
           ymax = ymin + h;
         } else {
-          if (resizingState.handle.includes('t')) ymin = clamp(initYmin + deltaY, 0, initYmax - minSize);
-          if (resizingState.handle.includes('b')) ymax = clamp(initYmax + deltaY, initYmin + minSize, 1000);
-          if (resizingState.handle.includes('l')) xmin = clamp(initXmin + deltaX, 0, initXmax - minSize);
-          if (resizingState.handle.includes('r')) xmax = clamp(initXmax + deltaX, initXmin + minSize, 1000);
+          // 4방향 리사이즈 자석 스냅
+          if (resizingState.handle.includes('t')) {
+            const rawT = clamp(initYmin + deltaY, 0, initYmax - minSize);
+            if (isSnapActive) {
+              const snapT = getSnapCoord(rawT, snapAnchors.yList);
+              ymin = snapT.val;
+              if (snapT.snapped) guideY = snapT.target;
+            } else {
+              ymin = rawT;
+            }
+          }
+          if (resizingState.handle.includes('b')) {
+            const rawB = clamp(initYmax + deltaY, initYmin + minSize, 1000);
+            if (isSnapActive) {
+              const snapB = getSnapCoord(rawB, snapAnchors.yList);
+              ymax = snapB.val;
+              if (snapB.snapped) guideY = snapB.target;
+            } else {
+              ymax = rawB;
+            }
+          }
+          if (resizingState.handle.includes('l')) {
+            const rawL = clamp(initXmin + deltaX, 0, initXmax - minSize);
+            if (isSnapActive) {
+              const snapL = getSnapCoord(rawL, snapAnchors.xList);
+              xmin = snapL.val;
+              if (snapL.snapped) guideX = snapL.target;
+            } else {
+              xmin = rawL;
+            }
+          }
+          if (resizingState.handle.includes('r')) {
+            const rawR = clamp(initXmax + deltaX, initXmin + minSize, 1000);
+            if (isSnapActive) {
+              const snapR = getSnapCoord(rawR, snapAnchors.xList);
+              xmax = snapR.val;
+              if (snapR.snapped) guideX = snapR.target;
+            } else {
+              xmax = rawR;
+            }
+          }
         }
+
+        setActiveGuideX(guideX);
+        setActiveGuideY(guideY);
 
         // [핵심] 상위 스토어(setNodes)를 절대 부르지 않고 로컬 draftBox만 60fps로 가볍게 갱신!
         setResizingState((prev) => (prev ? { ...prev, draftBox: [ymin, xmin, ymax, xmax] } : null));
@@ -315,6 +471,10 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     };
 
     const handleMouseUp = () => {
+      // 마우스 업 시 자석 가이드선 해제
+      setActiveGuideX(null);
+      setActiveGuideY(null);
+
       // [신규 생성 확정]
       if (isCreating && createStart && createCurrent) {
         setIsCreating(false);
@@ -323,7 +483,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
         const xmin = Math.min(createStart.x, createCurrent.x);
         const xmax = Math.max(createStart.x, createCurrent.x);
 
-        if (ymax - ymin >= 25 && xmax - xmin >= 25) {
+        if (ymax - ymin >= 20 && xmax - xmin >= 20) {
           const newId = `seg-${Date.now()}`;
           const newSegment: ViewerSegment = {
             id: newId,
@@ -361,7 +521,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isCreating, createStart, createCurrent, resizingState, pageNumber, onCreateSegment]);
+  }, [isCreating, createStart, createCurrent, resizingState, pageNumber, onCreateSegment, snapAnchors, getSnapCoord, enableSnap]);
 
   const handleSaveLabel = () => {
     if (selectedSegment && editingLabel.trim() && onUpdateSegmentRef.current) {
@@ -391,6 +551,30 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
         ${isEditMode && isShiftDown ? 'cursor-crosshair' : 'cursor-default'}
       `}
     >
+      {/* 0. [스마트 마그넷 스냅 가이드라인] (자석 흡착 시 피그마 스타일 가이드선 표시) */}
+      {activeGuideX !== null && (
+        <div
+          style={{ left: `${activeGuideX / 10}%` }}
+          className="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-purple-600 z-50 pointer-events-none shadow-sm"
+        >
+          <div className="absolute top-2 -translate-x-1/2 px-1 py-0.2 bg-purple-600 text-white text-[8px] font-bold rounded-xs shadow-md flex items-center gap-0.5">
+            <Magnet className="w-2.5 h-2.5" />
+            <span>SNAP</span>
+          </div>
+        </div>
+      )}
+      {activeGuideY !== null && (
+        <div
+          style={{ top: `${activeGuideY / 10}%` }}
+          className="absolute left-0 right-0 h-0 border-t-2 border-dashed border-purple-600 z-50 pointer-events-none shadow-sm"
+        >
+          <div className="absolute left-2 -translate-y-1/2 px-1 py-0.2 bg-purple-600 text-white text-[8px] font-bold rounded-xs shadow-md flex items-center gap-0.5">
+            <Magnet className="w-2.5 h-2.5" />
+            <span>SNAP</span>
+          </div>
+        </div>
+      )}
+
       {/* 1. 세그먼트 바운딩 박스 목록 */}
       {pageSegments.map((seg) => {
         // [C-1] 드래그 중인 세그먼트는 로컬 draftBox로 60fps 무지연 즉시 렌더링!
@@ -602,7 +786,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
               </>
             )}
 
-            {/* 3. [Labeling & Type Editing] 슬림 플로팅 미니 툴바 (더블클릭 또는 편집 아이콘 클릭 시에만 노출!) */}
+            {/* 3. [Labeling & Type Editing] 슬림 플로팅 미니 툴바 */}
             {isSelected && isEditMode && isEditingToolbarOpen && (
               <div
                 onClick={(e) => e.stopPropagation()}

@@ -13,6 +13,7 @@ export const PdfViewer = memo(function PdfViewer({
   isSpread = false,
   segments = [],
   isEditMode = false,
+  enableSmartSnap = true,
   onUpdateSegment,
   onCreateSegment,
   onDeleteSegment,
@@ -21,6 +22,8 @@ export const PdfViewer = memo(function PdfViewer({
 }: DocumentViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  // 페이지별 텍스트 라인 Y좌표 캐시 (0~1000 정규화 스냅 가이드용)
+  const [pageTextYMap, setPageTextYMap] = useState<Record<number, number[]>>({});
 
   const handleDocumentLoadSuccess = useCallback(
     ({ numPages: pages }: { numPages: number }) => {
@@ -36,13 +39,42 @@ export const PdfViewer = memo(function PdfViewer({
     setLoadError('PDF 문서를 로드하지 못했습니다.');
   }, []);
 
-  const handlePageLoadSuccess = (page: { width: number; height: number }) => {
-    onDimensionsChange?.({
-      width: page.width,
-      height: page.height,
-      aspectRatio: page.width / page.height,
-    });
-  };
+  const handlePageLoadSuccess = useCallback(
+    (page: any, pageNumber: number) => {
+      if (pageNumber === 1) {
+        onDimensionsChange?.({
+          width: page.width,
+          height: page.height,
+          aspectRatio: page.width / page.height,
+        });
+      }
+
+      // PDF 텍스트 엔진에서 각 줄의 Y좌표를 0~1000 정규화 좌표로 비동기 추출
+      if (typeof page.getTextContent === 'function') {
+        page.getTextContent()
+          .then((textContent: any) => {
+            const pageHeight = page.view ? page.view[3] : page.height || 1000;
+            const ySet = new Set<number>();
+            const items = textContent.items || [];
+            for (const item of items) {
+              if (item.transform && item.str && item.str.trim()) {
+                const ty = item.transform[5];
+                const normY = Math.max(0, Math.min(1000, Math.round(((pageHeight - ty) / pageHeight) * 1000)));
+                ySet.add(normY);
+              }
+            }
+            setPageTextYMap((prev) => ({
+              ...prev,
+              [pageNumber]: Array.from(ySet).sort((a, b) => a - b),
+            }));
+          })
+          .catch(() => {
+            // 텍스트 없는 스캔 이미지 PDF의 경우 무시 (기존 세그먼트 앵커 활용)
+          });
+      }
+    },
+    [onDimensionsChange]
+  );
 
   if (loadError) {
     return (
@@ -89,7 +121,7 @@ export const PdfViewer = memo(function PdfViewer({
                       width={isSpread ? 380 : 520}
                       renderTextLayer={false}
                       renderAnnotationLayer={false}
-                      onLoadSuccess={index === 0 ? handlePageLoadSuccess : undefined}
+                      onLoadSuccess={(page) => handlePageLoadSuccess(page, pageNumber)}
                       loading={
                         <div
                           className="bg-white flex items-center justify-center text-slate-300"
@@ -107,7 +139,9 @@ export const PdfViewer = memo(function PdfViewer({
                     <PdfSegmentOverlay
                       pageNumber={pageNumber}
                       segments={segments}
+                      textLines={pageTextYMap[pageNumber]}
                       isEditMode={isEditMode}
+                      enableSnap={enableSmartSnap}
                       onUpdateSegment={onUpdateSegment}
                       onCreateSegment={onCreateSegment}
                       onDeleteSegment={onDeleteSegment}

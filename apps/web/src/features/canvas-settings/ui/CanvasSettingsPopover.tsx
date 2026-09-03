@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Eye, Grid, Lock, Map, RotateCcw, Settings, Unlock } from 'lucide-react';
+import { Eye, Grid, Lock, Magnet, Map, RotateCcw, Settings, Unlock } from 'lucide-react';
 
 import { useCanvasSettings } from '../model/useCanvasSettings';
 import { SettingsToggleRow } from './SettingsToggleRow';
@@ -17,10 +17,12 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
     showDots,
     showMiniMap,
     isReadOnly,
+    enableSmartSnap,
     toggleSnapToGrid,
     toggleShowDots,
     toggleShowMiniMap,
     toggleReadOnly,
+    toggleEnableSmartSnap,
   } = useCanvasSettings();
 
   // Close when clicking outside
@@ -67,6 +69,12 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
               label="그리드에 맞추기"
               checked={snapToGrid}
               onToggle={toggleSnapToGrid}
+            />
+            <SettingsToggleRow
+              icon={Magnet}
+              label="스마트 마그넷 스냅"
+              checked={enableSmartSnap}
+              onToggle={toggleEnableSmartSnap}
             />
             <SettingsToggleRow
               icon={Eye}

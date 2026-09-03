@@ -15,6 +15,7 @@ export interface DocumentViewerProps {
   isSpread?: boolean;
   segments?: ViewerSegment[];
   isEditMode?: boolean;
+  enableSmartSnap?: boolean;
   onUpdateSegment?: (updated: ViewerSegment) => void;
   onCreateSegment?: (created: ViewerSegment) => void;
   onDeleteSegment?: (segmentId: string) => void;
