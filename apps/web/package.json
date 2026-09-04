@@ -17,6 +17,7 @@
     "@tiptap/react": "^3.31.0",
     "@tiptap/starter-kit": "^3.31.0",
     "@vibe/document-viewer": "workspace:*",
+    "@vibe/tiptap-scaffold": "workspace:*",
     "@xyflow/react": "^12.11.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

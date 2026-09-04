@@ -7,6 +7,8 @@ from typing import Any, Dict, Optional
 
 from fastapi import HTTPException, UploadFile
 
+from urllib.parse import unquote
+
 from app.core.config import settings
 from app.core.workflow.engine import NativeWorkflowEngine
 
@@ -46,17 +48,38 @@ def save_uploaded_file(file: UploadFile) -> Path:
 
 def resolve_uploaded_file(filename: str) -> Path:
     """
-    다운로드 요청된 파일의 실제 경로를 확인합니다.
-    업로드 디렉터리를 벗어나는 요청은 거부합니다.
+    다운로드 또는 스캔 요청된 파일의 실제 경로를 확인합니다.
+    1. URL 인코딩 해제 (예: %20 -> 공백)
+    2. settings.upload_dir 에서 탐색
+    3. 확장자(.pdf) 누락 시 .pdf 붙여서 재탐색
+    4. workbench/95.data_source 폴백 탐색
     """
-    file_path = (settings.upload_dir / _safe_filename(filename)).resolve()
+    decoded = unquote(filename or "")
+    safe_name = _safe_filename(decoded)
+    upload_dir = settings.upload_dir.resolve()
 
-    if not str(file_path).startswith(str(settings.upload_dir.resolve())):
-        raise HTTPException(status_code=400, detail="Invalid file path")
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File not found")
+    candidate = (upload_dir / safe_name).resolve()
+    if str(candidate).startswith(str(upload_dir)) and candidate.exists():
+        return candidate
 
-    return file_path
+    # 확장자 누락 폴백 (.pdf)
+    if not candidate.suffix:
+        pdf_candidate = (upload_dir / f"{safe_name}.pdf").resolve()
+        if str(pdf_candidate).startswith(str(upload_dir)) and pdf_candidate.exists():
+            return pdf_candidate
+
+    # workbench/95.data_source 폴백
+    source_dir = (Path(__file__).resolve().parents[3] / "workbench" / "95.data_source").resolve()
+    if source_dir.exists():
+        src_candidate = (source_dir / safe_name).resolve()
+        if str(src_candidate).startswith(str(source_dir)) and src_candidate.exists():
+            return src_candidate
+        if not src_candidate.suffix:
+            src_pdf = (source_dir / f"{safe_name}.pdf").resolve()
+            if str(src_pdf).startswith(str(source_dir)) and src_pdf.exists():
+                return src_pdf
+
+    raise HTTPException(status_code=404, detail=f"File not found: {filename}")
 
 
 def build_public_file_url(filename: str) -> str:
@@ -183,6 +206,28 @@ class ExtractionService:
             "document_title": file_path.name,
             "total_segments": len(segments),
             "segments": segments,
+        }
+
+    async def extract_scaffold(self, filename: str) -> Dict[str, Any]:
+        """
+        Phase 3: PDF 문서를 분석하여 Tiptap 스캐폴딩(HTML DOM & Markdown)을 생성합니다.
+        순수 AI 엔진 패키지(`packages/scaffold-engine`)에 위임합니다.
+        """
+        from scaffold_engine import ScaffoldPipeline
+
+        file_path = resolve_uploaded_file(filename)
+        logger.info("Executing ScaffoldPipeline for %s", file_path.name)
+
+        pipeline = ScaffoldPipeline()
+        # 블로킹 서브프로세스 호출이므로 asyncio.to_thread 사용
+        import asyncio
+        result = await asyncio.to_thread(pipeline.run, file_path)
+
+        return {
+            "status": "completed",
+            "meta": result.meta.model_dump(by_alias=True),
+            "htmlContent": result.html_content,
+            "markdownContent": result.markdown_content,
         }
 
 

@@ -1,0 +1,44 @@
+Metadata-Version: 2.4
+Name: scaffold-engine
+Version: 0.1.0
+Summary: Host-independent AI Document Scaffolding Engine for Tiptap & Antigravity
+Author: VibePatchNote Team
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: pymupdf>=1.24.0
+Requires-Dist: pydantic>=2.7.0
+
+# Scaffold Engine (Python)
+
+Host-independent AI Document Scaffolding Engine for Tiptap & Antigravity.
+
+## 개요
+임의의 PDF 또는 원본 문서를 시각적/구조적으로 분석하여,
+내용(인스턴스 값)은 제거하고 뼈대와 슬롯만 남겨둔 **Tiptap 정밀 스캐폴딩(HTML DOM & Markdown)**을 생성하는 엔진입니다.
+
+## 기능
+1. **Vision Rendering**: PyMuPDF 기반 고해상도 페이지 렌더링 및 2D 텍스트 레이아웃 감지
+2. **Antigravity Harness**: `agy-cli` 헤드리스 실행 및 Gemini 멀티모달 비전 추론
+3. **Tiptap DSL**: 2단/3단 컬럼 그룹, 빈칸 슬롯, 와이어프레임 테이블 문법 강제
+4. **Validator & Auto-healer**: 깨진 태그 및 마크업 자동 검증/복구
+
+## 설치
+```bash
+pip install -e packages/scaffold-engine
+```
+
+## 사용법
+### CLI
+```bash
+python -m scaffold_engine.cli extract "path/to/document.pdf"
+```
+
+### Python API
+```python
+from scaffold_engine import ScaffoldPipeline
+
+pipeline = ScaffoldPipeline()
+result = pipeline.run("path/to/document.pdf")
+print(result.html_content)
+print(result.markdown_content)
+```

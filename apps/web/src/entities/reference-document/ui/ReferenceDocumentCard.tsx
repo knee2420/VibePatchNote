@@ -9,6 +9,7 @@ import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeResize } from '../lib/useNodeResize';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
 import { useSegmentEditing } from '../model/useSegmentEditing';
+import { useDocumentScaffold } from '../model/useDocumentScaffold';
 import { REFERENCE_DOCUMENT_NODE_TYPE, type ReferenceDocumentData } from '../model/types';
 import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
@@ -72,6 +73,15 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     onScanError: () => alert('문서 영역 스캔 중 오류가 발생했습니다.'),
   });
 
+  const { isExtractingScaffold, extractScaffold } = useDocumentScaffold({
+    nodeId: id,
+    title: data.title,
+    url: data.url,
+    onSuccess: (scaffoldTitle) =>
+      alert(`스캐폴딩 추출 완료: [${scaffoldTitle}] 노드가 캔버스에 연결되었습니다.`),
+    onError: () => alert('Tiptap 서식 스캐폴딩 추출 중 오류가 발생했습니다.'),
+  });
+
   // 프리셋 토글 시에는 수동 크기를 버리고 자동 맞춤 우선권을 복원합니다.
   const onToggleSpreadWithReset = useCallback(() => {
     resetCustomSize();
@@ -124,8 +134,10 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         isScanning={isScanning}
         hasSegments={segments.length > 0}
         isEditMode={isEditMode}
+        isExtractingScaffold={isExtractingScaffold}
         onToggleFit={onToggleFitWithReset}
         onScan={scan}
+        onExtractScaffold={extractScaffold}
         onToggleEditMode={toggleEditMode}
         onDelete={handleDelete}
       />

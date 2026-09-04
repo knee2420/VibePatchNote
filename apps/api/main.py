@@ -1,12 +1,24 @@
 """Document Builder Backend Harness 진입점."""
-from fastapi import FastAPI
+import logging
+import sys
+from pathlib import Path
+
+# 모노레포 패키지(packages/scaffold-engine 등) 자동 로드 보장
+_PACKAGES_DIR = Path(__file__).resolve().parents[2] / "packages"
+if str(_PACKAGES_DIR / "scaffold-engine") not in sys.path:
+    sys.path.insert(0, str(_PACKAGES_DIR / "scaffold-engine"))
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.documents import router as documents_router
 from app.hitl import router as hitl_router
 from app.templates import router as templates_router
 from app.workspaces import router as workspaces_router
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Document Builder Backend Harness",
@@ -22,6 +34,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """500 예외 발생 시에도 CORS 헤더가 포함된 명확한 JSON 에러를 반환합니다."""
+    logger.exception("Unhandled server error: %s", exc)
+    origin = request.headers.get("origin", "*")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {str(exc)}"},
+        headers={
+            "Access-Control-Allow-Origin": origin if origin in settings.cors_origins else "*",
+            "Access-Control-Allow-Credentials": "true",
+        },
+    )
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Upload & Analyze"])
 app.include_router(hitl_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])

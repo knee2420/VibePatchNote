@@ -5,10 +5,12 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { ReferenceDocumentCard, REFERENCE_DOCUMENT_NODE_TYPE } from '@/entities/reference-document';
 import { ResourceCardNode, RESOURCE_CARD_NODE_TYPE } from '@/entities/resource-card';
+import { ScaffoldDocumentCard, SCAFFOLD_DOCUMENT_NODE_TYPE } from '@/entities/scaffold-document';
 import { SegmentNode, SEGMENT_NODE_TYPE } from '@/entities/segment';
 import { CanvasDropOverlay, useCanvasFileDrop } from '@/features/canvas-file-drop';
 import { CanvasNodeActionBar } from '@/features/canvas-node-actions';
 import { CanvasLeftToolbar, CanvasSearchModal, useCanvasMode } from '@/features/canvas-toolbar';
+import { ScaffoldFocusModal } from '@/features/scaffold-focus';
 import { SessionListSheet, useSessionActions, useSessionSync } from '@/features/workspace';
 import { useCanvasSettings } from '@/shared/model';
 import { InfiniteCanvas } from '@/shared/ui';
@@ -20,6 +22,7 @@ const NODE_TYPES = {
   [SEGMENT_NODE_TYPE]: SegmentNode,
   [RESOURCE_CARD_NODE_TYPE]: ResourceCardNode,
   [REFERENCE_DOCUMENT_NODE_TYPE]: ReferenceDocumentCard,
+  [SCAFFOLD_DOCUMENT_NODE_TYPE]: ScaffoldDocumentCard,
 };
 
 function HybridEditorBoardContent() {
@@ -119,6 +122,7 @@ function HybridEditorBoardContent() {
           isOpen={isSessionSheetOpen}
           onClose={() => setIsSessionSheetOpen(false)}
         />
+        <ScaffoldFocusModal />
       </div>
     </div>
   );

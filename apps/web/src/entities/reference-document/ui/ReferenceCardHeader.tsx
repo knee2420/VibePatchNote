@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2, Edit3 } from 'lucide-react';
+import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2, Edit3, Sparkles } from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
   title: string;
@@ -10,8 +10,10 @@ interface ReferenceCardHeaderProps {
   isScanning?: boolean;
   hasSegments?: boolean;
   isEditMode?: boolean;
+  isExtractingScaffold?: boolean;
   onToggleFit: () => void;
   onScan?: () => void;
+  onExtractScaffold?: () => void;
   onToggleEditMode?: () => void;
   onDelete: () => void;
 }
@@ -25,8 +27,10 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   isScanning = false,
   hasSegments = false,
   isEditMode = false,
+  isExtractingScaffold = false,
   onToggleFit,
   onScan,
+  onExtractScaffold,
   onToggleEditMode,
   onDelete,
 }: ReferenceCardHeaderProps) {
@@ -53,6 +57,36 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
+        {/* Extract Scaffold Button (Tiptap 와이어프레임 추출 및 미로 엣지 연결) */}
+        {onExtractScaffold && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onExtractScaffold();
+            }}
+            disabled={isExtractingScaffold}
+            className={`
+              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+              ${
+                isExtractingScaffold
+                  ? 'text-purple-600 bg-purple-100 animate-pulse ring-1 ring-purple-400'
+                  : 'text-purple-600 hover:bg-purple-100/80 bg-purple-50'
+              }
+            `}
+            title={
+              isExtractingScaffold
+                ? 'scaffold-engine 분석 및 Tiptap 서식 생성 중...'
+                : 'Tiptap 서식(스캐폴딩) 추출하여 미로 엣지로 연결'
+            }
+          >
+            {isExtractingScaffold ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+            )}
+          </button>
+        )}
+
         {/* Scan & Analyze Button (AI/agy-cli Structure Detection) */}
         {onScan && (
           <button

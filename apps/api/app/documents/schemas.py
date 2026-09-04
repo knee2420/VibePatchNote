@@ -43,6 +43,20 @@ class ScanDocumentResponse(BaseModel):
     segments: List[SegmentItem] = Field(default_factory=list, description="세그먼트 목록")
 
 
+class ScaffoldDocumentRequest(BaseModel):
+    filename: str = Field(..., description="스캐폴딩을 추출할 PDF 파일명")
+
+
+class ScaffoldDocumentResponse(BaseModel):
+    status: str = Field("completed", description="처리 상태")
+    meta: Dict[str, Any] = Field(..., description="서식 메타데이터")
+    html_content: str = Field(..., alias="htmlContent", description="Tiptap 에디터용 HTML")
+    markdown_content: str = Field(..., alias="markdownContent", description="에이전트/MCP 용 마크다운")
+
+    class Config:
+        populate_by_name = True
+
+
 # --- 도메인 모델 -------------------------------------------------------------
 # Phase 1~3 파이프라인이 주고받을 계층형 문서 트리 표현입니다.
 # 평면 스캔 결과(SegmentItem)와 달리 의미 계층을 갖습니다.

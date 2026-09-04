@@ -6,6 +6,8 @@ from .schemas import (
     ExtractionStatusResponse,
     ScanDocumentRequest,
     ScanDocumentResponse,
+    ScaffoldDocumentRequest,
+    ScaffoldDocumentResponse,
     UploadResponse,
 )
 from .service import extraction_service, resolve_uploaded_file
@@ -23,6 +25,12 @@ async def upload_reference_document(file: UploadFile = File(...)):
 async def scan_document_segments(req: ScanDocumentRequest):
     """Phase 2: 업로드된 문서에서 표/목록/섹션 바운딩 박스를 추출합니다."""
     return ScanDocumentResponse(**await extraction_service.scan_document_segments(req.filename))
+
+
+@router.post("/scaffold", response_model=ScaffoldDocumentResponse)
+async def extract_scaffold_wireframe(req: ScaffoldDocumentRequest):
+    """Phase 3: PDF 문서로부터 Tiptap 스캐폴딩(HTML & Markdown)을 추출합니다."""
+    return ScaffoldDocumentResponse(**await extraction_service.extract_scaffold(req.filename))
 
 
 @router.get("/status/{job_id}", response_model=ExtractionStatusResponse)
