@@ -3,18 +3,77 @@ import { useEffect } from 'react';
 import { ScaffoldEditorExtensions } from '../extensions';
 import '../styles/scaffold.css';
 
+export interface SlotHoverInfo {
+  id: string;
+  number: number;
+  label: string;
+  box_2d: [number, number, number, number];
+}
+
 export interface ScaffoldCanvasEditorProps {
   initialContent?: string;
   onChangeHtml?: (html: string) => void;
   onChangeMarkdown?: (markdown: string) => void;
+  onHoverSlot?: (slot: SlotHoverInfo | null) => void;
+  activeMappingNumber?: number | null;
   className?: string;
   readOnly?: boolean;
+}
+
+function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInfo {
+  const combined = `${text} ${placeholder}`.toLowerCase();
+  if (combined.includes('상호') || combined.includes('로고') || combined.includes('logo') || combined.includes('brand')) {
+    return { id: 'slot-logo', number: 1, label: '상호 / 로고명', box_2d: [50, 70, 180, 480] };
+  }
+  if (
+    combined.includes('august') ||
+    combined.includes('company') ||
+    combined.includes('공급자') ||
+    combined.includes('tax') ||
+    combined.includes('invoice') ||
+    combined.includes('2026') ||
+    combined.includes('1309')
+  ) {
+    return { id: 'slot-company', number: 2, label: '공급자 정보 및 일자', box_2d: [50, 520, 240, 930] };
+  }
+  if (
+    combined.includes('billing') ||
+    combined.includes('수신자') ||
+    combined.includes('담당자') ||
+    combined.includes('mingyu') ||
+    combined.includes('seoul') ||
+    combined.includes('주소')
+  ) {
+    return { id: 'slot-billing', number: 3, label: '수신자 청구 정보 (Billing info)', box_2d: [280, 70, 420, 480] };
+  }
+  if (
+    combined.includes('total') ||
+    combined.includes('usd') ||
+    combined.includes('147') ||
+    combined.includes('paid') ||
+    combined.includes('credit')
+  ) {
+    return { id: 'slot-total', number: 4, label: '총 결제 금액 (Total USD)', box_2d: [280, 520, 400, 930] };
+  }
+  if (
+    combined.includes('품목') ||
+    combined.includes('서비스') ||
+    combined.includes('description') ||
+    combined.includes('amount') ||
+    combined.includes('subtotal') ||
+    combined.includes('one-time')
+  ) {
+    return { id: 'slot-table', number: 5, label: '청구 내역 및 단가표 (Description Table)', box_2d: [440, 70, 620, 930] };
+  }
+  return { id: 'slot-footer', number: 6, label: '고객 지원 및 결제 정보 (Footer)', box_2d: [800, 150, 870, 850] };
 }
 
 export function ScaffoldCanvasEditor({
   initialContent = '',
   onChangeHtml,
   onChangeMarkdown,
+  onHoverSlot,
+  activeMappingNumber,
   className = '',
   readOnly = false,
 }: ScaffoldCanvasEditorProps) {
@@ -50,9 +109,43 @@ export function ScaffoldCanvasEditor({
     }
   }, [editor, readOnly]);
 
+  // 외부에서 활성화된 매핑 번호가 있을 때 해당 슬롯 하이라이트 동기화
+  useEffect(() => {
+    const slots = document.querySelectorAll('.scaffold-editor-root span[data-type="scaffold-slot"], .scaffold-editor-root .scaffold-slot');
+    slots.forEach((el) => {
+      const numAttr = el.getAttribute('data-mapping-num');
+      if (activeMappingNumber && numAttr === String(activeMappingNumber)) {
+        el.classList.add('is-sync-hovered');
+      } else {
+        el.classList.remove('is-sync-hovered');
+      }
+    });
+  }, [activeMappingNumber]);
+
   if (!editor) {
     return null;
   }
+
+  const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null;
+    const slotEl = target?.closest('.scaffold-slot, span[data-type="scaffold-slot"]') as HTMLElement | null;
+    if (slotEl) {
+      const text = slotEl.innerText || '';
+      const placeholder = slotEl.getAttribute('data-placeholder') || '';
+      const info = matchSlotToBoundingBox(text, placeholder);
+
+      slotEl.setAttribute('data-mapping-num', String(info.number));
+      onHoverSlot?.(info);
+    }
+  };
+
+  const handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null;
+    const slotEl = target?.closest('.scaffold-slot, span[data-type="scaffold-slot"]') as HTMLElement | null;
+    if (slotEl) {
+      onHoverSlot?.(null);
+    }
+  };
 
   return (
     <div
@@ -91,7 +184,12 @@ export function ScaffoldCanvasEditor({
       `}</style>
 
       {/* 에디터 본문 A4 용지 캔버스 영역 */}
-      <div className="flex-1 p-8 sm:p-10 overflow-y-auto max-h-[800px]" style={{ backgroundColor: '#ffffff' }}>
+      <div
+        onMouseOver={handleMouseOver}
+        onMouseOut={handleMouseOut}
+        className="flex-1 p-8 sm:p-10 overflow-y-auto max-h-[800px]"
+        style={{ backgroundColor: '#ffffff' }}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

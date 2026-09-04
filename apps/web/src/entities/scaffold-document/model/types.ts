@@ -18,6 +18,7 @@ export type ScaffoldStatus = 'generating' | 'completed' | 'error';
 export interface ScaffoldDocumentData extends Record<string, unknown> {
   id: string;
   title: string;
+  sourceNodeId?: string;
   sourcePdfFileName?: string;
   htmlContent: string;
   markdownContent: string;

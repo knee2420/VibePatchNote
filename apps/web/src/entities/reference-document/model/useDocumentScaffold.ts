@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useReactFlow, type Edge } from '@xyflow/react';
+import { useReactFlow, type Edge, MarkerType } from '@xyflow/react';
 
 import { referenceDocumentApi } from '../api/referenceDocumentApi';
 
@@ -38,13 +38,15 @@ export function useDocumentScaffold({
 
     // 1. 원본 노드 위치 및 동급(=동일) 크기 산정
     const sourceNode = getNode(nodeId);
-    const nodeWidth =
+    const measuredWidth =
       (sourceNode?.measured?.width as number) ||
       (typeof sourceNode?.style?.width === 'number'
         ? sourceNode.style.width
         : typeof sourceNode?.style?.width === 'string'
           ? parseInt(sourceNode.style.width, 10)
           : 600);
+    const nodeWidth = Math.max(measuredWidth, 560);
+
     const nodeHeight =
       (sourceNode?.measured?.height as number) ||
       (typeof sourceNode?.style?.height === 'number'
@@ -53,7 +55,8 @@ export function useDocumentScaffold({
           ? parseInt(sourceNode.style.height, 10)
           : 800);
 
-    const posX = (sourceNode?.position?.x ?? 100) + nodeWidth + 120;
+    // 넉넉한 180px 오프셋으로 엣지가 찌그러지지 않고 우아하게 이어지도록 배치
+    const posX = (sourceNode?.position?.x ?? 100) + nodeWidth + 180;
     const posY = sourceNode?.position?.y ?? 100;
     const newScaffoldId = `scaffold-${Date.now()}`;
 
@@ -65,6 +68,7 @@ export function useDocumentScaffold({
       style: { width: `${nodeWidth}px`, height: `${nodeHeight}px` },
       data: {
         id: newScaffoldId,
+        sourceNodeId: nodeId, // 원본 참고 문서 카드 노드 ID 연결 (격리용 SSOT)
         title: `${title} 서식 틀`,
         sourcePdfFileName: filename,
         htmlContent: '',
@@ -77,14 +81,22 @@ export function useDocumentScaffold({
       },
     };
 
-    // 3. [즉시 실행] 미로 스타일 곡선 보라색 엣지 즉각 연결
+    // 3. [즉시 실행] 미로 스타일 곡선 보라색 엣지 즉각 연결 (핸들 정확 바인딩 + 화살표)
     const newEdge: Edge = {
       id: `edge-${nodeId}-${newScaffoldId}`,
       source: nodeId,
       target: newScaffoldId,
+      sourceHandle: 'right',
+      targetHandle: 'target-left',
       type: 'smoothstep',
       animated: true,
-      style: { stroke: '#9333ea', strokeWidth: 2.5 },
+      style: { stroke: '#9333ea', strokeWidth: 2 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#9333ea',
+        width: 14,
+        height: 14,
+      },
     };
 
     setNodes((nds) => [...nds, initialScaffoldNode]);

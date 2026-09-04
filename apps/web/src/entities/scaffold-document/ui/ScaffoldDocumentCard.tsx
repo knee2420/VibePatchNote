@@ -14,7 +14,7 @@ import {
 
 import { ScaffoldCanvasEditor } from '@vibe/tiptap-scaffold';
 
-import { useScaffoldFocusStore } from '@/shared/model';
+import { useScaffoldFocusStore, useSyncMappingStore } from '@/shared/model';
 
 import { type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
 
@@ -33,6 +33,28 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 }: NodeProps<ScaffoldDocumentNode>) {
   const { setNodes, setEdges } = useReactFlow();
   const openFocus = useScaffoldFocusStore((s) => s.openFocus);
+
+  const setActiveMapping = useSyncMappingStore((s) => s.setActiveMapping);
+  const activeMapping = useSyncMappingStore((s) => s.activeMapping);
+
+  const handleHoverSlot = useCallback(
+    (slot: { id: string; number: number; label: string; box_2d: [number, number, number, number] } | null) => {
+      if (slot) {
+        setActiveMapping({
+          id: slot.id,
+          number: slot.number,
+          label: slot.label,
+          box_2d: slot.box_2d,
+          targetNodeId: (data.sourceNodeId as string) || undefined,
+          sourcePdfFileName: data.sourcePdfFileName,
+          source: 'slot',
+        });
+      } else {
+        setActiveMapping(null);
+      }
+    },
+    [setActiveMapping, data.sourceNodeId, data.sourcePdfFileName]
+  );
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -281,6 +303,8 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                 initialContent={data.htmlContent}
                 onChangeHtml={handleUpdateHtml}
                 onChangeMarkdown={handleUpdateMarkdown}
+                onHoverSlot={handleHoverSlot}
+                activeMappingNumber={activeMapping?.number}
               />
             </div>
           </div>

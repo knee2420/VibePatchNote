@@ -15,6 +15,7 @@ import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
 import { getReferenceCardTheme } from './referenceCardTheme';
+import { SyncMappingHighlightOverlay } from './SyncMappingHighlightOverlay';
 
 /**
  * ReferenceDocumentCard (FSD Entity UI)
@@ -144,7 +145,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
       {/* 플러그인 뷰어 본문 + 휠 가로채기 래퍼 */}
       <div
-        className={`flex-1 w-full h-full overflow-hidden flex flex-col nodrag nopan ${selected ? 'nowheel' : ''}`}
+        className={`flex-1 w-full h-full overflow-hidden flex flex-col relative nodrag nopan ${selected ? 'nowheel' : ''}`}
         onWheel={handleNodeWheel}
       >
         <ViewerComponent
@@ -160,6 +161,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           onPageCountChange={setPageCount}
           onDimensionsChange={setDimensions}
         />
+        <SyncMappingHighlightOverlay nodeId={id} fileName={data.url || data.title} />
       </div>
 
       {/* 2페이지 이상일 때만 보이는 펼침 앵커 */}
