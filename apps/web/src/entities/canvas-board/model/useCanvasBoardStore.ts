@@ -9,7 +9,7 @@ import {
   type OnNodesChange,
 } from '@xyflow/react';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 const STORAGE_KEY = 'vibe-canvas-board-storage';
 
@@ -29,6 +29,44 @@ export interface CanvasBoardState {
 }
 
 type PersistedCanvasBoard = Pick<CanvasBoardState, 'nodes' | 'edges'>;
+
+// 노드 드래그/이동 시 발생하는 고주파 setItem I/O 블로킹을 해소하기 위한 디바운스 스토리지
+const debouncedLocalStorage = {
+  getItem: (name: string) => localStorage.getItem(name),
+  setItem: (() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let pendingName = '';
+    let pendingValue = '';
+
+    const flush = () => {
+      if (pendingName) {
+        try {
+          localStorage.setItem(pendingName, pendingValue);
+        } catch (e) {
+          console.error('Failed to write to localStorage:', e);
+        }
+        pendingName = '';
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', flush);
+    }
+
+    return (name: string, value: string) => {
+      pendingName = name;
+      pendingValue = value;
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        flush();
+      }, 400);
+    };
+  })(),
+  removeItem: (name: string) => localStorage.removeItem(name),
+};
 
 // rAF Batching buffers to eliminate micro-stutters under high-polling mouse movements
 let pendingNodeChanges: Parameters<CanvasBoardState['onNodesChange']>[0] = [];
@@ -96,6 +134,7 @@ export const useCanvasBoardStore = create<CanvasBoardState>()(
     }),
     {
       name: STORAGE_KEY,
+      storage: createJSONStorage(() => debouncedLocalStorage),
       partialize: (state): PersistedCanvasBoard => ({
         nodes: state.nodes,
         edges: state.edges,

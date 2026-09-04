@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useRef, memo } from 'react';
 import { Document } from 'react-pdf';
 import { Loader2, AlertCircle } from 'lucide-react';
 
@@ -52,6 +52,8 @@ export const PdfViewer = memo(function PdfViewer({
     [onDimensionsChange, collectTextLines]
   );
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   if (loadError) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-rose-500 bg-rose-50/50 rounded-b-md">
@@ -77,6 +79,7 @@ export const PdfViewer = memo(function PdfViewer({
       >
         {numPages && (
           <div
+            ref={scrollContainerRef}
             className={`w-full h-full ${
               isSpread
                 ? 'px-4 pt-3 pb-1.5 flex flex-row items-start gap-5 overflow-x-auto overflow-y-hidden scrollbar-thin'
@@ -95,6 +98,7 @@ export const PdfViewer = memo(function PdfViewer({
                   textLines={textLinesByPage[pageNumber]}
                   isEditMode={isEditMode}
                   enableSnap={enableSmartSnap}
+                  scrollContainerRef={scrollContainerRef}
                   onLoadSuccess={handlePageLoadSuccess}
                   onUpdateSegment={onUpdateSegment}
                   onCreateSegment={onCreateSegment}

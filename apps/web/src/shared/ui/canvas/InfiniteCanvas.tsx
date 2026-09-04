@@ -99,6 +99,7 @@ export function InfiniteCanvas({
         nodeDragThreshold={2}
         defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
         elevateNodesOnSelect={false}
+        onlyRenderVisibleElements={true}
         deleteKeyCode={null}
         selectionKeyCode={null}
         fitView
@@ -108,7 +109,7 @@ export function InfiniteCanvas({
           <Background variant={BackgroundVariant.Dots} gap={24} size={1.2} color="#cbd5e1" />
         )}
         <Controls />
-        {showMiniMap && <MiniMap />}
+        {showMiniMap && <MiniMap nodeStrokeWidth={2} pannable={false} zoomable={false} />}
         {children}
       </ReactFlow>
     </div>
