@@ -1,0 +1,76 @@
+/* Tiptap 스캐폴딩 코어 CSS - 어떤 환경에서도 100% 보장되는 2단/3단 그리드 */
+
+.scaffold-prose {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/* 1. 다단 그룹 (ColumnGroup): 인라인 및 강제 CSS 그리드 */
+div[data-type="column-group"],
+.column-group {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 1.25rem !important;
+  width: 100% !important;
+  margin: 0.75rem 0 !important;
+  box-sizing: border-box !important;
+}
+
+div[data-type="column-group"][data-cols="3"],
+.column-group[data-cols="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+div[data-type="column-group"][data-layout="header-asym"],
+.column-group[data-layout="header-asym"] {
+  grid-template-columns: 1.25fr 1fr !important;
+}
+
+/* 2. 개별 컬럼 (Column) */
+div[data-type="column"],
+.column-box {
+  display: block !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 3. 인라인 템플릿 채우기 슬롯 (ScaffoldSlot) */
+span[data-type="scaffold-slot"],
+.scaffold-slot {
+  display: inline-block !important;
+  min-width: 60px !important;
+  padding: 1px 6px !important;
+  margin: 1px 2px !important;
+  border-radius: 4px !important;
+  border: 1.5px dashed #a855f7 !important;
+  background-color: #faf5ff !important;
+  color: #6b21a8 !important;
+  font-weight: 500 !important;
+  vertical-align: baseline !important;
+}
+
+span[data-type="scaffold-slot"]:empty:before,
+.scaffold-slot:empty:before {
+  content: attr(data-placeholder) !important;
+  color: #c084fc !important;
+  font-style: italic !important;
+  font-weight: normal !important;
+}
+
+/* 4. 와이어프레임 인보이스 라인 표 (Table) */
+.scaffold-prose table,
+table.scaffold-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1rem 0 !important;
+  border: none !important;
+}
+
+.scaffold-prose table th,
+.scaffold-prose table td,
+table.scaffold-table th,
+table.scaffold-table td {
+  border: none !important;
+}
