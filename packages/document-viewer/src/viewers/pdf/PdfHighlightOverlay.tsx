@@ -34,7 +34,7 @@ export const PdfHighlightOverlay = memo(function PdfHighlightOverlay({
 
   return (
     <div
-      className="absolute z-30 pointer-events-none rounded-md border-2 border-purple-500 bg-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.45)] ring-2 ring-purple-400/40 transition-all duration-150 ease-out"
+      className="absolute z-30 pointer-events-none rounded-md border-2 border-indigo-500 bg-indigo-500/15 shadow-[0_0_15px_rgba(99,102,241,0.25)] ring-2 ring-indigo-400/30 transition-all duration-150 ease-out"
       style={{
         top: `${top}%`,
         left: `${left}%`,
@@ -44,12 +44,12 @@ export const PdfHighlightOverlay = memo(function PdfHighlightOverlay({
     >
       <div className="absolute -top-6 left-0 flex items-center gap-1 select-none whitespace-nowrap">
         {highlight.number !== undefined && (
-          <span className="px-1.5 py-0.5 rounded bg-purple-600 text-white font-bold text-[10px] font-mono shadow">
+          <span className="px-1.5 py-0.5 rounded bg-indigo-600 text-white font-semibold text-[10px] font-mono shadow-xs">
             #{highlight.number}
           </span>
         )}
         {highlight.label && (
-          <span className="px-1.5 py-0.5 rounded bg-slate-900/90 text-purple-200 font-semibold text-[10px] shadow max-w-[200px] truncate">
+          <span className="px-1.5 py-0.5 rounded bg-white/95 text-slate-800 border border-slate-200/90 font-medium text-[10px] shadow-xs max-w-[200px] truncate">
             {highlight.label}
           </span>
         )}

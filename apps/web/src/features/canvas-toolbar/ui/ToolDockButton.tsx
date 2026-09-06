@@ -24,15 +24,15 @@ export function ToolDockButton({
   return (
     <button
       onClick={onClick}
-      className={`p-2.5 rounded-xl transition-all flex items-center justify-center relative group ${
-        isActive ? 'bg-blue-600 text-white shadow-sm' : `text-slate-600 ${hoverClass}`
+      className={`p-2.5 rounded-xl transition-all flex items-center justify-center relative group cursor-pointer ${
+        isActive ? 'bg-indigo-600 text-white shadow-xs' : `text-slate-600 ${hoverClass}`
       }`}
       title={title}
       aria-label={label}
     >
       <Icon className="w-4 h-4" />
       <span className="sr-only">{label}</span>
-      <span className="absolute left-full ml-3 px-2 py-1 bg-slate-900 text-white text-[11px] rounded shadow-md whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
+      <span className="absolute left-full ml-2.5 px-2.5 py-1 bg-slate-900/95 text-white text-[11px] font-medium rounded-md shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50">
         {tooltip}
       </span>
     </button>

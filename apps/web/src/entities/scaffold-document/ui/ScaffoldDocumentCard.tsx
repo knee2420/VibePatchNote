@@ -143,34 +143,34 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
       style={cardStyle}
       className={`
         rounded-2xl border-2 transition-all duration-300 select-none
-        flex flex-col overflow-hidden bg-slate-900 text-slate-100 shadow-2xl relative [contain:layout_style]
+        flex flex-col overflow-hidden bg-white text-slate-800 shadow-md relative [contain:layout_style]
         ${
           selected
-            ? 'border-purple-500 ring-4 ring-purple-400/30 z-30 shadow-purple-900/20'
-            : 'border-purple-200/80 hover:border-purple-400 z-10 hover:z-20'
+            ? 'border-indigo-500 ring-4 ring-indigo-400/20 z-30 shadow-indigo-900/10'
+            : 'border-slate-200 hover:border-slate-300 z-10 hover:z-20'
         }
       `}
     >
       {/* 1. 카드 상단 헤더 바 */}
-      <div className="px-5 py-3.5 bg-gradient-to-r from-purple-950/80 via-slate-900 to-indigo-950/80 border-b border-purple-800/40 flex items-center justify-between shrink-0">
+      <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5 min-w-0 pr-3">
-          <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shadow-md shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-xs shrink-0">
             {status === 'generating' ? (
-              <Loader2 className="w-4 h-4 animate-spin text-purple-200" />
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
             ) : (
               <FileText className="w-4 h-4" />
             )}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300 bg-purple-900/60 border border-purple-700/50 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
                 {status === 'generating' ? 'AI 실시간 분석 중' : 'Tiptap 와이어프레임 서식'}
               </span>
-              <span className="text-[10px] text-purple-400 font-mono">
+              <span className="text-[10px] text-slate-400 font-mono">
                 {status === 'generating' ? `${progressPercent}%` : 'v1.0'}
               </span>
             </div>
-            <h4 className="font-bold text-sm text-white truncate leading-tight mt-0.5" title={data.title}>
+            <h4 className="font-semibold text-sm text-slate-900 truncate leading-tight mt-0.5" title={data.title}>
               {data.title}
             </h4>
           </div>
@@ -180,7 +180,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
           {/* 포커스(전체화면 3단 모달) 버튼 */}
           <button
             onClick={handleOpenFocus}
-            className="p-1.5 rounded-lg bg-slate-800/90 hover:bg-purple-600/40 text-purple-300 border border-slate-700 hover:border-purple-500 transition-all nodrag cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-indigo-600 border border-slate-200 shadow-2xs transition-all nodrag cursor-pointer"
             title="Playground 3단 전체 화면 포커스 편집"
           >
             <Maximize2 className="w-4 h-4" />
@@ -188,7 +188,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
           {/* 노드 삭제 버튼 */}
           <button
             onClick={handleDelete}
-            className="p-1.5 rounded-lg bg-slate-800/90 hover:bg-rose-900/40 text-slate-400 hover:text-rose-300 border border-slate-700 hover:border-rose-500/50 transition-all nodrag cursor-pointer"
+            className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 shadow-2xs transition-all nodrag cursor-pointer"
             title="서식 카드 삭제"
           >
             <Trash2 className="w-4 h-4" />
@@ -197,21 +197,21 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
       </div>
 
       {/* 2. 카드 본문 뷰포트 (상태에 따른 분기) */}
-      <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-950 relative">
+      <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-50/50 relative">
         {/* CASE 1: AI 프로세스 진행 중 (Thinking & Generating) */}
         {status === 'generating' && (
           <div className="flex-1 p-6 flex flex-col justify-between overflow-y-auto nowheel">
             <div className="flex flex-col gap-5">
               {/* 상단 펄스 타이틀 */}
-              <div className="p-4 rounded-xl bg-purple-950/30 border border-purple-800/40 flex items-center gap-3 animate-pulse">
-                <div className="p-2 rounded-lg bg-purple-600 text-white">
+              <div className="p-4 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-600 text-white shadow-xs">
                   <Sparkles className="w-5 h-5 animate-spin" />
                 </div>
                 <div>
-                  <h5 className="text-xs font-bold text-purple-200">
+                  <h5 className="text-xs font-bold text-indigo-900">
                     AI 서식 분석 엔진이 문서를 스캐폴딩하고 있습니다
                   </h5>
-                  <p className="text-[11px] text-purple-300/70 mt-0.5">
+                  <p className="text-[11px] text-indigo-600/80 mt-0.5">
                     {data.progressMessage || '문서 2D 레이아웃 및 Tiptap 구조 추론 중...'}
                   </p>
                 </div>
@@ -219,13 +219,13 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
               {/* 프로그레스 바 */}
               <div className="space-y-1.5">
-                <div className="flex justify-between text-[11px] font-semibold text-slate-400">
+                <div className="flex justify-between text-[11px] font-semibold text-slate-600">
                   <span>추출 파이프라인 진행률</span>
-                  <span className="text-purple-400">{progressPercent}%</span>
+                  <span className="text-indigo-600 font-bold">{progressPercent}%</span>
                 </div>
-                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-purple-400 transition-all duration-700 ease-out"
+                    className="h-full bg-indigo-600 transition-all duration-700 ease-out rounded-full"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
@@ -244,38 +244,38 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                         p-3 rounded-xl border transition-all duration-300 flex items-start gap-3
                         ${
                           isCurrent
-                            ? 'bg-purple-950/40 border-purple-500/80 shadow-md ring-1 ring-purple-500/30'
+                            ? 'bg-white border-indigo-400 shadow-xs ring-2 ring-indigo-500/10'
                             : isDone
-                              ? 'bg-slate-900/60 border-slate-800 text-slate-400'
-                              : 'bg-slate-900/20 border-slate-900/60 text-slate-600'
+                              ? 'bg-white/80 border-slate-200 text-slate-700'
+                              : 'bg-slate-100/60 border-slate-200/60 text-slate-400'
                         }
                       `}
                     >
                       <div className="mt-0.5">
                         {isDone ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                         ) : isCurrent ? (
-                          <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                          <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
                         ) : (
-                          <CircleDashed className="w-4 h-4 text-slate-600" />
+                          <CircleDashed className="w-4 h-4 text-slate-400" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span
-                            className={`text-xs font-bold ${
-                              isCurrent ? 'text-purple-200' : isDone ? 'text-slate-300' : 'text-slate-500'
+                            className={`text-xs font-semibold ${
+                              isCurrent ? 'text-indigo-900' : isDone ? 'text-slate-800' : 'text-slate-400'
                             }`}
                           >
                             {s.label}
                           </span>
                           {isCurrent && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono font-semibold">
                               In Progress
                             </span>
                           )}
                           {isDone && (
-                            <span className="text-[10px] text-emerald-400 font-semibold">Done</span>
+                            <span className="text-[10px] text-emerald-600 font-semibold">Done</span>
                           )}
                         </div>
                         <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{s.desc}</p>
@@ -287,9 +287,9 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
             </div>
 
             {/* 하단 팁 */}
-            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
               <span className="flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-purple-400" />
+                <Layers className="w-3.5 h-3.5 text-indigo-600" />
                 완료 즉시 카드 상에 Tiptap 인터랙티브 편집기가 렌더링됩니다
               </span>
             </div>
@@ -298,7 +298,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
         {/* CASE 2: 완료 시 원본 카드와 '= 동급'의 Tiptap 서식 에디터 화면 직접 렌더링 (핵심!) */}
         {status === 'completed' && (
-          <div className="flex-1 w-full h-full overflow-y-auto p-4 sm:p-6 bg-slate-900 nodrag nowheel">
+          <div className="flex-1 w-full h-full overflow-y-auto p-4 sm:p-6 bg-slate-50 nodrag nowheel">
             <div className="max-w-full mx-auto">
               <ScaffoldCanvasEditor
                 initialContent={data.htmlContent}
@@ -314,13 +314,13 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
         {/* CASE 3: 에러 발생 시 */}
         {status === 'error' && (
-          <div className="flex-1 p-8 flex flex-col items-center justify-center text-center gap-4 text-slate-400">
-            <div className="w-12 h-12 rounded-full bg-rose-950/50 border border-rose-800/60 flex items-center justify-center text-rose-400">
+          <div className="flex-1 p-8 flex flex-col items-center justify-center text-center gap-4 text-slate-600">
+            <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shadow-xs">
               <AlertCircle className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white">서식 추출에 실패했습니다</h4>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm">
+              <h4 className="text-sm font-semibold text-slate-900">서식 추출에 실패했습니다</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
                 {data.errorMessage || '문서 분석 중 오류가 발생했습니다. 원본 카드의 버튼을 눌러 다시 시도해 주세요.'}
               </p>
             </div>
@@ -329,18 +329,18 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
       </div>
 
       {/* 3. 하단 메타 바 */}
-      <div className="px-5 py-2.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+      <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
         <div className="flex items-center gap-2">
           <span>연동: {data.sourcePdfFileName || 'PDF'}</span>
           {data.difficulty && (
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-purple-300 uppercase font-mono">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 uppercase font-mono font-medium">
               {data.difficulty}
             </span>
           )}
         </div>
         <button
           onClick={handleOpenFocus}
-          className="text-purple-400 hover:text-purple-300 font-semibold cursor-pointer transition-colors flex items-center gap-1"
+          className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer transition-colors flex items-center gap-1"
         >
           <span>Playground 전체화면 ↗</span>
         </button>
@@ -351,13 +351,13 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
         type="target"
         position={Position.Left}
         id="target-left"
-        className="!w-3.5 !h-3.5 !bg-purple-500 !border-2 !border-slate-900 !shadow-lg transition-transform hover:!scale-125"
+        className="!w-3.5 !h-3.5 !bg-indigo-600 !border-2 !border-white !shadow-sm transition-transform hover:!scale-125"
       />
       <Handle
         type="source"
         position={Position.Right}
         id="source-right"
-        className="!w-3.5 !h-3.5 !bg-purple-500 !border-2 !border-slate-900 !shadow-lg transition-transform hover:!scale-125"
+        className="!w-3.5 !h-3.5 !bg-indigo-600 !border-2 !border-white !shadow-sm transition-transform hover:!scale-125"
       />
     </div>
   );

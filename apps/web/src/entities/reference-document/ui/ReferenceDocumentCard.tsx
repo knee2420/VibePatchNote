@@ -131,7 +131,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       className={`
         group/node rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style]
         ${theme.container}
-        ${selected ? '!border-blue-500 shadow-xl ring-2 ring-blue-300 z-30 nowheel' : 'z-10 hover:z-20'}
+        ${selected ? '!border-indigo-500 shadow-xl ring-2 ring-indigo-400/30 z-30 nowheel' : 'z-10 hover:z-20'}
         ${customSize ? '' : dimensionClass}
         ${isResizing ? '' : 'transition-[width,height] duration-300 ease-out'}
       `}

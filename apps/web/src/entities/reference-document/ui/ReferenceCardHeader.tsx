@@ -69,8 +69,8 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
               p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
               ${
                 isExtractingScaffold
-                  ? 'text-purple-600 bg-purple-100 animate-pulse ring-1 ring-purple-400'
-                  : 'text-purple-600 hover:bg-purple-100/80 bg-purple-50'
+                  ? 'text-indigo-600 bg-indigo-100 animate-pulse ring-1 ring-indigo-400'
+                  : 'text-indigo-600 hover:bg-indigo-100/80 bg-indigo-50'
               }
             `}
             title={
@@ -80,9 +80,9 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
             }
           >
             {isExtractingScaffold ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
             )}
           </button>
         )}
@@ -99,10 +99,10 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
               p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
               ${
                 isScanning
-                  ? 'text-purple-600 bg-purple-100 animate-pulse'
+                  ? 'text-indigo-600 bg-indigo-100 animate-pulse'
                   : hasSegments
-                  ? 'text-purple-600 bg-purple-100 hover:bg-purple-200'
-                  : 'text-slate-400 hover:text-purple-600 hover:bg-purple-50'
+                  ? 'text-indigo-600 bg-indigo-100 hover:bg-indigo-200'
+                  : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
               }
             `}
             title={
@@ -114,7 +114,7 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
             }
           >
             {isScanning ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
             ) : (
               <ScanText className="w-3.5 h-3.5" />
             )}
@@ -132,8 +132,8 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
               p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
               ${
                 isEditMode
-                  ? 'text-purple-700 bg-purple-200/90 ring-1 ring-purple-400 font-semibold'
-                  : 'text-slate-400 hover:text-purple-600 hover:bg-purple-50'
+                  ? 'text-indigo-700 bg-indigo-100 ring-1 ring-indigo-300 font-semibold'
+                  : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
               }
             `}
             title={isEditMode ? '영역 편집 모드 끄기 (뷰 모드로 전환)' : '영역 편집 모드 켜기 (크기 조절 및 라벨 수정)'}
@@ -149,7 +149,7 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
             p-1.5 rounded-md transition-colors nodrag cursor-pointer
             ${
               isFitContent
-                ? 'text-blue-600 bg-blue-100 hover:bg-blue-200'
+                ? 'text-indigo-600 bg-indigo-100 hover:bg-indigo-200'
                 : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200/60'
             }
           `}

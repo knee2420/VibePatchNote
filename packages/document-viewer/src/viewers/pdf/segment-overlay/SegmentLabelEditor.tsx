@@ -23,7 +23,7 @@ export function SegmentLabelEditor({
 }: SegmentLabelEditorProps) {
   return (
     <div className="space-y-2.5">
-      <div className="flex items-center gap-1 bg-slate-800/90 rounded px-2 py-1.5 border border-purple-500/50 focus-within:border-purple-400">
+      <div className="flex items-center gap-1.5 bg-slate-50 focus-within:bg-white rounded-lg px-2.5 py-1.5 border border-slate-200 focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100 transition-all shadow-xs">
         <input
           type="text"
           value={editingLabel}
@@ -33,12 +33,12 @@ export function SegmentLabelEditor({
             else if (e.key === 'Escape') onCancelEdit();
           }}
           placeholder="라벨 입력..."
-          className="w-full bg-transparent text-xs text-white outline-none font-medium placeholder:text-slate-500"
+          className="w-full bg-transparent text-xs text-slate-800 outline-none font-medium placeholder:text-slate-400"
           autoFocus
         />
         <button
           onClick={onSaveLabel}
-          className="text-emerald-400 hover:text-emerald-300 p-0.5 rounded cursor-pointer"
+          className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 p-1 rounded-md cursor-pointer transition-colors"
           title="저장 (Enter)"
         >
           <Check className="w-3.5 h-3.5" />
@@ -50,10 +50,10 @@ export function SegmentLabelEditor({
           <button
             key={opt.id}
             onClick={() => onChangeType(opt.id)}
-            className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all cursor-pointer ${
+            className={`px-2 py-1 rounded-md text-[10px] font-semibold transition-all cursor-pointer ${
               segment.type === opt.id
-                ? `${opt.color} text-white shadow-xs ring-1 ring-white/40 scale-105`
-                : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                ? `${opt.color} shadow-xs ring-2 ring-indigo-400/30 scale-105`
+                : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/80'
             }`}
           >
             {opt.label}
@@ -62,7 +62,7 @@ export function SegmentLabelEditor({
       </div>
 
       {segment.content_summary && (
-        <p className="text-[10px] text-slate-300 leading-relaxed bg-slate-800/50 p-2 rounded border border-slate-700/50 line-clamp-3">
+        <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 line-clamp-3">
           {segment.content_summary}
         </p>
       )}

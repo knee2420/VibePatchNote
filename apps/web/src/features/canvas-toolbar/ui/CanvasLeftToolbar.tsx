@@ -82,7 +82,6 @@ export function CanvasLeftToolbar({ onUploadClick }: CanvasLeftToolbarProps) {
           label="자료 업로드"
           tooltip="자료 파일 업로드"
           title="레퍼런스 문서/자료 업로드"
-          hoverClass="hover:text-blue-600 hover:bg-blue-50"
           onClick={onUploadClick}
         />
 
@@ -92,7 +91,6 @@ export function CanvasLeftToolbar({ onUploadClick }: CanvasLeftToolbarProps) {
           label="지식 카드 생성"
           tooltip="새 지식 카드 추가"
           title="새 지식 카드(포스트잇) 생성"
-          hoverClass="hover:text-amber-600 hover:bg-amber-50"
           onClick={handleAddKnowledgeCard}
         />
 
@@ -102,7 +100,6 @@ export function CanvasLeftToolbar({ onUploadClick }: CanvasLeftToolbarProps) {
           label="세그먼트 생성"
           tooltip="새 세그먼트 추가"
           title="새 세그먼트 섹션 생성"
-          hoverClass="hover:text-emerald-600 hover:bg-emerald-50"
           onClick={handleAddSegment}
         />
 
