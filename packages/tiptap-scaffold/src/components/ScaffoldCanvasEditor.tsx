@@ -60,7 +60,7 @@ export function ScaffoldCanvasEditor({
     },
     editorProps: {
       attributes: {
-        class: 'scaffold-prose outline-none w-full text-slate-900 focus:outline-none',
+        class: 'scaffold-prose outline-none text-slate-900 focus:outline-none',
       },
     },
   });
@@ -129,7 +129,7 @@ export function ScaffoldCanvasEditor({
   return (
     <div
       ref={rootRef}
-      className={`scaffold-editor-root w-full bg-white rounded-xl shadow-xl border border-slate-200/80 overflow-auto ${className}`}
+      className={`scaffold-editor-root bg-white rounded-xl shadow-xl border border-slate-200/80 overflow-auto ${className}`}
     >
       <div onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
         <EditorContent editor={editor} />

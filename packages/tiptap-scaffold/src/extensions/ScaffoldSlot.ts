@@ -47,6 +47,18 @@ export const ScaffoldSlot = Node.create({
     };
   },
 
+  /** tiptap-markdown 직렬화. 슬롯은 엔진 마크다운과 같은 `[ 라벨 ]` 표기로 나간다. */
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: any, node: any) {
+          state.write(`[ ${node.attrs.placeholder || '입력'} ]`);
+        },
+        parse: {},
+      },
+    };
+  },
+
   parseHTML() {
     return [{ tag: 'span[data-type="scaffold-slot"]' }];
   },

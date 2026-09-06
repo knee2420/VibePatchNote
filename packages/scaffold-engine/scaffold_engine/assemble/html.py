@@ -1,7 +1,15 @@
 """Stage C — 측정 기하 + 역할 판정 -> Tiptap HTML / Markdown / 슬롯 좌표.
 
-페이지 캔버스를 PDF 포인트와 1:1 px 로 잡아 기하 드리프트를 원천 차단한다.
-슬롯의 `box_2d` 는 모델이 아니라 실측 블록에서 나오므로 매핑이 어긋날 수 없다.
+**출력 마크업은 `@vibe/tiptap-scaffold` 스키마와 1:1 로 대응해야 한다.**
+Tiptap 은 스키마에 없는 태그·속성·인라인 스타일을 파싱 단계에서 버리므로,
+기하 정보는 전부 스키마가 선언한 `data-*` 속성으로 실어 보낸다.
+(래퍼 div 나 style="" 로 보내면 화면에서 흔적도 없이 사라진다.)
+
+    scaffoldPage   <div data-type="scaffold-page" data-w data-h data-page>
+    scaffoldBlock  <div data-type="scaffold-block" data-x data-y data-w data-h data-fs ...>
+    scaffoldFrame  <div data-type="scaffold-frame" data-x data-y data-w data-h>  (표 위치 고정)
+    tr             <tr data-hpx="행 높이 px">
+    td/th          <td data-wpx="열 너비 px" data-fs="폰트 px" data-fill>
 """
 from __future__ import annotations
 
@@ -14,10 +22,7 @@ import fitz  # PyMuPDF
 from scaffold_engine.classify.schema import SLOT_ROLES
 
 if TYPE_CHECKING:  # pragma: no cover
-    from scaffold_engine.extract.geometry import Block, PageGeometry
-
-# 슬롯 하나가 차지할 최소 표시 폭(px). 너무 좁으면 플레이스홀더가 안 보인다.
-MIN_SLOT_WIDTH_PX = 24
+    from scaffold_engine.extract.geometry import Block, PageGeometry, TableGeometry
 
 
 def _slot_span(slot_id: str, number: int, label: str, fill: bool) -> str:
@@ -56,7 +61,7 @@ class HtmlAssembler:
         counter = 0
 
         def emit(block: "Block") -> Tuple[str, bool]:
-            """블록 하나를 HTML 조각으로. (조각, 슬롯이_박스를_채움) 반환."""
+            """블록 하나를 인라인 조각으로. (조각, 슬롯이_박스를_채움) 반환."""
             nonlocal counter
             decision = decided.get(block.id, {})
             role = decision.get("role", "label")
@@ -100,22 +105,19 @@ class HtmlAssembler:
             return fragment, not is_partial
 
         parts = [
-            f'<div class="scaffold-page" data-page="{page.page}" '
-            f'style="position:relative;width:{width:.1f}px;height:{height:.1f}px;'
-            f'background:#fff;overflow:hidden;">'
+            f'<div data-type="scaffold-page" data-w="{width:.0f}" '
+            f'data-h="{height:.0f}" data-page="{page.page}">'
         ]
 
-        def place(block: "Block") -> None:
-            fragment, _ = emit(block)
-            w = block.bbox[2] - block.bbox[0]
-            h = block.bbox[3] - block.bbox[1]
-            justify = {"right": "flex-end", "center": "center"}.get(block.align, "flex-start")
+        def place(block: "Block", variant: str = "text") -> None:
+            fragment = "" if variant == "rule" else emit(block)[0]
             parts.append(
-                f'<div data-bid="{block.id}" style="position:absolute;'
-                f'left:{block.bbox[0]:.1f}px;top:{block.bbox[1]:.1f}px;'
-                f'width:{w:.1f}px;height:{h:.1f}px;font-size:{block.size or 10:.1f}px;'
-                f'line-height:1;display:flex;align-items:center;justify-content:{justify};'
-                f'white-space:nowrap;overflow:hidden;">{fragment}</div>'
+                f'<div data-type="scaffold-block" data-bid="{block.id}" '
+                f'data-x="{block.bbox[0]:.1f}" data-y="{block.bbox[1]:.1f}" '
+                f'data-w="{block.bbox[2] - block.bbox[0]:.1f}" '
+                f'data-h="{max(block.bbox[3] - block.bbox[1], 0.6):.1f}" '
+                f'data-fs="{block.size or 10:.1f}" data-align="{block.align}" '
+                f'data-variant="{variant}">{fragment}</div>'
             )
 
         if page.doc_type == "grid" and page.tables:
@@ -126,34 +128,35 @@ class HtmlAssembler:
                 for ci in range(t.cols)
             }
             for block in page.blocks:
-                if block.kind in ("line", "image") and block.id not in in_table:
-                    place(block)
+                if block.kind == "rule":
+                    place(block, "rule")
+                elif block.id not in in_table:
+                    place(block, "image" if block.kind == "image" else "text")
             for table in page.tables:
                 parts.append(self._table(table, by_id, decided, emit))
         else:
             for block in page.blocks:
                 if block.kind == "rule":
-                    parts.append(self._rule(block))
+                    place(block, "rule")
                 else:
-                    place(block)
+                    place(block, "image" if block.kind == "image" else "text")
 
         parts.append("</div>")
         return "\n".join(parts), "\n\n".join(md_lines), slots
 
-    def _table(self, table, by_id, decided, emit) -> str:
+    def _table(self, table: "TableGeometry", by_id, decided, emit) -> str:
         tid = table.id[1:]
         tb = table.bbox
+        table_w = tb[2] - tb[0]
+        # 열 너비는 비율이 아니라 실측 px 로 준다 (페이지 캔버스가 pt 와 1:1 px 이므로 정확).
+        col_px = [round(table_w * pct / 100, 1) for pct in table.col_pct]
+
         out = [
-            f'<table class="scaffold-table" data-tid="{table.id}" style="position:absolute;'
-            f'left:{tb[0]:.1f}px;top:{tb[1]:.1f}px;width:{tb[2] - tb[0]:.1f}px;'
-            f'height:{tb[3] - tb[1]:.1f}px;border-collapse:collapse;table-layout:fixed;'
-            f'border:1px solid #333;">',
-            "<colgroup>"
-            + "".join(f'<col style="width:{w:.2f}%;"/>' for w in table.col_pct)
-            + "</colgroup><tbody>",
+            f'<div data-type="scaffold-frame" data-x="{tb[0]:.1f}" data-y="{tb[1]:.1f}" '
+            f'data-w="{table_w:.1f}" data-h="{tb[3] - tb[1]:.1f}"><table><tbody>'
         ]
         for ri in range(table.rows):
-            out.append(f'<tr style="height:{table.row_pct[ri]:.2f}%;">')
+            out.append(f'<tr data-hpx="{table.row_h_pt[ri]:.1f}">')
             for ci in range(table.cols):
                 block = by_id.get(f"{tid}-r{ri}c{ci}")
                 if block is None:
@@ -162,26 +165,15 @@ class HtmlAssembler:
                 fragment, filled = emit(block)
                 role = decided.get(block.id, {}).get("role", "label")
                 tag = "th" if role == "label" and ci == 0 else "td"
-                style = (
-                    f"padding:{'0' if filled else '2px 6px'};border:1px solid #333;"
-                    f"vertical-align:middle;font-size:{block.size or 10:.1f}px;overflow:hidden;"
+                attrs = (
+                    f'data-bid="{block.id}" data-wpx="{col_px[ci] if ci < len(col_px) else 0:.1f}" '
+                    f'data-fs="{block.size or 10:.1f}"'
+                    + (' data-fill="true"' if filled else "")
                 )
-                if tag == "th":
-                    style += "text-align:center;font-weight:600;background:#f7f7f7;"
-                out.append(f'<{tag} data-bid="{block.id}" style="{style}">{fragment}</{tag}>')
+                out.append(f"<{tag} {attrs}>{fragment}</{tag}>")
             out.append("</tr>")
-        out.append("</tbody></table>")
+        out.append("</tbody></table></div>")
         return "".join(out)
-
-    @staticmethod
-    def _rule(block: "Block") -> str:
-        w = block.bbox[2] - block.bbox[0]
-        h = max(block.bbox[3] - block.bbox[1], 0.6)
-        return (
-            f'<div style="position:absolute;left:{block.bbox[0]:.1f}px;'
-            f'top:{block.bbox[1]:.1f}px;width:{w:.1f}px;height:{h:.1f}px;'
-            f'background:#dcdcdc;"></div>'
-        )
 
     @staticmethod
     def _locate(fitz_page, line_bbox: List[float], needle: str) -> Optional[List[float]]:
