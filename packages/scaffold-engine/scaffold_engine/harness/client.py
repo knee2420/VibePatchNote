@@ -12,9 +12,10 @@ from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-# 기본 주력 모델 (규칙: Gemini-3.8-flash 또는 Gemini-3.1-pro)
-DEFAULT_MODEL = "gemini-3.8-flash-low"
+# 기본 주력 모델 (규칙: Gemini-3.1-pro, Gemini-3.5-flash)
+DEFAULT_MODEL = "gemini-3.1-pro-low"
 DEFAULT_TIMEOUT_SECONDS = 120
+
 
 
 class AntigravityClient:
@@ -32,6 +33,8 @@ class AntigravityClient:
 
     def run(self, prompt: str) -> Optional[str]:
         """프롬프트를 agy-cli에 전달하고 원본 출력을 반환합니다."""
+        import time
+        t0 = time.time()
         cmd = [
             self.executable,
             "-p",
@@ -40,6 +43,7 @@ class AntigravityClient:
             self.model,
             "--dangerously-skip-permissions",
         ]
+        logger.info("[AntigravityClient] Invoking agy CLI (model=%s, timeout=%ds, prompt_len=%d)", self.model, self.timeout_seconds, len(prompt))
 
         try:
             result = subprocess.run(
@@ -51,18 +55,22 @@ class AntigravityClient:
                 timeout=self.timeout_seconds,
                 check=False,
             )
+            duration = round(time.time() - t0, 2)
+            logger.info("[AntigravityClient] agy CLI completed in %ss with returncode=%d (stdout_len=%d, stderr_len=%d)", duration, result.returncode, len(result.stdout or ""), len(result.stderr or ""))
+            if result.stderr:
+                logger.warning("[AntigravityClient] agy stderr snippet: %s", (result.stderr or "")[:300])
         except FileNotFoundError:
-            logger.error("agy executable not found: %s", self.executable)
+            logger.error("[AntigravityClient] agy executable not found on PATH: %s", self.executable)
             return None
         except subprocess.TimeoutExpired:
-            logger.error("agy-cli timed out after %ds", self.timeout_seconds)
+            logger.error("[AntigravityClient] agy-cli timed out after %ds", self.timeout_seconds)
             return None
         except OSError as exc:
-            logger.error("agy-cli execution error: %s", exc)
+            logger.error("[AntigravityClient] agy-cli OS execution error: %s", exc)
             return None
 
         if result.returncode != 0:
-            logger.warning("agy-cli returned non-zero (%d): %s", result.returncode, result.stderr)
+            logger.warning("[AntigravityClient] agy-cli returned non-zero (%d): %s", result.returncode, result.stderr)
 
         return (result.stdout or "").strip()
 
@@ -70,8 +78,15 @@ class AntigravityClient:
         """프롬프트를 실행하고 응답에서 JSON 객체를 추출합니다."""
         raw_output = self.run(prompt)
         if not raw_output:
+            logger.warning("[AntigravityClient] run_json received empty raw output from agy")
             return None
-        return self._extract_json_object(raw_output)
+        parsed = self._extract_json_object(raw_output)
+        if not parsed:
+            logger.warning("[AntigravityClient] Failed to extract JSON object from raw output (len=%d). Raw snippet: %s", len(raw_output), raw_output[:300])
+        else:
+            logger.info("[AntigravityClient] Successfully parsed JSON object with keys: %s", list(parsed.keys()))
+        return parsed
+
 
     @staticmethod
     def _extract_json_object(raw_output: str) -> Optional[Dict[str, Any]]:

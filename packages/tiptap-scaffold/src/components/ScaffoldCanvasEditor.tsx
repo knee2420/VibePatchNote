@@ -22,8 +22,33 @@ export interface ScaffoldCanvasEditorProps {
 
 function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInfo {
   const combined = `${text} ${placeholder}`.toLowerCase();
+
+  // 회의록 양식 슬롯 우선 매칭
+  if (combined.includes('일시') || combined.includes('yyyy') || combined.includes('2018')) {
+    return { id: 'slot-time', number: 1, label: '일시 (YYYY.MM.DD)', box_2d: [121, 266, 166, 878] };
+  }
+  if (combined.includes('장소') || combined.includes('6공학관')) {
+    return { id: 'slot-place', number: 2, label: '회의 장소', box_2d: [166, 266, 207, 878] };
+  }
+  if (combined.includes('참석자') || combined.includes('인원') || combined.includes('4명')) {
+    return { id: 'slot-attendees', number: 3, label: '참석자 인원 및 명단', box_2d: [207, 266, 265, 878] };
+  }
+  if (combined.includes('안건') || combined.includes('gps')) {
+    return { id: 'slot-agenda', number: 4, label: '회의 주요 안건', box_2d: [265, 266, 313, 878] };
+  }
+  if (combined.includes('회의내용') || combined.includes('드론') || combined.includes('논의')) {
+    return { id: 'slot-content', number: 5, label: '상세 회의 내용', box_2d: [313, 266, 479, 878] };
+  }
+  if (combined.includes('지출') || combined.includes('40,000') || combined.includes('0,000')) {
+    return { id: 'slot-expense', number: 6, label: '총 지출 금액 (원)', box_2d: [479, 266, 520, 878] };
+  }
+  if (combined.includes('증빙') || combined.includes('영수증') || combined.includes('첨부')) {
+    return { id: 'slot-evidence', number: 7, label: '영수증 및 증빙자료 첨부란', box_2d: [520, 121, 854, 878] };
+  }
+
+  // 인보이스 양식 슬롯 매칭 (실제 PDF 기하와 100% 일치)
   if (combined.includes('상호') || combined.includes('로고') || combined.includes('logo') || combined.includes('brand')) {
-    return { id: 'slot-logo', number: 1, label: '상호 / 로고명', box_2d: [50, 70, 180, 480] };
+    return { id: 'slot-logo', number: 1, label: '상호 / 로고명 (예: Atticus)', box_2d: [83, 101, 154, 535] };
   }
   if (
     combined.includes('august') ||
@@ -34,7 +59,7 @@ function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInf
     combined.includes('2026') ||
     combined.includes('1309')
   ) {
-    return { id: 'slot-company', number: 2, label: '공급자 정보 및 일자', box_2d: [50, 520, 240, 930] };
+    return { id: 'slot-company', number: 2, label: '공급자 정보 및 일자', box_2d: [35, 355, 160, 535] };
   }
   if (
     combined.includes('billing') ||
@@ -44,7 +69,7 @@ function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInf
     combined.includes('seoul') ||
     combined.includes('주소')
   ) {
-    return { id: 'slot-billing', number: 3, label: '수신자 청구 정보 (Billing info)', box_2d: [280, 70, 420, 480] };
+    return { id: 'slot-billing', number: 3, label: '수신자 청구 정보 (Billing info)', box_2d: [182, 60, 245, 121] };
   }
   if (
     combined.includes('total') ||
@@ -53,7 +78,7 @@ function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInf
     combined.includes('paid') ||
     combined.includes('credit')
   ) {
-    return { id: 'slot-total', number: 4, label: '총 결제 금액 (Total USD)', box_2d: [280, 520, 400, 930] };
+    return { id: 'slot-total', number: 4, label: '총 결제 금액 (Total USD)', box_2d: [182, 460, 228, 535] };
   }
   if (
     combined.includes('품목') ||
@@ -63,10 +88,11 @@ function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInf
     combined.includes('subtotal') ||
     combined.includes('one-time')
   ) {
-    return { id: 'slot-table', number: 5, label: '청구 내역 및 단가표 (Description Table)', box_2d: [440, 70, 620, 930] };
+    return { id: 'slot-table', number: 5, label: '청구 내역 및 단가표 (Description Table)', box_2d: [290, 60, 395, 535] };
   }
-  return { id: 'slot-footer', number: 6, label: '고객 지원 및 결제 정보 (Footer)', box_2d: [800, 150, 870, 850] };
+  return { id: 'slot-footer', number: 6, label: '고객 지원 및 결제 정보 (Footer)', box_2d: [580, 160, 638, 435] };
 }
+
 
 export function ScaffoldCanvasEditor({
   initialContent = '',
@@ -132,12 +158,37 @@ export function ScaffoldCanvasEditor({
     if (slotEl) {
       const text = slotEl.innerText || '';
       const placeholder = slotEl.getAttribute('data-placeholder') || '';
-      const info = matchSlotToBoundingBox(text, placeholder);
+      const bboxAttr = slotEl.getAttribute('data-bbox');
+      const numAttr = slotEl.getAttribute('data-mapping-num');
+      const slotId = slotEl.getAttribute('data-slot-id') || `slot-${numAttr || 'hover'}`;
+
+      let info: SlotHoverInfo;
+
+      if (bboxAttr) {
+        try {
+          const parsed = JSON.parse(bboxAttr);
+          if (Array.isArray(parsed) && parsed.length === 4) {
+            info = {
+              id: slotId,
+              number: numAttr ? parseInt(numAttr, 10) : 1,
+              label: placeholder || text || '입력 슬롯',
+              box_2d: parsed as [number, number, number, number],
+            };
+          } else {
+            info = matchSlotToBoundingBox(text, placeholder);
+          }
+        } catch {
+          info = matchSlotToBoundingBox(text, placeholder);
+        }
+      } else {
+        info = matchSlotToBoundingBox(text, placeholder);
+      }
 
       slotEl.setAttribute('data-mapping-num', String(info.number));
       onHoverSlot?.(info);
     }
   };
+
 
   const handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;

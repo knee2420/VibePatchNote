@@ -43,7 +43,7 @@ span[data-type="scaffold-slot"],
   position: relative !important;
   min-width: 60px !important;
   padding: 1px 6px !important;
-  margin: 1px 2px !important;
+  margin: 3px 2px !important;
   border-radius: 4px !important;
   border: 1.5px dashed #a855f7 !important;
   background-color: #faf5ff !important;
@@ -52,6 +52,14 @@ span[data-type="scaffold-slot"],
   vertical-align: baseline !important;
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
+}
+
+/* 대형 헤더(h1, h2) 내부의 슬롯은 상단 뱃지가 윗줄 텍스트를 침범하지 않도록 상단 여백 확보 */
+h1 > span[data-type="scaffold-slot"],
+h2 > span[data-type="scaffold-slot"],
+h1 > .scaffold-slot,
+h2 > .scaffold-slot {
+  margin-top: 14px !important;
 }
 
 span[data-type="scaffold-slot"]:hover,
@@ -71,7 +79,7 @@ span[data-type="scaffold-slot"].is-sync-hovered:after,
 .scaffold-slot.is-sync-hovered:after {
   content: "#" attr(data-mapping-num) !important;
   position: absolute !important;
-  top: -18px !important;
+  top: -19px !important;
   left: 0 !important;
   background-color: #9333ea !important;
   color: #ffffff !important;
@@ -100,18 +108,21 @@ span[data-type="scaffold-slot"]:empty:before,
   font-weight: normal !important;
 }
 
-/* 4. 와이어프레임 인보이스 라인 표 (Table) */
+/* 4. 와이어프레임 표 (Table) - 열 너비 비율(19%:81% 등) 절대 보장 */
 .scaffold-prose table,
 table.scaffold-table {
   width: 100% !important;
+  table-layout: fixed !important;
   border-collapse: collapse !important;
   margin: 1rem 0 !important;
-  border: none !important;
+  box-sizing: border-box !important;
 }
 
 .scaffold-prose table th,
 .scaffold-prose table td,
 table.scaffold-table th,
 table.scaffold-table td {
-  border: none !important;
+  box-sizing: border-box !important;
+  word-break: break-word !important;
 }
+

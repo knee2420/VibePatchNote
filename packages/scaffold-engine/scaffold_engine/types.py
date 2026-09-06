@@ -2,8 +2,19 @@
 
 프론트엔드 `@vibe/tiptap-scaffold` 의 `types.ts` 와 1:1 호환되는 Pydantic 모델입니다.
 """
-from typing import Literal, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
+
+
+class SlotMappingItem(BaseModel):
+    id: str = Field(..., description="슬롯 고유 식별자")
+    number: int = Field(..., description="1-based 매핑 번호")
+    label: str = Field(..., description="슬롯 라벨")
+    box_2d: List[int] = Field(..., description="[ymin, xmin, ymax, xmax] 0~1000 정규화 좌표")
+    page_number: int = Field(default=1, alias="pageNumber", description="페이지 번호")
+
+    class Config:
+        populate_by_name = True
 
 
 class ScaffoldMeta(BaseModel):
@@ -22,6 +33,7 @@ class ScaffoldExtractResult(BaseModel):
     meta: ScaffoldMeta = Field(..., description="서식 메타데이터")
     html_content: str = Field(..., alias="htmlContent", description="Tiptap 에디터 렌더링용 HTML")
     markdown_content: str = Field(..., alias="markdownContent", description="에이전트/MCP 용 마크다운 텍스트")
+    slots: List[SlotMappingItem] = Field(default_factory=list, description="슬롯별 2D 정규화 좌표 및 매핑 목록")
 
     class Config:
         populate_by_name = True

@@ -41,12 +41,21 @@ export const SyncMappingHighlightOverlay = memo(function SyncMappingHighlightOve
 
   const [ymin, xmin, ymax, xmax] = activeMapping.box_2d;
 
+  // 글자가 테두리에 바짝 붙어 잘려 보이지 않도록 시각적 여백(Breathing Padding) 부여
+  const padX = 4;
+  const padY = 3;
+  const safeXmin = Math.max(xmin - padX, 0);
+  const safeYmin = Math.max(ymin - padY, 0);
+  const safeXmax = Math.min(xmax + padX, 1000);
+  const safeYmax = Math.min(ymax + padY, 1000);
+
   const style = {
-    top: `${ymin / 10}%`,
-    left: `${xmin / 10}%`,
-    width: `${Math.max((xmax - xmin) / 10, 5)}%`,
-    height: `${Math.max((ymax - ymin) / 10, 3)}%`,
+    top: `${safeYmin / 10}%`,
+    left: `${safeXmin / 10}%`,
+    width: `${Math.max((safeXmax - safeXmin) / 10, 4)}%`,
+    height: `${Math.max((safeYmax - safeYmin) / 10, 3)}%`,
   };
+
 
   return (
     <div

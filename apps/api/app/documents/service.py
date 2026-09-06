@@ -121,21 +121,18 @@ class ExtractionService:
 
     async def scan_document_segments(self, filename: str) -> Dict[str, Any]:
         """
-        Phase 2: 업로드된 문서의 논리 영역(표/목록/섹션)을 추출합니다.
-        이미 분석된 문서라면 디스크 캐시에서 즉시 반환합니다.
+        Phase 2: 업로드된 문서의 논리 영역(표/목록/섹션)을 실시간 추출합니다.
+        캐싱 없이 항상 최신 프롬프트와 비전 엔진으로 새롭게 분석합니다.
         """
         file_path = resolve_uploaded_file(filename)
-
-        cached = self._load_cached_scan(file_path)
-        if cached is not None:
-            return cached
+        logger.info("[ExtractionService] Starting fresh segment scan for %s", file_path.name)
 
         prompt = build_segment_scan_prompt(file_path)
         raw_result = await self.workflow_engine.execute_agent_json(prompt)
 
         response_data = self._to_scan_response(raw_result, file_path)
-        self._store_cached_scan(file_path, response_data)
         return response_data
+
 
     # --- 내부 헬퍼 ---
 
@@ -214,21 +211,35 @@ class ExtractionService:
         순수 AI 엔진 패키지(`packages/scaffold-engine`)에 위임합니다.
         """
         from scaffold_engine import ScaffoldPipeline
-
-        file_path = resolve_uploaded_file(filename)
-        logger.info("Executing ScaffoldPipeline for %s", file_path.name)
-
-        pipeline = ScaffoldPipeline()
-        # 블로킹 서브프로세스 호출이므로 asyncio.to_thread 사용
         import asyncio
-        result = await asyncio.to_thread(pipeline.run, file_path)
 
-        return {
-            "status": "completed",
-            "meta": result.meta.model_dump(by_alias=True),
-            "htmlContent": result.html_content,
-            "markdownContent": result.markdown_content,
-        }
+        logger.info("[ExtractionService] >>> extract_scaffold requested for filename: '%s'", filename)
+
+        try:
+            file_path = resolve_uploaded_file(filename)
+            logger.info("[ExtractionService] Resolved file path: %s (exists=%s)", file_path, file_path.exists())
+        except Exception as exc:
+            logger.exception("[ExtractionService] Failed to resolve file for '%s': %s", filename, exc)
+            raise
+
+        try:
+            pipeline = ScaffoldPipeline()
+            logger.info("[ExtractionService] Starting async thread execution for ScaffoldPipeline...")
+            result = await asyncio.to_thread(pipeline.run, file_path)
+            logger.info("[ExtractionService] ScaffoldPipeline finished for %s, slots=%d, html_len=%d", file_path.name, len(result.slots), len(result.html_content))
+
+            return {
+                "status": "completed",
+                "meta": result.meta.model_dump(by_alias=True),
+                "htmlContent": result.html_content,
+                "markdownContent": result.markdown_content,
+                "slots": [s.model_dump(by_alias=True) for s in result.slots],
+            }
+        except Exception as exc:
+            logger.exception("[ExtractionService] ScaffoldPipeline execution failed for %s: %s", file_path.name, exc)
+            raise
+
+
 
 
 extraction_service = ExtractionService()

@@ -25,7 +25,15 @@ export interface ScaffoldExtractResponse {
   };
   htmlContent: string;
   markdownContent: string;
+  slots?: Array<{
+    id: string;
+    number: number;
+    label: string;
+    box_2d: [number, number, number, number];
+    pageNumber?: number;
+  }>;
 }
+
 
 /** 참고 문서(reference-document) 도메인의 백엔드 API 통신 단일 진입점. */
 export const referenceDocumentApi = {

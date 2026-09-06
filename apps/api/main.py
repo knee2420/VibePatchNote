@@ -8,6 +8,23 @@ _PACKAGES_DIR = Path(__file__).resolve().parents[2] / "packages"
 if str(_PACKAGES_DIR / "scaffold-engine") not in sys.path:
     sys.path.insert(0, str(_PACKAGES_DIR / "scaffold-engine"))
 
+# 로깅 디렉터리 및 핸들러 초기화
+_LOGS_DIR = Path(__file__).resolve().parent / "logs"
+_LOGS_DIR.mkdir(parents=True, exist_ok=True)
+_LOG_FILE = _LOGS_DIR / "debug.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] [%(name)s:%(lineno)d] %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler(str(_LOG_FILE), encoding="utf-8", mode="a"),
+    ],
+)
+logger = logging.getLogger("vibe.api")
+logger.info("================ BACKEND LOGGING INITIALIZED ================")
+logger.info("Log file target: %s", _LOG_FILE)
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -18,13 +35,29 @@ from app.hitl import router as hitl_router
 from app.templates import router as templates_router
 from app.workspaces import router as workspaces_router
 
-logger = logging.getLogger(__name__)
-
 app = FastAPI(
     title="Document Builder Backend Harness",
     description="FastAPI Orchestrator for the Native Workflow Pipeline",
     version="0.1.0",
 )
+
+# 모든 HTTP 요청/응답을 파일에 기록하는 추적 미들웨어
+@app.middleware("http")
+async def logging_middleware(request: Request, call_next):
+    import time
+    start_time = time.time()
+    method = request.method
+    url = str(request.url)
+    logger.info("[HTTP IN] %s %s", method, url)
+    try:
+        response = await call_next(request)
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+        logger.info("[HTTP OUT] %s %s -> Status %d (%sms)", method, url, response.status_code, duration_ms)
+        return response
+    except Exception as exc:
+        duration_ms = round((time.time() - start_time) * 1000, 2)
+        logger.exception("[HTTP ERROR] %s %s failed after %sms: %s", method, url, duration_ms, exc)
+        raise
 
 # CORS: 허용 오리진은 app/core/config.py 에서 관리합니다. (VIBE_CORS_ORIGINS 로 확장)
 app.add_middleware(
@@ -34,6 +67,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 @app.exception_handler(Exception)

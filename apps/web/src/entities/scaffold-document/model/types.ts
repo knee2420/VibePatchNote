@@ -29,8 +29,16 @@ export interface ScaffoldDocumentData extends Record<string, unknown> {
   progressStep?: number;
   progressMessage?: string;
   errorMessage?: string;
+  slots?: Array<{
+    id: string;
+    number: number;
+    label: string;
+    box_2d: [number, number, number, number];
+    pageNumber?: number;
+  }>;
   width?: number;
   height?: number;
 }
+
 
 export type ScaffoldDocumentNode = Node<ScaffoldDocumentData, typeof SCAFFOLD_DOCUMENT_NODE_TYPE>;

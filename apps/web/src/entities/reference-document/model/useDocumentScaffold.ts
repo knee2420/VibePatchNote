@@ -34,6 +34,8 @@ export function useDocumentScaffold({
   const extractScaffold = useCallback(async () => {
     if (!filename || isExtractingScaffold) return;
 
+    console.info('[useDocumentScaffold] Starting extractScaffold -> filename:', filename, 'title:', title, 'url:', url);
+
     setIsExtractingScaffold(true);
 
     // 1. 원본 노드 위치 및 동급(=동일) 크기 산정
@@ -114,13 +116,13 @@ export function useDocumentScaffold({
                   data: {
                     ...n.data,
                     progressStep: 2,
-                    progressMessage: '2D 그리드 레이아웃, 표, 섹션 구조 감지 중...',
+                    progressMessage: '2D 그리드 레이아웃, 물리적 표/섹션 구조 정밀 감지 중...',
                   },
                 }
               : n
           )
         );
-      }, 2500)
+      }, 3500)
     );
 
     timers.push(
@@ -133,13 +135,13 @@ export function useDocumentScaffold({
                   data: {
                     ...n.data,
                     progressStep: 3,
-                    progressMessage: 'AI 엔진 Tiptap DSL 추론 및 가변 슬롯 구성 중...',
+                    progressMessage: 'AI 엔진(Gemini 3.1 Pro) Tiptap DSL & 슬롯 심층 추론 중...',
                   },
                 }
               : n
           )
         );
-      }, 7000)
+      }, 8000)
     );
 
     timers.push(
@@ -158,12 +160,20 @@ export function useDocumentScaffold({
               : n
           )
         );
-      }, 14000)
+      }, 45000)
     );
 
     try {
-      // 4. 백엔드 AI scaffold-engine 비동기 호출
-      const res = await referenceDocumentApi.extractScaffold(filename);
+      // 4. 백엔드 AI scaffold-engine 비동기 호출 (실제 AI 인퍼런스 시간을 고려한 130초 안전 가드)
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('서식 생성 요청 시간 초과 (130초)')), 130000)
+      );
+
+
+      const res = await Promise.race([
+        referenceDocumentApi.extractScaffold(filename),
+        timeoutPromise,
+      ]);
 
       // 타이머 정리
       timers.forEach((t) => clearTimeout(t));
@@ -194,9 +204,10 @@ export function useDocumentScaffold({
       onSuccess?.(res.meta.title || title);
     } catch (err) {
       timers.forEach((t) => clearTimeout(t));
-      console.error('[useDocumentScaffold] Error extracting scaffold:', err);
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      console.error('[useDocumentScaffold] Error extracting scaffold for', filename, ':', err);
 
-      // 실패 시 노드에 에러 상태 기록
+      // 실패 시 노드에 실제 에러 상세 메시지 기록
       setNodes((nds) =>
         nds.map((n) => {
           if (n.id === newScaffoldId) {
@@ -205,7 +216,7 @@ export function useDocumentScaffold({
               data: {
                 ...n.data,
                 status: 'error',
-                errorMessage: 'Tiptap 서식 스캐폴딩 추출 중 오류가 발생했습니다.',
+                errorMessage: `서식 추출 실패: ${errorMsg}`,
               },
             };
           }
@@ -217,7 +228,9 @@ export function useDocumentScaffold({
     } finally {
       setIsExtractingScaffold(false);
     }
-  }, [filename, isExtractingScaffold, nodeId, title, getNode, setNodes, setEdges, onSuccess, onError]);
+
+  }, [filename, isExtractingScaffold, nodeId, title, url, getNode, setNodes, setEdges, onSuccess, onError]);
+
 
   return {
     isExtractingScaffold,

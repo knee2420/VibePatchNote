@@ -56,12 +56,15 @@ export function useScaffoldExtract({
         data: {
           id: newScaffoldId,
           title: res.meta.title || `${filename} 서식 틀`,
+          sourceNodeId: nodeId,
           sourcePdfFileName: filename,
           htmlContent: res.htmlContent,
           markdownContent: res.markdownContent,
           description: res.meta.description,
           difficulty: res.meta.difficulty,
+          slots: res.slots,
         },
+
       };
 
       // 2. 미로 스타일 곡선 엣지 생성 (보라색 애니메이션)

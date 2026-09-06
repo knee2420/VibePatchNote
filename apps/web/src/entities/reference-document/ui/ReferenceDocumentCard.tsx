@@ -80,7 +80,11 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     url: data.url,
     onSuccess: (scaffoldTitle) =>
       alert(`스캐폴딩 추출 완료: [${scaffoldTitle}] 노드가 캔버스에 연결되었습니다.`),
-    onError: () => alert('Tiptap 서식 스캐폴딩 추출 중 오류가 발생했습니다.'),
+    onError: (err) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[ReferenceDocumentCard] Extract scaffold error:', err);
+      alert(`[Tiptap 서식 스캐폴딩 추출 오류]\n${msg}`);
+    },
   });
 
   // 프리셋 토글 시에는 수동 크기를 버리고 자동 맞춤 우선권을 복원합니다.
