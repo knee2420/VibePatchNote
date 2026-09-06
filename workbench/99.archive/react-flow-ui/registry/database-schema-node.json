@@ -1,0 +1,23 @@
+﻿{
+  "name": "database-schema-node",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "table",
+    "https://ui.reactflow.dev/base-node",
+    "https://ui.reactflow.dev/labeled-handle"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "database-schema-node.tsx",
+      "content": "import React, { type ReactNode } from \"react\";\n\nimport {\n  BaseNode,\n  BaseNodeContent,\n  BaseNodeHeader,\n} from \"@/registry/components/base-node\";\nimport { TableBody, TableRow, TableCell } from \"@/components/ui/table\";\n\n/* DATABASE SCHEMA NODE HEADER ------------------------------------------------ */\n/**\n * A container for the database schema node header.\n */\nexport type DatabaseSchemaNodeHeaderProps = {\n  children?: ReactNode;\n};\n\nexport const DatabaseSchemaNodeHeader = ({\n  children,\n}: DatabaseSchemaNodeHeaderProps) => {\n  return (\n    <BaseNodeHeader className=\"bg-secondary text-muted-foreground rounded-tl-md rounded-tr-md p-2 text-center text-sm\">\n      <h2>{children}</h2>\n    </BaseNodeHeader>\n  );\n};\n\n/* DATABASE SCHEMA NODE BODY -------------------------------------------------- */\n/**\n * A container for the database schema node body that wraps the table.\n */\nexport type DatabaseSchemaNodeBodyProps = {\n  children?: ReactNode;\n};\n\nexport const DatabaseSchemaNodeBody = ({\n  children,\n}: DatabaseSchemaNodeBodyProps) => {\n  return (\n    <BaseNodeContent className=\"p-0\">\n      <table className=\"border-spacing-10 overflow-visible\">\n        <TableBody>{children}</TableBody>\n      </table>\n    </BaseNodeContent>\n  );\n};\n\n/* DATABASE SCHEMA TABLE ROW -------------------------------------------------- */\n/**\n * A wrapper for individual table rows in the database schema node.\n */\n\nexport type DatabaseSchemaTableRowProps = {\n  children: ReactNode;\n  className?: string;\n};\n\nexport const DatabaseSchemaTableRow = ({\n  children,\n  className,\n}: DatabaseSchemaTableRowProps) => {\n  return (\n    <TableRow className={`relative text-xs ${className || \"\"}`}>\n      {children}\n    </TableRow>\n  );\n};\n\n/* DATABASE SCHEMA TABLE CELL ------------------------------------------------- */\n/**\n * A simplified table cell for the database schema node.\n * Renders static content without additional dynamic props.\n */\nexport type DatabaseSchemaTableCellProps = {\n  className?: string;\n  children?: ReactNode;\n};\n\nexport const DatabaseSchemaTableCell = ({\n  className,\n  children,\n}: DatabaseSchemaTableCellProps) => {\n  return <TableCell className={className}>{children}</TableCell>;\n};\n\n/* DATABASE SCHEMA NODE ------------------------------------------------------- */\n/**\n * The main DatabaseSchemaNode component that wraps the header and body.\n * It maps over the provided schema data to render rows and cells.\n */\nexport type DatabaseSchemaNodeProps = {\n  className?: string;\n  children?: ReactNode;\n};\n\nexport const DatabaseSchemaNode = ({\n  className,\n  children,\n}: DatabaseSchemaNodeProps) => {\n  return <BaseNode className={className}>{children}</BaseNode>;\n};\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

@@ -1,0 +1,21 @@
+﻿{
+  "name": "labeled-group-node",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://ui.reactflow.dev/base-node"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "labeled-group-node.tsx",
+      "content": "import React, { type ReactNode, type ComponentProps } from \"react\";\nimport { Panel, type NodeProps, type PanelPosition } from \"@xyflow/react\";\n\nimport { BaseNode } from \"@/registry/components/base-node\";\nimport { cn } from \"@/lib/utils\";\n\n/* GROUP NODE Label ------------------------------------------------------- */\n\nexport type GroupNodeLabelProps = ComponentProps<\"div\">;\n\nexport function GroupNodeLabel({\n  children,\n  className,\n  ...props\n}: GroupNodeLabelProps) {\n  return (\n    <div className=\"h-full w-full\" {...props}>\n      <div\n        className={cn(\n          \"text-card-foreground bg-secondary w-fit p-2 text-xs\",\n          className,\n        )}\n      >\n        {children}\n      </div>\n    </div>\n  );\n}\n\nexport type GroupNodeProps = Partial<NodeProps> & {\n  label?: ReactNode;\n  position?: PanelPosition;\n};\n\n/* GROUP NODE -------------------------------------------------------------- */\n\nexport function GroupNode({ label, position, ...props }: GroupNodeProps) {\n  const getLabelClassName = (position?: PanelPosition) => {\n    switch (position) {\n      case \"top-left\":\n        return \"rounded-br-sm\";\n      case \"top-center\":\n        return \"rounded-b-sm\";\n      case \"top-right\":\n        return \"rounded-bl-sm\";\n      case \"bottom-left\":\n        return \"rounded-tr-sm\";\n      case \"bottom-right\":\n        return \"rounded-tl-sm\";\n      case \"bottom-center\":\n        return \"rounded-t-sm\";\n      default:\n        return \"rounded-br-sm\";\n    }\n  };\n\n  return (\n    <BaseNode\n      className=\"h-full overflow-hidden rounded-sm bg-white bg-opacity-50\"\n      {...props}\n    >\n      <Panel className=\"m-0 p-0\" position={position}>\n        {label && (\n          <GroupNodeLabel className={getLabelClassName(position)}>\n            {label}\n          </GroupNodeLabel>\n        )}\n      </Panel>\n    </BaseNode>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

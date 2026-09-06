@@ -1,0 +1,19 @@
+﻿{
+  "name": "node-appendix",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "node-appendix.tsx",
+      "content": "import type { ComponentProps } from \"react\";\nimport { cva, type VariantProps } from \"class-variance-authority\";\n\nimport { cn } from \"@/lib/utils\";\n\nconst appendixVariants = cva(\n  \"node-appendix absolute flex w-full flex-col items-center rounded-md border bg-card p-1 text-card-foreground\",\n  {\n    variants: {\n      position: {\n        top: \"-translate-y-full -my-1\",\n        bottom: \"top-full my-1\",\n        left: \"-left-full -mx-1\",\n        right: \"left-full mx-1\",\n      },\n    },\n    defaultVariants: {\n      position: \"top\",\n    },\n  },\n);\n\nexport interface NodeAppendixProps\n  extends ComponentProps<\"div\">, VariantProps<typeof appendixVariants> {\n  className?: string;\n  position?: \"top\" | \"bottom\" | \"left\" | \"right\";\n}\n\nexport function NodeAppendix({\n  children,\n  className,\n  position,\n  ...props\n}: NodeAppendixProps) {\n  return (\n    <div className={cn(appendixVariants({ position }), className)} {...props}>\n      {children}\n    </div>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

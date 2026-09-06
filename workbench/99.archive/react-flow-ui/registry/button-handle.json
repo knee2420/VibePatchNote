@@ -1,0 +1,21 @@
+﻿{
+  "name": "button-handle",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://ui.reactflow.dev/base-handle"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "button-handle.tsx",
+      "content": "import { Position, type HandleProps } from \"@xyflow/react\";\nimport { BaseHandle } from \"@/registry/components/base-handle\";\n\nconst wrapperClassNames: Record<Position, string> = {\n  [Position.Top]:\n    \"flex-col-reverse left-1/2 -translate-y-full -translate-x-1/2\",\n  [Position.Bottom]: \"flex-col left-1/2 translate-y-[10px] -translate-x-1/2\",\n  [Position.Left]:\n    \"flex-row-reverse top-1/2 -translate-x-full -translate-y-1/2\",\n  [Position.Right]: \"top-1/2 -translate-y-1/2 translate-x-[10px]\",\n};\n\nexport function ButtonHandle({\n  showButton = true,\n  position = Position.Bottom,\n  children,\n  ...props\n}: HandleProps & { showButton?: boolean }) {\n  const wrapperClassName = wrapperClassNames[position || Position.Bottom];\n  const vertical = position === Position.Top || position === Position.Bottom;\n\n  return (\n    <BaseHandle position={position} id={props.id} {...props}>\n      {showButton && (\n        <div\n          className={`absolute flex items-center ${wrapperClassName} pointer-events-none`}\n        >\n          <div\n            className={`bg-gray-300 ${vertical ? \"h-10 w-px\" : \"h-px w-10\"}`}\n          />\n          <div className=\"nodrag nopan pointer-events-auto\">{children}</div>\n        </div>\n      )}\n    </BaseHandle>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}
