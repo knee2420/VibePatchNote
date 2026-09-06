@@ -12,6 +12,21 @@ export interface UploadDocumentResponse {
   file_url: string;
 }
 
+export interface ScaffoldArchiveMeta {
+  scaffoldId: string;
+  title: string;
+  sourcePdfFileName: string;
+  createdAt: string;
+  slotsCount: number;
+  difficulty: string;
+  overlayImageUrl: string;
+  originalImageUrl: string;
+  promptSpecUrl: string;
+  htmlUrl: string;
+  slotsUrl: string;
+  archiveDir: string;
+}
+
 /** `POST /api/v1/documents/scaffold` 응답 스키마. */
 export interface ScaffoldExtractResponse {
   status: string;
@@ -32,6 +47,7 @@ export interface ScaffoldExtractResponse {
     box_2d: [number, number, number, number];
     pageNumber?: number;
   }>;
+  archive?: ScaffoldArchiveMeta;
 }
 
 

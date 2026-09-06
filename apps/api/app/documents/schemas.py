@@ -53,6 +53,7 @@ class ScaffoldDocumentResponse(BaseModel):
     html_content: str = Field(..., alias="htmlContent", description="Tiptap 에디터용 HTML")
     markdown_content: str = Field(..., alias="markdownContent", description="에이전트/MCP 용 마크다운")
     slots: List[Dict[str, Any]] = Field(default_factory=list, description="슬롯 매핑 정보")
+    archive: Optional[Dict[str, Any]] = Field(default=None, description="영속화된 아카이브 및 비전 에셋 메타")
 
     class Config:
         populate_by_name = True

@@ -338,12 +338,25 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
             </span>
           )}
         </div>
-        <button
-          onClick={handleOpenFocus}
-          className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer transition-colors flex items-center gap-1"
-        >
-          <span>Playground 전체화면 ↗</span>
-        </button>
+        <div className="flex items-center gap-2.5">
+          {data.archive?.overlayImageUrl && (
+            <a
+              href={data.archive.overlayImageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-600 hover:text-purple-800 font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
+              title="슬롯 오버레이 비전 검증 이미지 열기"
+            >
+              <span>비전 검증 👁️</span>
+            </a>
+          )}
+          <button
+            onClick={handleOpenFocus}
+            className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer transition-colors flex items-center gap-1"
+          >
+            <span>Playground 전체화면 ↗</span>
+          </button>
+        </div>
       </div>
 
       {/* 4. React Flow 엣지 핸들 (미로 스타일 연결점) */}

@@ -36,6 +36,20 @@ export interface ScaffoldDocumentData extends Record<string, unknown> {
     box_2d: [number, number, number, number];
     pageNumber?: number;
   }>;
+  archive?: {
+    scaffoldId: string;
+    title: string;
+    sourcePdfFileName: string;
+    createdAt: string;
+    slotsCount: number;
+    difficulty: string;
+    overlayImageUrl: string;
+    originalImageUrl: string;
+    promptSpecUrl: string;
+    htmlUrl: string;
+    slotsUrl: string;
+    archiveDir: string;
+  };
   width?: number;
   height?: number;
 }

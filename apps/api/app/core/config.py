@@ -31,6 +31,9 @@ class Settings:
     def __init__(self) -> None:
         self.base_dir: Path = BASE_DIR
         self.upload_dir: Path = Path(os.getenv("VIBE_UPLOAD_DIR", str(BASE_DIR / "uploads")))
+        self.scaffold_storage_dir: Path = Path(
+            os.getenv("VIBE_SCAFFOLD_STORAGE_DIR", str(BASE_DIR / "storage" / "scaffolds"))
+        )
         self.db_file: Path = Path(os.getenv("VIBE_DB_FILE", str(BASE_DIR / "workspaces_db.json")))
         # 업로드 파일을 프런트엔드에 돌려줄 때 사용할 외부 노출 오리진.
         self.public_base_url: str = os.getenv("VIBE_PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
@@ -62,6 +65,7 @@ class Settings:
 
     def ensure_directories(self) -> None:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.scaffold_storage_dir.mkdir(parents=True, exist_ok=True)
 
 
 @lru_cache(maxsize=1)

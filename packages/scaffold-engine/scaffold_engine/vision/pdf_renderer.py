@@ -5,7 +5,7 @@ PyMuPDF(fitz)를 사용하여 PDF 페이지를 고해상도 이미지로 렌더�
 """
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 try:
     import pymupdf as fitz
 except ImportError:
@@ -195,3 +195,111 @@ class PdfVisionRenderer:
 
         doc.close()
         return results
+
+
+def render_page_as_png(
+    pdf_path: Union[str, Path],
+    page_number: int = 1,
+    dpi: int = 150,
+) -> bytes:
+    """PDF 지정 페이지를 순수 PNG 바이너리로 렌더링합니다."""
+    doc = fitz.open(str(pdf_path))
+    try:
+        idx = min(max(page_number, 1), len(doc)) - 1
+        page = doc[idx]
+        pix = page.get_pixmap(dpi=dpi)
+        return pix.tobytes("png")
+    finally:
+        doc.close()
+
+
+def _extract_slot_meta(slot: Any, default_number: int) -> Optional[tuple[List[int], int, int]]:
+    """슬롯 객체(Pydantic or dict)에서 (box_2d, number, page_number) 안전 추출."""
+    if hasattr(slot, "box_2d"):
+        box = slot.box_2d
+        num = getattr(slot, "number", default_number)
+        page = getattr(slot, "page_number", 1)
+    elif isinstance(slot, dict):
+        box = slot.get("box_2d", [])
+        num = slot.get("number", default_number)
+        page = slot.get("pageNumber", slot.get("page_number", 1))
+    else:
+        return None
+
+    if len(box) != 4:
+        return None
+    return box, num, page
+
+
+def _draw_slot_box_and_badge(page: Any, rect: fitz.Rect, num: int) -> None:
+    """PDF 페이지 위에 슬롯 하이라이트 박스와 번호 배지를 렌더링합니다."""
+    # 1. 보라색 반투명 박스 (#9333ea)
+    page.draw_rect(
+        rect,
+        color=(0.576, 0.2, 0.918),
+        fill=(0.933, 0.867, 0.988),
+        width=1.5,
+        fill_opacity=0.35,
+    )
+
+    # 2. 좌측 상단 번호 배지
+    badge_w = min(26.0, max(14.0, rect.width * 0.4))
+    badge_h = min(11.0, max(8.0, rect.height * 0.5))
+    badge_y0 = max(0.0, rect.y0 - badge_h) if rect.y0 >= badge_h else rect.y0
+    badge_rect = fitz.Rect(rect.x0, badge_y0, rect.x0 + badge_w, badge_y0 + badge_h)
+
+    page.draw_rect(
+        badge_rect,
+        color=(0.576, 0.2, 0.918),
+        fill=(0.576, 0.2, 0.918),
+        fill_opacity=0.9,
+    )
+    page.insert_textbox(
+        badge_rect,
+        f"s{num}",
+        fontsize=6.5,
+        color=(1.0, 1.0, 1.0),
+        align=1,  # 가운데 정렬
+    )
+
+
+def render_slot_overlay_png(
+    pdf_path: Union[str, Path],
+    slots: List[Any],
+    page_number: int = 1,
+    dpi: int = 150,
+) -> bytes:
+    """
+    원본 PDF 페이지 위에 추출된 슬롯들의 위치를 보라색 반투명 박스와 번호 태그로 오버레이 렌더링합니다.
+    (0~1000 정규화 좌표 [ymin, xmin, ymax, xmax] -> 이미지 픽셀 좌표 매핑)
+    """
+    doc = fitz.open(str(pdf_path))
+    try:
+        idx = min(max(page_number, 1), len(doc)) - 1
+        page = doc[idx]
+        pw, ph = page.rect.width, page.rect.height
+
+        for i, s in enumerate(slots):
+            meta = _extract_slot_meta(s, default_number=i + 1)
+            if not meta:
+                continue
+
+            box, num, p_num = meta
+            if p_num != page_number:
+                continue
+
+            ymin, xmin, ymax, xmax = box
+            x0, y0 = (xmin / 1000.0) * pw, (ymin / 1000.0) * ph
+            x1, y1 = (xmax / 1000.0) * pw, (ymax / 1000.0) * ph
+
+            if x1 <= x0 or y1 <= y0:
+                continue
+
+            _draw_slot_box_and_badge(page, fitz.Rect(x0, y0, x1, y1), num)
+
+        pix = page.get_pixmap(dpi=dpi)
+        return pix.tobytes("png")
+    finally:
+        doc.close()
+
+

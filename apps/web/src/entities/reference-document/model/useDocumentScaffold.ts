@@ -195,6 +195,7 @@ export function useDocumentScaffold({
                 markdownContent: res.markdownContent,
                 // 백엔드가 원본에서 실측한 슬롯 좌표. 이게 있어야 양방향 매핑이 성립한다.
                 slots: res.slots ?? [],
+                archive: res.archive,
                 description: res.meta.description,
                 difficulty: res.meta.difficulty,
                 status: 'completed',

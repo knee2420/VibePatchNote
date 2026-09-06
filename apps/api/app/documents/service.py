@@ -228,12 +228,26 @@ class ExtractionService:
             result = await asyncio.to_thread(pipeline.run, file_path)
             logger.info("[ExtractionService] ScaffoldPipeline finished for %s, slots=%d, html_len=%d", file_path.name, len(result.slots), len(result.html_content))
 
+            # --- 신규 파이프라인 인터셉트: 전용 아카이브 모듈에 파일 및 비전 오버레이 영속화 ---
+            archive_meta_dict = None
+            try:
+                from app.scaffolds.service import scaffold_archive_service
+                logger.info("[ExtractionService] Archiving scaffold to storage and generating vision overlay...")
+                archive_meta = await asyncio.to_thread(
+                    scaffold_archive_service.archive_scaffold, file_path, result
+                )
+                archive_meta_dict = archive_meta.model_dump(by_alias=True)
+                logger.info("[ExtractionService] Archived successfully: %s", archive_meta.scaffold_id)
+            except Exception as archive_err:
+                logger.warning("[ExtractionService] Non-fatal archive failure: %s", archive_err, exc_info=True)
+
             return {
                 "status": "completed",
                 "meta": result.meta.model_dump(by_alias=True),
                 "htmlContent": result.html_content,
                 "markdownContent": result.markdown_content,
                 "slots": [s.model_dump(by_alias=True) for s in result.slots],
+                "archive": archive_meta_dict,
             }
         except Exception as exc:
             logger.exception("[ExtractionService] ScaffoldPipeline execution failed for %s: %s", file_path.name, exc)

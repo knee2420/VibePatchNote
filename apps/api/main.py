@@ -32,6 +32,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.documents import router as documents_router
 from app.hitl import router as hitl_router
+from app.scaffolds import router as scaffolds_router
 from app.templates import router as templates_router
 from app.workspaces import router as workspaces_router
 
@@ -85,6 +86,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Upload & Analyze"])
+app.include_router(scaffolds_router, prefix="/api/v1/scaffolds", tags=["Scaffolds & Vision Archives"])
 app.include_router(hitl_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
 app.include_router(templates_router.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
 app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])

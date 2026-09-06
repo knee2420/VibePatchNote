@@ -1,0 +1,14 @@
+{
+  "scaffold_id": "scaffold-11월_디딤돌_회의록-1788686151",
+  "title": "11월 디딤돌 회의록.pdf",
+  "source_pdf_file_name": "11월 디딤돌 회의록.pdf",
+  "created_at": "2026-09-06T09:15:51.965592+00:00",
+  "slots_count": 7,
+  "difficulty": "easy",
+  "overlay_image_url": "http://localhost:8000/api/v1/scaffolds/scaffold-11월_디딤돌_회의록-1788686151/assets/vision/overlay_p1.png",
+  "original_image_url": "http://localhost:8000/api/v1/scaffolds/scaffold-11월_디딤돌_회의록-1788686151/assets/vision/original_p1.png",
+  "prompt_spec_url": "http://localhost:8000/api/v1/scaffolds/scaffold-11월_디딤돌_회의록-1788686151/assets/prompt_spec.md",
+  "html_url": "http://localhost:8000/api/v1/scaffolds/scaffold-11월_디딤돌_회의록-1788686151/assets/scaffold.html",
+  "slots_url": "http://localhost:8000/api/v1/scaffolds/scaffold-11월_디딤돌_회의록-1788686151/assets/slots.json",
+  "archive_dir": "C:\\AI_Projects\\WebNovelAssistant\\VibePatchNote\\apps\\api\\storage\\scaffolds\\scaffold-11월_디딤돌_회의록-1788686151"
+}
