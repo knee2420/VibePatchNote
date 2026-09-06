@@ -1,101 +1,35 @@
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect } from 'react';
-import { ScaffoldEditorExtensions } from '../extensions';
-import '../styles/scaffold.css';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-export interface SlotHoverInfo {
-  id: string;
-  number: number;
-  label: string;
-  box_2d: [number, number, number, number];
-}
+import { ScaffoldEditorExtensions } from '../extensions';
+import type { SlotMappingItem } from '../types';
+import '../styles/scaffold.css';
 
 export interface ScaffoldCanvasEditorProps {
   initialContent?: string;
+  /** 원본 문서 실측 좌표 목록. 슬롯 호버 시 이 값으로 원본 위치를 되짚는다. */
+  slots?: SlotMappingItem[];
   onChangeHtml?: (html: string) => void;
   onChangeMarkdown?: (markdown: string) => void;
-  onHoverSlot?: (slot: SlotHoverInfo | null) => void;
+  onHoverSlot?: (slot: SlotMappingItem | null) => void;
   activeMappingNumber?: number | null;
   className?: string;
   readOnly?: boolean;
 }
 
-function matchSlotToBoundingBox(text: string, placeholder: string): SlotHoverInfo {
-  const combined = `${text} ${placeholder}`.toLowerCase();
+const SLOT_SELECTOR = 'span[data-type="scaffold-slot"]';
+const ACTIVE_CLASS = 'is-sync-hovered';
 
-  // 회의록 양식 슬롯 우선 매칭
-  if (combined.includes('일시') || combined.includes('yyyy') || combined.includes('2018')) {
-    return { id: 'slot-time', number: 1, label: '일시 (YYYY.MM.DD)', box_2d: [121, 266, 166, 878] };
-  }
-  if (combined.includes('장소') || combined.includes('6공학관')) {
-    return { id: 'slot-place', number: 2, label: '회의 장소', box_2d: [166, 266, 207, 878] };
-  }
-  if (combined.includes('참석자') || combined.includes('인원') || combined.includes('4명')) {
-    return { id: 'slot-attendees', number: 3, label: '참석자 인원 및 명단', box_2d: [207, 266, 265, 878] };
-  }
-  if (combined.includes('안건') || combined.includes('gps')) {
-    return { id: 'slot-agenda', number: 4, label: '회의 주요 안건', box_2d: [265, 266, 313, 878] };
-  }
-  if (combined.includes('회의내용') || combined.includes('드론') || combined.includes('논의')) {
-    return { id: 'slot-content', number: 5, label: '상세 회의 내용', box_2d: [313, 266, 479, 878] };
-  }
-  if (combined.includes('지출') || combined.includes('40,000') || combined.includes('0,000')) {
-    return { id: 'slot-expense', number: 6, label: '총 지출 금액 (원)', box_2d: [479, 266, 520, 878] };
-  }
-  if (combined.includes('증빙') || combined.includes('영수증') || combined.includes('첨부')) {
-    return { id: 'slot-evidence', number: 7, label: '영수증 및 증빙자료 첨부란', box_2d: [520, 121, 854, 878] };
-  }
-
-  // 인보이스 양식 슬롯 매칭 (실제 PDF 기하와 100% 일치)
-  if (combined.includes('상호') || combined.includes('로고') || combined.includes('logo') || combined.includes('brand')) {
-    return { id: 'slot-logo', number: 1, label: '상호 / 로고명 (예: Atticus)', box_2d: [83, 101, 154, 535] };
-  }
-  if (
-    combined.includes('august') ||
-    combined.includes('company') ||
-    combined.includes('공급자') ||
-    combined.includes('tax') ||
-    combined.includes('invoice') ||
-    combined.includes('2026') ||
-    combined.includes('1309')
-  ) {
-    return { id: 'slot-company', number: 2, label: '공급자 정보 및 일자', box_2d: [35, 355, 160, 535] };
-  }
-  if (
-    combined.includes('billing') ||
-    combined.includes('수신자') ||
-    combined.includes('담당자') ||
-    combined.includes('mingyu') ||
-    combined.includes('seoul') ||
-    combined.includes('주소')
-  ) {
-    return { id: 'slot-billing', number: 3, label: '수신자 청구 정보 (Billing info)', box_2d: [182, 60, 245, 121] };
-  }
-  if (
-    combined.includes('total') ||
-    combined.includes('usd') ||
-    combined.includes('147') ||
-    combined.includes('paid') ||
-    combined.includes('credit')
-  ) {
-    return { id: 'slot-total', number: 4, label: '총 결제 금액 (Total USD)', box_2d: [182, 460, 228, 535] };
-  }
-  if (
-    combined.includes('품목') ||
-    combined.includes('서비스') ||
-    combined.includes('description') ||
-    combined.includes('amount') ||
-    combined.includes('subtotal') ||
-    combined.includes('one-time')
-  ) {
-    return { id: 'slot-table', number: 5, label: '청구 내역 및 단가표 (Description Table)', box_2d: [290, 60, 395, 535] };
-  }
-  return { id: 'slot-footer', number: 6, label: '고객 지원 및 결제 정보 (Footer)', box_2d: [580, 160, 638, 435] };
-}
-
-
+/**
+ * ScaffoldCanvasEditor
+ *
+ * 서식 와이어프레임 편집기. 슬롯 좌표는 **이 컴포넌트가 추론하지 않는다** —
+ * 백엔드가 원본 PDF 에서 실측한 `slots` 를 `data-slot-id`/`data-mapping-num` 으로
+ * 되짚기만 한다. 좌표를 알 수 없으면 매핑을 보고하지 않는다(틀린 위치를 띄우지 않음).
+ */
 export function ScaffoldCanvasEditor({
   initialContent = '',
+  slots,
   onChangeHtml,
   onChangeMarkdown,
   onHoverSlot,
@@ -103,29 +37,37 @@ export function ScaffoldCanvasEditor({
   className = '',
   readOnly = false,
 }: ScaffoldCanvasEditorProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const slotById = useMemo(() => {
+    const byId = new Map<string, SlotMappingItem>();
+    const byNumber = new Map<number, SlotMappingItem>();
+    (slots ?? []).forEach((slot) => {
+      byId.set(slot.id, slot);
+      byNumber.set(slot.number, slot);
+    });
+    return { byId, byNumber };
+  }, [slots]);
+
   const editor = useEditor({
     extensions: ScaffoldEditorExtensions,
     content: initialContent,
     editable: !readOnly,
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChangeHtml?.(html);
-
-      // tiptap-markdown 저장소에서 순수 마크다운 추출
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const markdown = (editor.storage as any).markdown?.getMarkdown?.() || '';
-      onChangeMarkdown?.(markdown);
+    onUpdate: ({ editor: instance }) => {
+      onChangeHtml?.(instance.getHTML());
+      const storage = instance.storage as { markdown?: { getMarkdown?: () => string } };
+      onChangeMarkdown?.(storage.markdown?.getMarkdown?.() ?? '');
     },
     editorProps: {
       attributes: {
-        class: 'scaffold-prose outline-none min-h-[500px] w-full text-slate-900 focus:outline-none',
+        class: 'scaffold-prose outline-none w-full text-slate-900 focus:outline-none',
       },
     },
   });
 
   useEffect(() => {
     if (editor && initialContent && editor.getHTML() !== initialContent) {
-      editor.commands.setContent(initialContent, { emitUpdate: true });
+      editor.commands.setContent(initialContent, { emitUpdate: false });
     }
   }, [editor, initialContent]);
 
@@ -135,112 +77,61 @@ export function ScaffoldCanvasEditor({
     }
   }, [editor, readOnly]);
 
-  // 외부에서 활성화된 매핑 번호가 있을 때 해당 슬롯 하이라이트 동기화
+  // 활성 매핑 하이라이트. 이 에디터 인스턴스의 DOM 으로만 범위를 한정한다.
   useEffect(() => {
-    const slots = document.querySelectorAll('.scaffold-editor-root span[data-type="scaffold-slot"], .scaffold-editor-root .scaffold-slot');
-    slots.forEach((el) => {
-      const numAttr = el.getAttribute('data-mapping-num');
-      if (activeMappingNumber && numAttr === String(activeMappingNumber)) {
-        el.classList.add('is-sync-hovered');
-      } else {
-        el.classList.remove('is-sync-hovered');
-      }
+    const root = rootRef.current;
+    if (!root) return;
+    const elements = root.querySelectorAll<HTMLElement>(SLOT_SELECTOR);
+    elements.forEach((element) => {
+      const raw = element.getAttribute('data-mapping-num');
+      const isActive = activeMappingNumber != null && raw === String(activeMappingNumber);
+      element.classList.toggle(ACTIVE_CLASS, isActive);
     });
-  }, [activeMappingNumber]);
+  }, [activeMappingNumber, initialContent]);
 
-  if (!editor) {
-    return null;
-  }
-
-  const handleMouseOver = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement | null;
-    const slotEl = target?.closest('.scaffold-slot, span[data-type="scaffold-slot"]') as HTMLElement | null;
-    if (slotEl) {
-      const text = slotEl.innerText || '';
-      const placeholder = slotEl.getAttribute('data-placeholder') || '';
-      const bboxAttr = slotEl.getAttribute('data-bbox');
-      const numAttr = slotEl.getAttribute('data-mapping-num');
-      const slotId = slotEl.getAttribute('data-slot-id') || `slot-${numAttr || 'hover'}`;
-
-      let info: SlotHoverInfo;
-
-      if (bboxAttr) {
-        try {
-          const parsed = JSON.parse(bboxAttr);
-          if (Array.isArray(parsed) && parsed.length === 4) {
-            info = {
-              id: slotId,
-              number: numAttr ? parseInt(numAttr, 10) : 1,
-              label: placeholder || text || '입력 슬롯',
-              box_2d: parsed as [number, number, number, number],
-            };
-          } else {
-            info = matchSlotToBoundingBox(text, placeholder);
-          }
-        } catch {
-          info = matchSlotToBoundingBox(text, placeholder);
-        }
-      } else {
-        info = matchSlotToBoundingBox(text, placeholder);
+  const resolveSlot = useCallback(
+    (element: HTMLElement): SlotMappingItem | null => {
+      const id = element.getAttribute('data-slot-id');
+      if (id) {
+        const found = slotById.byId.get(id);
+        if (found) return found;
       }
+      const raw = element.getAttribute('data-mapping-num');
+      if (raw) {
+        const parsed = Number.parseInt(raw, 10);
+        if (!Number.isNaN(parsed)) return slotById.byNumber.get(parsed) ?? null;
+      }
+      return null;
+    },
+    [slotById]
+  );
 
-      slotEl.setAttribute('data-mapping-num', String(info.number));
-      onHoverSlot?.(info);
-    }
-  };
+  const handlePointerOver = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(SLOT_SELECTOR);
+      if (!target) return;
+      // 좌표를 모르면 아무것도 보고하지 않는다. 틀린 위치를 띄우는 것보다 낫다.
+      onHoverSlot?.(resolveSlot(target));
+    },
+    [onHoverSlot, resolveSlot]
+  );
 
+  const handlePointerOut = useCallback(
+    (event: React.PointerEvent<HTMLDivElement>) => {
+      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(SLOT_SELECTOR);
+      if (target) onHoverSlot?.(null);
+    },
+    [onHoverSlot]
+  );
 
-  const handleMouseOut = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement | null;
-    const slotEl = target?.closest('.scaffold-slot, span[data-type="scaffold-slot"]') as HTMLElement | null;
-    if (slotEl) {
-      onHoverSlot?.(null);
-    }
-  };
+  if (!editor) return null;
 
   return (
     <div
-      className={`scaffold-editor-root w-full bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col ${className}`}
-      style={{
-        backgroundColor: '#ffffff',
-        color: '#0f172a',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-      }}
+      ref={rootRef}
+      className={`scaffold-editor-root w-full bg-white rounded-xl shadow-xl border border-slate-200/80 overflow-auto ${className}`}
     >
-      {/* 2단 및 3단 그리드를 무조건 강제하는 격리 스타일 */}
-      <style>{`
-        .scaffold-editor-root div[data-type="column-group"],
-        .scaffold-editor-root .column-group {
-          display: grid !important;
-          grid-template-columns: 1.25fr 1fr !important;
-          gap: 1.25rem !important;
-          width: 100% !important;
-          margin: 1rem 0 !important;
-          box-sizing: border-box !important;
-        }
-        .scaffold-editor-root div[data-type="column-group"][data-cols="3"],
-        .scaffold-editor-root .column-group[data-cols="3"] {
-          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-        }
-        .scaffold-editor-root div[data-type="column"],
-        .scaffold-editor-root .column-box {
-          display: block !important;
-          min-width: 0 !important;
-          width: 100% !important;
-          box-sizing: border-box !important;
-        }
-        .scaffold-editor-root .text-right {
-          text-align: right !important;
-        }
-      `}</style>
-
-      {/* 에디터 본문 A4 용지 캔버스 영역 */}
-      <div
-        onMouseOver={handleMouseOver}
-        onMouseOut={handleMouseOut}
-        className="flex-1 p-8 sm:p-10 overflow-y-auto max-h-[800px]"
-        style={{ backgroundColor: '#ffffff' }}
-      >
+      <div onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
         <EditorContent editor={editor} />
       </div>
     </div>

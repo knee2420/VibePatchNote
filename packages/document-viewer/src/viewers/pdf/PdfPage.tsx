@@ -2,7 +2,8 @@ import { memo, useRef, useState, useEffect, type RefObject } from 'react';
 import { Page } from 'react-pdf';
 import { Loader2 } from 'lucide-react';
 
-import type { ViewerSegment } from '../../types';
+import type { ViewerHighlight, ViewerSegment } from '../../types';
+import { PdfHighlightOverlay } from './PdfHighlightOverlay';
 import { PdfSegmentOverlay } from './PdfSegmentOverlay';
 import type { PdfPageInfo } from './usePdfTextLines';
 
@@ -16,6 +17,7 @@ interface PdfPageProps {
   totalPages: number;
   isSpread: boolean;
   segments: ViewerSegment[];
+  highlight?: ViewerHighlight | null;
   textLines?: number[];
   isEditMode: boolean;
   enableSnap: boolean;
@@ -32,6 +34,7 @@ export const PdfPage = memo(function PdfPage({
   totalPages,
   isSpread,
   segments,
+  highlight,
   textLines,
   isEditMode,
   enableSnap,
@@ -113,6 +116,8 @@ export const PdfPage = memo(function PdfPage({
               onCreateSegment={onCreateSegment}
               onDeleteSegment={onDeleteSegment}
             />
+
+            <PdfHighlightOverlay pageNumber={pageNumber} highlight={highlight} />
           </>
         ) : (
           <div

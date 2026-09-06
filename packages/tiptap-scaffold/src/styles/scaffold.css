@@ -36,93 +36,55 @@ div[data-type="column"],
   box-sizing: border-box !important;
 }
 
-/* 3. 인라인 템플릿 채우기 슬롯 (ScaffoldSlot) */
+/* 3. 서식 슬롯 (ScaffoldSlot) */
 span[data-type="scaffold-slot"],
 .scaffold-slot {
-  display: inline-block !important;
-  position: relative !important;
-  min-width: 60px !important;
-  padding: 1px 6px !important;
-  margin: 3px 2px !important;
-  border-radius: 4px !important;
-  border: 1.5px dashed #a855f7 !important;
-  background-color: #faf5ff !important;
-  color: #6b21a8 !important;
-  font-weight: 500 !important;
-  vertical-align: baseline !important;
-  transition: all 0.15s ease-in-out !important;
-  cursor: pointer !important;
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 3px;
+  border: 1px dashed #a855f7;
+  background-color: #faf5ff;
+  color: #7e22ce;
+  font-style: italic;
+  font-size: 0.82em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* 대형 헤더(h1, h2) 내부의 슬롯은 상단 뱃지가 윗줄 텍스트를 침범하지 않도록 상단 여백 확보 */
-h1 > span[data-type="scaffold-slot"],
-h2 > span[data-type="scaffold-slot"],
-h1 > .scaffold-slot,
-h2 > .scaffold-slot {
-  margin-top: 14px !important;
+/* 블록 전체가 슬롯인 경우 칸을 꽉 채워 원본 영역과 1:1 로 대응시킨다. */
+span[data-type="scaffold-slot"].scaffold-slot-fill {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
-span[data-type="scaffold-slot"]:hover,
-.scaffold-slot:hover,
-span[data-type="scaffold-slot"].is-sync-hovered,
-.scaffold-slot.is-sync-hovered {
-  border-color: #7e22ce !important;
-  border-style: solid !important;
-  background-color: #f3e8ff !important;
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.35) !important;
+span[data-type="scaffold-slot"]:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.85;
 }
 
-/* 슬롯 위에 솟아오르는 #1, #2 번호 뱃지 */
-span[data-type="scaffold-slot"][data-mapping-num]:hover:after,
-.scaffold-slot[data-mapping-num]:hover:after,
-span[data-type="scaffold-slot"].is-sync-hovered:after,
-.scaffold-slot.is-sync-hovered:after {
-  content: "#" attr(data-mapping-num) !important;
-  position: absolute !important;
-  top: -19px !important;
-  left: 0 !important;
-  background-color: #9333ea !important;
-  color: #ffffff !important;
-  font-size: 10px !important;
-  font-weight: 800 !important;
-  font-family: monospace !important;
-  padding: 1px 5px !important;
-  border-radius: 4px !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-  pointer-events: none !important;
-  z-index: 50 !important;
-  line-height: 1.2 !important;
-  animation: slot-badge-in 0.15s ease-out !important;
+/* 우측 서식에서 호버된 슬롯. 좌측 원본 하이라이트와 짝을 이룬다. */
+span[data-type="scaffold-slot"].is-sync-hovered {
+  background-color: #a855f7;
+  color: #ffffff;
+  border-style: solid;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.35);
 }
 
-@keyframes slot-badge-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+/* 4. 조립된 페이지 캔버스 — PDF 포인트와 1:1 px 로 배치된다. */
+.scaffold-page {
+  position: relative;
+  margin: 0 auto;
+  background: #ffffff;
+  transform-origin: top left;
 }
 
-span[data-type="scaffold-slot"]:empty:before,
-.scaffold-slot:empty:before {
-  content: attr(data-placeholder) !important;
-  color: #c084fc !important;
-  font-style: italic !important;
-  font-weight: normal !important;
+.scaffold-table th,
+.scaffold-table td {
+  overflow: hidden;
 }
-
-/* 4. 와이어프레임 표 (Table) - 열 너비 비율(19%:81% 등) 절대 보장 */
-.scaffold-prose table,
-table.scaffold-table {
-  width: 100% !important;
-  table-layout: fixed !important;
-  border-collapse: collapse !important;
-  margin: 1rem 0 !important;
-  box-sizing: border-box !important;
-}
-
-.scaffold-prose table th,
-.scaffold-prose table td,
-table.scaffold-table th,
-table.scaffold-table td {
-  box-sizing: border-box !important;
-  word-break: break-word !important;
-}
-

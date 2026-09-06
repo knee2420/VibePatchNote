@@ -3,6 +3,9 @@ import { useReactFlow, type Edge, MarkerType } from '@xyflow/react';
 
 import { referenceDocumentApi } from '../api/referenceDocumentApi';
 
+/** 백엔드 최악 지연(하네스 75초 x 재시도 3회 = 225초)을 덮는 프런트 가드. */
+const SCAFFOLD_TIMEOUT_MS = 240_000;
+
 interface UseDocumentScaffoldOptions {
   nodeId: string;
   title: string;
@@ -77,7 +80,7 @@ export function useDocumentScaffold({
         markdownContent: '',
         status: 'generating' as const,
         progressStep: 1,
-        progressMessage: 'PDF 페이지 고해상도 비전 렌더링 준비...',
+        progressMessage: '원본 페이지 기하 실측 준비...',
         width: nodeWidth,
         height: nodeHeight,
       },
@@ -116,7 +119,7 @@ export function useDocumentScaffold({
                   data: {
                     ...n.data,
                     progressStep: 2,
-                    progressMessage: '2D 그리드 레이아웃, 물리적 표/섹션 구조 정밀 감지 중...',
+                    progressMessage: '표 경계·행 높이·열 너비 실측 중...',
                   },
                 }
               : n
@@ -135,7 +138,7 @@ export function useDocumentScaffold({
                   data: {
                     ...n.data,
                     progressStep: 3,
-                    progressMessage: 'AI 엔진(Gemini 3.1 Pro) Tiptap DSL & 슬롯 심층 추론 중...',
+                    progressMessage: '고정 서식과 채울 값을 AI가 판정하는 중...',
                   },
                 }
               : n
@@ -154,21 +157,22 @@ export function useDocumentScaffold({
                   data: {
                     ...n.data,
                     progressStep: 4,
-                    progressMessage: 'HTML DOM 무결성 검증 및 서식 와이어프레임 완성 중...',
+                    progressMessage: '실측 좌표로 서식 조립 및 기하 채점 중...',
                   },
                 }
               : n
           )
         );
-      }, 45000)
+      }, 30000)
     );
 
     try {
-      // 4. 백엔드 AI scaffold-engine 비동기 호출 (실제 AI 인퍼런스 시간을 고려한 130초 안전 가드)
+      // 4. 백엔드 scaffold-engine 호출.
+      //    가드는 백엔드 최악 지연(하네스 75초 x 재시도 3회)보다 커야 한다.
+      //    그렇지 않으면 백엔드가 아직 일하는 중에 프런트가 먼저 실패로 처리한다.
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('서식 생성 요청 시간 초과 (130초)')), 130000)
+        setTimeout(() => reject(new Error('서식 생성 요청 시간 초과 (240초)')), SCAFFOLD_TIMEOUT_MS)
       );
-
 
       const res = await Promise.race([
         referenceDocumentApi.extractScaffold(filename),
@@ -189,6 +193,8 @@ export function useDocumentScaffold({
                 title: res.meta.title || `${title} 서식 틀`,
                 htmlContent: res.htmlContent,
                 markdownContent: res.markdownContent,
+                // 백엔드가 원본에서 실측한 슬롯 좌표. 이게 있어야 양방향 매핑이 성립한다.
+                slots: res.slots ?? [],
                 description: res.meta.description,
                 difficulty: res.meta.difficulty,
                 status: 'completed',

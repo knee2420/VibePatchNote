@@ -12,6 +12,7 @@ export const PdfViewer = memo(function PdfViewer({
   url,
   isSpread = false,
   segments = [],
+  highlight,
   isEditMode = false,
   enableSmartSnap = true,
   onUpdateSegment,
@@ -95,6 +96,7 @@ export const PdfViewer = memo(function PdfViewer({
                   totalPages={numPages}
                   isSpread={isSpread}
                   segments={segments}
+                  highlight={highlight}
                   textLines={textLinesByPage[pageNumber]}
                   isEditMode={isEditMode}
                   enableSnap={enableSmartSnap}

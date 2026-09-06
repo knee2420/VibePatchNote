@@ -8,8 +8,8 @@ import logging
 import sys
 from pathlib import Path
 
-from scaffold_engine.pipeline import ScaffoldPipeline
-from scaffold_engine.harness.client import DEFAULT_MODEL
+from scaffold_engine.core.pipeline import ScaffoldPipeline
+from scaffold_engine.harness.agy_client import DEFAULT_MODEL
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -26,6 +26,7 @@ def main() -> None:
     extract_parser.add_argument("--output", "-o", type=str, default=None, help="결과 JSON 저장 파일 경로")
     extract_parser.add_argument("--print-md", action="store_true", help="추출된 마크다운을 콘솔에 출력")
     extract_parser.add_argument("--print-html", action="store_true", help="추출된 HTML을 콘솔에 출력")
+    extract_parser.add_argument("--page", type=int, default=1, help="분석할 페이지 번호 (기본 1)")
 
     args = parser.parse_args()
 
@@ -37,7 +38,7 @@ def main() -> None:
 
         pipeline = ScaffoldPipeline(model=args.model)
         try:
-            result = pipeline.run(pdf_path)
+            result = pipeline.run(pdf_path, page_number=args.page)
             logger.info("추출 성공: %s", result.meta.title)
 
             out_dict = result.model_dump(by_alias=True)

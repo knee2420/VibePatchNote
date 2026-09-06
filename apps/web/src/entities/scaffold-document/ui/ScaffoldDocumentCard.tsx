@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-import { ScaffoldCanvasEditor } from '@vibe/tiptap-scaffold';
+import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
 
 import { useScaffoldFocusStore, useSyncMappingStore } from '@/shared/model';
 
@@ -38,20 +38,21 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
 
   const handleHoverSlot = useCallback(
-    (slot: { id: string; number: number; label: string; box_2d: [number, number, number, number] } | null) => {
-      if (slot) {
-        setActiveMapping({
-          id: slot.id,
-          number: slot.number,
-          label: slot.label,
-          box_2d: slot.box_2d,
-          targetNodeId: (data.sourceNodeId as string) || undefined,
-          sourcePdfFileName: data.sourcePdfFileName,
-          source: 'slot',
-        });
-      } else {
+    (slot: SlotMappingItem | null) => {
+      if (!slot) {
         setActiveMapping(null);
+        return;
       }
+      setActiveMapping({
+        id: slot.id,
+        number: slot.number,
+        label: slot.label,
+        box_2d: slot.box_2d,
+        page: slot.pageNumber ?? 1,
+        targetNodeId: (data.sourceNodeId as string) || undefined,
+        sourcePdfFileName: data.sourcePdfFileName,
+        source: 'slot',
+      });
     },
     [setActiveMapping, data.sourceNodeId, data.sourcePdfFileName]
   );
@@ -129,10 +130,10 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
   // AI 분석 단계 정의
   const progressSteps = [
-    { num: 1, label: 'PDF Vision Rendering', desc: '고해상도 래스터화 및 비전 메타 추출' },
-    { num: 2, label: '2D Layout & Grid Scan', desc: '다단 컬럼, 표, 섹션 바운딩 박스 감지' },
-    { num: 3, label: 'agy-cli Tiptap DSL Inference', desc: '템플릿 문법 및 가변 슬롯([ ... ]) 추론' },
-    { num: 4, label: 'DOM Validation & Assembly', desc: 'Tiptap 유효성 검증 및 서식 와이어프레임 완성' },
+    { num: 1, label: 'Geometry Measurement', desc: '표 경계·행 높이·열 너비 실측 (AI 미사용)' },
+    { num: 2, label: 'Block Detection', desc: '셀·텍스트 라인·이미지·구분선 블록화' },
+    { num: 3, label: 'Slot Classification', desc: '고정 서식 vs 채울 값 판정 (좌표 생성 없음)' },
+    { num: 4, label: 'Assembly & Fidelity Score', desc: '실측 좌표로 조립 후 기하 충실도 채점' },
   ];
 
   const progressPercent = Math.min(step * 25, 95);
@@ -301,6 +302,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
             <div className="max-w-full mx-auto">
               <ScaffoldCanvasEditor
                 initialContent={data.htmlContent}
+                slots={data.slots as SlotMappingItem[] | undefined}
                 onChangeHtml={handleUpdateHtml}
                 onChangeMarkdown={handleUpdateMarkdown}
                 onHoverSlot={handleHoverSlot}

@@ -1,9 +1,9 @@
 import { memo, useCallback, useMemo } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
 
-import { viewerRegistry } from '@vibe/document-viewer';
+import { viewerRegistry, type ViewerHighlight } from '@vibe/document-viewer';
 
-import { useCanvasSettings } from '@/shared/model';
+import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
 
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeResize } from '../lib/useNodeResize';
@@ -15,7 +15,6 @@ import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
 import { getReferenceCardTheme } from './referenceCardTheme';
-import { SyncMappingHighlightOverlay } from './SyncMappingHighlightOverlay';
 
 /**
  * ReferenceDocumentCard (FSD Entity UI)
@@ -31,6 +30,20 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 }: NodeProps<Node<ReferenceDocumentData, typeof REFERENCE_DOCUMENT_NODE_TYPE>>) {
   const { setNodes } = useReactFlow();
   const enableSmartSnap = useCanvasSettings((s) => s.enableSmartSnap);
+  const activeMapping = useSyncMappingStore((s) => s.activeMapping);
+
+  // 이 카드가 해당 매핑의 대상일 때만 강조한다. 좌표는 뷰어가 페이지 안에서 그린다.
+  const highlight = useMemo<ViewerHighlight | null>(() => {
+    if (!activeMapping?.box_2d) return null;
+    if (activeMapping.targetNodeId && activeMapping.targetNodeId !== id) return null;
+    return {
+      id: activeMapping.id,
+      page: activeMapping.page ?? 1,
+      box_2d: activeMapping.box_2d,
+      label: activeMapping.label,
+      number: activeMapping.number,
+    };
+  }, [activeMapping, id]);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
@@ -157,6 +170,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           title={data.title}
           isSpread={isSpread}
           segments={segments}
+          highlight={highlight}
           isEditMode={isEditMode}
           enableSmartSnap={enableSmartSnap}
           onUpdateSegment={updateSegment}
@@ -165,7 +179,6 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
           onPageCountChange={setPageCount}
           onDimensionsChange={setDimensions}
         />
-        <SyncMappingHighlightOverlay nodeId={id} fileName={data.url || data.title} />
       </div>
 
       {/* 2페이지 이상일 때만 보이는 펼침 앵커 */}
