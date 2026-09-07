@@ -1,5 +1,16 @@
 import { memo } from 'react';
-import { Trash2, BookOpen, Scaling, Image as ImageIcon, ScanText, Loader2, Edit3, Sparkles } from 'lucide-react';
+import {
+  Trash2,
+  BookOpen,
+  Scaling,
+  Image as ImageIcon,
+  ScanText,
+  Loader2,
+  Edit3,
+  Sparkles,
+  PanelRightClose,
+  PanelRightOpen,
+} from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
   title: string;
@@ -11,9 +22,14 @@ interface ReferenceCardHeaderProps {
   hasSegments?: boolean;
   isEditMode?: boolean;
   isExtractingScaffold?: boolean;
+  isExtractingOutline?: boolean;
+  hasOutline?: boolean;
+  isOutlineOpen?: boolean;
   onToggleFit: () => void;
   onScan?: () => void;
   onExtractScaffold?: () => void;
+  onExtractOutline?: () => void;
+  onToggleOutlinePanel?: () => void;
   onToggleEditMode?: () => void;
   onDelete: () => void;
 }
@@ -28,9 +44,14 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   hasSegments = false,
   isEditMode = false,
   isExtractingScaffold = false,
+  isExtractingOutline = false,
+  hasOutline = false,
+  isOutlineOpen = false,
   onToggleFit,
   onScan,
   onExtractScaffold,
+  onExtractOutline,
+  onToggleOutlinePanel,
   onToggleEditMode,
   onDelete,
 }: ReferenceCardHeaderProps) {
@@ -57,6 +78,65 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
+        {/* Extract Outline Button (문서 아웃라인 & 엘리먼트 추출) */}
+        {onExtractOutline && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onExtractOutline();
+            }}
+            disabled={isExtractingOutline}
+            className={`
+              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+              ${
+                isExtractingOutline
+                  ? 'text-indigo-600 bg-indigo-100 animate-pulse ring-1 ring-indigo-400'
+                  : hasOutline
+                    ? 'text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200'
+                    : 'text-indigo-600 hover:bg-indigo-100/80 bg-indigo-50'
+              }
+            `}
+            title={
+              isExtractingOutline
+                ? '아웃라인 & 엘리먼트 2-Stage 분석 중...'
+                : hasOutline
+                  ? '아웃라인 & 엘리먼트 재분석 (강제 갱신)'
+                  : '문서 아웃라인 & 엘리먼트 추출 (LLM 분석)'
+            }
+          >
+            {isExtractingOutline ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+            )}
+          </button>
+        )}
+
+        {/* [NEW] 추출 완료 후 생겨나는 아웃라인 & 엘리먼트 패널 보기/접기 버튼 */}
+        {hasOutline && onToggleOutlinePanel && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleOutlinePanel();
+            }}
+            className={`
+              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+              ${
+                isOutlineOpen
+                  ? 'text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm ring-1 ring-indigo-500'
+                  : 'text-indigo-600 bg-indigo-100 hover:bg-indigo-200 ring-1 ring-indigo-300'
+              }
+            `}
+            title={isOutlineOpen ? '아웃라인 패널 닫기 (기본 크기로 복원)' : '아웃라인 & 엘리먼트 패널 열기 (상세 트리 보기)'}
+          >
+            {isOutlineOpen ? (
+              <PanelRightClose className="w-3.5 h-3.5" />
+            ) : (
+              <PanelRightOpen className="w-3.5 h-3.5" />
+            )}
+          </button>
+        )}
+
         {/* Extract Scaffold Button (Tiptap 와이어프레임 추출 및 미로 엣지 연결) */}
         {onExtractScaffold && (
           <button
@@ -69,8 +149,8 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
               p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
               ${
                 isExtractingScaffold
-                  ? 'text-indigo-600 bg-indigo-100 animate-pulse ring-1 ring-indigo-400'
-                  : 'text-indigo-600 hover:bg-indigo-100/80 bg-indigo-50'
+                  ? 'text-purple-600 bg-purple-100 animate-pulse ring-1 ring-purple-400'
+                  : 'text-purple-600 hover:bg-purple-100/80 bg-purple-50'
               }
             `}
             title={
@@ -80,9 +160,9 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
             }
           >
             {isExtractingScaffold ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+              <span className="text-[10px] font-bold px-0.5 text-purple-700">T</span>
             )}
           </button>
         )}

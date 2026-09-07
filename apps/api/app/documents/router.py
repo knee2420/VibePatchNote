@@ -3,6 +3,8 @@ from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import FileResponse
 
 from .schemas import (
+    ExtractOutlineRequest,
+    ExtractOutlineResponse,
     ExtractionStatusResponse,
     ScanDocumentRequest,
     ScanDocumentResponse,
@@ -13,6 +15,25 @@ from .schemas import (
 from .service import extraction_service, resolve_uploaded_file
 
 router = APIRouter()
+
+
+@router.post("/outline", response_model=ExtractOutlineResponse)
+async def extract_document_outline(req: ExtractOutlineRequest):
+    """문서의 계층적 아웃라인과 세부 엘리먼트를 추출(또는 캐시 로드)합니다."""
+    result = await extraction_service.extract_document_outline(
+        req.filename, force_refresh=req.force_refresh
+    )
+    return ExtractOutlineResponse(**result)
+
+
+@router.get("/outline/{filename}", response_model=ExtractOutlineResponse)
+async def get_document_outline(filename: str):
+    """스토리지에 저장된 문서 아웃라인 패키지를 조회합니다."""
+    result = extraction_service.get_document_outline(filename)
+    if not result:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Outline not found for: {filename}")
+    return ExtractOutlineResponse(**result)
 
 
 @router.post("/upload", response_model=UploadResponse)

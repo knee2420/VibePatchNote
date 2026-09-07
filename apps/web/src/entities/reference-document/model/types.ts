@@ -25,6 +25,40 @@ export interface ScanDocumentResponse {
   segments: DocumentSegmentItem[];
 }
 
+export interface DocumentElementItem {
+  id: string;
+  outline_id?: string;
+  type: string; // 'table' | 'form_field' | 'list' | 'paragraph' | 'media'
+  label: string;
+  page: number;
+  box_2d: [number, number, number, number];
+  content_summary?: string;
+  structured_data?: Record<string, unknown>;
+}
+
+export interface DocumentOutlineNode {
+  id: string;
+  level: number;
+  title: string;
+  page: number;
+  box_2d?: [number, number, number, number];
+  purpose?: string;
+  elements: DocumentElementItem[];
+  children: DocumentOutlineNode[];
+}
+
+export interface ExtractOutlineResponse {
+  status: string;
+  document_title: string;
+  total_pages: number;
+  total_outlines: number;
+  total_elements: number;
+  outlines: DocumentOutlineNode[];
+  elements: DocumentElementItem[];
+  markdown_outline: string;
+  manifest?: Record<string, unknown>;
+}
+
 export interface ReferenceDocumentData extends Record<string, unknown> {
   title: string;
   url: string;
@@ -32,5 +66,8 @@ export interface ReferenceDocumentData extends Record<string, unknown> {
   size?: number;
   theme?: NodeTheme;
   segments?: DocumentSegmentItem[];
+  outlines?: DocumentOutlineNode[];
+  elements?: DocumentElementItem[];
+  isOutlineOpen?: boolean;
 }
 

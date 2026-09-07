@@ -1,6 +1,6 @@
 import { httpClient } from '@/shared/api';
 
-import type { ScanDocumentResponse } from '../model/types';
+import type { ScanDocumentResponse, ExtractOutlineResponse } from '../model/types';
 
 const BASE_PATH = '/api/v1/documents';
 
@@ -76,4 +76,15 @@ export const referenceDocumentApi = {
   /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. */
   extractScaffold: (filename: string) =>
     httpClient.post<ScaffoldExtractResponse>(`${BASE_PATH}/scaffold`, { filename }),
+
+  /** 문서의 계층적 아웃라인과 소속 세부 엘리먼트를 2-Stage로 추출(또는 캐시 로드)합니다. */
+  extractOutline: (filename: string, forceRefresh = false) =>
+    httpClient.post<ExtractOutlineResponse>(`${BASE_PATH}/outline`, {
+      filename,
+      force_refresh: forceRefresh,
+    }),
+
+  /** 스토리지에 캐시된 아웃라인 패키지를 조회합니다. */
+  getOutline: (filename: string) =>
+    httpClient.get<ExtractOutlineResponse>(`${BASE_PATH}/outline/${encodeURIComponent(filename)}`),
 };

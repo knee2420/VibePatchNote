@@ -4,9 +4,10 @@ import { REFERENCE_CARD_SIZE } from '../model/types';
 
 interface UseDocumentLayoutProps {
   viewerDefId: string;
+  isOutlineOpen?: boolean;
 }
 
-export function useDocumentLayout({ viewerDefId }: UseDocumentLayoutProps) {
+export function useDocumentLayout({ viewerDefId, isOutlineOpen = false }: UseDocumentLayoutProps) {
   const [isSpread, setIsSpread] = useState(false);
   const [isFitContent, setIsFitContent] = useState(false);
   const [pageCount, setPageCount] = useState<number | null>(null);
@@ -32,8 +33,8 @@ export function useDocumentLayout({ viewerDefId }: UseDocumentLayoutProps) {
     if (isFitContent) {
       // 1. 이미지 뷰어이고 원본 해상도/종횡비가 감지된 경우 (Aspect Ratio Hug Fit)
       if (viewerDefId === 'image' && dimensions?.aspectRatio) {
-        const targetWidth = 550;
-        const imageHeight = Math.round(targetWidth / dimensions.aspectRatio);
+        const targetWidth = isOutlineOpen ? 890 : 550;
+        const imageHeight = Math.round(550 / dimensions.aspectRatio);
         const headerHeight = 48;
         const padding = 16;
         // 안전 가드: 최소 320px ~ 최대 960px
@@ -49,20 +50,21 @@ export function useDocumentLayout({ viewerDefId }: UseDocumentLayoutProps) {
 
       // 2. PDF 단면 문서 (A4 규격 종이 520px 기준 여백 최소화 핏)
       return {
-        dimensionClass: 'w-[556px] h-[814px]',
+        dimensionClass: isOutlineOpen ? 'w-[916px] h-[814px]' : 'w-[556px] h-[814px]',
         dimensionStyle: undefined,
       };
     }
 
-    // 3. 기본 카드 크기 (REFERENCE_CARD_SIZE 와 같은 값)
+    // 3. 기본 카드 크기 (패널 열림 시 960px 확장)
+    const baseWidth = isOutlineOpen ? 960 : REFERENCE_CARD_SIZE.width;
     return {
       dimensionClass: '',
       dimensionStyle: {
-        width: `${REFERENCE_CARD_SIZE.width}px`,
+        width: `${baseWidth}px`,
         height: `${REFERENCE_CARD_SIZE.height}px`,
       },
     };
-  }, [isSpread, isFitContent, viewerDefId, dimensions]);
+  }, [isSpread, isFitContent, isOutlineOpen, viewerDefId, dimensions]);
 
   return {
     isSpread,

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol
 
 from app.core.config import settings
+from app.core.storage.document_storage import document_storage
 from pydantic import ValidationError
 from scaffold_engine.types import SlotMappingItem
 
@@ -89,7 +90,12 @@ class IScaffoldRepository(Protocol):
 
 
 class LocalScaffoldRepository:
-    """로컬 파일시스템 기반 스캐폴드 아티팩트 저장소 구현체."""
+    """
+    로컬 파일시스템 기반 스캐폴드 아티팩트 저장소 구현체 (Document-Centric SSOT & Fallback).
+    
+    신규 스캐폴드는 `storage/documents/{doc_slug}/scaffolds/{scaffold_id}`에 저장하고,
+    기존 레거시 `storage/scaffolds/{scaffold_id}`와의 하위 호환성을 완벽히 보장합니다.
+    """
 
     def __init__(self, root_dir: Optional[Path] = None) -> None:
         self.root_dir = root_dir or settings.scaffold_storage_dir
@@ -99,8 +105,19 @@ class LocalScaffoldRepository:
         return self.root_dir
 
     def resolve_dir(self, scaffold_id: str) -> Path:
-        """현재 실행 환경 기준 아카이브 디렉터리 경로."""
-        return (self.root_dir / sanitize_scaffold_id(scaffold_id)).resolve()
+        """
+        scaffold_id에 해당하는 디렉터리를 탐색합니다.
+        1순위: 신규 통합 문서 패키지 내부 (storage/documents/*/scaffolds/{scaffold_id})
+        2순위: 기존 레거시 스캐폴드 디렉터리 (storage/scaffolds/{scaffold_id})
+        """
+        clean_id = sanitize_scaffold_id(scaffold_id)
+        # 1. 신규 문서 패키지 탐색
+        pkg_scaffold_dir = document_storage.find_scaffold_dir(clean_id)
+        if pkg_scaffold_dir:
+            return pkg_scaffold_dir
+
+        # 2. 레거시 디렉터리 폴백
+        return (self.root_dir / clean_id).resolve()
 
     def save_artifacts(
         self,
@@ -113,14 +130,14 @@ class LocalScaffoldRepository:
         overlay_png: Optional[bytes] = None,
         render_png: Optional[bytes] = None,
     ) -> Path:
-        """스캐폴드 아티팩트를 격리 디렉터리에 물리적으로 기록.
+        """스캐폴드 아티팩트를 문서 중심 디렉터리에 물리적으로 기록."""
+        clean_id = sanitize_scaffold_id(record.scaffold_id)
 
-        기록 도중 실패하면 이번 호출이 만든 디렉터리를 되돌린다. 상위에서 아카이빙
-        실패를 비치명(non-fatal)으로 삼키기 때문에, 되돌리지 않으면 manifest 없는
-        빈 디렉터리가 조용히 쌓인다.
-        """
-        self._ensure_root()
-        archive_dir = self.root_dir / sanitize_scaffold_id(record.scaffold_id)
+        # 항상 문서 패키지 하위의 scaffolds/ 에 영속화
+        doc_key = record.source_pdf_file_name or "scaffold"
+        pkg = document_storage.get_package(doc_key)
+        pkg.ensure()
+        archive_dir = pkg.scaffolds_dir / clean_id
         created_now = not archive_dir.exists()
 
         try:
@@ -176,7 +193,7 @@ class LocalScaffoldRepository:
         엔진 원본(scaffold.html / content.md)은 건드리지 않는다. 원본을 덮어쓰면
         엔진 품질 회귀를 추적할 기준선이 사라지기 때문이다.
         """
-        archive_dir = self.root_dir / sanitize_scaffold_id(scaffold_id)
+        archive_dir = self.resolve_dir(scaffold_id)
         record = self._read_record(archive_dir)
         if not record:
             return None
@@ -200,7 +217,7 @@ class LocalScaffoldRepository:
         원본 PDF 렌더(original)·슬롯 오버레이(overlay)와 나란히 두어, 한 서식의
         '원본 / 좌표 검증 / 재구성 결과' 세 장면을 같은 자리에서 비교할 수 있게 한다.
         """
-        archive_dir = self.root_dir / sanitize_scaffold_id(scaffold_id)
+        archive_dir = self.resolve_dir(scaffold_id)
         if not (archive_dir / ASSET_MANIFEST).exists():
             return False
 
@@ -268,7 +285,7 @@ class LocalScaffoldRepository:
 
     def find_contents(self, scaffold_id: str) -> Optional[ScaffoldArchiveContents]:
         """ID로 단일 아카이브의 레코드와 본문을 복원."""
-        archive_dir = self.root_dir / sanitize_scaffold_id(scaffold_id)
+        archive_dir = self.resolve_dir(scaffold_id)
         record = self._read_record(archive_dir)
         if not record:
             return None
@@ -298,17 +315,29 @@ class LocalScaffoldRepository:
             return None
 
     def find_all_records(self) -> List[ScaffoldArchiveRecord]:
-        """저장된 모든 아카이브 레코드를 최신순으로 조회."""
-        self._ensure_root()
+        """저장된 모든 아카이브 레코드를 통합 수집하여 최신순으로 조회."""
+        seen_ids = set()
         results: List[ScaffoldArchiveRecord] = []
 
-        for p in sorted(self.root_dir.iterdir(), key=lambda x: x.stat().st_mtime, reverse=True):
-            if not p.is_dir():
-                continue
+        # 1. 신규 문서 패키지 하위의 스캐폴드 탐색 (1순위)
+        for p in document_storage.find_all_scaffold_dirs():
             record = self._read_record(p)
-            if record:
+            if record and record.scaffold_id not in seen_ids:
+                seen_ids.add(record.scaffold_id)
                 results.append(record)
 
+        # 2. 레거시 디렉터리가 남아있는 경우에만 폴백 탐색
+        if self.root_dir.exists():
+            for p in self.root_dir.iterdir():
+                if not p.is_dir():
+                    continue
+                record = self._read_record(p)
+                if record and record.scaffold_id not in seen_ids:
+                    seen_ids.add(record.scaffold_id)
+                    results.append(record)
+
+        # 생성일자(created_at) 내림차순 정렬
+        results.sort(key=lambda r: r.created_at or "", reverse=True)
         return results
 
     def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:

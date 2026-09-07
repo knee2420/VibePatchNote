@@ -55,8 +55,24 @@ class ScaffoldDocumentResponse(BaseModel):
     slots: List[Dict[str, Any]] = Field(default_factory=list, description="슬롯 매핑 정보")
     archive: Optional[Dict[str, Any]] = Field(default=None, description="영속화된 아카이브 및 비전 에셋 메타")
 
-    class Config:
-        populate_by_name = True
+from app.documents.pipeline import ElementItem, OutlineNode
+
+
+class ExtractOutlineRequest(BaseModel):
+    filename: str = Field(..., description="분석할 문서 파일명 또는 상대 경로")
+    force_refresh: bool = Field(False, description="기존 스토리지 캐시를 무시하고 강제 재분석할지 여부")
+
+
+class ExtractOutlineResponse(BaseModel):
+    status: str = Field("completed", description="처리 상태 (completed/failed)")
+    document_title: str = Field(..., description="문서 제목")
+    total_pages: int = Field(1, description="총 페이지 수")
+    total_outlines: int = Field(0, description="추출된 아웃라인 수")
+    total_elements: int = Field(0, description="추출된 엘리먼트 수")
+    outlines: List[OutlineNode] = Field(default_factory=list, description="계층형 아웃라인 트리 (엘리먼트 바인딩 포함)")
+    elements: List[ElementItem] = Field(default_factory=list, description="뷰어 하이라이트용 평면 엘리먼트 목록")
+    markdown_outline: str = Field("", description="가독성 마크다운 목차")
+    manifest: Optional[Dict[str, Any]] = Field(None, description="스토리지 영속화 메타데이터")
 
 
 # --- 도메인 모델 -------------------------------------------------------------

@@ -66,12 +66,18 @@ export function useScaffoldArchive(
       if (blob) {
         await scaffoldArchiveApi.saveRenderImage(targetId, blob);
       }
-    } catch (err) {
-      console.warn('[useScaffoldArchive] Failed to upload DOM snapshot:', err);
+    } catch (err: unknown) {
+      if (err instanceof HttpError && err.status === 404) {
+        setNodes((nds) =>
+          nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, archiveMissing: true } } : n))
+        );
+      } else {
+        console.warn('[useScaffoldArchive] Failed to upload DOM snapshot:', err);
+      }
     } finally {
       isUploadingSnapshotRef.current = false;
     }
-  }, [containerRef]);
+  }, [containerRef, nodeId, setNodes]);
 
   // 1) 아카이브 -> 노드 (하이드레이션)
   useEffect(() => {
@@ -135,7 +141,7 @@ export function useScaffoldArchive(
 
   // 2) 노드 -> 아카이브 (편집 되쓰기 및 스냅샷 갱신)
   useEffect(() => {
-    if (!scaffoldId) return;
+    if (!scaffoldId || data.archiveMissing) return;
     if (syncedHtmlRef.current === null) return; // 하이드레이션 전 편집은 있을 수 없다
     if (html === syncedHtmlRef.current) return; // 실제 변경분만 보낸다
 
@@ -166,12 +172,12 @@ export function useScaffoldArchive(
         saveTimerRef.current = null;
       }
     };
-  }, [scaffoldId, html, markdown, uploadSnapshot]);
+  }, [scaffoldId, html, markdown, data.archiveMissing, uploadSnapshot]);
 
   // 3) 초기 렌더링 완료 후 실제 브라우저 DOM 스냅샷을 백엔드에 1회 동기화
   //    (백엔드가 생성한 간이 렌더러 결과물을 실제 브라우저 렌더링 스냅샷으로 교체)
   useEffect(() => {
-    if (!scaffoldId || syncState === 'hydrating' || !data.htmlContent) return;
+    if (!scaffoldId || syncState === 'hydrating' || !data.htmlContent || data.archiveMissing) return;
     if (initialSnapshotTakenRef.current === scaffoldId) return;
 
     if (snapshotTimerRef.current !== null) window.clearTimeout(snapshotTimerRef.current);
@@ -188,7 +194,7 @@ export function useScaffoldArchive(
         snapshotTimerRef.current = null;
       }
     };
-  }, [scaffoldId, syncState, data.htmlContent, uploadSnapshot]);
+  }, [scaffoldId, syncState, data.htmlContent, data.archiveMissing, uploadSnapshot]);
 
   return { syncState, isHydrating: syncState === 'hydrating' };
 }

@@ -10,7 +10,13 @@ from fastapi import HTTPException, UploadFile
 from urllib.parse import unquote
 
 from app.core.config import settings
+from app.core.storage.document_storage import document_storage
 from app.core.workflow.engine import NativeWorkflowEngine
+from app.documents.pipeline import (
+    DocumentPipelineContext,
+    create_outline_and_elements_pipeline,
+    outline_storage,
+)
 
 from .prompts import build_segment_scan_prompt
 
@@ -131,35 +137,110 @@ class ExtractionService:
         raw_result = await self.workflow_engine.execute_agent_json(prompt)
 
         response_data = self._to_scan_response(raw_result, file_path)
+        self._store_cached_scan(file_path, response_data)
         return response_data
+
+    async def extract_document_outline(
+        self, filename: str, force_refresh: bool = False
+    ) -> Dict[str, Any]:
+        """
+        문서의 계층적 아웃라인과 세부 엘리먼트를 2-Stage 파이프라인으로 추출합니다.
+        force_refresh가 False이고 스토리지에 캐시가 존재하면 즉시 반환합니다.
+        """
+        file_path = resolve_uploaded_file(filename)
+
+        if not force_refresh and outline_storage.exists(file_path.name):
+            cached = outline_storage.load(file_path.name)
+            if cached:
+                manifest = cached.get("manifest", {})
+                logger.info("[ExtractionService] Cached outline loaded for %s", file_path.name)
+                return {
+                    "status": "completed",
+                    "document_title": manifest.get("document_title", file_path.name),
+                    "total_pages": manifest.get("total_pages", 1),
+                    "total_outlines": manifest.get("total_outlines", 0),
+                    "total_elements": manifest.get("total_elements", 0),
+                    "outlines": cached.get("outlines", []),
+                    "elements": cached.get("elements", []),
+                    "markdown_outline": cached.get("markdown_outline", ""),
+                    "manifest": manifest,
+                }
+
+        logger.info("[ExtractionService] Running fresh outline pipeline for %s", file_path.name)
+        ctx = DocumentPipelineContext(file_path=file_path, filename=file_path.name)
+        runner = create_outline_and_elements_pipeline()
+        await runner.run(ctx)
+
+        loaded = outline_storage.load(file_path.name)
+        manifest = loaded.get("manifest", {}) if loaded else {}
+
+        return {
+            "status": "completed",
+            "document_title": file_path.name,
+            "total_pages": ctx.metadata.get("total_pages") or len(ctx.geometry_pages) or 1,
+            "total_outlines": len(ctx.outlines),
+            "total_elements": len(ctx.flat_elements),
+            "outlines": [n.model_dump(by_alias=True) for n in ctx.outlines],
+            "elements": [e.model_dump(by_alias=True) for e in ctx.flat_elements],
+            "markdown_outline": ctx.markdown_outline,
+            "manifest": manifest,
+        }
+
+    def get_document_outline(self, filename: str) -> Optional[Dict[str, Any]]:
+        """저장소에 캐시된 아웃라인 패키지를 조회합니다."""
+        file_path = resolve_uploaded_file(filename)
+        cached = outline_storage.load(file_path.name)
+        if not cached:
+            return None
+        manifest = cached.get("manifest", {})
+        return {
+            "status": "completed",
+            "document_title": manifest.get("document_title", file_path.name),
+            "total_pages": manifest.get("total_pages", 1),
+            "total_outlines": manifest.get("total_outlines", 0),
+            "total_elements": manifest.get("total_elements", 0),
+            "outlines": cached.get("outlines", []),
+            "elements": cached.get("elements", []),
+            "markdown_outline": cached.get("markdown_outline", ""),
+            "manifest": manifest,
+        }
 
 
     # --- 내부 헬퍼 ---
 
     @staticmethod
-    def _cache_path(file_path: Path) -> Path:
+    def _legacy_cache_path(file_path: Path) -> Path:
         return file_path.with_name(f"{file_path.name}{SEGMENT_CACHE_SUFFIX}")
 
     def _load_cached_scan(self, file_path: Path) -> Optional[Dict[str, Any]]:
-        cache_file = self._cache_path(file_path)
-        if not cache_file.exists():
-            return None
-        try:
-            with open(cache_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (OSError, json.JSONDecodeError) as exc:
-            # 캐시가 손상됐으면 무시하고 재분석합니다.
-            logger.warning("Segment cache unreadable (%s): %s", cache_file.name, exc)
-            return None
+        """신규 통합 스토리지에서 세그먼트 캐시를 조회하며, 레거시 파일이 있으면 자동 마이그레이션합니다."""
+        pkg = document_storage.get_package(file_path.name)
+        cached = pkg.segments.load()
+        if cached:
+            return cached
+
+        # 레거시 폴백: uploads/*.segments.json
+        legacy_file = self._legacy_cache_path(file_path)
+        if legacy_file.exists():
+            try:
+                with open(legacy_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                # 신규 스토리지로 마이그레이션
+                pkg.segments.save(data)
+                logger.info("[ExtractionService] Migrated legacy segment cache to document package: %s", file_path.name)
+                return data
+            except Exception as exc:
+                logger.warning("Legacy segment cache unreadable (%s): %s", legacy_file.name, exc)
+
+        return None
 
     def _store_cached_scan(self, file_path: Path, payload: Dict[str, Any]) -> None:
-        cache_file = self._cache_path(file_path)
+        """세그먼트 캐시를 문서 패키지 전용 디렉터리(storage/documents/{slug}/segments/)에 보관합니다."""
         try:
-            with open(cache_file, "w", encoding="utf-8") as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-        except OSError as exc:
-            # 캐시 저장 실패는 응답을 막을 이유가 되지 않습니다.
-            logger.warning("Failed to write segment cache (%s): %s", cache_file.name, exc)
+            pkg = document_storage.get_package(file_path.name)
+            pkg.segments.save(payload)
+        except Exception as exc:
+            logger.warning("Failed to write segment cache for %s: %s", file_path.name, exc)
 
     def _to_scan_response(
         self, raw_result: Optional[Dict[str, Any]], file_path: Path

@@ -1,5 +1,12 @@
-import { memo, useCallback, useMemo } from 'react';
-import { Handle, Position, useReactFlow, type NodeProps, type Node } from '@xyflow/react';
+import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import {
+  Handle,
+  Position,
+  useReactFlow,
+  useUpdateNodeInternals,
+  type NodeProps,
+  type Node,
+} from '@xyflow/react';
 
 import { viewerRegistry, type ViewerHighlight } from '@vibe/document-viewer';
 
@@ -10,10 +17,16 @@ import { useNodeResize } from '../lib/useNodeResize';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
 import { useSegmentEditing } from '../model/useSegmentEditing';
 import { useDocumentScaffold } from '../model/useDocumentScaffold';
-import { REFERENCE_DOCUMENT_NODE_TYPE, type ReferenceDocumentData } from '../model/types';
+import { useDocumentOutline } from '../model/useDocumentOutline';
+import {
+  REFERENCE_DOCUMENT_NODE_TYPE,
+  type ReferenceDocumentData,
+  type DocumentElementItem,
+} from '../model/types';
 import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
+import { DocumentOutlinePanel } from './DocumentOutlinePanel';
 import { getReferenceCardTheme } from './referenceCardTheme';
 
 /**
@@ -29,11 +42,23 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   selected = false,
 }: NodeProps<Node<ReferenceDocumentData, typeof REFERENCE_DOCUMENT_NODE_TYPE>>) {
   const { setNodes } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
+  const containerRef = useRef<HTMLDivElement>(null);
   const enableSmartSnap = useCanvasSettings((s) => s.enableSmartSnap);
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
 
-  // 이 카드가 해당 매핑의 대상일 때만 강조한다. 좌표는 뷰어가 페이지 안에서 그린다.
+  const [activeElement, setActiveElement] = useState<DocumentElementItem | null>(null);
+
+  // 이 카드가 해당 매핑의 대상이거나 아웃라인 엘리먼트가 선택되었을 때 강조한다.
   const highlight = useMemo<ViewerHighlight | null>(() => {
+    if (activeElement?.box_2d) {
+      return {
+        id: activeElement.id,
+        page: activeElement.page ?? 1,
+        box_2d: activeElement.box_2d,
+        label: activeElement.label,
+      };
+    }
     if (!activeMapping?.box_2d) return null;
     if (activeMapping.targetNodeId && activeMapping.targetNodeId !== id) return null;
     return {
@@ -43,7 +68,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       label: activeMapping.label,
       number: activeMapping.number,
     };
-  }, [activeMapping, id]);
+  }, [activeElement, activeMapping, id]);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
@@ -55,6 +80,33 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     useNodeResize(id);
 
   const {
+    isExtractingOutline,
+    isOutlineOpen,
+    outlines,
+    hasOutline,
+    selectedElementId,
+    setSelectedElementId,
+    extractOutline,
+    toggleOutlinePanel,
+  } = useDocumentOutline({
+    nodeId: id,
+    title: data.title,
+    url: data.url,
+    initialOutlines: data.outlines,
+    initialElements: data.elements,
+    initialIsOpen: data.isOutlineOpen,
+    onError: () => alert('문서 아웃라인 추출 중 오류가 발생했습니다.'),
+  });
+
+  const handleSelectElement = useCallback(
+    (elem: DocumentElementItem) => {
+      setSelectedElementId(elem.id);
+      setActiveElement(elem);
+    },
+    [setSelectedElementId]
+  );
+
+  const {
     isSpread,
     isFitContent,
     pageCount,
@@ -64,7 +116,37 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     handleToggleFit,
     dimensionClass,
     dimensionStyle,
-  } = useDocumentLayout({ viewerDefId: viewerDef.id });
+  } = useDocumentLayout({
+    viewerDefId: viewerDef.id,
+    isOutlineOpen: isOutlineOpen && hasOutline,
+  });
+
+  // 노드 DOM 크기 변화를 실시간 감지하여 React Flow Handle 위치 캐시를 즉각 갱신
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    updateNodeInternals(id);
+
+    const observer = new ResizeObserver(() => {
+      updateNodeInternals(id);
+    });
+
+    observer.observe(el);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [id, updateNodeInternals]);
+
+  // 패널 토글 시에도 애니메이션 시작 및 완료(320ms) 시점에 확실하게 동기화
+  useEffect(() => {
+    updateNodeInternals(id);
+    const timer = setTimeout(() => {
+      updateNodeInternals(id);
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [id, isOutlineOpen, isSpread, isFitContent, customSize, updateNodeInternals]);
 
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });
 
@@ -127,6 +209,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
   return (
     <div
+      ref={containerRef}
       style={containerStyle}
       className={`
         group/node rounded-xl shadow-md border-2 flex flex-col relative [contain:layout_style]
@@ -153,32 +236,53 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         hasSegments={segments.length > 0}
         isEditMode={isEditMode}
         isExtractingScaffold={isExtractingScaffold}
+        isExtractingOutline={isExtractingOutline}
+        hasOutline={hasOutline}
+        isOutlineOpen={isOutlineOpen}
         onToggleFit={onToggleFitWithReset}
         onScan={scan}
         onExtractScaffold={extractScaffold}
+        onExtractOutline={() => extractOutline(hasOutline)}
+        onToggleOutlinePanel={toggleOutlinePanel}
         onToggleEditMode={toggleEditMode}
         onDelete={handleDelete}
       />
 
-      {/* 플러그인 뷰어 본문 + 휠 가로채기 래퍼 */}
-      <div
-        className={`flex-1 w-full h-full overflow-hidden flex flex-col relative nodrag nopan ${selected ? 'nowheel' : ''}`}
-        onWheel={handleNodeWheel}
-      >
-        <ViewerComponent
-          url={data.url}
-          title={data.title}
-          isSpread={isSpread}
-          segments={segments}
-          highlight={highlight}
-          isEditMode={isEditMode}
-          enableSmartSnap={enableSmartSnap}
-          onUpdateSegment={updateSegment}
-          onCreateSegment={createSegment}
-          onDeleteSegment={deleteSegment}
-          onPageCountChange={setPageCount}
-          onDimensionsChange={setDimensions}
-        />
+      {/* 본문 컨테이너: 뷰어 본문 + (패널 열림 시) 아웃라인 패널 가로 분할 */}
+      <div className="flex-1 w-full h-full overflow-hidden flex flex-row relative nodrag nopan">
+        {/* 플러그인 뷰어 본문 + 휠 가로채기 래퍼 */}
+        <div
+          className={`flex-1 w-full h-full overflow-hidden flex flex-col relative ${selected ? 'nowheel' : ''}`}
+          onWheel={handleNodeWheel}
+        >
+          <ViewerComponent
+            url={data.url}
+            title={data.title}
+            isSpread={isSpread}
+            segments={segments}
+            highlight={highlight}
+            isEditMode={isEditMode}
+            enableSmartSnap={enableSmartSnap}
+            onUpdateSegment={updateSegment}
+            onCreateSegment={createSegment}
+            onDeleteSegment={deleteSegment}
+            onPageCountChange={setPageCount}
+            onDimensionsChange={setDimensions}
+          />
+        </div>
+
+        {/* 아웃라인 & 엘리먼트 트리 패널 */}
+        {isOutlineOpen && hasOutline && (
+          <DocumentOutlinePanel
+            title={data.title}
+            outlines={outlines}
+            selectedElementId={selectedElementId}
+            isRefreshing={isExtractingOutline}
+            onSelectElement={handleSelectElement}
+            onClose={toggleOutlinePanel}
+            onRefresh={() => extractOutline(true)}
+          />
+        )}
       </div>
 
       {/* 2페이지 이상일 때만 보이는 펼침 앵커 */}
