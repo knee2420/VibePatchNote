@@ -17,7 +17,12 @@ V1_ROOT = REPO_ROOT / "workbench" / "05.llm_tuning" / "01.outline_extraction"
 sys.path.insert(0, str(V2_ROOT))
 sys.path.insert(0, str(V1_ROOT / "05.evaluations"))
 
-from evaluate import evaluate_outlines, flatten_outline_tree
+from evaluate import (
+    evaluate_outlines,
+    flatten_outline_tree,
+    collect_all_elements,
+    evaluate_elements,
+)
 from pipeline.step1_outline import OutlineExtractionStep
 
 BENCHMARK_DOCS = [
@@ -86,6 +91,28 @@ def run_benchmark(
         with open(gt_file, "r", encoding="utf-8") as f:
             gt_data = json.load(f)
 
+        # GT elements 바인딩
+        gt_elem_file = V1_ROOT / "02.ground_truth" / doc_name / "expected_elements.json"
+        if gt_elem_file.exists():
+            try:
+                gt_elems = json.loads(gt_elem_file.read_text(encoding="utf-8"))
+                elem_map = {}
+                for el in gt_elems:
+                    oid = el.get("outline_id")
+                    if oid:
+                        elem_map.setdefault(oid, []).append(el)
+
+                def attach(nodes):
+                    for n in nodes:
+                        nid = n.get("id")
+                        if nid in elem_map:
+                            n["elements"] = elem_map[nid]
+                        attach(n.get("children", []))
+
+                attach(gt_data.get("outlines", []))
+            except Exception:
+                pass
+
         # 1. V2 실행
         res = step.execute(pdf_path=pdf_path, model=model, effort=effort)
         if not res["success"]:
@@ -95,12 +122,21 @@ def run_benchmark(
         v2_pred = res["data"]
         telemetry = res["telemetry"]
 
-        # 2. 채점
+        # 2. 채점 (Outline Tree)
         gt_flat = flatten_outline_tree(gt_data.get("outlines", []))
         v2_flat = flatten_outline_tree(v2_pred.get("outlines", []))
         eval_res = evaluate_outlines(gt_flat, v2_flat)
 
-        # 3. V1 기준선 로드
+        # 3. 채점 (Elements / Classify)
+        gt_all_elems = collect_all_elements(gt_data.get("outlines", []))
+        v2_all_elems = collect_all_elements(v2_pred.get("outlines", []))
+        elem_res = (
+            evaluate_elements(gt_all_elems, v2_all_elems, eval_res.get("matched_nodes", []))
+            if (gt_all_elems or v2_all_elems)
+            else {}
+        )
+
+        # 4. V1 기준선 로드
         v1_score = load_v1_baseline(doc_name)
 
         doc_summary = {
@@ -117,6 +153,10 @@ def run_benchmark(
             "f1": eval_res["f1"],
             "f1_delta": round(eval_res["f1"] - v1_score.get("f1", 0.0), 1),
             "path_acc": eval_res["avg_path_accuracy"],
+            "elem_f1": elem_res.get("f1", 0.0),
+            "elem_tp": elem_res.get("tp", 0),
+            "elem_gt": len(gt_all_elems),
+            "elem_pred": len(v2_all_elems),
             "latency": telemetry["cli_duration"],
             "tokens": telemetry["tokens"]["total"],
             "missed_samples": eval_res["missed_outlines"][:3],
@@ -125,7 +165,8 @@ def run_benchmark(
         matrix_results.append(doc_summary)
 
         print(
-            f"  └─ 결과: F1 {doc_summary['f1']}% (V1 대비 {doc_summary['f1_delta']:+0.1f}%) | "
+            f"  └─ 결과: 목차 F1 {doc_summary['f1']}% (V1 대비 {doc_summary['f1_delta']:+0.1f}%) | "
+            f"요소(Classify) F1 {doc_summary['elem_f1']}% ({doc_summary['elem_tp']}/{doc_summary['elem_gt']} 매핑) | "
             f"P: {doc_summary['precision']}% | R: {doc_summary['recall']}% | "
             f"Path: {doc_summary['path_acc']}% | 지연: {doc_summary['latency']}s\n"
         )

@@ -62,8 +62,8 @@ class OutlineExtractionStep:
             f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
             f"{doc_ctx['context_text']}\n"
             f"======================================================================\n\n"
-            f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree)를 추출하십시오.\n"
-            f"반드시 지침의 '목차 vs 본문 분리 기준(Stopping Criteria)'을 엄격히 준수하여 본문 데이터 행이나 세부 불릿 문단이 목차로 잘못 수집되지 않도록 하십시오."
+            f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
+            f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오."
         )
 
         # 4. CLI 네이티브 구조화 실행

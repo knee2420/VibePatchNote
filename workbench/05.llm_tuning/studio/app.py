@@ -31,10 +31,18 @@ V2_DIR = TUNING_DIR / "01.outline_extraction_v2"
 # V1 평가 모듈 임포트
 sys.path.insert(0, str(V1_DIR / "05.evaluations"))
 try:
-    from evaluate import evaluate_outlines, flatten_outline_tree
+    from evaluate import (
+        evaluate_outlines,
+        flatten_outline_tree,
+        collect_all_elements,
+        evaluate_elements,
+    )
 except ImportError:
     evaluate_outlines = None
     flatten_outline_tree = None
+    collect_all_elements = None
+    evaluate_elements = None
+
 
 # V2 파이프라인 모듈 임포트
 sys.path.insert(0, str(V2_DIR))
@@ -86,8 +94,43 @@ async def get_documents():
     return {"documents": doc_list}
 
 
+def bind_gt_elements(gt_data: Dict[str, Any], doc: str) -> None:
+    """Ground Truth 디렉터리의 expected_elements.json을 아웃라인 트리에 자동 매핑."""
+    gt_elem_file = V1_DIR / "02.ground_truth" / doc / "expected_elements.json"
+    if not gt_elem_file.exists() or "outlines" not in gt_data:
+        return
+
+    try:
+        gt_elements = json.loads(gt_elem_file.read_text(encoding="utf-8"))
+        elem_map: Dict[str, List[Dict[str, Any]]] = {}
+        for el in gt_elements:
+            oid = el.get("outline_id")
+            if oid:
+                elem_map.setdefault(oid, []).append(el)
+
+        def attach(nodes: List[Dict[str, Any]]):
+            for node in nodes:
+                nid = node.get("id")
+                if nid in elem_map:
+                    node["elements"] = elem_map[nid]
+                    if not node.get("type"):
+                        node["type"] = elem_map[nid][0].get("type", "key_value")
+                else:
+                    if node.get("children"):
+                        if not node.get("type"):
+                            node["type"] = "header"
+                    else:
+                        if not node.get("type"):
+                            node["type"] = "key_value"
+                attach(node.get("children", []))
+
+        attach(gt_data.get("outlines", []))
+    except Exception as e:
+        logger.warning("Failed to bind GT elements: %s", e)
+
+
 def calculate_diff_and_metrics(gt_data: Dict[str, Any], pred_data: Dict[str, Any]) -> Dict[str, Any]:
-    """정답셋 vs 예측결과 F1 채점 및 각 노드별 일치/누락/과추출 매핑."""
+    """정답셋 vs 예측결과 F1 채점 및 각 노드별 일치/누락/과추출 매핑 (아웃라인 + 엘리먼트 종합)."""
     if not flatten_outline_tree or not evaluate_outlines:
         return {"f1": 0.0, "precision": 0.0, "recall": 0.0, "path_accuracy": 0.0}
 
@@ -98,6 +141,27 @@ def calculate_diff_and_metrics(gt_data: Dict[str, Any], pred_data: Dict[str, Any
     matched_nodes = res.get("matched_nodes", [])
     matched_gt_ids = {m["gt_id"]: m for m in matched_nodes}
     matched_pred_ids = {m["pred_id"]: m for m in matched_nodes}
+
+    # 엘리먼트/컴포넌트 채점 (evaluate_elements)
+    elem_metrics = {"f1": 0.0, "precision": 0.0, "recall": 0.0, "total_gt": 0, "total_pred": 0}
+    if collect_all_elements and evaluate_elements:
+        try:
+            gt_elems = collect_all_elements(gt_data.get("outlines", []))
+            pred_elems = collect_all_elements(pred_data.get("outlines", []))
+            if gt_elems or pred_elems:
+                el_res = evaluate_elements(gt_elems, pred_elems, res.get("matched_nodes", []))
+                elem_metrics = {
+                    "f1": el_res.get("f1", 0.0),
+                    "precision": el_res.get("precision", 0.0),
+                    "recall": el_res.get("recall", 0.0),
+                    "total_gt": len(gt_elems),
+                    "total_pred": len(pred_elems),
+                    "tp": el_res.get("tp", 0),
+                    "fn": el_res.get("fn", 0),
+                    "fp": el_res.get("fp", 0),
+                }
+        except Exception as e:
+            logger.warning("Failed to evaluate elements: %s", e)
 
     return {
         "f1": res.get("f1", 0.0),
@@ -113,18 +177,20 @@ def calculate_diff_and_metrics(gt_data: Dict[str, Any], pred_data: Dict[str, Any
         "matched_pred_ids": matched_pred_ids,
         "missed_samples": res.get("missed_outlines", []),
         "excess_samples": res.get("excess_outlines", []),
+        "elements": elem_metrics,
     }
 
 
 @app.get("/api/document-data")
 async def get_document_data(doc: str = "11월_디딤돌_회의록"):
     """선택된 문서의 Ground Truth, V2 예측 결과, 정밀 지표 반환."""
-    # 1. Ground Truth 로드
+    # 1. Ground Truth 로드 및 elements 결합
     gt_file = V1_DIR / "02.ground_truth" / doc / "expected_outlines.json"
     gt_data: Dict[str, Any] = {"document_title": f"{doc}.pdf", "outlines": []}
     if gt_file.exists():
         try:
             gt_data = json.loads(gt_file.read_text(encoding="utf-8"))
+            bind_gt_elements(gt_data, doc)
         except Exception as e:
             logger.warning("Failed to load GT file: %s", e)
 
@@ -144,6 +210,21 @@ async def get_document_data(doc: str = "11월_디딤돌_회의록"):
                 pred_data = json.loads(v1_file.read_text(encoding="utf-8"))
             except Exception:
                 pass
+
+    # V2 트리의 노드 type 기본값 보정 (type이 누락된 경우 elements 또는 자식 여부 기준)
+    def normalize_types(nodes: List[Dict[str, Any]]):
+        for n in nodes:
+            if not n.get("type"):
+                elems = n.get("elements", [])
+                if elems and isinstance(elems, list) and len(elems) > 0 and elems[0].get("type"):
+                    n["type"] = elems[0]["type"]
+                elif n.get("children"):
+                    n["type"] = "header"
+                else:
+                    n["type"] = "key_value"
+            normalize_types(n.get("children", []))
+
+    normalize_types(pred_data.get("outlines", []))
 
     # 3. 벤치마크 리포트에서 텔레메트리(지연시간, 토큰) 조회
     telemetry = {"latency": 0.0, "tokens": 0}

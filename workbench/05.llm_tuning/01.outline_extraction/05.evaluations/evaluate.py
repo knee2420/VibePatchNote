@@ -111,9 +111,9 @@ def collect_all_elements(
     for elem in elements:
         label = elem.get("label", "") or elem.get("name", "")
         val = elem.get("value", "") or elem.get("content_summary", "")
-        if not val and "items" in elem:
+        if not val and elem.get("items"):
             val = " ".join(str(i) for i in elem["items"])
-        elif not val and "structured_data" in elem:
+        elif not val and elem.get("structured_data"):
             val = json.dumps(elem["structured_data"], ensure_ascii=False)
 
         normalized_elements.append({
