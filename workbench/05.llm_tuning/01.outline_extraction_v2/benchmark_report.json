@@ -1,0 +1,74 @@
+[
+  {
+    "document": "11월_디딤돌_회의록",
+    "v1_f1": 86.5,
+    "v1_path_acc": 98.0,
+    "v2_nodes": 16,
+    "gt_nodes": 16,
+    "tp": 16,
+    "fp": 0,
+    "fn": 0,
+    "precision": 100.0,
+    "recall": 100.0,
+    "f1": 100.0,
+    "f1_delta": 13.5,
+    "path_acc": 84.9,
+    "latency": 9.0861221,
+    "tokens": 23382,
+    "missed_samples": [],
+    "excess_samples": []
+  },
+  {
+    "document": "Atticus_LLC_Invoice_000081709",
+    "v1_f1": 60.0,
+    "v1_path_acc": 79.0,
+    "v2_nodes": 10,
+    "gt_nodes": 7,
+    "tp": 5,
+    "fp": 5,
+    "fn": 2,
+    "precision": 50.0,
+    "recall": 71.4,
+    "f1": 58.8,
+    "f1_delta": -1.2,
+    "path_acc": 98.2,
+    "latency": 18.9357651,
+    "tokens": 25618,
+    "missed_samples": [
+      "Header Meta",
+      "Contact support"
+    ],
+    "excess_samples": [
+      "Description Amount Total",
+      "Amount",
+      "Total"
+    ]
+  },
+  {
+    "document": "디딤돌_참가신청서_딥드론",
+    "v1_f1": 79.0,
+    "v1_path_acc": 97.1,
+    "v2_nodes": 52,
+    "gt_nodes": 42,
+    "tp": 35,
+    "fp": 17,
+    "fn": 7,
+    "precision": 67.3,
+    "recall": 83.3,
+    "f1": 74.5,
+    "f1_delta": -4.5,
+    "path_acc": 95.8,
+    "latency": 24.244517,
+    "tokens": 58016,
+    "missed_samples": [
+      "기본 과제 정보",
+      "성명",
+      "시스템 구성도 및 해파리 사진"
+    ],
+    "excess_samples": [
+      "이름",
+      "위와 같이 부산대학교 창의미래설계 디딤돌 사업 지원신청서를 제출합니다.",
+      "구분"
+    ]
+  }
+]

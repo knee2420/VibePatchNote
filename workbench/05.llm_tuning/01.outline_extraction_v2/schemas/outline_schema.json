@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "OutlineItem": {
+      "properties": {
+        "id": {
+          "description": "out-1, out-1-1 등 고유 식별자",
+          "title": "Id",
+          "type": "string"
+        },
+        "level": {
+          "default": 1,
+          "description": "계층 깊이: 1(대주제/문서표제), 2(소주제/섹션/표대구획), 3(세부항목/서식필드), 4(하위 세부필드)",
+          "title": "Level",
+          "type": "integer"
+        },
+        "title": {
+          "description": "순수 항목명/서식 라벨 (입력값 제외, 원문 표기 유지)",
+          "title": "Title",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "description": "페이지 번호 (1부터 시작)",
+          "title": "Page",
+          "type": "integer"
+        },
+        "box_2d": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표",
+          "title": "Box 2D"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "해당 섹션의 비즈니스/도메인 목적 및 역할 요약",
+          "title": "Purpose"
+        },
+        "children": {
+          "description": "하위 자식 목차 항목 리스트",
+          "items": {
+            "$ref": "#/$defs/OutlineItem"
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "OutlineItem",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "document_title": {
+      "description": "분석 대상 문서 파일명",
+      "title": "Document Title",
+      "type": "string"
+    },
+    "total_pages": {
+      "default": 1,
+      "description": "실제 분석한 총 페이지 수",
+      "title": "Total Pages",
+      "type": "integer"
+    },
+    "outlines": {
+      "description": "계층적 목차 트리 (한국형 서식 표의 L2, L3, L4 필드 라벨을 children에 남김없이 전수 분해)",
+      "items": {
+        "$ref": "#/$defs/OutlineItem"
+      },
+      "title": "Outlines",
+      "type": "array"
+    }
+  },
+  "required": [
+    "document_title"
+  ],
+  "title": "OutlineOutput",
+  "type": "object"
+}

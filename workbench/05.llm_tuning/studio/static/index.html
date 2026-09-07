@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VibePatchNote — LLM Tuning Studio</title>
-  <!-- Tailwind CSS & Icons -->
+  <title>LLM Tuning Studio — Ground Truth vs V2 대조</title>
+  <!-- Tailwind CSS & Font Awesome Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Vue 3 CDN -->
@@ -17,30 +17,17 @@
           fontFamily: {
             mono: ['Consolas', 'Fira Code', 'Monaco', 'monospace'],
             sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
-          },
-          colors: {
-            vscode: {
-              bg: '#181818',
-              sidebar: '#1e1e1e',
-              item: '#252526',
-              hover: '#2a2d2e',
-              active: '#094771',
-              border: '#2b2b2b',
-              line: '#333333',
-            }
           }
         }
       }
     }
   </script>
   <style>
-    /* VS Code Style Thin Scrollbar */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #1e1e1e; }
-    ::-webkit-scrollbar-thumb { background: #3c3c3c; }
-    ::-webkit-scrollbar-thumb:hover { background: #505050; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #18181b; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #52525b; }
 
-    /* Indentation Guide Line */
     .tree-guide {
       position: relative;
     }
@@ -51,492 +38,302 @@
       top: 0;
       bottom: 0;
       width: 1px;
-      background-color: #333333;
+      background-color: #27272a;
     }
   </style>
 </head>
-<body class="bg-[#181818] text-[#cccccc] min-h-screen flex flex-col font-sans select-none antialiased">
+<body class="bg-[#0f0f11] text-zinc-300 min-h-screen flex flex-col font-sans select-none antialiased">
   <div id="app" class="flex-1 flex flex-col h-screen overflow-hidden">
 
-    <!-- Top Navigation Bar (VS Code Titlebar Style) -->
-    <header class="bg-[#1e1e1e] border-b border-[#2b2b2b] px-4 py-2 flex items-center justify-between shrink-0 text-xs">
+    <!-- ========================================================================= -->
+    <!-- 1. Top Navigation Bar (문서 선택, 모델 선택, 실행/저장 액션) -->
+    <!-- ========================================================================= -->
+    <header class="bg-[#18181b] border-b border-zinc-800 px-4 py-2 flex items-center justify-between shrink-0 text-xs">
       <div class="flex items-center space-x-3">
         <!-- Logo -->
         <div class="flex items-center space-x-2">
-          <div class="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-xs shadow">
-            <i class="fa-solid fa-code-branch"></i>
+          <div class="w-6 h-6 rounded bg-gradient-to-tr from-emerald-600 to-cyan-500 flex items-center justify-center text-white text-xs shadow font-bold">
+            <i class="fa-solid fa-code-compare"></i>
           </div>
-          <span class="font-bold text-slate-100 tracking-wide">LLM Tuning Studio</span>
-          <span class="text-[10px] text-slate-400 font-mono bg-[#252526] px-1.5 py-0.5 rounded border border-[#333333]">:8088</span>
+          <span class="font-bold text-zinc-100 tracking-wide">LLM Tuning Studio</span>
+          <span class="text-[10px] text-emerald-400 font-mono bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-800/60">V2 Native</span>
         </div>
 
-        <div class="h-4 w-px bg-[#333333] mx-1"></div>
+        <div class="h-4 w-px bg-zinc-800 mx-1"></div>
 
-        <!-- Task Tabs (VS Code Editor Tabs Style) -->
-        <div class="flex space-x-1">
-          <button 
-            v-for="t in tasks" 
-            :key="t.id"
-            @click="selectTask(t.id)"
-            :class="selectedTask === t.id ? 'bg-[#181818] text-white border-t-2 border-blue-500 font-semibold' : 'bg-[#252526] text-slate-400 hover:text-slate-200 hover:bg-[#2a2d2e] border-t-2 border-transparent'"
-            class="px-3 py-1 text-xs transition-colors flex items-center space-x-1.5 border-r border-[#2b2b2b]">
-            <i :class="getTaskIcon(t.id)" class="text-[11px] text-blue-400"></i>
-            <span>{{ t.name }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Right Controls -->
-      <div class="flex items-center space-x-2">
-        <div class="flex items-center space-x-1 bg-[#252526] border border-[#333333] rounded px-2 py-1">
-          <i class="fa-regular fa-file text-[11px] text-slate-400"></i>
-          <span class="text-[11px] text-slate-400">문서:</span>
+        <!-- Document Selector Dropdown -->
+        <div class="flex items-center space-x-1.5 bg-zinc-900 border border-zinc-700/80 rounded px-2.5 py-1">
+          <i class="fa-regular fa-file-lines text-cyan-400 text-xs"></i>
+          <span class="text-zinc-400 font-medium">문서:</span>
           <select 
             v-model="selectedDoc" 
             @change="loadDocData"
-            class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer">
-            <option v-for="d in documents" :key="d" :value="d" class="bg-[#1e1e1e] text-slate-200">{{ d }}</option>
+            class="bg-transparent text-xs text-zinc-100 font-bold focus:outline-none cursor-pointer">
+            <option v-for="d in documents" :key="d" :value="d" class="bg-zinc-900 text-zinc-200">{{ d }}</option>
           </select>
         </div>
 
-        <!-- Agent Server :8001 Status Badge -->
-        <div class="flex items-center space-x-1.5 bg-[#252526] border border-[#333333] rounded px-2 py-1 text-[11px] font-mono">
-          <span :class="agentStatus.online ? 'bg-emerald-500' : 'bg-amber-500'" class="w-2 h-2 rounded-full inline-block"></span>
-          <span class="text-slate-300 font-semibold">Agent :8001</span>
-          <span :class="agentStatus.online ? 'text-emerald-400' : 'text-amber-400'" class="text-[10px]">
-            {{ agentStatus.online ? '온라인' : 'CLI 폴백' }}
-          </span>
+        <!-- Model Selector Dropdown -->
+        <div class="flex items-center space-x-1.5 bg-zinc-900 border border-zinc-700/80 rounded px-2 py-1">
+          <i class="fa-solid fa-microchip text-indigo-400 text-xs"></i>
+          <span class="text-zinc-400">모델:</span>
+          <select 
+            v-model="selectedModel" 
+            class="bg-transparent text-xs text-indigo-300 font-mono focus:outline-none cursor-pointer">
+            <option value="gemini-3.8-flash-low" class="bg-zinc-900">gemini-3.8-flash-low (기본 고속)</option>
+            <option value="gemini-3.1-pro-low" class="bg-zinc-900">gemini-3.1-pro-low (고지능 Pro)</option>
+            <option value="gemini-3.8-flash-medium" class="bg-zinc-900">gemini-3.8-flash-medium</option>
+          </select>
         </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2">
+        <button 
+          @click="runJudge" 
+          :disabled="judging"
+          class="px-3 py-1.5 rounded bg-amber-600 hover:bg-amber-500 disabled:bg-zinc-800 text-white font-bold flex items-center space-x-1.5 shadow transition-colors">
+          <i class="fa-solid fa-scale-balanced text-[11px]" :class="{'fa-spin': judging}"></i>
+          <span>{{ judging ? '심사위원 채점 중...' : '⚖️ LLM 인지 채점' }}</span>
+        </button>
 
         <button 
-          @click="refreshAll" 
+          @click="runV2" 
+          :disabled="running"
+          class="px-3 py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold flex items-center space-x-1.5 shadow transition-colors">
+          <i class="fa-solid fa-play text-[10px]" :class="{'fa-spin': running}"></i>
+          <span>{{ running ? '추론 진행 중...' : 'V2 재실행' }}</span>
+        </button>
+
+        <button 
+          @click="saveGroundTruth" 
+          :disabled="saving"
+          class="px-3.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 text-white font-bold flex items-center space-x-1.5 shadow transition-colors">
+          <i class="fa-solid fa-floppy-disk text-[11px]" :class="{'fa-spin': saving}"></i>
+          <span>정답셋 저장</span>
+        </button>
+
+        <button 
+          @click="loadDocData" 
           title="새로고침"
-          class="p-1.5 rounded bg-[#252526] hover:bg-[#333333] text-slate-300 border border-[#333333] transition-colors">
+          class="p-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition-colors">
           <i class="fa-solid fa-rotate-right text-xs" :class="{'fa-spin': loading}"></i>
         </button>
       </div>
     </header>
 
-    <!-- Main 3-Column VS Code Outline Panels -->
-    <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden text-xs">
 
-      <!-- ========================================================================= -->
-      <!-- Column 1: 🏛️ 원본 LLM Baseline (AS-IS Tree View) (4 Cols) -->
-      <!-- ========================================================================= -->
-      <section class="col-span-4 border-r border-[#2b2b2b] flex flex-col bg-[#1e1e1e] overflow-hidden">
-        <!-- Panel Header -->
-        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-folder-tree text-amber-500 text-xs"></i>
-            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Baseline AS-IS</span>
-            <span class="text-[10px] text-slate-400 font-mono">({{ baselineCount }} 노드)</span>
-          </div>
-          <div class="flex items-center space-x-2">
-            <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-800/60 font-mono">
-              ⚠️ 편향감지
-            </span>
-            <button @click="showRawJson('baseline')" title="Raw JSON 보기" class="text-slate-400 hover:text-white">
-              <i class="fa-solid fa-code text-[11px]"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Bias Note Strip -->
-        <div v-if="baseline && baseline.bias_analysis" class="px-3 py-1.5 bg-amber-950/20 border-b border-amber-900/30 text-[11px] text-amber-300/80 flex items-center space-x-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0 text-[10px]"></i>
-          <span class="truncate">회의비 과적합으로 드론/GPS 기술 논의 및 의결 사항 대거 누락</span>
-        </div>
-
-        <!-- VS Code Tree View -->
-        <div class="flex-1 overflow-y-auto py-1 font-mono">
-          <div v-if="!baseline.outlines || !baseline.outlines.outlines || baseline.outlines.outlines.length === 0" class="p-4 text-center text-slate-500">
-            데이터가 없습니다.
-          </div>
-
-          <div v-for="item in baseline.outlines.outlines" :key="item.id" class="flex flex-col">
-            <!-- Level 1 Node -->
-            <div 
-              @click="toggleExpand(item)"
-              class="h-7 px-2 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer group text-slate-200 transition-colors">
-              <i :class="item.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
-                 class="w-3 text-[9px] text-slate-400"></i>
-              <i class="fa-solid fa-folder text-amber-400/90 text-xs"></i>
-              <span class="font-semibold truncate flex-1">{{ item.title }}</span>
-              <span class="text-[10px] text-slate-500 font-mono group-hover:text-slate-400">p.{{ item.page }}</span>
-            </div>
-
-            <!-- Children Sub-Tree -->
-            <div v-if="item.expanded !== false" class="tree-guide ml-3 pl-3">
-              <div 
-                v-for="sub in item.children" 
-                :key="sub.id"
-                class="h-6 px-1 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer group text-slate-300 transition-colors">
-                <i class="fa-regular fa-file-lines text-slate-400 text-xs"></i>
-                <span class="truncate flex-1 text-[11px]">{{ sub.title }}</span>
-                <div class="flex items-center space-x-1">
-                  <!-- Tag badge -->
-                  <span 
-                    v-for="el in sub.elements" 
-                    :key="el.id"
-                    class="text-[9px] px-1 rounded bg-[#333333] text-slate-300 font-sans">
-                    {{ el.type }}
-                  </span>
-                  <span class="text-[9px] text-slate-500 font-mono">p.{{ sub.page }}</span>
-                </div>
-              </div>
-
-              <!-- Purpose Note (Obsidian Callout Style) -->
-              <div v-if="item.purpose" class="my-0.5 ml-1 px-2 py-0.5 text-[10px] text-slate-400 italic bg-[#252526]/50 rounded truncate border-l-2 border-amber-500/50">
-                ↳ {{ item.purpose }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================================= -->
-      <!-- Column 2: 🎯 정답셋 (Ground Truth) Obsidian Tree Editor (4 Cols) -->
-      <!-- ========================================================================= -->
-      <section class="col-span-4 border-r border-[#2b2b2b] flex flex-col bg-[#1e1e1e] overflow-hidden">
-        <!-- Panel Header -->
-        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-bullseye text-emerald-400 text-xs"></i>
-            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Ground Truth (정답셋)</span>
-            <span class="text-[10px] text-slate-400 font-mono">({{ gtCount }} 노드)</span>
-          </div>
-
-          <div class="flex items-center space-x-1.5">
-            <button 
-              @click="addRootOutline" 
-              title="새 최상위 섹션 추가"
-              class="px-2 py-0.5 rounded bg-[#333333] hover:bg-[#444444] text-slate-200 text-[11px] font-medium flex items-center space-x-1 transition-colors">
-              <i class="fa-solid fa-plus text-[9px]"></i>
-              <span>추가</span>
-            </button>
-            <button 
-              @click="saveGroundTruth" 
-              :disabled="savingGt"
-              class="px-2.5 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center space-x-1 shadow transition-colors">
-              <i class="fa-solid fa-floppy-disk text-[10px]" :class="{'fa-spin': savingGt}"></i>
-              <span>저장</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Tip Header -->
-        <div class="px-3 py-1 bg-emerald-950/20 border-b border-emerald-900/30 text-[11px] text-emerald-300/80 flex items-center justify-between">
-          <span>각 노드를 클릭하면 하단 인스펙터에서 즉시 수정됩니다.</span>
-          <span class="text-[10px] text-slate-400 font-mono">JSON 자동 동기화</span>
-        </div>
-
-        <!-- Obsidian Tree View -->
-        <div class="flex-1 overflow-y-auto py-1 font-mono">
-          <div v-if="!groundTruth.outlines || !groundTruth.outlines.outlines || groundTruth.outlines.outlines.length === 0" class="p-4 text-center text-slate-500">
-            정답셋이 비어있습니다. [+ 추가] 버튼을 누르세요.
-          </div>
-
-          <div v-for="(item, idx) in flattenedGtNodes" :key="item.node.id || idx" class="flex flex-col">
-            <!-- Outline Row -->
-            <div 
-              @click="selectNode(item.node, item.parent)"
-              :style="{ paddingLeft: `${(item.depth - 1) * 14 + 6}px` }"
-              :class="selectedNode === item.node ? 'bg-[#094771] text-white' : 'hover:bg-[#2a2d2e] text-slate-200'"
-              class="h-6 pr-2 flex items-center space-x-1.5 cursor-pointer group transition-all">
-              
-              <!-- Expand arrow if has children or element data -->
-              <i @click.stop="toggleExpand(item.node)" 
-                 v-if="(item.node.children && item.node.children.length > 0) || hasElementData(item.node.id)"
-                 :class="item.node.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
-                 class="w-3 text-[9px] text-slate-400 hover:text-white"></i>
-              <span v-else class="w-3"></span>
-              
-              <!-- Dynamic Level Badge -->
-              <span :class="getLevelBadgeClass(item.node.level || item.depth)" class="text-[9px] font-mono font-bold px-1 rounded transition-colors">
-                L{{ item.node.level || item.depth }}
-              </span>
-
-              <i :class="item.node.children && item.node.children.length > 0 ? 'fa-solid fa-folder text-emerald-400' : 'fa-regular fa-file-lines text-cyan-500/80'" class="text-xs"></i>
-              
-              <span class="font-semibold truncate flex-1 text-[11px]">{{ item.node.title || '(제목 없음)' }}</span>
-
-              <!-- Element Badge if bound -->
-              <span v-if="getNodeElement(item.node.id)" class="text-[9px] px-1 py-0.2 rounded bg-[#333333] text-cyan-300 font-mono">
-                {{ getNodeElement(item.node.id).type }}
-              </span>
-              
-              <!-- Quick Action Hover Buttons -->
-              <div class="hidden group-hover:flex items-center space-x-1 shrink-0">
-                <button @click.stop="addChildNode(item.node)" title="하위 노드 추가" class="text-slate-400 hover:text-emerald-300 p-0.5">
-                  <i class="fa-solid fa-plus text-[10px]"></i>
-                </button>
-                <button @click.stop="removeNode(item)" title="삭제" class="text-slate-400 hover:text-rose-400 p-0.5">
-                  <i class="fa-solid fa-xmark text-[10px]"></i>
-                </button>
-              </div>
-
-              <span class="text-[9px] text-slate-500 font-mono">p.{{ item.node.page }}</span>
-            </div>
-
-            <!-- 🌟 INLINE ELEMENT DATA (해당 노드에 바인딩된 실제 엘리먼트 데이터) -->
-            <div v-if="item.node.expanded !== false && getNodeElement(item.node.id)" 
-                 :style="{ paddingLeft: `${(item.depth - 1) * 14 + 22}px` }"
-                 class="tree-guide pr-2 py-0.5 space-y-0.5 border-l border-cyan-900/60 ml-2">
-              
-              <!-- 1. If Value is an Object (Key-Value Pairs) -->
-              <template v-if="isObject(getNodeElement(item.node.id).value)">
-                <div 
-                  v-for="(val, key) in getNodeElement(item.node.id).value" 
-                  :key="key" 
-                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
-                  <i class="fa-solid fa-tag text-[8px] text-cyan-400 shrink-0"></i>
-                  <span class="text-slate-400 shrink-0 font-semibold">{{ key }}:</span>
-                  <span class="text-emerald-300 truncate">{{ val }}</span>
-                </div>
-              </template>
-
-              <!-- 2. If Items (List items) -->
-              <template v-else-if="getNodeElement(item.node.id).items && getNodeElement(item.node.id).items.length > 0">
-                <div 
-                  v-for="(it, iIdx) in getNodeElement(item.node.id).items" 
-                  :key="iIdx" 
-                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
-                  <i class="fa-solid fa-circle-dot text-[6px] text-cyan-400 shrink-0"></i>
-                  <span class="text-slate-500 shrink-0">{{ iIdx + 1 }}.</span>
-                  <span class="text-slate-200 truncate">{{ it }}</span>
-                </div>
-              </template>
-
-              <!-- 3. If Table format (value with items array) -->
-              <template v-else-if="isTableElement(getNodeElement(item.node.id))">
-                <div 
-                  v-for="(row, rIdx) in getNodeElement(item.node.id).value.items" 
-                  :key="rIdx" 
-                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
-                  <i class="fa-solid fa-table-cells text-[8px] text-amber-400 shrink-0"></i>
-                  <span class="text-slate-200 truncate font-semibold">{{ row.description || row['구분'] || row['주요과제 및 추진계획'] || row['항목'] || row }}</span>
-                  <span class="text-emerald-300 text-[9px] shrink-0">({{ row.total || row.amount || row['금액(원)'] || row['이름'] || row['추진일정'] || '' }})</span>
-                </div>
-              </template>
-
-              <!-- 4. Simple String Value -->
-              <template v-else-if="getNodeElement(item.node.id).value">
-                <div class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
-                  <i class="fa-solid fa-arrow-turn-down-right text-[8px] text-cyan-400 shrink-0"></i>
-                  <span class="text-emerald-300 truncate">{{ getNodeElement(item.node.id).value }}</span>
-                </div>
-              </template>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Node Inspector Panel (하단 속성 & 엘리먼트 데이터 편집기) -->
-        <div v-if="selectedNode" class="p-3 border-t border-[#2b2b2b] bg-[#252526] shrink-0 space-y-2.5 max-h-[48vh] overflow-y-auto">
-          <div class="flex items-center justify-between border-b border-[#333333] pb-1.5">
-            <div class="flex items-center space-x-2">
-              <i class="fa-solid fa-sliders text-emerald-400"></i>
-              <span class="text-[11px] font-bold uppercase text-slate-200 tracking-wider">노드 속성 & 데이터 인스펙터</span>
-            </div>
-            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800">
-              ID: {{ selectedNode.id }}
-            </span>
-          </div>
-
-          <!-- Basic Attributes (Title, Purpose, Level, Page) -->
-          <div class="space-y-1.5 font-mono text-xs">
-            <div class="flex items-center space-x-2">
-              <span class="text-[10px] text-slate-400 w-12 shrink-0">제목:</span>
-              <input 
-                type="text" 
-                v-model="selectedNode.title" 
-                placeholder="목차 제목..." 
-                class="flex-1 bg-[#181818] border border-[#333333] focus:border-emerald-500 rounded px-2 py-1 text-xs text-slate-100 focus:outline-none" />
-            </div>
-
-            <div class="flex items-center space-x-2">
-              <span class="text-[10px] text-slate-400 w-12 shrink-0">목적:</span>
-              <input 
-                type="text" 
-                v-model="selectedNode.purpose" 
-                placeholder="도메인/비즈니스 목적 서술..." 
-                class="flex-1 bg-[#181818] border border-[#333333] focus:border-emerald-500 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none" />
-            </div>
-
-            <div class="flex items-center space-x-4 pt-0.5">
-              <div class="flex items-center space-x-1.5">
-                <span class="text-[10px] text-slate-400">Level:</span>
-                <select 
-                  v-model.number="selectedNode.level" 
-                  class="bg-[#181818] text-xs font-bold text-emerald-400 border border-[#333333] rounded px-2 py-1 focus:outline-none">
-                  <option :value="1">Level 1 (대주제/문서)</option>
-                  <option :value="2">Level 2 (소주제/안건)</option>
-                  <option :value="3">Level 3 (세부항목)</option>
-                </select>
-              </div>
-
-              <div class="flex items-center space-x-1.5">
-                <span class="text-[10px] text-slate-400">Page:</span>
-                <input 
-                  type="number" 
-                  v-model.number="selectedNode.page" 
-                  class="w-12 bg-[#181818] border border-[#333333] rounded px-1 py-1 text-xs text-center text-slate-200 focus:outline-none font-bold" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Bound Element Section (바인딩된 실제 데이터 표출 및 편집) -->
-          <div class="pt-2 border-t border-[#333333] space-y-2">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-1.5">
-                <i class="fa-solid fa-cube text-cyan-400 text-xs"></i>
-                <span class="text-[10px] font-bold uppercase text-slate-300 tracking-wider">바인딩된 엘리먼트 데이터 (Element Value)</span>
-              </div>
-              <div v-if="selectedElement" class="flex items-center space-x-1.5">
-                <span class="text-[10px] text-slate-400 font-semibold">타입:</span>
-                <select 
-                  v-model="selectedElement.type" 
-                  class="bg-[#181818] text-[10px] px-1.5 py-0.5 rounded text-cyan-300 border border-cyan-800 font-mono focus:outline-none focus:border-cyan-500">
-                  <option value="key_value">key_value</option>
-                  <option value="paragraph">paragraph</option>
-                  <option value="table">table</option>
-                  <option value="list">list</option>
-                  <option value="media">media</option>
-                </select>
-              </div>
-              <button 
-                v-else 
-                @click="createElementForNode(selectedNode)" 
-                class="text-[10px] px-2 py-0.5 bg-indigo-900 hover:bg-indigo-800 text-indigo-200 rounded border border-indigo-700 transition-colors">
-                + 엘리먼트 데이터 연결
-              </button>
-            </div>
-
-            <!-- Element Content Renderer -->
-            <div v-if="selectedElement" class="bg-[#181818] border border-[#333333] rounded-lg p-2.5 font-mono text-xs space-y-2">
-              <!-- If Value is an Object (Dict of fields) -->
-              <div v-if="isObject(selectedElement.value)" class="space-y-1.5">
-                <div v-for="(val, key) in selectedElement.value" :key="key" class="flex items-start space-x-2">
-                  <span class="text-[10px] text-slate-400 w-24 shrink-0 truncate font-semibold" :title="key">{{ key }}:</span>
-                  <input 
-                    type="text" 
-                    v-model="selectedElement.value[key]" 
-                    class="flex-1 bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none" />
-                </div>
-              </div>
-
-              <!-- If Value has Items (List) -->
-              <div v-else-if="selectedElement.items && selectedElement.items.length > 0" class="space-y-1">
-                <div v-for="(it, iIdx) in selectedElement.items" :key="iIdx" class="flex items-center space-x-1.5">
-                  <span class="text-[10px] text-slate-500">{{ iIdx + 1 }}.</span>
-                  <input 
-                    type="text" 
-                    v-model="selectedElement.items[iIdx]" 
-                    class="flex-1 bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none" />
-                </div>
-              </div>
-
-              <!-- If Simple String Value -->
-              <div v-else class="space-y-1">
-                <textarea 
-                  v-model="selectedElement.value" 
-                  rows="2" 
-                  class="w-full bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded p-1.5 text-xs text-slate-200 focus:outline-none resize-none leading-normal"></textarea>
-              </div>
-            </div>
-
-            <div v-else class="p-2 text-center text-slate-500 text-[11px] bg-[#181818]/60 rounded border border-[#2b2b2b]">
-              이 목차 노드에 바인딩된 세부 엘리먼트가 없습니다.
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================================= -->
-      <!-- Column 3: 🔬 프롬프트 실험실 (Playground Tree View) (4 Cols) -->
-      <!-- ========================================================================= -->
-      <section class="col-span-4 flex flex-col bg-[#1e1e1e] overflow-hidden">
-        <!-- Panel Header -->
-        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
-          <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-flask text-indigo-400 text-xs"></i>
-            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Experiment Playground</span>
-          </div>
-
-          <!-- Model Selector -->
-          <div class="flex items-center space-x-1">
-            <select 
-              v-model="experimentModel" 
-              class="bg-[#181818] text-[11px] font-mono text-indigo-400 border border-[#333333] rounded px-2 py-0.5 focus:outline-none font-semibold">
-              <option value="gemini-3.8-flash-low">gemini-3.8-flash-low (기본 고속)</option>
-              <option value="gemini-3.1-pro-low">gemini-3.1-pro-low (고지능 Pro)</option>
-              <option value="gemini-3.7-flash-low">gemini-3.7-flash-low</option>
-              <option value="claude-sonnet-4.6-thinking">claude-sonnet-4.6-thinking</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Prompt Mini Bar & Run Button -->
-        <div class="p-2 border-b border-[#2b2b2b] bg-[#252526]/60 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">프롬프트 템플릿</span>
-            <button @click="loadDefaultPrompt" class="text-[10px] text-blue-400 hover:underline">기본 복원</button>
-          </div>
-          <textarea 
-            v-model="promptTemplate" 
-            rows="3" 
-            class="w-full bg-[#181818] border border-[#333333] focus:border-indigo-500 rounded p-1.5 text-[11px] font-mono text-slate-300 focus:outline-none resize-none leading-tight"></textarea>
-          
-          <button 
-            @click="runExperiment" 
-            :disabled="runningExp"
-            class="w-full py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow flex items-center justify-center space-x-1.5 transition-colors">
-            <i class="fa-solid fa-play text-[10px]" :class="{'fa-spin': runningExp}"></i>
-            <span>{{ runningExp ? '추론 진행 중...' : '실험 실행 및 실시간 채점 (Run & Eval)' }}</span>
-          </button>
-        </div>
-
-        <!-- Scorecard Mini Ribbon -->
-        <div v-if="metrics" class="px-3 py-1.5 bg-[#252526] border-b border-[#2b2b2b] flex items-center justify-between font-mono text-[11px]">
-          <div class="flex items-center space-x-3">
-            <span>Recall: <b class="text-emerald-400">{{ metrics.recall }}%</b></span>
-            <span>Precision: <b class="text-cyan-400">{{ metrics.precision }}%</b></span>
-            <span>누락: <b class="text-rose-400">{{ metrics.missed_titles.length }}</b></span>
-          </div>
-          <span class="px-1.5 py-0.2 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700 font-bold">
-            F1: {{ metrics.f1 }}%
+    <!-- ========================================================================= -->
+    <!-- 2. Metrics Ribbon Bar (측정 지표 대시보드 리본) -->
+    <!-- ========================================================================= -->
+    <section class="bg-zinc-900/90 border-b border-zinc-800 px-4 py-2 flex items-center justify-between shrink-0 text-xs">
+      <div class="flex items-center space-x-6">
+        <!-- F1 Score Large Badge -->
+        <div class="flex items-center space-x-2">
+          <span class="text-zinc-400 font-semibold tracking-wider uppercase text-[11px]">F1 Score:</span>
+          <span :class="getF1Color(metrics.f1)" class="text-base font-extrabold font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700">
+            {{ metrics.f1.toFixed(1) }}%
           </span>
         </div>
 
-        <!-- Result Tree View (VS Code Style) -->
-        <div class="flex-1 overflow-y-auto py-1 font-mono">
-          <div v-if="!experimentResult" class="p-6 text-center text-slate-500 text-xs">
-            상단 [실험 실행] 버튼을 누르면 새 프롬프트로 추론된 트리가 여기에 렌더링됩니다.
+        <!-- Precision & Recall -->
+        <div class="flex items-center space-x-4 font-mono">
+          <div class="flex items-center space-x-1.5">
+            <span class="text-zinc-400">정밀도(Precision):</span>
+            <span class="font-bold text-cyan-400">{{ metrics.precision.toFixed(1) }}%</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="text-zinc-400">재현율(Recall):</span>
+            <span class="font-bold text-emerald-400">{{ metrics.recall.toFixed(1) }}%</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="text-zinc-400">계층경로(Path Acc):</span>
+            <span class="font-bold text-indigo-400">{{ metrics.path_accuracy.toFixed(1) }}%</span>
+          </div>
+        </div>
+
+        <div class="h-4 w-px bg-zinc-800"></div>
+
+        <!-- Node Counts Breakdown -->
+        <div class="flex items-center space-x-3 font-mono text-[11px]">
+          <span class="text-zinc-400">정답: <b class="text-zinc-200">{{ metrics.total_gt }}</b></span>
+          <span class="text-zinc-400">예측: <b class="text-zinc-200">{{ metrics.total_pred }}</b></span>
+          <span class="text-emerald-400 font-semibold">일치(TP): {{ metrics.tp }}</span>
+          <span :class="metrics.fn > 0 ? 'text-rose-400 font-bold' : 'text-zinc-500'">누락(FN): {{ metrics.fn }}</span>
+          <span :class="metrics.fp > 0 ? 'text-amber-400 font-bold' : 'text-zinc-500'">과추출(FP): {{ metrics.fp }}</span>
+        </div>
+
+        <!-- LLM Judge Score Badge -->
+        <div v-if="judgeResult" @click="showJudgeModal = true" class="flex items-center space-x-2 bg-amber-950/50 border border-amber-700/80 px-2.5 py-1 rounded cursor-pointer hover:bg-amber-900/60 transition-colors" title="클릭하여 심사위원 상세 총평 보기">
+          <i class="fa-solid fa-brain text-amber-400 text-xs"></i>
+          <span class="text-amber-400 font-bold text-[11px]">인간인지 점수:</span>
+          <span class="text-sm font-extrabold font-mono text-amber-200">{{ judgeResult.cognitive_score }}점</span>
+          <span class="text-[10px] font-bold px-1 rounded bg-amber-900 text-amber-300 uppercase font-mono">{{ judgeResult.verdict }}</span>
+          <i class="fa-solid fa-chevron-right text-[9px] text-amber-400"></i>
+        </div>
+      </div>
+
+      <!-- Latency & Tokens -->
+      <div class="flex items-center space-x-4 font-mono text-zinc-400 text-[11px]">
+        <span v-if="telemetry.latency > 0">
+          <i class="fa-regular fa-clock mr-1 text-zinc-500"></i>{{ telemetry.latency }}s
+        </span>
+        <span v-if="telemetry.tokens > 0">
+          <i class="fa-solid fa-coins mr-1 text-amber-500/80"></i>{{ telemetry.tokens.toLocaleString() }} 토큰
+        </span>
+      </div>
+    </section>
+
+
+    <!-- ========================================================================= -->
+    <!-- 3. Main 50:50 좌-우 대조 패널 (Left: Ground Truth, Right: V2 Prediction) -->
+    <!-- ========================================================================= -->
+    <main class="flex-1 grid grid-cols-2 gap-0 overflow-hidden text-xs">
+
+      <!-- ======================================================================= -->
+      <!-- [좌측 50%] 🎯 정답셋 (Ground Truth) 에디터 트리 -->
+      <!-- ======================================================================= -->
+      <section class="border-r border-zinc-800 flex flex-col bg-[#121214] overflow-hidden">
+        <!-- Panel Header -->
+        <div class="h-9 px-3 border-b border-zinc-800 bg-zinc-900/60 flex items-center justify-between shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-bullseye text-emerald-400 text-xs"></i>
+            <span class="font-bold text-zinc-100 uppercase tracking-wider text-[11px]">Ground Truth (정답셋)</span>
+            <span class="text-[10px] text-zinc-400 font-mono">({{ flatGtNodes.length }} 노드)</span>
           </div>
 
-          <div v-if="experimentResult && experimentResult.outlines" v-for="item in experimentResult.outlines" :key="item.id" class="flex flex-col">
-            <div 
-              @click="toggleExpand(item)"
-              class="h-7 px-2 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer text-slate-200 transition-colors">
-              <i :class="item.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
-                 class="w-3 text-[9px] text-slate-400"></i>
-              <i class="fa-solid fa-folder text-indigo-400 text-xs"></i>
-              <span class="font-semibold truncate flex-1">{{ item.title }}</span>
-              <span class="text-[10px] text-slate-500 font-mono">p.{{ item.page }}</span>
-            </div>
+          <button 
+            @click="addRootGtNode" 
+            title="새 최상위 섹션 추가"
+            class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold flex items-center space-x-1 border border-zinc-700 transition-colors">
+            <i class="fa-solid fa-plus text-[9px] text-emerald-400"></i>
+            <span>최상위 항목 추가</span>
+          </button>
+        </div>
 
-            <div v-if="item.expanded !== false" class="tree-guide ml-3 pl-3">
-              <div 
-                v-for="sub in item.children" 
-                :key="sub.id"
-                class="h-6 px-1 flex items-center space-x-1.5 hover:bg-[#2a2d2e] text-slate-300 transition-colors">
-                <i class="fa-regular fa-file-lines text-indigo-400/80 text-xs"></i>
-                <span class="truncate flex-1 text-[11px]">{{ sub.title }}</span>
-                <span class="text-[9px] text-slate-500 font-mono">p.{{ sub.page }}</span>
+        <!-- Tree View Scrollable -->
+        <div class="flex-1 overflow-y-auto py-1 font-mono">
+          <div v-if="flatGtNodes.length === 0" class="p-8 text-center text-zinc-500 text-xs">
+            정답셋이 비어있습니다. 우측 V2 결과에서 [+ 정답셋으로 복사]를 누르거나 상단 [+ 추가] 버튼을 클릭하세요.
+          </div>
+
+          <div v-for="(item, idx) in flatGtNodes" :key="item.node.id || idx" class="flex flex-col">
+            <div 
+              @click="selectGtNode(item.node, item.parent)"
+              :style="{ paddingLeft: `${(item.depth - 1) * 16 + 8}px` }"
+              :class="selectedNode === item.node ? 'bg-indigo-900/60 text-white border-l-2 border-indigo-400' : 'hover:bg-zinc-800/60 text-zinc-200 border-l-2 border-transparent'"
+              class="h-7 pr-3 flex items-center space-x-2 cursor-pointer group transition-all">
+              
+              <!-- Expand/Collapse arrow -->
+              <i @click.stop="toggleExpand(item.node)" 
+                 v-if="item.node.children && item.node.children.length > 0"
+                 :class="item.node.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
+                 class="w-3 text-[9px] text-zinc-500 hover:text-zinc-200"></i>
+              <span v-else class="w-3"></span>
+
+              <!-- Level Badge -->
+              <span :class="getLevelBadgeClass(item.node.level)" class="text-[9px] font-bold px-1.5 py-0.2 rounded font-mono">
+                L{{ item.node.level }}
+              </span>
+
+              <!-- Folder/File icon -->
+              <i :class="item.node.children && item.node.children.length > 0 ? 'fa-solid fa-folder text-emerald-400' : 'fa-regular fa-file text-cyan-400/80'" class="text-xs"></i>
+
+              <!-- Title -->
+              <span class="font-semibold truncate flex-1 text-[11px]">{{ item.node.title || '(제목 없음)' }}</span>
+
+              <!-- Diff Status Tag: Matched vs Missed -->
+              <span v-if="isGtNodeMatched(item.node.id)" class="text-[9px] font-sans px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                ✓ 일치
+              </span>
+              <span v-else class="text-[9px] font-sans px-1.5 py-0.2 rounded bg-rose-950 text-rose-300 border border-rose-800 font-bold">
+                ✕ V2 누락
+              </span>
+
+              <!-- Hover Action Buttons -->
+              <div class="hidden group-hover:flex items-center space-x-1 shrink-0">
+                <button @click.stop="addChildGtNode(item.node)" title="하위 자식 추가" class="text-zinc-400 hover:text-emerald-300 p-1">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                </button>
+                <button @click.stop="removeGtNode(item)" title="삭제" class="text-zinc-400 hover:text-rose-400 p-1">
+                  <i class="fa-solid fa-trash-can text-[10px]"></i>
+                </button>
               </div>
-              <div v-if="item.purpose" class="my-0.5 ml-1 px-2 py-0.5 text-[10px] text-slate-400 italic bg-[#252526]/50 rounded truncate border-l-2 border-indigo-500/50">
-                ↳ {{ item.purpose }}
-              </div>
+
+              <span class="text-[10px] text-zinc-500 font-mono">p.{{ item.node.page }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================= -->
+      <!-- [우측 50%] 🤖 LLM 추출 결과 (V2 Prediction) -->
+      <!-- ======================================================================= -->
+      <section class="flex flex-col bg-[#121214] overflow-hidden">
+        <!-- Panel Header -->
+        <div class="h-9 px-3 border-b border-zinc-800 bg-zinc-900/60 flex items-center justify-between shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400 text-xs"></i>
+            <span class="font-bold text-zinc-100 uppercase tracking-wider text-[11px]">V2 추출 예측 (Prediction)</span>
+            <span class="text-[10px] text-zinc-400 font-mono">({{ flatPredNodes.length }} 노드)</span>
+          </div>
+
+          <button 
+            @click="copyAllPredToGt" 
+            title="V2 결과 전체를 정답셋으로 복사"
+            class="px-2.5 py-1 rounded bg-indigo-950/80 hover:bg-indigo-900 text-indigo-200 text-[11px] font-semibold flex items-center space-x-1 border border-indigo-700/80 transition-colors">
+            <i class="fa-regular fa-copy text-[10px]"></i>
+            <span>V2 전체를 정답셋으로 복사</span>
+          </button>
+        </div>
+
+        <!-- Tree View Scrollable -->
+        <div class="flex-1 overflow-y-auto py-1 font-mono">
+          <div v-if="flatPredNodes.length === 0" class="p-8 text-center text-zinc-500 text-xs">
+            추출된 V2 결과가 없습니다. 상단의 [V2 재실행] 버튼을 클릭하세요.
+          </div>
+
+          <div v-for="(item, idx) in flatPredNodes" :key="item.node.id || idx" class="flex flex-col">
+            <div 
+              :style="{ paddingLeft: `${(item.depth - 1) * 16 + 8}px` }"
+              class="h-7 pr-3 flex items-center space-x-2 hover:bg-zinc-800/60 text-zinc-200 group transition-all">
+              
+              <!-- Expand/Collapse arrow -->
+              <i @click.stop="toggleExpand(item.node)" 
+                 v-if="item.node.children && item.node.children.length > 0"
+                 :class="item.node.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
+                 class="w-3 text-[9px] text-zinc-500 hover:text-zinc-200"></i>
+              <span v-else class="w-3"></span>
+
+              <!-- Level Badge -->
+              <span :class="getLevelBadgeClass(item.node.level)" class="text-[9px] font-bold px-1.5 py-0.2 rounded font-mono">
+                L{{ item.node.level }}
+              </span>
+
+              <!-- Icon -->
+              <i :class="item.node.children && item.node.children.length > 0 ? 'fa-solid fa-folder text-indigo-400' : 'fa-regular fa-file text-indigo-300/80'" class="text-xs"></i>
+
+              <!-- Title -->
+              <span class="font-semibold truncate flex-1 text-[11px]">{{ item.node.title }}</span>
+
+              <!-- Diff Status Tag: Matched vs Excess (FP) -->
+              <span v-if="isPredNodeMatched(item.node.id)" class="text-[9px] font-sans px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold">
+                ✓ 일치
+              </span>
+              <span v-else class="text-[9px] font-sans px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">
+                + 과추출(FP)
+              </span>
+
+              <!-- Quick action to adopt node into Ground Truth -->
+              <button 
+                @click.stop="adoptPredNodeToGt(item.node)"
+                title="이 노드를 좌측 정답셋에 추가"
+                class="hidden group-hover:flex items-center space-x-1 px-1.5 py-0.5 rounded bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 text-[10px] border border-emerald-700 transition-colors">
+                <i class="fa-solid fa-arrow-left text-[9px]"></i>
+                <span>정답셋 추가</span>
+              </button>
+
+              <span class="text-[10px] text-zinc-500 font-mono">p.{{ item.node.page }}</span>
             </div>
           </div>
         </div>
@@ -544,414 +341,378 @@
 
     </main>
 
-    <!-- Raw JSON Modal -->
-    <div v-if="rawModal.open" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div class="bg-[#1e1e1e] border border-[#2b2b2b] rounded-lg w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl">
-        <div class="p-3 border-b border-[#2b2b2b] flex items-center justify-between bg-[#252526]">
-          <span class="text-xs font-bold text-slate-200 font-mono">{{ rawModal.title }}</span>
-          <button @click="rawModal.open = false" class="text-slate-400 hover:text-white">
+    <!-- ========================================================================= -->
+    <!-- 4. Bottom Node Inspector Bar (선택 노드 속성 인라인 편집기) -->
+    <!-- ========================================================================= -->
+    <footer v-if="selectedNode" class="h-12 bg-zinc-900 border-t border-zinc-800 px-4 flex items-center justify-between shrink-0 font-mono text-xs">
+      <div class="flex items-center space-x-4 flex-1">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-sliders text-emerald-400"></i>
+          <span class="text-[11px] font-bold text-zinc-200 uppercase tracking-wider">노드 속성:</span>
+          <span class="text-[10px] px-1 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">ID: {{ selectedNode.id }}</span>
+        </div>
+
+        <div class="flex items-center space-x-1.5 flex-1 max-w-md">
+          <span class="text-zinc-400 text-[11px]">제목:</span>
+          <input 
+            type="text" 
+            v-model="selectedNode.title" 
+            class="flex-1 bg-zinc-950 border border-zinc-700 focus:border-emerald-500 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none" />
+        </div>
+
+        <div class="flex items-center space-x-1.5">
+          <span class="text-zinc-400 text-[11px]">Level:</span>
+          <select 
+            v-model.number="selectedNode.level" 
+            class="bg-zinc-950 text-xs font-bold text-emerald-400 border border-zinc-700 rounded px-2 py-1 focus:outline-none">
+            <option :value="1">Level 1 (대주제)</option>
+            <option :value="2">Level 2 (소주제/섹션)</option>
+            <option :value="3">Level 3 (세부항목)</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-1.5">
+          <span class="text-zinc-400 text-[11px]">Page:</span>
+          <input 
+            type="number" 
+            v-model.number="selectedNode.page" 
+            class="w-12 bg-zinc-950 border border-zinc-700 rounded px-1.5 py-1 text-xs text-center text-zinc-100 font-bold focus:outline-none" />
+        </div>
+
+        <div class="flex items-center space-x-1.5 flex-1 max-w-xs">
+          <span class="text-zinc-400 text-[11px]">목적:</span>
+          <input 
+            type="text" 
+            v-model="selectedNode.purpose" 
+            placeholder="비즈니스 목적..." 
+            class="flex-1 bg-zinc-950 border border-zinc-700 focus:border-emerald-500 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none" />
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <button 
+          @click="selectedNode = null" 
+          class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 text-xs">
+          닫기
+        </button>
+      </div>
+    </footer>
+
+    <!-- LLM Judge Result Modal -->
+    <div v-if="showJudgeModal && judgeResult" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+      <div class="bg-zinc-900 border border-zinc-700 rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-zinc-800 bg-zinc-800/80 flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <i class="fa-solid fa-scale-balanced text-amber-400 text-base"></i>
+            <span class="font-bold text-zinc-100 text-sm">LLM-as-a-Judge 심사위원 평가 리포트</span>
+          </div>
+          <button @click="showJudgeModal = false" class="text-zinc-400 hover:text-white p-1">
             <i class="fa-solid fa-xmark text-sm"></i>
           </button>
         </div>
-        <pre class="p-4 overflow-y-auto flex-1 font-mono text-xs text-slate-300 bg-[#181818] leading-relaxed whitespace-pre">{{ rawModal.content }}</pre>
-      </div>
-    </div>
 
-    <!-- Toast Notification -->
-    <div v-if="toast.show" class="fixed bottom-4 right-4 z-50 px-3 py-2 rounded shadow-xl border text-xs font-mono flex items-center space-x-2 transition-all"
-         :class="toast.type === 'success' ? 'bg-[#1e1e1e] text-emerald-400 border-emerald-800' : 'bg-[#1e1e1e] text-rose-400 border-rose-800'">
-      <i :class="toast.type === 'success' ? 'fa-solid fa-check' : 'fa-solid fa-triangle-exclamation'"></i>
-      <span>{{ toast.message }}</span>
+        <div class="p-5 space-y-4 text-xs font-mono max-h-[75vh] overflow-y-auto">
+          <!-- Top KPI Cards -->
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-center">
+              <div class="text-[10px] text-zinc-400 font-sans mb-1">인간 인지 종합 점수</div>
+              <div class="text-2xl font-extrabold text-amber-400">{{ judgeResult.cognitive_score }}점</div>
+            </div>
+            <div class="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-center">
+              <div class="text-[10px] text-zinc-400 font-sans mb-1">종합 판정</div>
+              <div class="text-lg font-bold text-emerald-400 uppercase tracking-wider">{{ judgeResult.verdict }}</div>
+            </div>
+            <div class="bg-zinc-950 p-3 rounded-lg border border-zinc-800 text-center">
+              <div class="text-[10px] text-zinc-400 font-sans mb-1">핵심 랜드마크 커버리지</div>
+              <div class="text-2xl font-extrabold text-cyan-400">{{ judgeResult.core_coverage_pct }}%</div>
+            </div>
+          </div>
+
+          <!-- Rationale -->
+          <div class="bg-zinc-950 p-3.5 rounded-lg border border-zinc-800 space-y-1.5">
+            <div class="font-bold text-zinc-300 font-sans flex items-center space-x-1.5">
+              <i class="fa-solid fa-quote-left text-amber-400 text-xs"></i>
+              <span>심사위원 인지 총평</span>
+            </div>
+            <p class="text-zinc-300 leading-relaxed text-[11px] font-sans whitespace-pre-wrap">{{ judgeResult.rationale }}</p>
+          </div>
+
+          <!-- Well captured blocks -->
+          <div v-if="judgeResult.well_captured_blocks && judgeResult.well_captured_blocks.length > 0" class="space-y-1.5">
+            <div class="font-bold text-emerald-400 font-sans flex items-center space-x-1.5">
+              <i class="fa-solid fa-circle-check text-xs"></i>
+              <span>합리적으로 잘 짚어낸 핵심 구획 ({{ judgeResult.well_captured_blocks.length }})</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span v-for="b in judgeResult.well_captured_blocks" :key="b" class="px-2 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[11px]">
+                {{ b }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Critical omissions -->
+          <div v-if="judgeResult.critical_omissions && judgeResult.critical_omissions.length > 0" class="space-y-1.5">
+            <div class="font-bold text-rose-400 font-sans flex items-center space-x-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+              <span>사람이 보기에 아쉬운 누락 구획 ({{ judgeResult.critical_omissions.length }})</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span v-for="o in judgeResult.critical_omissions" :key="o" class="px-2 py-1 rounded bg-rose-950 text-rose-300 border border-rose-800 text-[11px]">
+                {{ o }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 border-t border-zinc-800 bg-zinc-800/40 flex justify-end">
+          <button @click="showJudgeModal = false" class="px-4 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-semibold">
+            확인
+          </button>
+        </div>
+      </div>
     </div>
 
   </div>
 
+  <!-- Vue 3 Application Script -->
   <script>
     const { createApp, ref, computed, onMounted } = Vue;
 
     createApp({
       setup() {
-        const tasks = ref([]);
-        const selectedTask = ref('01.outline_extraction');
         const documents = ref([]);
-        const selectedDoc = ref('11월_디딤돌_회의록');
-
+        const selectedDoc = ref("11월_디딤돌_회의록");
+        const selectedModel = ref("gemini-3.8-flash-low");
         const loading = ref(false);
-        const savingGt = ref(false);
-        const runningExp = ref(false);
+        const saving = ref(false);
+        const running = ref(false);
+        const judging = ref(false);
+        const judgeResult = ref(null);
+        const showJudgeModal = ref(false);
 
-        const baseline = ref({ outlines: {}, elements: [], bias_analysis: '' });
-        const groundTruth = ref({ outlines: { outlines: [] }, elements: [] });
+
+        const groundTruth = ref({ document_title: '', outlines: [] });
+        const prediction = ref({ document_title: '', outlines: [] });
+        const metrics = ref({
+          f1: 0.0, precision: 0.0, recall: 0.0, path_accuracy: 0.0,
+          total_gt: 0, total_pred: 0, tp: 0, fn: 0, fp: 0,
+          matched_gt_ids: {}, matched_pred_ids: {}
+        });
+        const telemetry = ref({ latency: 0.0, tokens: 0 });
+
         const selectedNode = ref(null);
+        const selectedParent = ref(null);
 
-        const defaultPrompt = ref('');
-        const promptTemplate = ref('');
-        const experimentModel = ref('gemini-3.8-flash-low');
-        const experimentResult = ref(null);
-        const metrics = ref(null);
-
-        const agentStatus = ref({ online: false, mode: 'checking...', default_model: 'gemini-3.8-flash-low' });
-
-        const checkAgentStatus = async () => {
-          try {
-            const res = await fetch('/api/agent-status');
-            if (res.ok) {
-              agentStatus.value = await res.json();
-            }
-          } catch (e) {
-            agentStatus.value = { online: false, mode: 'cli-fallback', default_model: 'gemini-3.8-flash-low' };
-          }
-        };
-
-        const rawModal = ref({ open: false, title: '', content: '' });
-        const toast = ref({ show: false, message: '', type: 'success' });
-
-        const showToast = (msg, type = 'success') => {
-          toast.value = { show: true, message: msg, type };
-          setTimeout(() => { toast.value.show = false; }, 2500);
-        };
-
-        const baselineCount = computed(() => {
-          const list = baseline.value.outlines?.outlines || [];
-          let count = list.length;
-          list.forEach(item => { if (item.children) count += item.children.length; });
-          return count;
-        });
-
-        const flattenTree = (nodes, parent = null, depth = 1) => {
-          let list = [];
-          if (!nodes) return list;
-          for (const node of nodes) {
-            list.push({ node, parent, depth });
-            if (node.expanded !== false && node.children && node.children.length > 0) {
-              list = list.concat(flattenTree(node.children, node, depth + 1));
-            }
-          }
-          return list;
-        };
-
-        const flattenedGtNodes = computed(() => {
-          return flattenTree(groundTruth.value.outlines?.outlines || []);
-        });
-
-        const countTreeNodes = (nodes) => {
-          let c = 0;
-          if (!nodes) return 0;
-          for (const n of nodes) {
-            c += 1;
-            if (n.children) c += countTreeNodes(n.children);
-          }
-          return c;
-        };
-
-        const gtCount = computed(() => {
-          return countTreeNodes(groundTruth.value.outlines?.outlines || []);
-        });
-
-        const selectedElement = computed(() => {
-          if (!selectedNode.value) return null;
-          const elList = groundTruth.value.elements || [];
-          return elList.find(e => e.outline_id === selectedNode.value.id) || null;
-        });
-
-        const getNodeElement = (id) => {
-          const elList = groundTruth.value.elements || [];
-          return elList.find(e => e.outline_id === id);
-        };
-
-        const getLevelBadgeClass = (level) => {
-          if (level === 1) return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
-          if (level === 2) return 'bg-blue-950 text-blue-400 border border-blue-800';
-          if (level === 3) return 'bg-amber-950 text-amber-400 border border-amber-800';
-          if (level === 4) return 'bg-purple-950 text-purple-400 border border-purple-800';
-          return 'bg-rose-950 text-rose-400 border border-rose-800';
-        };
-
-        const isObject = (val) => {
-          return val && typeof val === 'object' && !Array.isArray(val);
-        };
-
-        const isTableElement = (elem) => {
-          if (!elem) return false;
-          return elem.type === 'table' || (elem.value && elem.value.items && Array.isArray(elem.value.items));
-        };
-
-        const hasElementData = (id) => {
-          const el = getNodeElement(id);
-          if (!el) return false;
-          if (el.items && el.items.length > 0) return true;
-          if (el.value) {
-            if (typeof el.value === 'object') return Object.keys(el.value).length > 0;
-            return String(el.value).trim().length > 0;
-          }
-          return false;
-        };
-
-        const createElementForNode = (node) => {
-          if (!groundTruth.value.elements) groundTruth.value.elements = [];
-          const newElem = {
-            id: `elem-${node.id}`,
-            outline_id: node.id,
-            type: 'key_value',
-            label: node.title,
-            page: node.page || 1,
-            value: ''
-          };
-          groundTruth.value.elements.push(newElem);
-          showToast('새 엘리먼트 데이터가 연결되었습니다.');
-        };
-
-        const getTaskIcon = (id) => {
-          if (id.includes('outline')) return 'fa-solid fa-list-check';
-          if (id.includes('segment')) return 'fa-solid fa-vector-square';
-          return 'fa-solid fa-file-invoice';
-        };
-
-        const loadTasks = async () => {
-          try {
-            const res = await fetch('/api/tasks');
-            tasks.value = await res.json();
-          } catch(e) { console.error(e); }
-        };
-
+        // Load document list
         const loadDocuments = async () => {
           try {
-            const res = await fetch(`/api/documents?task=${selectedTask.value}`);
+            const res = await fetch('/api/documents');
             const data = await res.json();
-            documents.value = data.documents;
+            documents.value = data.documents || [];
             if (documents.value.length > 0 && !documents.value.includes(selectedDoc.value)) {
               selectedDoc.value = documents.value[0];
             }
-          } catch(e) { console.error(e); }
+          } catch (e) {
+            console.error("Failed to load documents:", e);
+          }
         };
 
+        // Load active document data
         const loadDocData = async () => {
           loading.value = true;
+          selectedNode.value = null;
           try {
-            const res = await fetch(`/api/document-data?task=${selectedTask.value}&doc=${selectedDoc.value}`);
+            const res = await fetch(`/api/document-data?doc=${encodeURIComponent(selectedDoc.value)}`);
             const data = await res.json();
-            baseline.value = data.baseline || { outlines: {}, elements: [], bias_analysis: '' };
-            groundTruth.value = data.ground_truth || { outlines: { outlines: [] }, elements: [] };
-            defaultPrompt.value = data.default_prompt || '';
-            promptTemplate.value = defaultPrompt.value; // 문서 변경 시 프롬프트 템플릿 항상 갱신
-            
-            // 첫 번째 GT 노드 선택
-            if (groundTruth.value.outlines?.outlines?.length > 0) {
-              selectedNode.value = groundTruth.value.outlines.outlines[0];
-            } else {
-              selectedNode.value = null;
-            }
-            experimentResult.value = null;
-            metrics.value = null;
-          } catch(e) {
-            showToast('데이터 로드 실패', 'error');
+            groundTruth.value = data.ground_truth || { outlines: [] };
+            prediction.value = data.prediction || { outlines: [] };
+            metrics.value = data.metrics || {
+              f1: 0.0, precision: 0.0, recall: 0.0, path_accuracy: 0.0,
+              total_gt: 0, total_pred: 0, tp: 0, fn: 0, fp: 0,
+              matched_gt_ids: {}, matched_pred_ids: {}
+            };
+            telemetry.value = data.telemetry || { latency: 0.0, tokens: 0 };
+          } catch (e) {
+            console.error("Failed to load document data:", e);
           } finally {
             loading.value = false;
           }
         };
 
-        const selectTask = async (id) => {
-          selectedTask.value = id;
-          await loadDocuments();
-          await loadDocData();
-        };
-
-        const toggleExpand = (item) => {
-          item.expanded = item.expanded === false ? true : false;
-        };
-
-        const selectNode = (node) => {
-          selectedNode.value = node;
-        };
-
-        const addRootOutline = () => {
-          if (!groundTruth.value.outlines) groundTruth.value.outlines = { outlines: [] };
-          if (!groundTruth.value.outlines.outlines) groundTruth.value.outlines.outlines = [];
-          
-          const newIdx = groundTruth.value.outlines.outlines.length + 1;
-          const newNode = {
-            id: `out-${newIdx}`,
-            level: 1,
-            title: `새 회의/섹션 ${newIdx}`,
-            page: 1,
-            purpose: '목적 기술...',
-            children: []
-          };
-          groundTruth.value.outlines.outlines.push(newNode);
-          selectedNode.value = newNode;
-          showToast('새 최상위 섹션이 추가되었습니다.');
-        };
-
-        const addChildNode = (parent) => {
-          if (!parent.children) parent.children = [];
-          const newLevel = (parent.level || 1) + 1;
-          const newSub = {
-            id: `${parent.id}-${parent.children.length + 1}`,
-            level: newLevel,
-            title: `새 L${newLevel} 항목`,
-            page: parent.page || 1,
-            purpose: '',
-            children: []
-          };
-          parent.children.push(newSub);
-          parent.expanded = true;
-          selectedNode.value = newSub;
-          showToast(`L${newLevel} 하위 노드가 추가되었습니다.`);
-        };
-
-        const removeNode = (item) => {
-          if (item.parent) {
-            const pChildren = item.parent.children;
-            const idx = pChildren.indexOf(item.node);
-            if (idx >= 0) pChildren.splice(idx, 1);
-          } else {
-            const roots = groundTruth.value.outlines?.outlines || [];
-            const idx = roots.indexOf(item.node);
-            if (idx >= 0) roots.splice(idx, 1);
-          }
-          selectedNode.value = null;
-          showToast('노드가 삭제되었습니다.');
-        };
-
+        // Save Ground Truth
         const saveGroundTruth = async () => {
-          savingGt.value = true;
+          saving.value = true;
           try {
             const res = await fetch('/api/save-ground-truth', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                task: selectedTask.value,
                 document: selectedDoc.value,
-                outlines: groundTruth.value.outlines,
-                elements: groundTruth.value.elements || []
+                outlines: groundTruth.value
               })
             });
             const data = await res.json();
             if (data.status === 'success') {
-              showToast('expected_outlines.json 파일에 저장되었습니다.');
+              metrics.value = data.metrics;
+              alert(`[완료] '${selectedDoc.value}' 정답셋이 성공적으로 저장되었습니다!`);
             }
-          } catch(e) {
-            showToast('저장 실패', 'error');
+          } catch (e) {
+            alert('정답셋 저장 중 오류가 발생했습니다: ' + e);
           } finally {
-            savingGt.value = false;
+            saving.value = false;
           }
         };
 
-        const loadDefaultPrompt = () => {
-          promptTemplate.value = defaultPrompt.value;
-          showToast('기본 프롬프트로 복원되었습니다.');
-        };
-
-        const runExperiment = async () => {
-          runningExp.value = true;
-          experimentResult.value = null;
-          metrics.value = null;
+        // Run V2 Pipeline
+        const runV2 = async () => {
+          running.value = true;
           try {
-            const res = await fetch('/api/run-experiment', {
+            const res = await fetch('/api/run-v2', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                task: selectedTask.value,
                 document: selectedDoc.value,
-                model: experimentModel.value,
-                prompt: promptTemplate.value
+                model: selectedModel.value,
+                effort: 'low'
               })
             });
             const data = await res.json();
             if (data.status === 'success') {
-              experimentResult.value = data.result;
-              showToast(`${data.model} 추론 완료! 채점표 계산.`);
-              await evaluateResult();
+              prediction.value = data.prediction;
+              metrics.value = data.metrics;
+              telemetry.value = data.telemetry;
+            } else {
+              alert('V2 실행 실패: ' + data.detail);
             }
-          } catch(e) {
-            showToast('실험 실행 중 통신 오류 발생', 'error');
+          } catch (e) {
+            alert('V2 실행 오류: ' + e);
           } finally {
-            runningExp.value = false;
+            running.value = false;
           }
         };
 
-        const evaluateResult = async () => {
-          if (!experimentResult.value || !groundTruth.value.outlines) return;
-          try {
-            const res = await fetch('/api/evaluate', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                ground_truth_outlines: groundTruth.value.outlines.outlines || [],
-                predicted_outlines: experimentResult.value.outlines || []
-              })
-            });
-            metrics.value = await res.json();
-          } catch(e) { console.error(e); }
-        };
-
-        const showRawJson = (type) => {
-          if (type === 'baseline') {
-            rawModal.value = {
-              open: true,
-              title: 'Baseline Outline Tree (JSON)',
-              content: JSON.stringify(baseline.value.outlines, null, 2)
-            };
+        // Flatten tree helper
+        const flattenTree = (nodes, depth = 1, parent = null) => {
+          const list = [];
+          if (!nodes || !Array.isArray(nodes)) return list;
+          for (const node of nodes) {
+            list.push({ node, depth, parent });
+            if (node.expanded !== false && node.children && Array.isArray(node.children)) {
+              list.push(...flattenTree(node.children, depth + 1, node));
+            }
           }
+          return list;
         };
 
-        const refreshAll = async () => {
-          await checkAgentStatus();
-          await loadDocData();
+        const flatGtNodes = computed(() => flattenTree(groundTruth.value.outlines || []));
+        const flatPredNodes = computed(() => flattenTree(prediction.value.outlines || []));
+
+        // Matching checks
+        const isGtNodeMatched = (nodeId) => {
+          if (!metrics.value || !metrics.value.matched_gt_ids) return false;
+          return String(nodeId) in metrics.value.matched_gt_ids;
+        };
+
+        const isPredNodeMatched = (nodeId) => {
+          if (!metrics.value || !metrics.value.matched_pred_ids) return false;
+          return String(nodeId) in metrics.value.matched_pred_ids;
+        };
+
+        // UI Interactions
+        const toggleExpand = (node) => {
+          node.expanded = node.expanded === false ? true : false;
+        };
+
+        const selectGtNode = (node, parent) => {
+          selectedNode.value = node;
+          selectedParent.value = parent;
+        };
+
+        const addRootGtNode = () => {
+          if (!groundTruth.value.outlines) groundTruth.value.outlines = [];
+          const newId = `node_${Date.now()}`;
+          const newNode = {
+            id: newId,
+            level: 1,
+            title: '새 목차 항목',
+            page: 1,
+            purpose: null,
+            children: []
+          };
+          groundTruth.value.outlines.push(newNode);
+          selectedNode.value = newNode;
+        };
+
+        const addChildGtNode = (parentNode) => {
+          if (!parentNode.children) parentNode.children = [];
+          const newId = `node_${Date.now()}`;
+          const newNode = {
+            id: newId,
+            level: Math.min((parentNode.level || 1) + 1, 3),
+            title: '새 하위 항목',
+            page: parentNode.page || 1,
+            purpose: null,
+            children: []
+          };
+          parentNode.children.push(newNode);
+          parentNode.expanded = true;
+          selectedNode.value = newNode;
+        };
+
+        const removeGtNode = (item) => {
+          if (!confirm(`'${item.node.title}' 노드를 삭제하시겠습니까?`)) return;
+          if (item.parent && item.parent.children) {
+            const idx = item.parent.children.indexOf(item.node);
+            if (idx !== -1) item.parent.children.splice(idx, 1);
+          } else if (groundTruth.value.outlines) {
+            const idx = groundTruth.value.outlines.indexOf(item.node);
+            if (idx !== -1) groundTruth.value.outlines.splice(idx, 1);
+          }
+          if (selectedNode.value === item.node) selectedNode.value = null;
+        };
+
+        // Adopt single V2 node to GT
+        const adoptPredNodeToGt = (predNode) => {
+          if (!groundTruth.value.outlines) groundTruth.value.outlines = [];
+          const copyNode = JSON.parse(JSON.stringify(predNode));
+          groundTruth.value.outlines.push(copyNode);
+          alert(`'${predNode.title}' 노드가 좌측 정답셋에 추가되었습니다! [정답셋 저장]을 누르면 영구 반영됩니다.`);
+        };
+
+        // Copy entire V2 result to GT
+        const copyAllPredToGt = () => {
+          if (!confirm('V2 예측 결과 전체를 정답셋(Ground Truth)으로 덮어쓰시겠습니까?')) return;
+          groundTruth.value.outlines = JSON.parse(JSON.stringify(prediction.value.outlines || []));
+          alert('V2 결과가 정답셋으로 복사되었습니다! [정답셋 저장]을 눌러 저장하세요.');
+        };
+
+        // Colors
+        const getF1Color = (f1) => {
+          if (f1 >= 90) return 'text-emerald-400 border-emerald-700/60 bg-emerald-950/60';
+          if (f1 >= 70) return 'text-amber-400 border-amber-700/60 bg-amber-950/60';
+          return 'text-rose-400 border-rose-700/60 bg-rose-950/60';
+        };
+
+        const getLevelBadgeClass = (level) => {
+          if (level === 1) return 'bg-purple-950 text-purple-300 border border-purple-800';
+          if (level === 2) return 'bg-blue-950 text-blue-300 border border-blue-800';
+          return 'bg-teal-950 text-teal-300 border border-teal-800';
         };
 
         onMounted(async () => {
-          await checkAgentStatus();
-          setInterval(checkAgentStatus, 10000);
-          await loadTasks();
           await loadDocuments();
           await loadDocData();
         });
 
         return {
-          agentStatus,
-          refreshAll,
-          tasks,
-          selectedTask,
-          documents,
-          selectedDoc,
-          loading,
-          savingGt,
-          runningExp,
-          baseline,
-          groundTruth,
-          selectedNode,
-          baselineCount,
-          gtCount,
-          defaultPrompt,
-          promptTemplate,
-          experimentModel,
-          experimentResult,
-          metrics,
-          rawModal,
-          toast,
-          selectedElement,
-          getNodeElement,
-          getLevelBadgeClass,
-          isObject,
-          isTableElement,
-          hasElementData,
-          createElementForNode,
-          getTaskIcon,
-          selectTask,
-          toggleExpand,
-          selectNode,
-          loadDocData,
-          loadDefaultPrompt,
-          addRootOutline,
-          addChildNode,
-          removeNode,
-          removeRootNode: removeNode,
-          removeSubNode: removeNode,
-          flattenedGtNodes,
-          saveGroundTruth,
-          runExperiment,
-          showRawJson
+          documents, selectedDoc, selectedModel, loading, saving, running,
+          groundTruth, prediction, metrics, telemetry, selectedNode,
+          flatGtNodes, flatPredNodes,
+          loadDocData, saveGroundTruth, runV2,
+          isGtNodeMatched, isPredNodeMatched,
+          toggleExpand, selectGtNode, addRootGtNode, addChildGtNode, removeGtNode,
+          adoptPredNodeToGt, copyAllPredToGt,
+          getF1Color, getLevelBadgeClass
         };
       }
     }).mount('#app');

@@ -1,0 +1,746 @@
+{
+  "document_title": "디딤돌_참가신청서_딥드론.pdf",
+  "total_pages": 3,
+  "outlines": [
+    {
+      "id": "outline-0",
+      "level": 1,
+      "title": "[ACE⁺] 창의미래설계 디딤돌 사업 지원신청서",
+      "page": 1,
+      "box_2d": [
+        87,
+        186,
+        109,
+        814
+      ],
+      "purpose": null,
+      "children": [
+        {
+          "id": "outline-1",
+          "level": 2,
+          "title": "팀명",
+          "page": 1,
+          "box_2d": [
+            132,
+            165,
+            144,
+            200
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-2",
+          "level": 2,
+          "title": "지원유형",
+          "page": 1,
+          "box_2d": [
+            155,
+            149,
+            171,
+            209
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-3",
+          "level": 2,
+          "title": "과제명",
+          "page": 1,
+          "box_2d": [
+            183,
+            157,
+            195,
+            200
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-4",
+          "level": 2,
+          "title": "팀장",
+          "page": 1,
+          "box_2d": [
+            251,
+            165,
+            263,
+            199
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-5",
+              "level": 3,
+              "title": "이름",
+              "page": 1,
+              "box_2d": [
+                208,
+                281,
+                220,
+                314
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-6",
+              "level": 3,
+              "title": "연락처",
+              "page": 1,
+              "box_2d": [
+                229,
+                273,
+                250,
+                320
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-7",
+              "level": 3,
+              "title": "소속",
+              "page": 1,
+              "box_2d": [
+                280,
+                281,
+                292,
+                314
+              ],
+              "purpose": null,
+              "children": [
+                {
+                  "id": "outline-8",
+                  "level": 4,
+                  "title": "대학",
+                  "page": 1,
+                  "box_2d": [
+                    268,
+                    382,
+                    280,
+                    416
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-9",
+                  "level": 4,
+                  "title": "학과(부)",
+                  "page": 1,
+                  "box_2d": [
+                    268,
+                    480,
+                    280,
+                    536
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-10",
+                  "level": 4,
+                  "title": "학년",
+                  "page": 1,
+                  "box_2d": [
+                    268,
+                    660,
+                    280,
+                    694
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-11",
+                  "level": 4,
+                  "title": "학번",
+                  "page": 1,
+                  "box_2d": [
+                    268,
+                    760,
+                    280,
+                    794
+                  ],
+                  "purpose": null,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "outline-12",
+          "level": 2,
+          "title": "과제수행 기간",
+          "page": 1,
+          "box_2d": [
+            318,
+            128,
+            330,
+            225
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-13",
+          "level": 2,
+          "title": "과제수행 계획 요약",
+          "page": 1,
+          "box_2d": [
+            457,
+            128,
+            488,
+            242
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-14",
+              "level": 3,
+              "title": "1. 프로젝트 도출 배경",
+              "page": 1,
+              "box_2d": [
+                352,
+                500,
+                364,
+                684
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-15",
+              "level": 3,
+              "title": "2. CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
+              "page": 1,
+              "box_2d": [
+                491,
+                272,
+                503,
+                700
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-16",
+          "level": 2,
+          "title": "지원요청금액",
+          "page": 1,
+          "box_2d": [
+            615,
+            132,
+            627,
+            225
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-17",
+          "level": 2,
+          "title": "붙임",
+          "page": 1,
+          "box_2d": [
+            641,
+            114,
+            652,
+            175
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-18",
+              "level": 3,
+              "title": "1. [서식1-1]의 팀 활동계획서 1부",
+              "page": 1,
+              "box_2d": [
+                641,
+                176,
+                652,
+                380
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-19",
+              "level": 3,
+              "title": "2. 통장사본 1부",
+              "page": 1,
+              "box_2d": [
+                660,
+                114,
+                671,
+                220
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-20",
+          "level": 2,
+          "title": "위와 같이 부산대학교 창의미래설계 디딤돌 사업 지원신청서를 제출합니다.",
+          "page": 1,
+          "box_2d": [
+            698,
+            114,
+            711,
+            767
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-21",
+          "level": 2,
+          "title": "제출자 : 팀장 김 태 진 (서명/인)",
+          "page": 1,
+          "box_2d": [
+            787,
+            309,
+            801,
+            480
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-22",
+          "level": 2,
+          "title": "부산대학교 ACE사업단장 귀하",
+          "page": 1,
+          "box_2d": [
+            833,
+            114,
+            851,
+            506
+          ],
+          "purpose": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "outline-23",
+      "level": 1,
+      "title": "[ACE⁺] 창의미래설계 디딤돌 사업 활동계획서",
+      "page": 1,
+      "box_2d": [
+        87,
+        191,
+        109,
+        820
+      ],
+      "purpose": null,
+      "children": [
+        {
+          "id": "outline-24",
+          "level": 2,
+          "title": "1. 목표",
+          "page": 1,
+          "box_2d": [
+            133,
+            109,
+            150,
+            175
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "outline-25",
+          "level": 2,
+          "title": "2. 팀원 명단",
+          "page": 1,
+          "box_2d": [
+            238,
+            109,
+            255,
+            225
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-26",
+              "level": 3,
+              "title": "구분",
+              "page": 1,
+              "box_2d": [
+                268,
+                128,
+                280,
+                162
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-27",
+              "level": 3,
+              "title": "이름",
+              "page": 1,
+              "box_2d": [
+                268,
+                220,
+                280,
+                250
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-28",
+              "level": 3,
+              "title": "학과(부)",
+              "page": 1,
+              "box_2d": [
+                268,
+                340,
+                280,
+                396
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-29",
+              "level": 3,
+              "title": "학년",
+              "page": 1,
+              "box_2d": [
+                268,
+                520,
+                280,
+                550
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-30",
+              "level": 3,
+              "title": "학번",
+              "page": 1,
+              "box_2d": [
+                268,
+                620,
+                280,
+                650
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-31",
+              "level": 3,
+              "title": "연락처(전화, e-mail)",
+              "page": 1,
+              "box_2d": [
+                268,
+                700,
+                280,
+                819
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-32",
+              "level": 3,
+              "title": "◦ 팀원 구성 이유 및 역할",
+              "page": 1,
+              "box_2d": [
+                387,
+                121,
+                398,
+                331
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-33",
+          "level": 2,
+          "title": "3. 과제수행 계획",
+          "page": 1,
+          "box_2d": [
+            545,
+            109,
+            562,
+            265
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-34",
+              "level": 3,
+              "title": "주요과제 및 추진계획",
+              "page": 1,
+              "box_2d": [
+                575,
+                348,
+                587,
+                500
+              ],
+              "purpose": null,
+              "children": [
+                {
+                  "id": "outline-35",
+                  "level": 4,
+                  "title": "1. 개발 준비 단계",
+                  "page": 1,
+                  "box_2d": [
+                    600,
+                    114,
+                    612,
+                    265
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-36",
+                  "level": 4,
+                  "title": "2. 딥러닝 개발",
+                  "page": 1,
+                  "box_2d": [
+                    676,
+                    114,
+                    688,
+                    239
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-37",
+                  "level": 4,
+                  "title": "3. 드론 개발",
+                  "page": 1,
+                  "box_2d": [
+                    742,
+                    114,
+                    754,
+                    230
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-38",
+                  "level": 4,
+                  "title": "4. 딥러닝 + 드론 연동",
+                  "page": 1,
+                  "box_2d": [
+                    793,
+                    124,
+                    805,
+                    270
+                  ],
+                  "purpose": null,
+                  "children": []
+                },
+                {
+                  "id": "outline-39",
+                  "level": 4,
+                  "title": "5. 실제 테스트 및 오류 수정",
+                  "page": 1,
+                  "box_2d": [
+                    844,
+                    124,
+                    856,
+                    310
+                  ],
+                  "purpose": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "outline-40",
+              "level": 3,
+              "title": "추진일정",
+              "page": 1,
+              "box_2d": [
+                575,
+                780,
+                587,
+                845
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-41",
+          "level": 2,
+          "title": "4. 예상 소요비용",
+          "page": 1,
+          "box_2d": [
+            89,
+            109,
+            106,
+            265
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-42",
+              "level": 3,
+              "title": "지출항목",
+              "page": 1,
+              "box_2d": [
+                121,
+                137,
+                132,
+                195
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-43",
+              "level": 3,
+              "title": "예산액",
+              "page": 1,
+              "box_2d": [
+                121,
+                320,
+                132,
+                365
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-44",
+              "level": 3,
+              "title": "산출근거",
+              "page": 1,
+              "box_2d": [
+                121,
+                500,
+                132,
+                555
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-45",
+              "level": 3,
+              "title": "비 고",
+              "page": 1,
+              "box_2d": [
+                121,
+                780,
+                132,
+                827
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "outline-46",
+              "level": 3,
+              "title": "합 계",
+              "page": 1,
+              "box_2d": [
+                265,
+                146,
+                277,
+                195
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-47",
+          "level": 2,
+          "title": "5. 과제수행 점검 계획",
+          "page": 1,
+          "box_2d": [
+            329,
+            109,
+            346,
+            316
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-48",
+              "level": 3,
+              "title": "◦ 동영상 촬영 및 중간 레포트",
+              "page": 1,
+              "box_2d": [
+                352,
+                135,
+                373,
+                487
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-49",
+          "level": 2,
+          "title": "6. 내 ․ 외부 기관 및 전문가와의 협력 계획 ( 필요 시 작성 )",
+          "page": 1,
+          "box_2d": [
+            464,
+            109,
+            481,
+            643
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "outline-50",
+              "level": 3,
+              "title": "◦ 해파리 전문가 , 드론 전문가 , 딥러닝 전문가",
+              "page": 1,
+              "box_2d": [
+                486,
+                135,
+                508,
+                663
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "outline-51",
+          "level": 2,
+          "title": "7. 기대효과 및 활용",
+          "page": 1,
+          "box_2d": [
+            573,
+            109,
+            590,
+            306
+          ],
+          "purpose": null,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

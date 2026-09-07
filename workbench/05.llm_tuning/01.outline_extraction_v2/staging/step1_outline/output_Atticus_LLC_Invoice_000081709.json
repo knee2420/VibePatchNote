@@ -1,0 +1,148 @@
+{
+  "document_title": "Atticus_LLC_Invoice_000081709.pdf",
+  "total_pages": 1,
+  "outlines": [
+    {
+      "id": "node_1",
+      "level": 1,
+      "title": "Invoice 000081709",
+      "page": 1,
+      "box_2d": [
+        175,
+        747,
+        188,
+        898
+      ],
+      "purpose": null,
+      "children": [
+        {
+          "id": "node_2",
+          "level": 2,
+          "title": "Company info",
+          "page": 1,
+          "box_2d": [
+            56,
+            789,
+            69,
+            898
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "node_3",
+          "level": 2,
+          "title": "Billing info",
+          "page": 1,
+          "box_2d": [
+            216,
+            101,
+            230,
+            179
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "node_4",
+          "level": 2,
+          "title": "Total (USD)",
+          "page": 1,
+          "box_2d": [
+            216,
+            809,
+            230,
+            898
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "node_5",
+          "level": 2,
+          "title": "Description Amount Total",
+          "page": 1,
+          "box_2d": [
+            347,
+            106,
+            360,
+            895
+          ],
+          "purpose": null,
+          "children": [
+            {
+              "id": "node_6",
+              "level": 3,
+              "title": "Description",
+              "page": 1,
+              "box_2d": [
+                347,
+                106,
+                360,
+                175
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "node_7",
+              "level": 3,
+              "title": "Amount",
+              "page": 1,
+              "box_2d": [
+                347,
+                709,
+                360,
+                757
+              ],
+              "purpose": null,
+              "children": []
+            },
+            {
+              "id": "node_8",
+              "level": 3,
+              "title": "Total",
+              "page": 1,
+              "box_2d": [
+                347,
+                858,
+                360,
+                895
+              ],
+              "purpose": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node_9",
+          "level": 2,
+          "title": "Subtotal:",
+          "page": 1,
+          "box_2d": [
+            426,
+            720,
+            438,
+            775
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "node_10",
+          "level": 2,
+          "title": "Total:",
+          "page": 1,
+          "box_2d": [
+            454,
+            743,
+            465,
+            777
+          ],
+          "purpose": null,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

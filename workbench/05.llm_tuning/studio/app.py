@@ -1,16 +1,18 @@
 """
-VibePatchNote — LLM Tuning Studio Backend
-본 프로젝트(apps/web, apps/api)와 100% 분리되어 로컬 8088 포트에서 구동되는 독립형 튜닝/평가 서버입니다.
+VibePatchNote — LLM Tuning Studio Backend (v2)
+Ground Truth vs V2 아웃라인 50:50 좌-우 대조 및 정밀 F1 지표 대시보드 서버 (:8088).
 """
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse
-from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
-from pathlib import Path
 import json
 import logging
+import re
 import sys
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, HTMLResponse
+from pydantic import BaseModel, Field
 
 # 윈도우 콘솔 UTF-8 강제
 try:
@@ -19,40 +21,35 @@ try:
 except Exception:
     pass
 
-# 프로젝트 루트 경로 및 apps/api 패키지 등록
 STUDIO_DIR = Path(__file__).resolve().parent
 TUNING_DIR = STUDIO_DIR.parent
 PROJECT_ROOT = TUNING_DIR.parent.parent
-API_DIR = PROJECT_ROOT / "apps" / "api"
-if str(API_DIR) not in sys.path:
-    sys.path.insert(0, str(API_DIR))
 
-# app.py 자체 파일명과의 네임스페이스 섀도잉 방지: importlib 동적 바인딩
+V1_DIR = TUNING_DIR / "01.outline_extraction"
+V2_DIR = TUNING_DIR / "01.outline_extraction_v2"
+
+# V1 평가 모듈 임포트
+sys.path.insert(0, str(V1_DIR / "05.evaluations"))
 try:
-    import importlib.util
-    spec = importlib.util.spec_from_file_location(
-        "api_antigravity",
-        str(API_DIR / "app" / "core" / "antigravity" / "agent.py"),
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    AntigravityAgent = mod.AntigravityAgent
+    from evaluate import evaluate_outlines, flatten_outline_tree
+except ImportError:
+    evaluate_outlines = None
+    flatten_outline_tree = None
 
-    spec_conf = importlib.util.spec_from_file_location(
-        "api_config",
-        str(API_DIR / "app" / "core" / "config.py"),
-    )
-    mod_conf = importlib.util.module_from_spec(spec_conf)
-    spec_conf.loader.exec_module(mod_conf)
-    settings = mod_conf.settings
-except Exception as e:
-    AntigravityAgent = None
-    settings = None
+# V2 파이프라인 모듈 임포트
+sys.path.insert(0, str(V2_DIR))
+try:
+    from pipeline.step1_outline import OutlineExtractionStep
+    from evaluations.llm_judge import OutlineLLMJudge
+except ImportError:
+    OutlineExtractionStep = None
+    OutlineLLMJudge = None
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("LLMTuningStudio")
 
-app = FastAPI(title="LLM Tuning Studio", version="1.0.0")
+app = FastAPI(title="LLM Tuning Studio v2", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -72,289 +69,220 @@ async def serve_index():
     return FileResponse(STATIC_INDEX)
 
 
-@app.get("/api/tasks")
-async def get_tasks():
-    """사용 가능한 LLM 메인 태스크 목록."""
-    return [
-        {"id": "01.outline_extraction", "name": "01. 아웃라인 및 5대 컴포넌트 추출", "domain": "apps/api/app/documents/pipeline"},
-        {"id": "02.segment_scan", "name": "02. 논리 블록/세그먼트 고속 스캔", "domain": "apps/api/app/documents/prompts.py"},
-        {"id": "03.scaffold_generation", "name": "03. Tiptap 서식 및 슬롯 분류", "domain": "packages/scaffold-engine"},
-    ]
-
-
 @app.get("/api/documents")
-async def get_documents(task: str = "01.outline_extraction"):
-    """선택된 태스크에 등록된 문서 목록 반환."""
-    task_dir = TUNING_DIR / task
+async def get_documents():
+    """사용 가능한 벤치마크 대상 문서 목록 반환."""
     docs = set()
-
-    # ground_truth, baselines_raw_llm, dataset/raw 순회
-    import re
-    for sub in ["02.ground_truth", "03.baselines_raw_llm/gemini-3.5-flash", "01.dataset/raw"]:
-        target = task_dir / sub
-        if target.exists():
-            for item in target.iterdir():
+    for p in [V1_DIR / "02.ground_truth", V1_DIR / "01.dataset" / "raw"]:
+        if p.exists():
+            for item in p.iterdir():
                 name = item.stem if item.is_file() else item.name
-                normalized = re.sub(r'[\s_]+', '_', name).strip('_')
-                docs.add(normalized)
+                if not name.startswith("."):
+                    docs.add(name)
 
     doc_list = sorted(list(docs))
     if not doc_list:
-        doc_list = ["11월_디딤돌_회의록"]
-    return {"task": task, "documents": doc_list}
+        doc_list = ["11월_디딤돌_회의록", "Atticus_LLC_Invoice_000081709", "디딤돌_참가신청서_딥드론"]
+    return {"documents": doc_list}
+
+
+def calculate_diff_and_metrics(gt_data: Dict[str, Any], pred_data: Dict[str, Any]) -> Dict[str, Any]:
+    """정답셋 vs 예측결과 F1 채점 및 각 노드별 일치/누락/과추출 매핑."""
+    if not flatten_outline_tree or not evaluate_outlines:
+        return {"f1": 0.0, "precision": 0.0, "recall": 0.0, "path_accuracy": 0.0}
+
+    gt_flat = flatten_outline_tree(gt_data.get("outlines", []))
+    pred_flat = flatten_outline_tree(pred_data.get("outlines", []))
+    res = evaluate_outlines(gt_flat, pred_flat)
+
+    matched_nodes = res.get("matched_nodes", [])
+    matched_gt_ids = {m["gt_id"]: m for m in matched_nodes}
+    matched_pred_ids = {m["pred_id"]: m for m in matched_nodes}
+
+    return {
+        "f1": res.get("f1", 0.0),
+        "precision": res.get("precision", 0.0),
+        "recall": res.get("recall", 0.0),
+        "path_accuracy": res.get("avg_path_accuracy", 0.0),
+        "total_gt": len(gt_flat),
+        "total_pred": len(pred_flat),
+        "tp": res.get("tp", 0),
+        "fn": res.get("fn", 0),
+        "fp": res.get("fp", 0),
+        "matched_gt_ids": matched_gt_ids,
+        "matched_pred_ids": matched_pred_ids,
+        "missed_samples": res.get("missed_outlines", []),
+        "excess_samples": res.get("excess_outlines", []),
+    }
 
 
 @app.get("/api/document-data")
-async def get_document_data(task: str = "01.outline_extraction", doc: str = "11월_디딤돌_회의록"):
-    """해당 문서의 Baseline, Ground Truth, Bias Analysis, 텍스트 원문 조회."""
-    task_dir = TUNING_DIR / task
+async def get_document_data(doc: str = "11월_디딤돌_회의록"):
+    """선택된 문서의 Ground Truth, V2 예측 결과, 정밀 지표 반환."""
+    # 1. Ground Truth 로드
+    gt_file = V1_DIR / "02.ground_truth" / doc / "expected_outlines.json"
+    gt_data: Dict[str, Any] = {"document_title": f"{doc}.pdf", "outlines": []}
+    if gt_file.exists():
+        try:
+            gt_data = json.loads(gt_file.read_text(encoding="utf-8"))
+        except Exception as e:
+            logger.warning("Failed to load GT file: %s", e)
 
-    # 1. Baseline (원 LLM AS-IS)
-    base_dir = task_dir / "03.baselines_raw_llm" / "gemini-3.5-flash" / doc
-    baseline_outlines = {}
-    baseline_elements = []
-    bias_analysis_md = ""
-
-    if base_dir.exists():
-        if (base_dir / "outline_tree.json").exists():
+    # 2. V2 예측 결과 로드
+    v2_file = V2_DIR / "staging" / "step1_outline" / f"output_{doc}.json"
+    pred_data: Dict[str, Any] = {"document_title": f"{doc}.pdf", "outlines": []}
+    if v2_file.exists():
+        try:
+            pred_data = json.loads(v2_file.read_text(encoding="utf-8"))
+        except Exception as e:
+            logger.warning("Failed to load V2 file: %s", e)
+    else:
+        # Fallback to V1
+        v1_file = V1_DIR / "06.staging" / "step1_outline" / f"output_{doc}.json"
+        if v1_file.exists():
             try:
-                baseline_outlines = json.loads((base_dir / "outline_tree.json").read_text(encoding="utf-8"))
-            except Exception:
-                pass
-        if (base_dir / "elements.json").exists():
-            try:
-                baseline_elements = json.loads((base_dir / "elements.json").read_text(encoding="utf-8"))
-            except Exception:
-                pass
-        if (base_dir / "bias_analysis.md").exists():
-            bias_analysis_md = (base_dir / "bias_analysis.md").read_text(encoding="utf-8")
-
-    # 2. Ground Truth
-    gt_dir = task_dir / "02.ground_truth" / doc
-    gt_outlines = {}
-    gt_elements = []
-    if gt_dir.exists():
-        if (gt_dir / "expected_outlines.json").exists():
-            try:
-                gt_outlines = json.loads((gt_dir / "expected_outlines.json").read_text(encoding="utf-8"))
-            except Exception:
-                pass
-        if (gt_dir / "expected_elements.json").exists():
-            try:
-                gt_elements = json.loads((gt_dir / "expected_elements.json").read_text(encoding="utf-8"))
+                pred_data = json.loads(v1_file.read_text(encoding="utf-8"))
             except Exception:
                 pass
 
-    # 만약 GT가 비어있다면 베이스라인 내용을 기본 템플릿으로 제공
-    if not gt_outlines and baseline_outlines:
-        gt_outlines = baseline_outlines
-    if not gt_elements and baseline_elements:
-        gt_elements = baseline_elements
+    # 3. 벤치마크 리포트에서 텔레메트리(지연시간, 토큰) 조회
+    telemetry = {"latency": 0.0, "tokens": 0}
+    report_json = V2_DIR / "benchmark_report.json"
+    if report_json.exists():
+        try:
+            reports = json.loads(report_json.read_text(encoding="utf-8"))
+            for r in reports:
+                if r.get("document") == doc:
+                    telemetry["latency"] = round(r.get("latency", 0.0), 1)
+                    telemetry["tokens"] = r.get("tokens", 0)
+                    break
+        except Exception:
+            pass
 
-    # 3. 기본 추천 프롬프트 템플릿
-    default_prompt = (
-        "당신은 고정밀 비즈니스 문서 구조화 전문가입니다.\n"
-        f"문서 '{doc}'의 핵심 목차(Outline Tree)와 주요 안건을 균형 있게 추출하세요.\n\n"
-        "[추출 원칙]\n"
-        "1. 회의비/영수증 등 단순 지출에 편향되지 말고, 문서에 기재된 주요 기술 논의, 진행 안건, 의결 사항을 빠짐없이 계층적으로 추출하세요.\n"
-        "2. Level 1: 문서 대제목 또는 회의 차수(예: 1차 회의, 2차 회의)\n"
-        "   Level 2: 회의 일시/장소 기본정보, 기술 논의 안건 상세, 회의비 지출 내역 등\n"
-        "3. 각 항목의 page 번호와 비즈니스 목적(purpose)을 구체적으로 서술하세요.\n\n"
-        "반드시 지정된 JSON 규격으로만 응답하세요."
-    )
+    # 4. 정밀 채점
+    metrics = calculate_diff_and_metrics(gt_data, pred_data)
 
     return {
-        "task": task,
         "document": doc,
-        "baseline": {
-            "outlines": baseline_outlines,
-            "elements": baseline_elements,
-            "bias_analysis": bias_analysis_md,
-        },
-        "ground_truth": {
-            "outlines": gt_outlines,
-            "elements": gt_elements,
-        },
-        "default_prompt": default_prompt,
+        "ground_truth": gt_data,
+        "prediction": pred_data,
+        "metrics": metrics,
+        "telemetry": telemetry,
     }
 
 
 class SaveGroundTruthRequest(BaseModel):
-    task: str = "01.outline_extraction"
     document: str
     outlines: Dict[str, Any]
-    elements: List[Dict[str, Any]]
 
 
 @app.post("/api/save-ground-truth")
 async def save_ground_truth(req: SaveGroundTruthRequest):
-    """사용자가 UI에서 수정한 Ground Truth 정답셋을 로컬 파일로 저장."""
-    gt_dir = TUNING_DIR / req.task / "02.ground_truth" / req.document
+    """Ground Truth 파일 저장 및 즉시 재채점."""
+    gt_dir = V1_DIR / "02.ground_truth" / req.document
     gt_dir.mkdir(parents=True, exist_ok=True)
-
     outlines_path = gt_dir / "expected_outlines.json"
-    elements_path = gt_dir / "expected_elements.json"
 
-    outlines_path.write_text(json.dumps(req.outlines, ensure_ascii=False, indent=2), encoding="utf-8")
-    elements_path.write_text(json.dumps(req.elements, ensure_ascii=False, indent=2), encoding="utf-8")
+    outlines_path.write_text(
+        json.dumps(req.outlines, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    logger.info("Saved Ground Truth for %s", req.document)
 
-    logger.info("Saved Ground Truth for %s at %s", req.document, gt_dir)
-    return {"status": "success", "message": f"Ground Truth for '{req.document}' saved successfully!"}
+    # V2 예측 로드 후 즉시 새 메트릭 계산
+    v2_file = V2_DIR / "staging" / "step1_outline" / f"output_{req.document}.json"
+    pred_data: Dict[str, Any] = {"outlines": []}
+    if v2_file.exists():
+        try:
+            pred_data = json.loads(v2_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    metrics = calculate_diff_and_metrics(req.outlines, pred_data)
+    return {"status": "success", "metrics": metrics}
 
 
-import httpx
+class RunV2Request(BaseModel):
+    document: str
+    model: str = "gemini-3.8-flash-low"
+    effort: str = "low"
 
-AGENT_SERVER_URL = "http://127.0.0.1:8001"
 
+@app.post("/api/run-v2")
+async def run_v2_pipeline(req: RunV2Request):
+    """선택된 문서에 대해 V2 아웃라인 추출 파이프라인 단독 실행 및 즉시 갱신."""
+    if not OutlineExtractionStep:
+        raise HTTPException(status_code=500, detail="OutlineExtractionStep not loaded.")
 
-@app.get("/api/agent-status")
-async def get_agent_status():
-    """8001 에이전트 브릿지 서버 연동 상태 확인."""
-    try:
-        async with httpx.AsyncClient(timeout=2.0) as client:
-            res = await client.get(f"{AGENT_SERVER_URL}/health")
-            if res.status_code == 200:
-                data = res.json()
-                return {
-                    "online": True,
-                    "server_url": AGENT_SERVER_URL,
-                    "default_model": data.get("default_model", "gemini-3.8-flash-low"),
-                    "mode": "bridge-server",
-                }
-    except Exception:
-        pass
+    pdf_path = V1_DIR / "01.dataset" / "raw" / f"{req.document}.pdf"
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail=f"PDF not found: {pdf_path}")
 
-    fallback_model = settings.agent_cli_model if settings else "gemini-3.8-flash-low"
-    return {
-        "online": False,
-        "server_url": AGENT_SERVER_URL,
-        "default_model": fallback_model,
-        "mode": "cli-fallback",
+    step = OutlineExtractionStep()
+    res = step.execute(pdf_path=pdf_path, model=req.model, effort=req.effort)
+
+    if not res.get("success"):
+        raise HTTPException(
+            status_code=502, detail=res.get("error", "Extraction failed")
+        )
+
+    pred_data = res.get("data", {})
+    telemetry = {
+        "latency": res.get("telemetry", {}).get("cli_duration", 0.0),
+        "tokens": res.get("telemetry", {}).get("tokens", {}).get("total", 0),
     }
 
+    # Ground Truth 로드 및 즉시 채점
+    gt_file = V1_DIR / "02.ground_truth" / req.document / "expected_outlines.json"
+    gt_data: Dict[str, Any] = {"outlines": []}
+    if gt_file.exists():
+        try:
+            gt_data = json.loads(gt_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
 
-class RunExperimentRequest(BaseModel):
-    task: str = "01.outline_extraction"
-    document: str
-    model: Optional[str] = Field("gemini-3.8-flash-low", description="사용할 모델명")
-    prompt: str
-
-
-@app.post("/api/run-experiment")
-async def run_experiment(req: RunExperimentRequest):
-    """헤드리스 AntigravityAgent로 프롬프트 튜닝 실험 실행."""
-    if not AntigravityAgent:
-        raise HTTPException(status_code=500, detail="AntigravityAgent not available in python environment.")
-
-    # 문서 원본 텍스트 추출 또는 기존 베이스라인 참조 컨텍스트 구성
-    task_dir = TUNING_DIR / req.task
-    doc_text = ""
-    raw_md = task_dir / "01.dataset" / "inputs" / f"{req.document}.md"
-    if raw_md.exists():
-        doc_text = raw_md.read_text(encoding="utf-8")
-    else:
-        # 베이스라인의 summary나 outline.md 컨텍스트 활용
-        base_md = task_dir / "03.baselines_raw_llm" / "gemini-3.5-flash" / req.document / "outline.md"
-        if base_md.exists():
-            doc_text = base_md.read_text(encoding="utf-8")
-
-    full_prompt = (
-        f"{req.prompt}\n\n"
-        f"[참조 문서 컨텍스트]\n"
-        f"{doc_text[:4000]}\n\n"
-        f"반드시 다음 JSON 규격으로만 응답하세요:\n"
-        f"{{\n"
-        f'  "document_title": "{req.document}",\n'
-        f'  "total_pages": 2,\n'
-        f'  "outlines": [\n'
-        f'    {{\n'
-        f'      "id": "out-1",\n'
-        f'      "level": 1,\n'
-        f'      "title": "섹션 제목",\n'
-        f'      "page": 1,\n'
-        f'      "purpose": "비즈니스 목적",\n'
-        f'      "children": []\n'
-        f'    }}\n'
-        f'  ]\n'
-        f"}}\n"
-    )
-
-    logger.info("Executing experiment for %s with model %s", req.document, req.model)
-    agent = AntigravityAgent(model=req.model, timeout_seconds=90)
-    result = agent.run_json(full_prompt)
-
-    if not result:
-        raise HTTPException(status_code=502, detail="LLM execution failed or returned invalid JSON.")
-
-    # 실험 결과 아카이빙 (workbench/05.llm_tuning/01.outline_extraction/04.experiments/)
-    exp_dir = task_dir / "04.experiments" / req.document
-    exp_dir.mkdir(parents=True, exist_ok=True)
-    exp_path = exp_dir / f"result_{req.model}.json"
-    exp_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    metrics = calculate_diff_and_metrics(gt_data, pred_data)
 
     return {
         "status": "success",
-        "model": req.model,
-        "result": result,
-        "saved_path": str(exp_path),
+        "prediction": pred_data,
+        "metrics": metrics,
+        "telemetry": telemetry,
     }
 
 
-class EvaluateRequest(BaseModel):
-    ground_truth_outlines: List[Dict[str, Any]]
-    predicted_outlines: List[Dict[str, Any]]
+class RunJudgeRequest(BaseModel):
+
+    document: str
 
 
-@app.post("/api/evaluate")
-async def evaluate_metrics(req: EvaluateRequest):
-    """정답셋 대비 예측 결과의 재현율(Recall) 및 정밀도(Precision) 정량 채점."""
-    gt_titles = set()
-    def collect_titles(items, target_set):
-        for it in items:
-            t = it.get("title", "").strip().lower()
-            if t:
-                target_set.add(t)
-            if "children" in it and isinstance(it["children"], list):
-                collect_titles(it["children"], target_set)
+@app.post("/api/run-judge")
+async def run_judge_evaluation(req: RunJudgeRequest):
+    """선택된 문서의 V2 예측 결과에 대해 LLM-as-a-Judge 인지적 채점 실행."""
+    if not OutlineLLMJudge:
+        raise HTTPException(status_code=500, detail="OutlineLLMJudge module not loaded.")
 
-    collect_titles(req.ground_truth_outlines, gt_titles)
-    
-    pred_titles = set()
-    collect_titles(req.predicted_outlines, pred_titles)
+    pdf_path = V1_DIR / "01.dataset" / "raw" / f"{req.document}.pdf"
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail=f"PDF not found: {pdf_path}")
 
-    if not gt_titles:
-        return {"recall": 0, "precision": 0, "f1": 0, "matched": [], "missed": []}
+    v2_file = V2_DIR / "staging" / "step1_outline" / f"output_{req.document}.json"
+    if not v2_file.exists():
+        raise HTTPException(status_code=404, detail=f"V2 prediction not found for: {req.document}")
 
-    matched = []
-    missed = []
-    for gt in gt_titles:
-        # 부분 일치(유사도) 검사
-        found = any(gt in pt or pt in gt for pt in pred_titles)
-        if found:
-            matched.append(gt)
-        else:
-            missed.append(gt)
-
-    recall = round(len(matched) / len(gt_titles) * 100, 1)
-    precision = round(len(matched) / max(len(pred_titles), 1) * 100, 1)
-    f1 = round((2 * recall * precision) / max(recall + precision, 1), 1)
-
-    return {
-        "total_gt": len(gt_titles),
-        "total_pred": len(pred_titles),
-        "matched_count": len(matched),
-        "recall": recall,
-        "precision": precision,
-        "f1": f1,
-        "matched_titles": matched,
-        "missed_titles": missed,
-    }
+    pred_data = json.loads(v2_file.read_text(encoding="utf-8"))
+    judge = OutlineLLMJudge()
+    res = judge.evaluate(pdf_path, pred_data)
+    if not res.get("success"):
+        raise HTTPException(status_code=502, detail=res.get("error", "Judge evaluation failed"))
+    return res
 
 
 if __name__ == "__main__":
+
     import uvicorn
-    print("=" * 60)
-    print("[*] VibePatchNote LLM Tuning Studio Started")
-    print("[*] Studio URL: http://localhost:8088")
-    print("=" * 60)
+
+    print("=" * 64)
+    print("  [*] VibePatchNote — LLM Tuning Studio (v2)")
+    print("  [*] URL: http://localhost:8088")
+    print("=" * 64)
     uvicorn.run(app, host="127.0.0.1", port=8088, log_level="info")

@@ -92,17 +92,39 @@ class ExtractOutlineStep(PipelineStep):
         if ctx.geometry_pages:
             for page in ctx.geometry_pages:
                 p_num = getattr(page, "page_number", 1)
-                lines.append(f"--- [페이지 {p_num}] ---")
+                lines.append(f"==================== [페이지 {p_num}] ====================")
+
+                # 1. 기하 실측 표(Table) 구조 메타
+                tables = getattr(page, "tables", [])
+                if tables:
+                    lines.append("[1. 실측된 표(Table) 구조 메타]")
+                    for t_idx, t in enumerate(tables, 1):
+                        norm_box = getattr(t, "norm_bbox", [])
+                        cols = getattr(t, "col_count", 0)
+                        rows = getattr(t, "row_count", 0)
+                        lines.append(f"- 표 {t_idx}: 상대좌표={norm_box}, 규격: {cols}열 x {rows}행")
+                    lines.append("")
+
+                # 2. 주요 타이포그래피 블록 (폰트 크기 및 위치)
                 text_blocks = getattr(page, "text_blocks", [])
-                # 페이지 당 최대 300개의 블록까지 허용하여 누락 방지 (기존 35개 제한 해제)
-                for b in text_blocks[:300]:
-                    text = b.get("text", "").replace("\n", " ").strip()
-                    if text:
-                        bbox = b.get("bbox", [])
-                        font_size = b.get("size", "")
-                        lines.append(f"- (폰트:{font_size}, 위치:{bbox}) {text}")
+                if text_blocks:
+                    lines.append("[2. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
+                    for b in text_blocks[:150]:
+                        text = b.get("text", "").replace("\n", " ").strip()
+                        if text:
+                            norm_box = b.get("norm_bbox") or b.get("bbox", [])
+                            font_size = b.get("size", "")
+                            lines.append(f"- (폰트:{font_size}, 위치:{norm_box}) {text}")
+                    lines.append("")
+
+                # 3. 페이지 원문 텍스트 전문 (Raw Text Flow)
+                raw_text = getattr(page, "raw_text", "")
+                if raw_text and raw_text.strip():
+                    lines.append("[3. 페이지 원문 텍스트 전문 (연속 텍스트 흐름)]")
+                    lines.append(raw_text.strip())
+                    lines.append("")
         elif "raw_text" in ctx.metadata:
-            lines.append(ctx.metadata["raw_text"][:10000])
+            lines.append(ctx.metadata["raw_text"][:15000])
         return "\n".join(lines)
 
     def _build_prompt(self, file_path: Path, text_context: str) -> str:
@@ -115,31 +137,37 @@ class ExtractOutlineStep(PipelineStep):
 - 파일명: {filename}
 - 원본 파일 경로: {resolved_path}
 
-[중요 지침]
-반드시 위 원본 파일 경로('{resolved_path}')의 문서를 도구를 통해 직접 열람(view/inspect)하여, 실제 시각적 레이아웃(헤더/표/구획의 배치, 폰트 위계, 밑줄 여부 등)을 확인한 뒤 아래 텍스트 정보와 대조하여 목차(Outline Tree)와 세부 항목들을 계층적으로 빠짐없이 추출하세요.
+[중요 지침: 3중 멀티모달 컨텍스트 활용]
+1. [시각적 비전 (PDF 직접 열람)]: 반드시 위 원본 파일 경로('{resolved_path}')의 문서를 직접 열람(view/inspect)하여, 전반적인 시각 레이아웃(여백, 밑줄, 박스 테두리, 심미적 위계)을 확인하세요.
+2. [실측 표(Table) 구조 메타 & 타이포그래피]: 아래 제공된 각 페이지별 실측 표 규격(행x열, 위치)과 큰 폰트 크기 블록을 바탕으로 상위 대주제와 부모 표 구획의 경계를 파악하세요.
+3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.
 
-[고급 추출 및 밀도 조절 가이드 (Best Practices)]
-1. [Schema Anchoring] 아래 제공된 JSON 스키마 규격을 엄격히 준수하세요. 누락된 정보는 지어내지 마세요.
-2. [Chain of Thought] JSON 최상단 `_reasoning` 필드에 문서의 전체 시각적 구조(어떤 표와 섹션이 있는지)를 먼저 분석하고, 목차(Outline)로 뽑아야 할 그룹과 하위 필드들을 분류하는 논리를 작성하세요.
-3. [원문 라벨 보존 원칙 (Literal Labeling)]
-   - 문서에 인쇄된 실제 라벨 텍스트를 임의로 유사어로 바꾸지 마세요. (나쁜 예: 문서에 '성명'이라고 표기되어 있는데 '이름'으로 변경 ❌ -> 반드시 '성명' 원문 표기 ⭕)
-4. [목차 자격 요건 및 표 하위 셀 전수 분해 (Full Granularity)]
-   - 공문서/신청서 양식의 경우 입력란(Form Field) 하나하나가 독립된 항목(목차) 자격을 갖습니다.
-   - 상위 그룹핑: '팀명', '지원유형', '과제명'은 독립 그룹인 '기본 과제 정보' 아래에 Level 3 자식으로 묶으세요.
-   - 복합 표(Table) 내부의 하위 병합 셀(예: '팀장' -> '소속' 내부의 '대학', '학과(부)', '학년', '학번')도 생략하거나 요약하지 말고 Level 4 자식 목차로 끝까지 전수 분해하세요.
-   - 하단 '제출문 및 서명' 구역은 '제출문', '제출일', '제출자', '수신처' 등의 세부 구획을 자식으로 포함하세요.
-5. [영수증/인보이스 특화]
-   - 상단의 브랜드 로고, 발행일자, 인보이스 번호 구역은 반드시 'Header Meta'를 상위 Level 2 목차로 구성하세요.
-6. [순수 항목명 유지 규칙]
-   - 섹션 제목(title)에는 실제 데이터 값(Value)을 섞지 말고, 순수한 라벨(항목명, 컬럼명, 그룹명)만 기재하세요. (나쁜 예: '일시 (2024.11.08)' ❌ / 좋은 예: '일시' ⭕, 나쁜 예: '팀명: 딥드론' ❌ / 좋은 예: '팀명' ⭕)
-7. 다중 페이지 문서의 경우, 각 페이지별 누락되는 영역이 없도록 모든 페이지(1~3페이지)를 끝까지 꼼꼼히 전수 분석하세요.
+[인간의 인지적 문서 구조화 원칙 (Cognitive Outline Extraction Principles)]
+당신은 사람이 문서를 처음 보았을 때 시각적 구조(Visual Gestalt)와 위계를 인지하는 방식 그대로 목차 트리를 구성해야 합니다.
 
-[Few-Shot Examples (다중 도메인 예시)]
-- 회의록 양식: Level 1 '회의비 사용 내역' -> Level 2 '일 시', '장 소', '참석자', '안 건', '회의내용', '지출금액', '증빙자료'
-- 영수증(인보이스) 양식: Level 1 'Invoice 000081709' -> Level 2 'Header Meta', 'Company info', 'Billing info', 'Description', 'Total (USD)', 'Contact support'
-- 공문(참가신청서) 양식:
-  * 1페이지: Level 1 '지원신청서' -> Level 2 '기본 과제 정보' (Level 3 '팀명', '지원유형', '과제명'), Level 2 '팀장' (Level 3 '성명', '연락처', '소속' -> Level 4 '대학', '학과(부)', '학년', '학번'), Level 2 '과제수행 기간', Level 2 '과제수행 계획 요약', Level 2 '지원요청금액', Level 2 '붙임 서류', Level 2 '제출문 및 서명'
-  * 2~3페이지: Level 1 '활동계획서' -> Level 2 '1. 목표', '2. 팀원 명단 및 역할', '3. 월별 추진일정', '4. 소요 예산' 등 대소주제 전수 추출
+1. [시각적 군집화 및 여백 인지 (Visual Gestalt & Proximity)]
+   - 물리적으로 인접하거나 같은 테두리(Border), 배경색, 분할선 안에 묶인 텍스트 군집은 하나의 논리적 구획(Section)으로 인식하세요.
+   - 문서 상단이나 하단에 명시적 타이틀 글자가 없더라도, 로고/발행처/문서번호/일자 등이 모여 있는 머리말 영역은 시각적 '문서 메타 헤더(Header Meta)' 구역으로, 서명/도장/제출처 등이 모여 있는 영역은 '제출 및 서명란' 구역으로 인지하여 상위 그룹으로 묶으세요.
+
+2. [타이포그래피 및 위계 인지 (Typographic Hierarchy)]
+   - 가장 크고 굵은 폰트(Title), 중앙 정렬, 밑줄이 그어진 최상위 텍스트는 Level 1 대주제로 분류하세요.
+   - 번호 체계(1, 1.1, (1), ① 등)나 중간 크기 볼드체는 번호 깊이에 맞게 Level 2, Level 3으로 엄격히 계층화하세요.
+
+3. [표(Table) 및 서식(Form)의 부모-자식 분해 (Full Granularity)]
+   - 표 서식의 병합된 셀(Header Cell)이나 구획 라벨(예: 인적사항, 지출내역)은 상위 부모 목차로 삼으세요.
+   - 표 내부의 세부 입력란(Form Field), 자식 라벨, 분할 셀들은 결코 요약하거나 생략하지 말고, 상위 구획 아래의 자식 목차로 끝까지 전수 분해하세요.
+
+4. [원문 라벨 보존 및 데이터(Value) 분리 원칙]
+   - 목차 제목(title)에는 문서에 인쇄된 **순수 라벨(항목명, 컬럼명)**만 기재하세요. (나쁜 예: '일시: 2026.09.07' ❌ -> 좋은 예: '일시' ⭕)
+   - 문서에 표기된 단어를 임의의 유사어로 치환하지 말고 원문 그대로 표기하세요. (예: 문서에 '성명'이라 적혀 있으면 '이름'이 아니라 '성명' ⭕)
+
+5. [다중 페이지 완전성 (Completeness)]
+   - 여러 페이지에 걸친 문서의 경우, 첫 페이지만 분석하고 멈추지 말고 모든 페이지의 시각 구획을 누락 없이 끝까지 분석하세요.
+
+[보편적 구조화 패턴 (Abstract Structural Patterns)]
+- 그리드/테이블 서식: Level 1 [표 제목] -> Level 2 [주요 행 구획/항목 라벨] -> Level 3 [세부 입력란]
+- 메타/명세서 서식: Level 1 [문서명] -> Level 2 [상단 메타 헤더], [발행/수신 정보], [상세 명세 테이블], [합계/결제], [하단 고객안내]
+- 신청서/공문 서식: Level 1 [신청서 제목] -> Level 2 [기본 정보], [신청자 인적사항], [사업/과제 개요], [예산 명세], [제출문 및 서명]
 
 [문서 실측 텍스트 정보]
 {text_context}

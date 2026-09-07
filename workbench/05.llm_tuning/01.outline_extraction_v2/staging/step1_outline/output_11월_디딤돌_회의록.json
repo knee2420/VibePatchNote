@@ -1,0 +1,232 @@
+{
+  "document_title": "11월_디딤돌_회의록.pdf",
+  "total_pages": 2,
+  "outlines": [
+    {
+      "id": "doc_p1",
+      "level": 1,
+      "title": "회의비 사용 내역 (1회차)",
+      "page": 1,
+      "box_2d": [
+        87,
+        386,
+        107,
+        614
+      ],
+      "purpose": null,
+      "children": [
+        {
+          "id": "sec_1_1",
+          "level": 2,
+          "title": "일    시",
+          "page": 1,
+          "box_2d": [
+            137,
+            160,
+            150,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_2",
+          "level": 2,
+          "title": "장    소",
+          "page": 1,
+          "box_2d": [
+            180,
+            160,
+            193,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_3",
+          "level": 2,
+          "title": "참 석 자",
+          "page": 1,
+          "box_2d": [
+            230,
+            160,
+            243,
+            217
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_4",
+          "level": 2,
+          "title": "안    건",
+          "page": 1,
+          "box_2d": [
+            283,
+            160,
+            296,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 1,
+          "box_2d": [
+            390,
+            160,
+            403,
+            228
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 1,
+          "box_2d": [
+            493,
+            160,
+            506,
+            217
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_1_7",
+          "level": 2,
+          "title": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+          "page": 1,
+          "box_2d": [
+            654,
+            147,
+            720,
+            240
+          ],
+          "purpose": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "doc_p2",
+      "level": 1,
+      "title": "회의비 사용 내역 (2회차)",
+      "page": 1,
+      "box_2d": [
+        87,
+        386,
+        107,
+        614
+      ],
+      "purpose": null,
+      "children": [
+        {
+          "id": "sec_2_1",
+          "level": 2,
+          "title": "일    시",
+          "page": 1,
+          "box_2d": [
+            137,
+            160,
+            150,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_2",
+          "level": 2,
+          "title": "장    소",
+          "page": 1,
+          "box_2d": [
+            180,
+            160,
+            193,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_3",
+          "level": 2,
+          "title": "참 석 자",
+          "page": 1,
+          "box_2d": [
+            230,
+            160,
+            243,
+            217
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_4",
+          "level": 2,
+          "title": "안    건",
+          "page": 1,
+          "box_2d": [
+            283,
+            160,
+            296,
+            205
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 1,
+          "box_2d": [
+            390,
+            160,
+            403,
+            228
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 1,
+          "box_2d": [
+            493,
+            160,
+            506,
+            217
+          ],
+          "purpose": null,
+          "children": []
+        },
+        {
+          "id": "sec_2_7",
+          "level": 2,
+          "title": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+          "page": 1,
+          "box_2d": [
+            654,
+            147,
+            720,
+            240
+          ],
+          "purpose": null,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
