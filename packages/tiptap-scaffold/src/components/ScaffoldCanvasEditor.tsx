@@ -118,11 +118,19 @@ export function ScaffoldCanvasEditor({
 
   const handlePointerOut = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
-      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(SLOT_SELECTOR);
-      if (target) onHoverSlot?.(null);
+      // 마우스가 새로 들어간 대상이 슬롯 내부가 아니라면 하이라이트 즉시 해제
+      const nextTarget = (event.relatedTarget as HTMLElement | null)?.closest<HTMLElement>(SLOT_SELECTOR);
+      if (!nextTarget) {
+        onHoverSlot?.(null);
+      }
     },
     [onHoverSlot]
   );
+
+  const handlePointerLeave = useCallback(() => {
+    // 에디터 캔버스 영역 자체를 벗어나면 무조건 하이라이트 즉시 해제 (호버 고착 방지)
+    onHoverSlot?.(null);
+  }, [onHoverSlot]);
 
   if (!editor) return null;
 
@@ -131,7 +139,11 @@ export function ScaffoldCanvasEditor({
       ref={rootRef}
       className={`scaffold-editor-root bg-white rounded-xl shadow-xl border border-slate-200/80 overflow-auto ${className}`}
     >
-      <div onPointerOver={handlePointerOver} onPointerOut={handlePointerOut}>
+      <div 
+        onPointerOver={handlePointerOver} 
+        onPointerOut={handlePointerOut}
+        onPointerLeave={handlePointerLeave}
+      >
         <EditorContent editor={editor} />
       </div>
     </div>

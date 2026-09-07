@@ -5,6 +5,7 @@
   "description": "FastAPI 백엔드 (Turborepo 워크스페이스 엔트리)",
   "scripts": {
     "dev": "python -m uvicorn main:app --reload --port 8000",
+    "dev:agent": "python -m app.core.antigravity.server",
     "build": "python -m compileall -q app main.py",
     "lint": "python -m compileall -q app main.py"
   }

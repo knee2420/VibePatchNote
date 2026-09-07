@@ -68,12 +68,13 @@ span[data-type="scaffold-slot"]:empty::before {
   opacity: 0.85;
 }
 
-/* 우측 서식에서 호버된 슬롯. 좌측 원본 하이라이트와 짝을 이룬다. */
+/* 우측 서식에서 호버된 슬롯. 좌측 원본 하이라이트와 1:1 짝을 이루며 텍스트 가독성을 보장한다. */
 span[data-type="scaffold-slot"].is-sync-hovered {
-  background-color: #a855f7;
-  color: #ffffff;
-  border-style: solid;
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.35);
+  background-color: rgba(168, 85, 247, 0.22);
+  color: #6b21a8;
+  border: 1.5px solid #9333ea;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+  font-weight: 600;
 }
 
 /* 4. 조립된 페이지 캔버스 — 원본 PDF 포인트와 1:1 px.

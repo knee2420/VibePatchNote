@@ -99,20 +99,23 @@ export function useDocumentOutline({
   const toggleOutlinePanel = useCallback(() => {
     setIsOutlineOpen((prev) => {
       const next = !prev;
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === nodeId) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                isOutlineOpen: next,
-              } as ReferenceDocumentData,
-            };
-          }
-          return node;
-        })
-      );
+      // React 19: BatchProvider setState 충돌 방지를 위해 setNodes를 updater 바깥 비동기 마이크로태스크로 분리
+      queueMicrotask(() => {
+        setNodes((nds) =>
+          nds.map((node) => {
+            if (node.id === nodeId) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  isOutlineOpen: next,
+                } as ReferenceDocumentData,
+              };
+            }
+            return node;
+          })
+        );
+      });
       return next;
     });
   }, [nodeId, setNodes]);

@@ -71,6 +71,20 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
     [setActiveMapping, data.sourceNodeId, data.sourcePdfFileName]
   );
 
+  // 활성 매핑이 이 스캐폴드 카드의 원본 문서와 일치하는 경우에만 하이라이트 번호를 전달한다 (타 카드 교차 번짐 완벽 방지)
+  const isMappingForThisCard = useMemo(() => {
+    if (!activeMapping) return false;
+    if (activeMapping.targetNodeId && data.sourceNodeId) {
+      return activeMapping.targetNodeId === data.sourceNodeId;
+    }
+    if (activeMapping.sourcePdfFileName && data.sourcePdfFileName) {
+      return activeMapping.sourcePdfFileName === data.sourcePdfFileName;
+    }
+    return false;
+  }, [activeMapping, data.sourceNodeId, data.sourcePdfFileName]);
+
+  const activeNumberForEditor = isMappingForThisCard ? activeMapping?.number : null;
+
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
@@ -332,7 +346,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                 onChangeHtml={handleUpdateHtml}
                 onChangeMarkdown={handleUpdateMarkdown}
                 onHoverSlot={handleHoverSlot}
-                activeMappingNumber={activeMapping?.number}
+                activeMappingNumber={activeNumberForEditor}
               />
             </div>
           </div>

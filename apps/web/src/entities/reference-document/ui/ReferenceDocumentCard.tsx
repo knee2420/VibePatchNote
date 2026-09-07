@@ -49,7 +49,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
   const [activeElement, setActiveElement] = useState<DocumentElementItem | null>(null);
 
-  // 이 카드가 해당 매핑의 대상이거나 아웃라인 엘리먼트가 선택되었을 때 강조한다.
+  // 이 카드가 해당 매핑의 대상이거나 아웃라인 엘리먼트가 선택되었을 때만 강조한다 (타 카드 번짐 완벽 방지)
   const highlight = useMemo<ViewerHighlight | null>(() => {
     if (activeElement?.box_2d) {
       return {
@@ -60,7 +60,18 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       };
     }
     if (!activeMapping?.box_2d) return null;
-    if (activeMapping.targetNodeId && activeMapping.targetNodeId !== id) return null;
+    if (activeMapping.targetNodeId) {
+      if (activeMapping.targetNodeId !== id) return null;
+    } else if (activeMapping.sourcePdfFileName) {
+      const isMatchingFile =
+        data.title === activeMapping.sourcePdfFileName ||
+        (data.url && data.url.includes(encodeURIComponent(activeMapping.sourcePdfFileName))) ||
+        (data.url && data.url.includes(activeMapping.sourcePdfFileName));
+      if (!isMatchingFile) return null;
+    } else {
+      return null;
+    }
+
     return {
       id: activeMapping.id,
       page: activeMapping.page ?? 1,
@@ -68,7 +79,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       label: activeMapping.label,
       number: activeMapping.number,
     };
-  }, [activeElement, activeMapping, id]);
+  }, [activeElement, activeMapping, id, data.title, data.url]);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
