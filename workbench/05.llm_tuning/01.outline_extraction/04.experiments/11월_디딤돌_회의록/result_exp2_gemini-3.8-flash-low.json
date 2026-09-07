@@ -1,0 +1,286 @@
+{
+  "document_title": "11월_디딤돌_회의록.pdf",
+  "total_pages": 2,
+  "outlines": [
+    {
+      "id": "out-p1",
+      "level": 1,
+      "title": "1차 회의 (2018.11.08) - 회의비 사용 내역",
+      "page": 1,
+      "purpose": "11월 8일자 디딤돌 회의 기본 정보, 안건 논의 내용 및 회의비 지출 증빙",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-p1-1",
+          "level": 2,
+          "title": "일 시",
+          "page": 1,
+          "purpose": "회의 일시 확인",
+          "elements": [
+            {
+              "id": "elem-p1-1",
+              "outline_id": "out-p1-1",
+              "type": "key_value",
+              "label": "일 시",
+              "value": "2018.11.08",
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-2",
+          "level": 2,
+          "title": "장 소",
+          "page": 1,
+          "purpose": "회의 진행 장소 확인",
+          "elements": [
+            {
+              "id": "elem-p1-2",
+              "outline_id": "out-p1-2",
+              "type": "key_value",
+              "label": "장 소",
+              "value": "회의실 및 실습실",
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-3",
+          "level": 2,
+          "title": "참석자",
+          "page": 1,
+          "purpose": "회의 참석자 명단 확인",
+          "elements": [
+            {
+              "id": "elem-p1-3",
+              "outline_id": "out-p1-3",
+              "type": "key_value",
+              "label": "참석자",
+              "value": "팀원 전원",
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-4",
+          "level": 2,
+          "title": "안 건",
+          "page": 1,
+          "purpose": "회의 주요 안건 정보 확인",
+          "elements": [
+            {
+              "id": "elem-p1-4",
+              "outline_id": "out-p1-4",
+              "type": "key_value",
+              "label": "안 건",
+              "value": "GPS + 동영상 촬영 및 프로그램 테스트 최종 확인",
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 1,
+          "purpose": "안건에 따른 세부 논의 및 점검 결과 기록",
+          "elements": [
+            {
+              "id": "elem-p1-5",
+              "outline_id": "out-p1-5",
+              "type": "list",
+              "label": "회의내용",
+              "value": [
+                "드론 센서 데이터 수집 상태 확인",
+                "GPS 연동 및 동영상 촬영 기능 최종 테스트",
+                "결과보고서 작성을 위한 사전 회의 및 역할 분담"
+              ],
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 1,
+          "purpose": "회의비 집행 금액 확인",
+          "elements": [
+            {
+              "id": "elem-p1-6",
+              "outline_id": "out-p1-6",
+              "type": "key_value",
+              "label": "지출금액",
+              "value": "₩40,000",
+              "page": 1
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p1-7",
+          "level": 2,
+          "title": "증빙자료",
+          "page": 1,
+          "purpose": "회의비 지출 영수증 및 증빙자료 첨부",
+          "elements": [
+            {
+              "id": "elem-p1-7",
+              "outline_id": "out-p1-7",
+              "type": "media",
+              "label": "영수증 증빙",
+              "value": "신용카드/현금영수증 전표 첨부 (₩40,000)",
+              "page": 1
+            }
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "out-p2",
+      "level": 1,
+      "title": "2차 회의 (2018.11.16) - 회의비 사용 내역",
+      "page": 2,
+      "purpose": "11월 16일자 디딤돌 회의 기본 정보, 안건 논의 내용 및 회의비 지출 증빙",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-p2-1",
+          "level": 2,
+          "title": "일 시",
+          "page": 2,
+          "purpose": "회의 일시 확인",
+          "elements": [
+            {
+              "id": "elem-p2-1",
+              "outline_id": "out-p2-1",
+              "type": "key_value",
+              "label": "일 시",
+              "value": "2018.11.16",
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-2",
+          "level": 2,
+          "title": "장 소",
+          "page": 2,
+          "purpose": "회의 진행 장소 확인",
+          "elements": [
+            {
+              "id": "elem-p2-2",
+              "outline_id": "out-p2-2",
+              "type": "key_value",
+              "label": "장 소",
+              "value": "회의실",
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-3",
+          "level": 2,
+          "title": "참석자",
+          "page": 2,
+          "purpose": "회의 참석자 명단 확인",
+          "elements": [
+            {
+              "id": "elem-p2-3",
+              "outline_id": "out-p2-3",
+              "type": "key_value",
+              "label": "참석자",
+              "value": "팀원 전원",
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-4",
+          "level": 2,
+          "title": "안 건",
+          "page": 2,
+          "purpose": "회의 주요 안건 정보 확인",
+          "elements": [
+            {
+              "id": "elem-p2-4",
+              "outline_id": "out-p2-4",
+              "type": "key_value",
+              "label": "안 건",
+              "value": "최종 점검, 결과보고서 작성",
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 2,
+          "purpose": "최종 서류 준비 및 결과보고서 작성 논의 결과 기록",
+          "elements": [
+            {
+              "id": "elem-p2-5",
+              "outline_id": "out-p2-5",
+              "type": "list",
+              "label": "회의내용",
+              "value": [
+                "제출 필요서류 및 증빙자료 목록 최종 점검",
+                "결과보고서 항목별 초안 취합 및 보완 작성",
+                "최종 제출 일정 및 산출물 마무리 확인"
+              ],
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 2,
+          "purpose": "회의비 집행 금액 확인",
+          "elements": [
+            {
+              "id": "elem-p2-6",
+              "outline_id": "out-p2-6",
+              "type": "key_value",
+              "label": "지출금액",
+              "value": "₩29,000",
+              "page": 2
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-p2-7",
+          "level": 2,
+          "title": "증빙자료",
+          "page": 2,
+          "purpose": "회의비 지출 영수증 및 증빙자료 첨부",
+          "elements": [
+            {
+              "id": "elem-p2-7",
+              "outline_id": "out-p2-7",
+              "type": "media",
+              "label": "영수증 증빙",
+              "value": "신용카드/현금영수증 전표 첨부 (₩29,000)",
+              "page": 2
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

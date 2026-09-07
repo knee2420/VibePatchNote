@@ -1,0 +1,248 @@
+{
+  "document_title": "11월_디딤돌_회의록.pdf",
+  "total_pages": 2,
+  "outlines": [
+    {
+      "id": "out-1",
+      "level": 1,
+      "title": "회의비 사용 내역",
+      "page": 1,
+      "box_2d": [
+        73,
+        230,
+        90,
+        611
+      ],
+      "purpose": "11월 8일자 디딤돌 회의 진행 정보 및 회의비 지출 내역 기록",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-1-1",
+          "level": 2,
+          "title": "일 시",
+          "page": 1,
+          "box_2d": [
+            115,
+            95,
+            126,
+            226
+          ],
+          "purpose": "회의 진행 일자 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-2",
+          "level": 2,
+          "title": "장 소",
+          "page": 1,
+          "box_2d": [
+            151,
+            95,
+            162,
+            226
+          ],
+          "purpose": "회의 진행 장소 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-3",
+          "level": 2,
+          "title": "참 석 자",
+          "page": 1,
+          "box_2d": [
+            193,
+            95,
+            204,
+            226
+          ],
+          "purpose": "회의 참석 인원수 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-4",
+          "level": 2,
+          "title": "안 건",
+          "page": 1,
+          "box_2d": [
+            237,
+            95,
+            248,
+            228
+          ],
+          "purpose": "회의 주요 안건 및 목적 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 1,
+          "box_2d": [
+            327,
+            95,
+            338,
+            226
+          ],
+          "purpose": "회의 상세 진행 사항 및 토의 내용 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 1,
+          "box_2d": [
+            414,
+            95,
+            425,
+            226
+          ],
+          "purpose": "회의비 총 지출 금액 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-7",
+          "level": 2,
+          "title": "증빙자료",
+          "page": 1,
+          "box_2d": [
+            550,
+            87,
+            605,
+            238
+          ],
+          "purpose": "신용카드 영수증 및 현금영수증 등 지출 증빙 첨부 영역",
+          "elements": [],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "out-2",
+      "level": 1,
+      "title": "회의비 사용 내역",
+      "page": 2,
+      "box_2d": [
+        73,
+        230,
+        90,
+        611
+      ],
+      "purpose": "11월 16일자 디딤돌 회의 진행 정보 및 회의비 지출 내역 기록",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-2-1",
+          "level": 2,
+          "title": "일 시",
+          "page": 2,
+          "box_2d": [
+            115,
+            95,
+            126,
+            226
+          ],
+          "purpose": "회의 진행 일자 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-2",
+          "level": 2,
+          "title": "장 소",
+          "page": 2,
+          "box_2d": [
+            151,
+            95,
+            162,
+            226
+          ],
+          "purpose": "회의 진행 장소 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-3",
+          "level": 2,
+          "title": "참 석 자",
+          "page": 2,
+          "box_2d": [
+            193,
+            95,
+            204,
+            226
+          ],
+          "purpose": "회의 참석 인원수 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-4",
+          "level": 2,
+          "title": "안 건",
+          "page": 2,
+          "box_2d": [
+            237,
+            95,
+            248,
+            228
+          ],
+          "purpose": "회의 주요 안건 및 목적 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-5",
+          "level": 2,
+          "title": "회의내용",
+          "page": 2,
+          "box_2d": [
+            327,
+            95,
+            338,
+            226
+          ],
+          "purpose": "회의 상세 진행 사항 및 토의 내용 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-6",
+          "level": 2,
+          "title": "지출금액",
+          "page": 2,
+          "box_2d": [
+            414,
+            95,
+            425,
+            226
+          ],
+          "purpose": "회의비 총 지출 금액 기록",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-2-7",
+          "level": 2,
+          "title": "증빙자료",
+          "page": 2,
+          "box_2d": [
+            550,
+            87,
+            605,
+            238
+          ],
+          "purpose": "신용카드 영수증 및 현금영수증 등 지출 증빙 첨부 영역",
+          "elements": [],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

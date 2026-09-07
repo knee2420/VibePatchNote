@@ -5,7 +5,7 @@ VibePatchNote — LLM Tuning Studio Backend
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 import json
@@ -19,16 +19,35 @@ try:
 except Exception:
     pass
 
-# 프로젝트 루트 경로 등록 (AntigravityAgent 재사용 목적)
+# 프로젝트 루트 경로 및 apps/api 패키지 등록
 STUDIO_DIR = Path(__file__).resolve().parent
 TUNING_DIR = STUDIO_DIR.parent
 PROJECT_ROOT = TUNING_DIR.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "apps" / "api"))
+API_DIR = PROJECT_ROOT / "apps" / "api"
+if str(API_DIR) not in sys.path:
+    sys.path.insert(0, str(API_DIR))
 
+# app.py 자체 파일명과의 네임스페이스 섀도잉 방지: importlib 동적 바인딩
 try:
-    from app.core.antigravity import AntigravityAgent
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "api_antigravity",
+        str(API_DIR / "app" / "core" / "antigravity" / "agent.py"),
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    AntigravityAgent = mod.AntigravityAgent
+
+    spec_conf = importlib.util.spec_from_file_location(
+        "api_config",
+        str(API_DIR / "app" / "core" / "config.py"),
+    )
+    mod_conf = importlib.util.module_from_spec(spec_conf)
+    spec_conf.loader.exec_module(mod_conf)
+    settings = mod_conf.settings
 except Exception as e:
     AntigravityAgent = None
+    settings = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("LLMTuningStudio")
@@ -183,10 +202,41 @@ async def save_ground_truth(req: SaveGroundTruthRequest):
     return {"status": "success", "message": f"Ground Truth for '{req.document}' saved successfully!"}
 
 
+import httpx
+
+AGENT_SERVER_URL = "http://127.0.0.1:8001"
+
+
+@app.get("/api/agent-status")
+async def get_agent_status():
+    """8001 에이전트 브릿지 서버 연동 상태 확인."""
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            res = await client.get(f"{AGENT_SERVER_URL}/health")
+            if res.status_code == 200:
+                data = res.json()
+                return {
+                    "online": True,
+                    "server_url": AGENT_SERVER_URL,
+                    "default_model": data.get("default_model", "gemini-3.8-flash-low"),
+                    "mode": "bridge-server",
+                }
+    except Exception:
+        pass
+
+    fallback_model = settings.agent_cli_model if settings else "gemini-3.8-flash-low"
+    return {
+        "online": False,
+        "server_url": AGENT_SERVER_URL,
+        "default_model": fallback_model,
+        "mode": "cli-fallback",
+    }
+
+
 class RunExperimentRequest(BaseModel):
     task: str = "01.outline_extraction"
     document: str
-    model: str = "gemini-3.5-flash"
+    model: Optional[str] = Field("gemini-3.8-flash-low", description="사용할 모델명")
     prompt: str
 
 

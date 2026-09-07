@@ -1,0 +1,460 @@
+{
+  "document_title": "Atticus_LLC_Invoice_000081709.pdf",
+  "total_pages": 1,
+  "outlines": [
+    {
+      "id": "out-1",
+      "level": 1,
+      "title": "Invoice 000081709",
+      "page": 1,
+      "box_2d": [
+        30,
+        60,
+        825,
+        905
+      ],
+      "purpose": "Atticus LLC 인보이스 문서 전체 내역 및 결제 명세",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-1-1",
+          "level": 2,
+          "title": "Header Meta",
+          "page": 1,
+          "box_2d": [
+            30,
+            463,
+            39,
+            532
+          ],
+          "purpose": "인보이스 발행 일자 메타데이터",
+          "elements": [
+            {
+              "id": "elem-1",
+              "outline_id": "out-1-1",
+              "type": "key_value",
+              "label": "Date",
+              "page": 1,
+              "box_2d": [
+                35,
+                778,
+                46,
+                893
+              ],
+              "content_summary": "August 25th 2026",
+              "structured_data": {
+                "value": "August 25th 2026"
+              }
+            },
+            {
+              "id": "elem-2",
+              "outline_id": "out-1-1",
+              "type": "key_value",
+              "label": "Invoice Number",
+              "page": 1,
+              "box_2d": [
+                175,
+                747,
+                188,
+                898
+              ],
+              "content_summary": "Invoice 000081709",
+              "structured_data": {
+                "value": "Invoice 000081709"
+              }
+            },
+            {
+              "id": "elem-10",
+              "outline_id": "out-1-1",
+              "type": "key_value",
+              "label": "Page Number",
+              "page": 1,
+              "box_2d": [
+                968,
+                459,
+                979,
+                541
+              ],
+              "content_summary": "Page 1 of 1",
+              "structured_data": {
+                "value": "Page 1 of 1"
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-1-2",
+          "level": 2,
+          "title": "Company info",
+          "page": 1,
+          "box_2d": [
+            47,
+            355,
+            134,
+            535
+          ],
+          "purpose": "발행처(Atticus LLC) 회사 기본 정보, 주소 및 과세 식별 번호",
+          "elements": [
+            {
+              "id": "elem-3",
+              "outline_id": "out-1-2",
+              "type": "paragraph",
+              "label": "Company Info & Address",
+              "page": 1,
+              "box_2d": [
+                56,
+                671,
+                145,
+                898
+              ],
+              "content_summary": "Company info\nAtticus LLC\n1309 Coffeen Ave. Ste. 2513\nSheridan\nWyoming, 82801\nUnited States",
+              "structured_data": {
+                "value": "Company info\nAtticus LLC\n1309 Coffeen Ave. Ste. 2513\nSheridan\nWyoming, 82801\nUnited States"
+              }
+            },
+            {
+              "id": "elem-4",
+              "outline_id": "out-1-2",
+              "type": "key_value",
+              "label": "Sales tax ID",
+              "page": 1,
+              "box_2d": [
+                149,
+                598,
+                158,
+                898
+              ],
+              "content_summary": "VAT - EU372031974 UK - GB383499055",
+              "structured_data": {
+                "value": "VAT - EU372031974 UK - GB383499055"
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-1-3",
+          "level": 2,
+          "title": "Billing info",
+          "page": 1,
+          "box_2d": [
+            182,
+            60,
+            245,
+            245
+          ],
+          "purpose": "청구 대상 고객 및 수신처 정보",
+          "elements": [
+            {
+              "id": "elem-5",
+              "outline_id": "out-1-3",
+              "type": "paragraph",
+              "label": "Billing info",
+              "page": 1,
+              "box_2d": [
+                217,
+                101,
+                291,
+                203
+              ],
+              "content_summary": "Billing info\nqround SEO MINGYU seoul, 40-6 South Korea",
+              "structured_data": {
+                "value": "Billing info\nqround SEO MINGYU seoul, 40-6 South Korea"
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-1-4",
+          "level": 2,
+          "title": "Total (USD)",
+          "page": 1,
+          "box_2d": [
+            182,
+            461,
+            226,
+            535
+          ],
+          "purpose": "결제 총액 및 결제 수단 요약",
+          "elements": [
+            {
+              "id": "elem-6",
+              "outline_id": "out-1-4",
+              "type": "key_value",
+              "label": "Total (USD)",
+              "page": 1,
+              "box_2d": [
+                217,
+                780,
+                254,
+                898
+              ],
+              "content_summary": "$147.00",
+              "structured_data": {
+                "value": "$147.00"
+              }
+            },
+            {
+              "id": "elem-7",
+              "outline_id": "out-1-4",
+              "type": "key_value",
+              "label": "Payment Method",
+              "page": 1,
+              "box_2d": [
+                258,
+                776,
+                269,
+                898
+              ],
+              "content_summary": "Paid via credit card",
+              "structured_data": {
+                "value": "Paid via credit card"
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-1-5",
+          "level": 2,
+          "title": "Description",
+          "page": 1,
+          "box_2d": [
+            292,
+            63,
+            392,
+            533
+          ],
+          "purpose": "구매 품목 상세 명세, 소계 및 합계 내역",
+          "elements": [
+            {
+              "id": "elem-8",
+              "outline_id": "out-1-5",
+              "type": "table",
+              "label": "Invoice Line Items & Totals",
+              "page": 1,
+              "box_2d": [
+                347,
+                106,
+                466,
+                895
+              ],
+              "content_summary": "| Description | Amount | Total |\n| :--- | :--- | :--- |\n| Atticus (One-time payment ($147.00)) | $147.00 | $147.00 |\n| Subtotal | | $147.00 |\n| Total | | $147.00 |",
+              "structured_data": {
+                "value": "| Description | Amount | Total |\n| :--- | :--- | :--- |\n| Atticus (One-time payment ($147.00)) | $147.00 | $147.00 |\n| Subtotal | | $147.00 |\n| Total | | $147.00 |"
+              }
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "out-1-6",
+          "level": 2,
+          "title": "Contact support",
+          "page": 1,
+          "box_2d": [
+            583,
+            159,
+            636,
+            435
+          ],
+          "purpose": "고객 지원 문의처, 결제 관리 안내 링크 및 주문 처리 저작권 정보",
+          "elements": [
+            {
+              "id": "elem-9",
+              "outline_id": "out-1-6",
+              "type": "paragraph",
+              "label": "Support & Service Notice",
+              "page": 1,
+              "box_2d": [
+                694,
+                269,
+                760,
+                730
+              ],
+              "content_summary": "Contact support: support@atticus.io\nClick here to manage your billing details and view purchase history\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
+              "structured_data": {
+                "value": "Contact support: support@atticus.io\nClick here to manage your billing details and view purchase history\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved."
+              }
+            }
+          ],
+          "children": []
+        }
+      ]
+    }
+  ],
+  "elements": [
+    {
+      "id": "elem-1",
+      "outline_id": "out-1-1",
+      "type": "key_value",
+      "label": "Date",
+      "page": 1,
+      "box_2d": [
+        35,
+        778,
+        46,
+        893
+      ],
+      "content_summary": "August 25th 2026",
+      "structured_data": {
+        "value": "August 25th 2026"
+      }
+    },
+    {
+      "id": "elem-2",
+      "outline_id": "out-1-1",
+      "type": "key_value",
+      "label": "Invoice Number",
+      "page": 1,
+      "box_2d": [
+        175,
+        747,
+        188,
+        898
+      ],
+      "content_summary": "Invoice 000081709",
+      "structured_data": {
+        "value": "Invoice 000081709"
+      }
+    },
+    {
+      "id": "elem-3",
+      "outline_id": "out-1-2",
+      "type": "paragraph",
+      "label": "Company Info & Address",
+      "page": 1,
+      "box_2d": [
+        56,
+        671,
+        145,
+        898
+      ],
+      "content_summary": "Company info\nAtticus LLC\n1309 Coffeen Ave. Ste. 2513\nSheridan\nWyoming, 82801\nUnited States",
+      "structured_data": {
+        "value": "Company info\nAtticus LLC\n1309 Coffeen Ave. Ste. 2513\nSheridan\nWyoming, 82801\nUnited States"
+      }
+    },
+    {
+      "id": "elem-4",
+      "outline_id": "out-1-2",
+      "type": "key_value",
+      "label": "Sales tax ID",
+      "page": 1,
+      "box_2d": [
+        149,
+        598,
+        158,
+        898
+      ],
+      "content_summary": "VAT - EU372031974 UK - GB383499055",
+      "structured_data": {
+        "value": "VAT - EU372031974 UK - GB383499055"
+      }
+    },
+    {
+      "id": "elem-5",
+      "outline_id": "out-1-3",
+      "type": "paragraph",
+      "label": "Billing info",
+      "page": 1,
+      "box_2d": [
+        217,
+        101,
+        291,
+        203
+      ],
+      "content_summary": "Billing info\nqround SEO MINGYU seoul, 40-6 South Korea",
+      "structured_data": {
+        "value": "Billing info\nqround SEO MINGYU seoul, 40-6 South Korea"
+      }
+    },
+    {
+      "id": "elem-6",
+      "outline_id": "out-1-4",
+      "type": "key_value",
+      "label": "Total (USD)",
+      "page": 1,
+      "box_2d": [
+        217,
+        780,
+        254,
+        898
+      ],
+      "content_summary": "$147.00",
+      "structured_data": {
+        "value": "$147.00"
+      }
+    },
+    {
+      "id": "elem-7",
+      "outline_id": "out-1-4",
+      "type": "key_value",
+      "label": "Payment Method",
+      "page": 1,
+      "box_2d": [
+        258,
+        776,
+        269,
+        898
+      ],
+      "content_summary": "Paid via credit card",
+      "structured_data": {
+        "value": "Paid via credit card"
+      }
+    },
+    {
+      "id": "elem-8",
+      "outline_id": "out-1-5",
+      "type": "table",
+      "label": "Invoice Line Items & Totals",
+      "page": 1,
+      "box_2d": [
+        347,
+        106,
+        466,
+        895
+      ],
+      "content_summary": "| Description | Amount | Total |\n| :--- | :--- | :--- |\n| Atticus (One-time payment ($147.00)) | $147.00 | $147.00 |\n| Subtotal | | $147.00 |\n| Total | | $147.00 |",
+      "structured_data": {
+        "value": "| Description | Amount | Total |\n| :--- | :--- | :--- |\n| Atticus (One-time payment ($147.00)) | $147.00 | $147.00 |\n| Subtotal | | $147.00 |\n| Total | | $147.00 |"
+      }
+    },
+    {
+      "id": "elem-9",
+      "outline_id": "out-1-6",
+      "type": "paragraph",
+      "label": "Support & Service Notice",
+      "page": 1,
+      "box_2d": [
+        694,
+        269,
+        760,
+        730
+      ],
+      "content_summary": "Contact support: support@atticus.io\nClick here to manage your billing details and view purchase history\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
+      "structured_data": {
+        "value": "Contact support: support@atticus.io\nClick here to manage your billing details and view purchase history\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved."
+      }
+    },
+    {
+      "id": "elem-10",
+      "outline_id": "out-1-1",
+      "type": "key_value",
+      "label": "Page Number",
+      "page": 1,
+      "box_2d": [
+        968,
+        459,
+        979,
+        541
+      ],
+      "content_summary": "Page 1 of 1",
+      "structured_data": {
+        "value": "Page 1 of 1"
+      }
+    }
+  ]
+}

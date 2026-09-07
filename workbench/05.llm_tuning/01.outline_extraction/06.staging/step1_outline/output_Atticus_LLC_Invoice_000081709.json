@@ -1,0 +1,128 @@
+{
+  "document_title": "Atticus_LLC_Invoice_000081709.pdf",
+  "total_pages": 1,
+  "outlines": [
+    {
+      "id": "out-1",
+      "level": 1,
+      "title": "Invoice 000081709",
+      "page": 1,
+      "box_2d": [
+        30,
+        60,
+        825,
+        905
+      ],
+      "purpose": "Atticus LLC 인보이스 전체 문서",
+      "elements": [],
+      "children": [
+        {
+          "id": "out-1-1",
+          "level": 2,
+          "title": "Company info",
+          "page": 1,
+          "box_2d": [
+            30,
+            355,
+            160,
+            903
+          ],
+          "purpose": "발행일자, 발행 기업 정보(Atticus LLC 주소 및 세금 ID), 인보이스 번호",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-2",
+          "level": 2,
+          "title": "Billing info",
+          "page": 1,
+          "box_2d": [
+            182,
+            60,
+            245,
+            205
+          ],
+          "purpose": "청구 대상 고객 정보(qround, SEO MINGYU 및 수신 주소)",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-3",
+          "level": 2,
+          "title": "Total (USD)",
+          "page": 1,
+          "box_2d": [
+            182,
+            461,
+            226,
+            535
+          ],
+          "purpose": "청구 및 결제 총액 요약 및 결제 수단 정보",
+          "elements": [],
+          "children": []
+        },
+        {
+          "id": "out-1-4",
+          "level": 2,
+          "title": "Description",
+          "page": 1,
+          "box_2d": [
+            292,
+            63,
+            392,
+            532
+          ],
+          "purpose": "구매 품목 상세 내역 테이블 및 소계(Subtotal), 총계(Total)",
+          "elements": [],
+          "children": [
+            {
+              "id": "out-1-4-1",
+              "level": 3,
+              "title": "Amount",
+              "page": 1,
+              "box_2d": [
+                292,
+                421,
+                330,
+                532
+              ],
+              "purpose": "품목별 단가 및 수량 금액",
+              "elements": [],
+              "children": []
+            },
+            {
+              "id": "out-1-4-2",
+              "level": 3,
+              "title": "Total",
+              "page": 1,
+              "box_2d": [
+                292,
+                428,
+                392,
+                532
+              ],
+              "purpose": "항목별 합계 및 최종 청구 합계",
+              "elements": [],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "out-1-5",
+          "level": 2,
+          "title": "Contact support",
+          "page": 1,
+          "box_2d": [
+            583,
+            159,
+            636,
+            435
+          ],
+          "purpose": "고객지원 문의처 및 결제 내역 관리 링크 안내",
+          "elements": [],
+          "children": []
+        }
+      ]
+    }
+  ]
+}

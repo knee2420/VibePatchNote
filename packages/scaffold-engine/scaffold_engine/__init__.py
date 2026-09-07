@@ -4,6 +4,7 @@
 좌표는 측정 단계에서만 생성된다. 상세는 `core/pipeline.py` 참조.
 """
 from .core.pipeline import ScaffoldPipeline, ScannedDocumentError
+from .outline import ElementItem, OutlineDocument, OutlineNode, OutlinePipeline
 from .types import ScaffoldExtractResult, ScaffoldMeta, SlotMappingItem
 
 __all__ = [
@@ -12,4 +13,9 @@ __all__ = [
     "ScaffoldExtractResult",
     "ScaffoldMeta",
     "SlotMappingItem",
+    # Outline 트랙 (이원화 서브패키지)
+    "ElementItem",
+    "OutlineNode",
+    "OutlineDocument",
+    "OutlinePipeline",
 ]
