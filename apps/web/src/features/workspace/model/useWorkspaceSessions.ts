@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import type { WorkspaceSession } from '@/entities/workspace-session';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
+import { stripArchivedNodeBody } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 import { useSessionActions } from './useSessionActions';
@@ -59,7 +60,11 @@ export function useWorkspaceSessions({ enabled }: UseWorkspaceSessionsOptions) {
 
     const { nodes, edges } = useCanvasBoardStore.getState();
     try {
-      await workspaceApi.update(activeSessionId, { title: activeSessionTitle, nodes, edges });
+      await workspaceApi.update(activeSessionId, {
+        title: activeSessionTitle,
+        nodes: stripArchivedNodeBody(nodes),
+        edges,
+      });
       await refresh();
       return true;
     } catch (error) {

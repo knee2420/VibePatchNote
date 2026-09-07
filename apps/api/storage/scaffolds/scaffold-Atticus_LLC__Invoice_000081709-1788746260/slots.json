@@ -9,7 +9,7 @@
       46,
       893
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s2",
@@ -21,43 +21,43 @@
       88,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s3",
     "number": 3,
-    "label": "회사 로고",
+    "label": "공급자 로고 이미지",
     "box_2d": [
       83,
       101,
       154,
       535
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s4",
     "number": 4,
-    "label": "공급자 주소 상세",
+    "label": "공급자 상세주소",
     "box_2d": [
       89,
       671,
       102,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s5",
     "number": 5,
-    "label": "공급자 도시",
+    "label": "공급자 도시명",
     "box_2d": [
       103,
       830,
       116,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s6",
@@ -69,31 +69,31 @@
       131,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s7",
     "number": 7,
-    "label": "공급자 국가",
+    "label": "공급자 국가명",
     "box_2d": [
       132,
       793,
       145,
       897
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s8",
     "number": 8,
-    "label": "공급자 세금 등록 번호",
+    "label": "공급자 사업자/세금 등록번호",
     "box_2d": [
       149,
       674,
       158,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s9",
@@ -105,103 +105,103 @@
       188,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s10",
     "number": 10,
-    "label": "청구 총액",
+    "label": "청구 총금액",
     "box_2d": [
       231,
       780,
       254,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s11",
     "number": 11,
-    "label": "청구처 회사명",
+    "label": "수신자 회사명/소속",
     "box_2d": [
       235,
       101,
       248,
       159
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s12",
     "number": 12,
-    "label": "청구처 고객명",
+    "label": "수신자 고객명",
     "box_2d": [
       249,
       101,
       262,
       203
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s13",
     "number": 13,
-    "label": "청구처 상세 주소",
+    "label": "수신자 상세주소",
     "box_2d": [
       263,
       101,
       277,
       189
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s14",
     "number": 14,
-    "label": "청구처 국가",
+    "label": "수신자 국가명",
     "box_2d": [
       278,
       101,
       291,
       199
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s15",
     "number": 15,
-    "label": "결제 수단 및 상태",
+    "label": "결제 수단/상태",
     "box_2d": [
       258,
       776,
       268,
       898
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s16",
     "number": 16,
-    "label": "항목 품명",
+    "label": "품목/서비스명",
     "box_2d": [
       378,
       106,
       391,
       160
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s17",
     "number": 17,
-    "label": "항목 단가/수량 금액",
+    "label": "단가/항목 금액",
     "box_2d": [
       378,
       709,
       391,
       774
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s18",
@@ -213,19 +213,19 @@
       391,
       893
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s19",
     "number": 19,
-    "label": "결제 조건 및 결제 금액",
+    "label": "결제 세부 금액",
     "box_2d": [
       394,
-      106,
+      220,
       403,
-      271
+      267
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s20",
@@ -237,7 +237,7 @@
       438,
       893
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s21",
@@ -249,18 +249,18 @@
       465,
       893
     ],
-    "pageNumber": 1
+    "page_number": 1
   },
   {
     "id": "s22",
     "number": 22,
-    "label": "고객지원 이메일",
+    "label": "고객지원 이메일 주소",
     "box_2d": [
       693,
       495,
       705,
       626
     ],
-    "pageNumber": 1
+    "page_number": 1
   }
 ]

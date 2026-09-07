@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import {
   FileText,
@@ -16,6 +16,7 @@ import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffol
 
 import { useScaffoldFocusStore, useSyncMappingStore } from '@/shared/model';
 
+import { useScaffoldArchive, type ScaffoldArchiveSyncState } from '../model/useScaffoldArchive';
 import { type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
 
 /**
@@ -26,6 +27,14 @@ import { type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
  * 1) 생성 중: 실시간 AI 프로세스(Vision -> 2D Grid -> DSL 추론 -> DOM 검증) 현황 시각화
  * 2) 완료 시: Tiptap 와이어프레임 캔버스 에디터(인라인 슬롯, 다단 그리드)가 카드에 직접 렌더링됩니다.
  */
+const SYNC_LABELS: Record<ScaffoldArchiveSyncState, string> = {
+  idle: '',
+  hydrating: '불러오는 중',
+  saving: '저장 중',
+  saved: '보관함 저장됨',
+  error: '동기화 실패',
+};
+
 export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   id,
   data,
@@ -33,6 +42,11 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 }: NodeProps<ScaffoldDocumentNode>) {
   const { setNodes, setEdges } = useReactFlow();
   const openFocus = useScaffoldFocusStore((s) => s.openFocus);
+
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+
+  // 본문(HTML/마크다운/슬롯)의 출처이자 저장처는 백엔드 아카이브다.
+  const { syncState } = useScaffoldArchive(id, data, editorContainerRef);
 
   const setActiveMapping = useSyncMappingStore((s) => s.setActiveMapping);
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
@@ -125,7 +139,8 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
     };
   }, [data.width, data.height]);
 
-  const status = data.status || (data.htmlContent ? 'completed' : 'generating');
+  // 세션에서 복원된 노드는 본문이 비어 있고 포인터만 있다. 그것도 완료 상태다.
+  const status = data.status || (data.htmlContent || data.scaffoldId ? 'completed' : 'generating');
   const step = data.progressStep || 1;
 
   // AI 분석 단계 정의
@@ -169,6 +184,14 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
               <span className="text-[10px] text-slate-400 font-mono">
                 {status === 'generating' ? `${progressPercent}%` : 'v1.0'}
               </span>
+              {status === 'completed' && syncState !== 'idle' && (
+                <span
+                  className={`text-[10px] font-medium ${syncState === 'error' ? 'text-rose-500' : 'text-slate-400'}`}
+                  title="서식 보관함 동기화 상태"
+                >
+                  {SYNC_LABELS[syncState]}
+                </span>
+              )}
             </div>
             <h4 className="font-semibold text-sm text-slate-900 truncate leading-tight mt-0.5" title={data.title}>
               {data.title}
@@ -298,7 +321,10 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
         {/* CASE 2: 완료 시 원본 카드와 '= 동급'의 Tiptap 서식 에디터 화면 직접 렌더링 (핵심!) */}
         {status === 'completed' && (
-          <div className="flex-1 w-full h-full overflow-y-auto p-4 sm:p-6 bg-slate-50 nodrag nowheel">
+          <div
+            ref={editorContainerRef}
+            className="flex-1 w-full h-full overflow-y-auto p-4 sm:p-6 bg-slate-50 nodrag nowheel"
+          >
             <div className="max-w-full mx-auto">
               <ScaffoldCanvasEditor
                 initialContent={data.htmlContent}

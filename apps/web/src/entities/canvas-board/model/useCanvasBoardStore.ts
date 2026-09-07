@@ -10,6 +10,7 @@ import {
 } from '@xyflow/react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { stripArchivedNodeBody } from '@/shared/lib';
 
 const STORAGE_KEY = 'vibe-canvas-board-storage';
 
@@ -135,8 +136,9 @@ export const useCanvasBoardStore = create<CanvasBoardState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => debouncedLocalStorage),
+      // 본문의 SSOT 는 백엔드 스캐폴드 아카이브다. 로컬 스냅샷에는 포인터만 남긴다.
       partialize: (state): PersistedCanvasBoard => ({
-        nodes: state.nodes,
+        nodes: stripArchivedNodeBody(state.nodes),
         edges: state.edges,
       }),
       // 세션 정보가 함께 저장돼 있던 구버전 스냅샷에서도 그래프만 안전하게 복원합니다.

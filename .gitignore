@@ -9,6 +9,7 @@ dist-ssr/
 build/
 .turbo/
 *.tsbuildinfo
+scratch/*
 
 # Python
 *.py[cod]

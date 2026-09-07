@@ -191,6 +191,8 @@ export function useDocumentScaffold({
               data: {
                 ...n.data,
                 title: res.meta.title || `${title} 서식 틀`,
+                // 본문의 SSOT 는 백엔드 아카이브. 이 포인터가 있으면 세션에는 본문이 저장되지 않는다.
+                scaffoldId: res.archive?.scaffoldId,
                 htmlContent: res.htmlContent,
                 markdownContent: res.markdownContent,
                 // 백엔드가 원본에서 실측한 슬롯 좌표. 이게 있어야 양방향 매핑이 성립한다.

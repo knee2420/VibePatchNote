@@ -19,10 +19,18 @@ export interface ScaffoldArchiveMeta {
   createdAt: string;
   slotsCount: number;
   difficulty: string;
+  /** 엔진이 부여한 원본 식별자와 판정 메타. 아카이브가 함께 보존한다. */
+  engineScaffoldId?: string;
+  targetDoc?: string;
+  description?: string;
+  /** 아카이빙된 원본 페이지 번호(1-based). */
+  pageNumber?: number;
   overlayImageUrl: string;
   originalImageUrl: string;
   promptSpecUrl: string;
   htmlUrl: string;
+  /** 엔진 원문 마크다운(content.md) URL. 명세서(promptSpecUrl)와 다른 파일이다. */
+  markdownUrl: string;
   slotsUrl: string;
   archiveDir: string;
 }

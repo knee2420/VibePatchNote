@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
+import { stripArchivedNodeBody } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 
@@ -24,7 +25,11 @@ export function useActiveSessionTitle() {
 
       const { nodes, edges } = useCanvasBoardStore.getState();
       try {
-        await workspaceApi.update(activeSessionId, { title: trimmed, nodes, edges });
+        await workspaceApi.update(activeSessionId, {
+          title: trimmed,
+          nodes: stripArchivedNodeBody(nodes),
+          edges,
+        });
       } catch (error) {
         console.error('Failed to update title:', error);
       }

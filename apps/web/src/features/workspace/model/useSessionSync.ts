@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
+import { stripArchivedNodeBody } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 import { useSessionActions } from './useSessionActions';
@@ -57,7 +58,11 @@ export function useSessionSync() {
 
     const timeoutId = setTimeout(() => {
       workspaceApi
-        .update(activeSessionId, { title: activeSessionTitle, nodes, edges })
+        .update(activeSessionId, {
+          title: activeSessionTitle,
+          nodes: stripArchivedNodeBody(nodes),
+          edges,
+        })
         .catch((error: unknown) => {
           console.error('Auto-save failed:', error);
         });
