@@ -1,0 +1,31 @@
+# Invoice 000081709 (Vision 기반 정밀 정답셋)
+
+## Invoice 000081709 (p.1)
+- **Header Meta**:
+  - Logo: Atticus
+  - Invoice No: 000081709
+  - Issue Date: August 25th 2026
+- **Company info**:
+  - Company: Atticus LLC
+  - Street: 1309 Coffeen Ave. Ste. 2513
+  - City: Sheridan
+  - State & Zip: Wyoming, 82801
+  - Country: United States
+  - VAT EU: VAT - EU372031974
+  - Tax UK: UK - GB383499055
+- **Billing info**:
+  - Account: qround
+  - Recipient: SEO MINGYU
+  - Street: seoul, 40-6
+  - Country: South Korea
+- **Total (USD)**:
+  - Total: $147.00
+  - Payment: Paid via credit card
+- **Description (Table)**:
+  - Item: Atticus [One-time payment ($147.00)]
+  - Amount: $147.00 | Total: $147.00
+  - Subtotal: $147.00 | Total: $147.00
+- **Contact support**:
+  - Email: support@atticus.io
+  - Note: Click here to manage your billing details and view purchase history
+  - Notice: Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.

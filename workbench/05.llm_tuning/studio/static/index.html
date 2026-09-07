@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibePatchNote — LLM Tuning Studio</title>
+  <!-- Tailwind CSS & Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['Consolas', 'Fira Code', 'Monaco', 'monospace'],
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            vscode: {
+              bg: '#181818',
+              sidebar: '#1e1e1e',
+              item: '#252526',
+              hover: '#2a2d2e',
+              active: '#094771',
+              border: '#2b2b2b',
+              line: '#333333',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* VS Code Style Thin Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #1e1e1e; }
+    ::-webkit-scrollbar-thumb { background: #3c3c3c; }
+    ::-webkit-scrollbar-thumb:hover { background: #505050; }
+
+    /* Indentation Guide Line */
+    .tree-guide {
+      position: relative;
+    }
+    .tree-guide::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background-color: #333333;
+    }
+  </style>
+</head>
+<body class="bg-[#181818] text-[#cccccc] min-h-screen flex flex-col font-sans select-none antialiased">
+  <div id="app" class="flex-1 flex flex-col h-screen overflow-hidden">
+
+    <!-- Top Navigation Bar (VS Code Titlebar Style) -->
+    <header class="bg-[#1e1e1e] border-b border-[#2b2b2b] px-4 py-2 flex items-center justify-between shrink-0 text-xs">
+      <div class="flex items-center space-x-3">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2">
+          <div class="w-6 h-6 rounded bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-xs shadow">
+            <i class="fa-solid fa-code-branch"></i>
+          </div>
+          <span class="font-bold text-slate-100 tracking-wide">LLM Tuning Studio</span>
+          <span class="text-[10px] text-slate-400 font-mono bg-[#252526] px-1.5 py-0.5 rounded border border-[#333333]">:8088</span>
+        </div>
+
+        <div class="h-4 w-px bg-[#333333] mx-1"></div>
+
+        <!-- Task Tabs (VS Code Editor Tabs Style) -->
+        <div class="flex space-x-1">
+          <button 
+            v-for="t in tasks" 
+            :key="t.id"
+            @click="selectTask(t.id)"
+            :class="selectedTask === t.id ? 'bg-[#181818] text-white border-t-2 border-blue-500 font-semibold' : 'bg-[#252526] text-slate-400 hover:text-slate-200 hover:bg-[#2a2d2e] border-t-2 border-transparent'"
+            class="px-3 py-1 text-xs transition-colors flex items-center space-x-1.5 border-r border-[#2b2b2b]">
+            <i :class="getTaskIcon(t.id)" class="text-[11px] text-blue-400"></i>
+            <span>{{ t.name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1 bg-[#252526] border border-[#333333] rounded px-2 py-1">
+          <i class="fa-regular fa-file text-[11px] text-slate-400"></i>
+          <span class="text-[11px] text-slate-400">문서:</span>
+          <select 
+            v-model="selectedDoc" 
+            @change="loadDocData"
+            class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer">
+            <option v-for="d in documents" :key="d" :value="d" class="bg-[#1e1e1e] text-slate-200">{{ d }}</option>
+          </select>
+        </div>
+
+        <button 
+          @click="loadDocData" 
+          title="새로고침"
+          class="p-1.5 rounded bg-[#252526] hover:bg-[#333333] text-slate-300 border border-[#333333] transition-colors">
+          <i class="fa-solid fa-rotate-right text-xs" :class="{'fa-spin': loading}"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main 3-Column VS Code Outline Panels -->
+    <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden text-xs">
+
+      <!-- ========================================================================= -->
+      <!-- Column 1: 🏛️ 원본 LLM Baseline (AS-IS Tree View) (4 Cols) -->
+      <!-- ========================================================================= -->
+      <section class="col-span-4 border-r border-[#2b2b2b] flex flex-col bg-[#1e1e1e] overflow-hidden">
+        <!-- Panel Header -->
+        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-folder-tree text-amber-500 text-xs"></i>
+            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Baseline AS-IS</span>
+            <span class="text-[10px] text-slate-400 font-mono">({{ baselineCount }} 노드)</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] text-amber-400 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-800/60 font-mono">
+              ⚠️ 편향감지
+            </span>
+            <button @click="showRawJson('baseline')" title="Raw JSON 보기" class="text-slate-400 hover:text-white">
+              <i class="fa-solid fa-code text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bias Note Strip -->
+        <div v-if="baseline && baseline.bias_analysis" class="px-3 py-1.5 bg-amber-950/20 border-b border-amber-900/30 text-[11px] text-amber-300/80 flex items-center space-x-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 shrink-0 text-[10px]"></i>
+          <span class="truncate">회의비 과적합으로 드론/GPS 기술 논의 및 의결 사항 대거 누락</span>
+        </div>
+
+        <!-- VS Code Tree View -->
+        <div class="flex-1 overflow-y-auto py-1 font-mono">
+          <div v-if="!baseline.outlines || !baseline.outlines.outlines || baseline.outlines.outlines.length === 0" class="p-4 text-center text-slate-500">
+            데이터가 없습니다.
+          </div>
+
+          <div v-for="item in baseline.outlines.outlines" :key="item.id" class="flex flex-col">
+            <!-- Level 1 Node -->
+            <div 
+              @click="toggleExpand(item)"
+              class="h-7 px-2 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer group text-slate-200 transition-colors">
+              <i :class="item.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
+                 class="w-3 text-[9px] text-slate-400"></i>
+              <i class="fa-solid fa-folder text-amber-400/90 text-xs"></i>
+              <span class="font-semibold truncate flex-1">{{ item.title }}</span>
+              <span class="text-[10px] text-slate-500 font-mono group-hover:text-slate-400">p.{{ item.page }}</span>
+            </div>
+
+            <!-- Children Sub-Tree -->
+            <div v-if="item.expanded !== false" class="tree-guide ml-3 pl-3">
+              <div 
+                v-for="sub in item.children" 
+                :key="sub.id"
+                class="h-6 px-1 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer group text-slate-300 transition-colors">
+                <i class="fa-regular fa-file-lines text-slate-400 text-xs"></i>
+                <span class="truncate flex-1 text-[11px]">{{ sub.title }}</span>
+                <div class="flex items-center space-x-1">
+                  <!-- Tag badge -->
+                  <span 
+                    v-for="el in sub.elements" 
+                    :key="el.id"
+                    class="text-[9px] px-1 rounded bg-[#333333] text-slate-300 font-sans">
+                    {{ el.type }}
+                  </span>
+                  <span class="text-[9px] text-slate-500 font-mono">p.{{ sub.page }}</span>
+                </div>
+              </div>
+
+              <!-- Purpose Note (Obsidian Callout Style) -->
+              <div v-if="item.purpose" class="my-0.5 ml-1 px-2 py-0.5 text-[10px] text-slate-400 italic bg-[#252526]/50 rounded truncate border-l-2 border-amber-500/50">
+                ↳ {{ item.purpose }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- Column 2: 🎯 정답셋 (Ground Truth) Obsidian Tree Editor (4 Cols) -->
+      <!-- ========================================================================= -->
+      <section class="col-span-4 border-r border-[#2b2b2b] flex flex-col bg-[#1e1e1e] overflow-hidden">
+        <!-- Panel Header -->
+        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-bullseye text-emerald-400 text-xs"></i>
+            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Ground Truth (정답셋)</span>
+            <span class="text-[10px] text-slate-400 font-mono">({{ gtCount }} 노드)</span>
+          </div>
+
+          <div class="flex items-center space-x-1.5">
+            <button 
+              @click="addRootOutline" 
+              title="새 최상위 섹션 추가"
+              class="px-2 py-0.5 rounded bg-[#333333] hover:bg-[#444444] text-slate-200 text-[11px] font-medium flex items-center space-x-1 transition-colors">
+              <i class="fa-solid fa-plus text-[9px]"></i>
+              <span>추가</span>
+            </button>
+            <button 
+              @click="saveGroundTruth" 
+              :disabled="savingGt"
+              class="px-2.5 py-0.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center space-x-1 shadow transition-colors">
+              <i class="fa-solid fa-floppy-disk text-[10px]" :class="{'fa-spin': savingGt}"></i>
+              <span>저장</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tip Header -->
+        <div class="px-3 py-1 bg-emerald-950/20 border-b border-emerald-900/30 text-[11px] text-emerald-300/80 flex items-center justify-between">
+          <span>각 노드를 클릭하면 하단 인스펙터에서 즉시 수정됩니다.</span>
+          <span class="text-[10px] text-slate-400 font-mono">JSON 자동 동기화</span>
+        </div>
+
+        <!-- Obsidian Tree View -->
+        <div class="flex-1 overflow-y-auto py-1 font-mono">
+          <div v-if="!groundTruth.outlines || !groundTruth.outlines.outlines || groundTruth.outlines.outlines.length === 0" class="p-4 text-center text-slate-500">
+            정답셋이 비어있습니다. [+ 추가] 버튼을 누르세요.
+          </div>
+
+          <div v-for="(item, idx) in flattenedGtNodes" :key="item.node.id || idx" class="flex flex-col">
+            <!-- Outline Row -->
+            <div 
+              @click="selectNode(item.node, item.parent)"
+              :style="{ paddingLeft: `${(item.depth - 1) * 14 + 6}px` }"
+              :class="selectedNode === item.node ? 'bg-[#094771] text-white' : 'hover:bg-[#2a2d2e] text-slate-200'"
+              class="h-6 pr-2 flex items-center space-x-1.5 cursor-pointer group transition-all">
+              
+              <!-- Expand arrow if has children or element data -->
+              <i @click.stop="toggleExpand(item.node)" 
+                 v-if="(item.node.children && item.node.children.length > 0) || hasElementData(item.node.id)"
+                 :class="item.node.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
+                 class="w-3 text-[9px] text-slate-400 hover:text-white"></i>
+              <span v-else class="w-3"></span>
+              
+              <!-- Dynamic Level Badge -->
+              <span :class="getLevelBadgeClass(item.node.level || item.depth)" class="text-[9px] font-mono font-bold px-1 rounded transition-colors">
+                L{{ item.node.level || item.depth }}
+              </span>
+
+              <i :class="item.node.children && item.node.children.length > 0 ? 'fa-solid fa-folder text-emerald-400' : 'fa-regular fa-file-lines text-cyan-500/80'" class="text-xs"></i>
+              
+              <span class="font-semibold truncate flex-1 text-[11px]">{{ item.node.title || '(제목 없음)' }}</span>
+
+              <!-- Element Badge if bound -->
+              <span v-if="getNodeElement(item.node.id)" class="text-[9px] px-1 py-0.2 rounded bg-[#333333] text-cyan-300 font-mono">
+                {{ getNodeElement(item.node.id).type }}
+              </span>
+              
+              <!-- Quick Action Hover Buttons -->
+              <div class="hidden group-hover:flex items-center space-x-1 shrink-0">
+                <button @click.stop="addChildNode(item.node)" title="하위 노드 추가" class="text-slate-400 hover:text-emerald-300 p-0.5">
+                  <i class="fa-solid fa-plus text-[10px]"></i>
+                </button>
+                <button @click.stop="removeNode(item)" title="삭제" class="text-slate-400 hover:text-rose-400 p-0.5">
+                  <i class="fa-solid fa-xmark text-[10px]"></i>
+                </button>
+              </div>
+
+              <span class="text-[9px] text-slate-500 font-mono">p.{{ item.node.page }}</span>
+            </div>
+
+            <!-- 🌟 INLINE ELEMENT DATA (해당 노드에 바인딩된 실제 엘리먼트 데이터) -->
+            <div v-if="item.node.expanded !== false && getNodeElement(item.node.id)" 
+                 :style="{ paddingLeft: `${(item.depth - 1) * 14 + 22}px` }"
+                 class="tree-guide pr-2 py-0.5 space-y-0.5 border-l border-cyan-900/60 ml-2">
+              
+              <!-- 1. If Value is an Object (Key-Value Pairs) -->
+              <template v-if="isObject(getNodeElement(item.node.id).value)">
+                <div 
+                  v-for="(val, key) in getNodeElement(item.node.id).value" 
+                  :key="key" 
+                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
+                  <i class="fa-solid fa-tag text-[8px] text-cyan-400 shrink-0"></i>
+                  <span class="text-slate-400 shrink-0 font-semibold">{{ key }}:</span>
+                  <span class="text-emerald-300 truncate">{{ val }}</span>
+                </div>
+              </template>
+
+              <!-- 2. If Items (List items) -->
+              <template v-else-if="getNodeElement(item.node.id).items && getNodeElement(item.node.id).items.length > 0">
+                <div 
+                  v-for="(it, iIdx) in getNodeElement(item.node.id).items" 
+                  :key="iIdx" 
+                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
+                  <i class="fa-solid fa-circle-dot text-[6px] text-cyan-400 shrink-0"></i>
+                  <span class="text-slate-500 shrink-0">{{ iIdx + 1 }}.</span>
+                  <span class="text-slate-200 truncate">{{ it }}</span>
+                </div>
+              </template>
+
+              <!-- 3. If Table format (value with items array) -->
+              <template v-else-if="isTableElement(getNodeElement(item.node.id))">
+                <div 
+                  v-for="(row, rIdx) in getNodeElement(item.node.id).value.items" 
+                  :key="rIdx" 
+                  class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
+                  <i class="fa-solid fa-table-cells text-[8px] text-amber-400 shrink-0"></i>
+                  <span class="text-slate-200 truncate font-semibold">{{ row.description || row['구분'] || row['주요과제 및 추진계획'] || row['항목'] || row }}</span>
+                  <span class="text-emerald-300 text-[9px] shrink-0">({{ row.total || row.amount || row['금액(원)'] || row['이름'] || row['추진일정'] || '' }})</span>
+                </div>
+              </template>
+
+              <!-- 4. Simple String Value -->
+              <template v-else-if="getNodeElement(item.node.id).value">
+                <div class="h-5 px-1 flex items-center space-x-1.5 text-[10px] text-slate-300 hover:bg-[#252526] rounded font-mono truncate">
+                  <i class="fa-solid fa-arrow-turn-down-right text-[8px] text-cyan-400 shrink-0"></i>
+                  <span class="text-emerald-300 truncate">{{ getNodeElement(item.node.id).value }}</span>
+                </div>
+              </template>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Node Inspector Panel (하단 속성 & 엘리먼트 데이터 편집기) -->
+        <div v-if="selectedNode" class="p-3 border-t border-[#2b2b2b] bg-[#252526] shrink-0 space-y-2.5 max-h-[48vh] overflow-y-auto">
+          <div class="flex items-center justify-between border-b border-[#333333] pb-1.5">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-sliders text-emerald-400"></i>
+              <span class="text-[11px] font-bold uppercase text-slate-200 tracking-wider">노드 속성 & 데이터 인스펙터</span>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800">
+              ID: {{ selectedNode.id }}
+            </span>
+          </div>
+
+          <!-- Basic Attributes (Title, Purpose, Level, Page) -->
+          <div class="space-y-1.5 font-mono text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] text-slate-400 w-12 shrink-0">제목:</span>
+              <input 
+                type="text" 
+                v-model="selectedNode.title" 
+                placeholder="목차 제목..." 
+                class="flex-1 bg-[#181818] border border-[#333333] focus:border-emerald-500 rounded px-2 py-1 text-xs text-slate-100 focus:outline-none" />
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] text-slate-400 w-12 shrink-0">목적:</span>
+              <input 
+                type="text" 
+                v-model="selectedNode.purpose" 
+                placeholder="도메인/비즈니스 목적 서술..." 
+                class="flex-1 bg-[#181818] border border-[#333333] focus:border-emerald-500 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none" />
+            </div>
+
+            <div class="flex items-center space-x-4 pt-0.5">
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] text-slate-400">Level:</span>
+                <select 
+                  v-model.number="selectedNode.level" 
+                  class="bg-[#181818] text-xs font-bold text-emerald-400 border border-[#333333] rounded px-2 py-1 focus:outline-none">
+                  <option :value="1">Level 1 (대주제/문서)</option>
+                  <option :value="2">Level 2 (소주제/안건)</option>
+                  <option :value="3">Level 3 (세부항목)</option>
+                </select>
+              </div>
+
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] text-slate-400">Page:</span>
+                <input 
+                  type="number" 
+                  v-model.number="selectedNode.page" 
+                  class="w-12 bg-[#181818] border border-[#333333] rounded px-1 py-1 text-xs text-center text-slate-200 focus:outline-none font-bold" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Bound Element Section (바인딩된 실제 데이터 표출 및 편집) -->
+          <div class="pt-2 border-t border-[#333333] space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5">
+                <i class="fa-solid fa-cube text-cyan-400 text-xs"></i>
+                <span class="text-[10px] font-bold uppercase text-slate-300 tracking-wider">바인딩된 엘리먼트 데이터 (Element Value)</span>
+              </div>
+              <div v-if="selectedElement" class="flex items-center space-x-1.5">
+                <span class="text-[10px] text-slate-400 font-semibold">타입:</span>
+                <select 
+                  v-model="selectedElement.type" 
+                  class="bg-[#181818] text-[10px] px-1.5 py-0.5 rounded text-cyan-300 border border-cyan-800 font-mono focus:outline-none focus:border-cyan-500">
+                  <option value="key_value">key_value</option>
+                  <option value="paragraph">paragraph</option>
+                  <option value="table">table</option>
+                  <option value="list">list</option>
+                  <option value="media">media</option>
+                </select>
+              </div>
+              <button 
+                v-else 
+                @click="createElementForNode(selectedNode)" 
+                class="text-[10px] px-2 py-0.5 bg-indigo-900 hover:bg-indigo-800 text-indigo-200 rounded border border-indigo-700 transition-colors">
+                + 엘리먼트 데이터 연결
+              </button>
+            </div>
+
+            <!-- Element Content Renderer -->
+            <div v-if="selectedElement" class="bg-[#181818] border border-[#333333] rounded-lg p-2.5 font-mono text-xs space-y-2">
+              <!-- If Value is an Object (Dict of fields) -->
+              <div v-if="isObject(selectedElement.value)" class="space-y-1.5">
+                <div v-for="(val, key) in selectedElement.value" :key="key" class="flex items-start space-x-2">
+                  <span class="text-[10px] text-slate-400 w-24 shrink-0 truncate font-semibold" :title="key">{{ key }}:</span>
+                  <input 
+                    type="text" 
+                    v-model="selectedElement.value[key]" 
+                    class="flex-1 bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none" />
+                </div>
+              </div>
+
+              <!-- If Value has Items (List) -->
+              <div v-else-if="selectedElement.items && selectedElement.items.length > 0" class="space-y-1">
+                <div v-for="(it, iIdx) in selectedElement.items" :key="iIdx" class="flex items-center space-x-1.5">
+                  <span class="text-[10px] text-slate-500">{{ iIdx + 1 }}.</span>
+                  <input 
+                    type="text" 
+                    v-model="selectedElement.items[iIdx]" 
+                    class="flex-1 bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none" />
+                </div>
+              </div>
+
+              <!-- If Simple String Value -->
+              <div v-else class="space-y-1">
+                <textarea 
+                  v-model="selectedElement.value" 
+                  rows="2" 
+                  class="w-full bg-[#252526] border border-[#333333] focus:border-cyan-500 rounded p-1.5 text-xs text-slate-200 focus:outline-none resize-none leading-normal"></textarea>
+              </div>
+            </div>
+
+            <div v-else class="p-2 text-center text-slate-500 text-[11px] bg-[#181818]/60 rounded border border-[#2b2b2b]">
+              이 목차 노드에 바인딩된 세부 엘리먼트가 없습니다.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- Column 3: 🔬 프롬프트 실험실 (Playground Tree View) (4 Cols) -->
+      <!-- ========================================================================= -->
+      <section class="col-span-4 flex flex-col bg-[#1e1e1e] overflow-hidden">
+        <!-- Panel Header -->
+        <div class="h-8 px-3 border-b border-[#2b2b2b] bg-[#252526] flex items-center justify-between shrink-0">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-flask text-indigo-400 text-xs"></i>
+            <span class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Experiment Playground</span>
+          </div>
+
+          <!-- Model Selector -->
+          <div class="flex items-center space-x-1">
+            <select 
+              v-model="experimentModel" 
+              class="bg-[#181818] text-[11px] font-mono text-indigo-400 border border-[#333333] rounded px-2 py-0.5 focus:outline-none font-semibold">
+              <option value="gemini-3.5-flash">gemini-3.5-flash</option>
+              <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+              <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
+              <option value="gemma-4-31b">gemma-4-31b</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Prompt Mini Bar & Run Button -->
+        <div class="p-2 border-b border-[#2b2b2b] bg-[#252526]/60 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">프롬프트 템플릿</span>
+            <button @click="loadDefaultPrompt" class="text-[10px] text-blue-400 hover:underline">기본 복원</button>
+          </div>
+          <textarea 
+            v-model="promptTemplate" 
+            rows="3" 
+            class="w-full bg-[#181818] border border-[#333333] focus:border-indigo-500 rounded p-1.5 text-[11px] font-mono text-slate-300 focus:outline-none resize-none leading-tight"></textarea>
+          
+          <button 
+            @click="runExperiment" 
+            :disabled="runningExp"
+            class="w-full py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow flex items-center justify-center space-x-1.5 transition-colors">
+            <i class="fa-solid fa-play text-[10px]" :class="{'fa-spin': runningExp}"></i>
+            <span>{{ runningExp ? '추론 진행 중...' : '실험 실행 및 실시간 채점 (Run & Eval)' }}</span>
+          </button>
+        </div>
+
+        <!-- Scorecard Mini Ribbon -->
+        <div v-if="metrics" class="px-3 py-1.5 bg-[#252526] border-b border-[#2b2b2b] flex items-center justify-between font-mono text-[11px]">
+          <div class="flex items-center space-x-3">
+            <span>Recall: <b class="text-emerald-400">{{ metrics.recall }}%</b></span>
+            <span>Precision: <b class="text-cyan-400">{{ metrics.precision }}%</b></span>
+            <span>누락: <b class="text-rose-400">{{ metrics.missed_titles.length }}</b></span>
+          </div>
+          <span class="px-1.5 py-0.2 rounded bg-indigo-900/60 text-indigo-300 border border-indigo-700 font-bold">
+            F1: {{ metrics.f1 }}%
+          </span>
+        </div>
+
+        <!-- Result Tree View (VS Code Style) -->
+        <div class="flex-1 overflow-y-auto py-1 font-mono">
+          <div v-if="!experimentResult" class="p-6 text-center text-slate-500 text-xs">
+            상단 [실험 실행] 버튼을 누르면 새 프롬프트로 추론된 트리가 여기에 렌더링됩니다.
+          </div>
+
+          <div v-if="experimentResult && experimentResult.outlines" v-for="item in experimentResult.outlines" :key="item.id" class="flex flex-col">
+            <div 
+              @click="toggleExpand(item)"
+              class="h-7 px-2 flex items-center space-x-1.5 hover:bg-[#2a2d2e] cursor-pointer text-slate-200 transition-colors">
+              <i :class="item.expanded !== false ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" 
+                 class="w-3 text-[9px] text-slate-400"></i>
+              <i class="fa-solid fa-folder text-indigo-400 text-xs"></i>
+              <span class="font-semibold truncate flex-1">{{ item.title }}</span>
+              <span class="text-[10px] text-slate-500 font-mono">p.{{ item.page }}</span>
+            </div>
+
+            <div v-if="item.expanded !== false" class="tree-guide ml-3 pl-3">
+              <div 
+                v-for="sub in item.children" 
+                :key="sub.id"
+                class="h-6 px-1 flex items-center space-x-1.5 hover:bg-[#2a2d2e] text-slate-300 transition-colors">
+                <i class="fa-regular fa-file-lines text-indigo-400/80 text-xs"></i>
+                <span class="truncate flex-1 text-[11px]">{{ sub.title }}</span>
+                <span class="text-[9px] text-slate-500 font-mono">p.{{ sub.page }}</span>
+              </div>
+              <div v-if="item.purpose" class="my-0.5 ml-1 px-2 py-0.5 text-[10px] text-slate-400 italic bg-[#252526]/50 rounded truncate border-l-2 border-indigo-500/50">
+                ↳ {{ item.purpose }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Raw JSON Modal -->
+    <div v-if="rawModal.open" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+      <div class="bg-[#1e1e1e] border border-[#2b2b2b] rounded-lg w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl">
+        <div class="p-3 border-b border-[#2b2b2b] flex items-center justify-between bg-[#252526]">
+          <span class="text-xs font-bold text-slate-200 font-mono">{{ rawModal.title }}</span>
+          <button @click="rawModal.open = false" class="text-slate-400 hover:text-white">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+        <pre class="p-4 overflow-y-auto flex-1 font-mono text-xs text-slate-300 bg-[#181818] leading-relaxed whitespace-pre">{{ rawModal.content }}</pre>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div v-if="toast.show" class="fixed bottom-4 right-4 z-50 px-3 py-2 rounded shadow-xl border text-xs font-mono flex items-center space-x-2 transition-all"
+         :class="toast.type === 'success' ? 'bg-[#1e1e1e] text-emerald-400 border-emerald-800' : 'bg-[#1e1e1e] text-rose-400 border-rose-800'">
+      <i :class="toast.type === 'success' ? 'fa-solid fa-check' : 'fa-solid fa-triangle-exclamation'"></i>
+      <span>{{ toast.message }}</span>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const tasks = ref([]);
+        const selectedTask = ref('01.outline_extraction');
+        const documents = ref([]);
+        const selectedDoc = ref('11월_디딤돌_회의록');
+
+        const loading = ref(false);
+        const savingGt = ref(false);
+        const runningExp = ref(false);
+
+        const baseline = ref({ outlines: {}, elements: [], bias_analysis: '' });
+        const groundTruth = ref({ outlines: { outlines: [] }, elements: [] });
+        const selectedNode = ref(null);
+
+        const defaultPrompt = ref('');
+        const promptTemplate = ref('');
+        const experimentModel = ref('gemini-3.5-flash');
+        const experimentResult = ref(null);
+        const metrics = ref(null);
+
+        const rawModal = ref({ open: false, title: '', content: '' });
+        const toast = ref({ show: false, message: '', type: 'success' });
+
+        const showToast = (msg, type = 'success') => {
+          toast.value = { show: true, message: msg, type };
+          setTimeout(() => { toast.value.show = false; }, 2500);
+        };
+
+        const baselineCount = computed(() => {
+          const list = baseline.value.outlines?.outlines || [];
+          let count = list.length;
+          list.forEach(item => { if (item.children) count += item.children.length; });
+          return count;
+        });
+
+        const flattenTree = (nodes, parent = null, depth = 1) => {
+          let list = [];
+          if (!nodes) return list;
+          for (const node of nodes) {
+            list.push({ node, parent, depth });
+            if (node.expanded !== false && node.children && node.children.length > 0) {
+              list = list.concat(flattenTree(node.children, node, depth + 1));
+            }
+          }
+          return list;
+        };
+
+        const flattenedGtNodes = computed(() => {
+          return flattenTree(groundTruth.value.outlines?.outlines || []);
+        });
+
+        const countTreeNodes = (nodes) => {
+          let c = 0;
+          if (!nodes) return 0;
+          for (const n of nodes) {
+            c += 1;
+            if (n.children) c += countTreeNodes(n.children);
+          }
+          return c;
+        };
+
+        const gtCount = computed(() => {
+          return countTreeNodes(groundTruth.value.outlines?.outlines || []);
+        });
+
+        const selectedElement = computed(() => {
+          if (!selectedNode.value) return null;
+          const elList = groundTruth.value.elements || [];
+          return elList.find(e => e.outline_id === selectedNode.value.id) || null;
+        });
+
+        const getNodeElement = (id) => {
+          const elList = groundTruth.value.elements || [];
+          return elList.find(e => e.outline_id === id);
+        };
+
+        const getLevelBadgeClass = (level) => {
+          if (level === 1) return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+          if (level === 2) return 'bg-blue-950 text-blue-400 border border-blue-800';
+          if (level === 3) return 'bg-amber-950 text-amber-400 border border-amber-800';
+          if (level === 4) return 'bg-purple-950 text-purple-400 border border-purple-800';
+          return 'bg-rose-950 text-rose-400 border border-rose-800';
+        };
+
+        const isObject = (val) => {
+          return val && typeof val === 'object' && !Array.isArray(val);
+        };
+
+        const isTableElement = (elem) => {
+          if (!elem) return false;
+          return elem.type === 'table' || (elem.value && elem.value.items && Array.isArray(elem.value.items));
+        };
+
+        const hasElementData = (id) => {
+          const el = getNodeElement(id);
+          if (!el) return false;
+          if (el.items && el.items.length > 0) return true;
+          if (el.value) {
+            if (typeof el.value === 'object') return Object.keys(el.value).length > 0;
+            return String(el.value).trim().length > 0;
+          }
+          return false;
+        };
+
+        const createElementForNode = (node) => {
+          if (!groundTruth.value.elements) groundTruth.value.elements = [];
+          const newElem = {
+            id: `elem-${node.id}`,
+            outline_id: node.id,
+            type: 'key_value',
+            label: node.title,
+            page: node.page || 1,
+            value: ''
+          };
+          groundTruth.value.elements.push(newElem);
+          showToast('새 엘리먼트 데이터가 연결되었습니다.');
+        };
+
+        const getTaskIcon = (id) => {
+          if (id.includes('outline')) return 'fa-solid fa-list-check';
+          if (id.includes('segment')) return 'fa-solid fa-vector-square';
+          return 'fa-solid fa-file-invoice';
+        };
+
+        const loadTasks = async () => {
+          try {
+            const res = await fetch('/api/tasks');
+            tasks.value = await res.json();
+          } catch(e) { console.error(e); }
+        };
+
+        const loadDocuments = async () => {
+          try {
+            const res = await fetch(`/api/documents?task=${selectedTask.value}`);
+            const data = await res.json();
+            documents.value = data.documents;
+            if (documents.value.length > 0 && !documents.value.includes(selectedDoc.value)) {
+              selectedDoc.value = documents.value[0];
+            }
+          } catch(e) { console.error(e); }
+        };
+
+        const loadDocData = async () => {
+          loading.value = true;
+          try {
+            const res = await fetch(`/api/document-data?task=${selectedTask.value}&doc=${selectedDoc.value}`);
+            const data = await res.json();
+            baseline.value = data.baseline || { outlines: {}, elements: [], bias_analysis: '' };
+            groundTruth.value = data.ground_truth || { outlines: { outlines: [] }, elements: [] };
+            defaultPrompt.value = data.default_prompt || '';
+            promptTemplate.value = defaultPrompt.value; // 문서 변경 시 프롬프트 템플릿 항상 갱신
+            
+            // 첫 번째 GT 노드 선택
+            if (groundTruth.value.outlines?.outlines?.length > 0) {
+              selectedNode.value = groundTruth.value.outlines.outlines[0];
+            } else {
+              selectedNode.value = null;
+            }
+            experimentResult.value = null;
+            metrics.value = null;
+          } catch(e) {
+            showToast('데이터 로드 실패', 'error');
+          } finally {
+            loading.value = false;
+          }
+        };
+
+        const selectTask = async (id) => {
+          selectedTask.value = id;
+          await loadDocuments();
+          await loadDocData();
+        };
+
+        const toggleExpand = (item) => {
+          item.expanded = item.expanded === false ? true : false;
+        };
+
+        const selectNode = (node) => {
+          selectedNode.value = node;
+        };
+
+        const addRootOutline = () => {
+          if (!groundTruth.value.outlines) groundTruth.value.outlines = { outlines: [] };
+          if (!groundTruth.value.outlines.outlines) groundTruth.value.outlines.outlines = [];
+          
+          const newIdx = groundTruth.value.outlines.outlines.length + 1;
+          const newNode = {
+            id: `out-${newIdx}`,
+            level: 1,
+            title: `새 회의/섹션 ${newIdx}`,
+            page: 1,
+            purpose: '목적 기술...',
+            children: []
+          };
+          groundTruth.value.outlines.outlines.push(newNode);
+          selectedNode.value = newNode;
+          showToast('새 최상위 섹션이 추가되었습니다.');
+        };
+
+        const addChildNode = (parent) => {
+          if (!parent.children) parent.children = [];
+          const newLevel = (parent.level || 1) + 1;
+          const newSub = {
+            id: `${parent.id}-${parent.children.length + 1}`,
+            level: newLevel,
+            title: `새 L${newLevel} 항목`,
+            page: parent.page || 1,
+            purpose: '',
+            children: []
+          };
+          parent.children.push(newSub);
+          parent.expanded = true;
+          selectedNode.value = newSub;
+          showToast(`L${newLevel} 하위 노드가 추가되었습니다.`);
+        };
+
+        const removeNode = (item) => {
+          if (item.parent) {
+            const pChildren = item.parent.children;
+            const idx = pChildren.indexOf(item.node);
+            if (idx >= 0) pChildren.splice(idx, 1);
+          } else {
+            const roots = groundTruth.value.outlines?.outlines || [];
+            const idx = roots.indexOf(item.node);
+            if (idx >= 0) roots.splice(idx, 1);
+          }
+          selectedNode.value = null;
+          showToast('노드가 삭제되었습니다.');
+        };
+
+        const saveGroundTruth = async () => {
+          savingGt.value = true;
+          try {
+            const res = await fetch('/api/save-ground-truth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                task: selectedTask.value,
+                document: selectedDoc.value,
+                outlines: groundTruth.value.outlines,
+                elements: groundTruth.value.elements || []
+              })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+              showToast('expected_outlines.json 파일에 저장되었습니다.');
+            }
+          } catch(e) {
+            showToast('저장 실패', 'error');
+          } finally {
+            savingGt.value = false;
+          }
+        };
+
+        const loadDefaultPrompt = () => {
+          promptTemplate.value = defaultPrompt.value;
+          showToast('기본 프롬프트로 복원되었습니다.');
+        };
+
+        const runExperiment = async () => {
+          runningExp.value = true;
+          experimentResult.value = null;
+          metrics.value = null;
+          try {
+            const res = await fetch('/api/run-experiment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                task: selectedTask.value,
+                document: selectedDoc.value,
+                model: experimentModel.value,
+                prompt: promptTemplate.value
+              })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+              experimentResult.value = data.result;
+              showToast(`${data.model} 추론 완료! 채점표 계산.`);
+              await evaluateResult();
+            }
+          } catch(e) {
+            showToast('실험 실행 중 통신 오류 발생', 'error');
+          } finally {
+            runningExp.value = false;
+          }
+        };
+
+        const evaluateResult = async () => {
+          if (!experimentResult.value || !groundTruth.value.outlines) return;
+          try {
+            const res = await fetch('/api/evaluate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ground_truth_outlines: groundTruth.value.outlines.outlines || [],
+                predicted_outlines: experimentResult.value.outlines || []
+              })
+            });
+            metrics.value = await res.json();
+          } catch(e) { console.error(e); }
+        };
+
+        const showRawJson = (type) => {
+          if (type === 'baseline') {
+            rawModal.value = {
+              open: true,
+              title: 'Baseline Outline Tree (JSON)',
+              content: JSON.stringify(baseline.value.outlines, null, 2)
+            };
+          }
+        };
+
+        onMounted(async () => {
+          await loadTasks();
+          await loadDocuments();
+          await loadDocData();
+        });
+
+        return {
+          tasks,
+          selectedTask,
+          documents,
+          selectedDoc,
+          loading,
+          savingGt,
+          runningExp,
+          baseline,
+          groundTruth,
+          selectedNode,
+          baselineCount,
+          gtCount,
+          defaultPrompt,
+          promptTemplate,
+          experimentModel,
+          experimentResult,
+          metrics,
+          rawModal,
+          toast,
+          selectedElement,
+          getNodeElement,
+          getLevelBadgeClass,
+          isObject,
+          isTableElement,
+          hasElementData,
+          createElementForNode,
+          getTaskIcon,
+          selectTask,
+          toggleExpand,
+          selectNode,
+          loadDocData,
+          loadDefaultPrompt,
+          addRootOutline,
+          addChildNode,
+          removeNode,
+          removeRootNode: removeNode,
+          removeSubNode: removeNode,
+          flattenedGtNodes,
+          saveGroundTruth,
+          runExperiment,
+          showRawJson
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

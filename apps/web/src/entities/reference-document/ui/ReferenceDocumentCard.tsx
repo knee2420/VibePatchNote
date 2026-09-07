@@ -122,30 +122,51 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   });
 
   // 노드 DOM 크기 변화를 실시간 감지하여 React Flow Handle 위치 캐시를 즉각 갱신
+  // React 19 / BatchProvider 렌더 사이클 충돌을 방지하기 위해 반드시 rAF로 다음 프레임에 스케줄링합니다.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    updateNodeInternals(id);
+    let rafId: number | null = null;
+    const safeUpdate = () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        updateNodeInternals(id);
+        rafId = null;
+      });
+    };
+
+    safeUpdate();
 
     const observer = new ResizeObserver(() => {
-      updateNodeInternals(id);
+      safeUpdate();
     });
 
     observer.observe(el);
 
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       observer.disconnect();
     };
   }, [id, updateNodeInternals]);
 
-  // 패널 토글 시에도 애니메이션 시작 및 완료(320ms) 시점에 확실하게 동기화
+  // 패널 토글 시에도 애니메이션 시작 및 완료(320ms) 시점에 안전하게 동기화
   useEffect(() => {
-    updateNodeInternals(id);
-    const timer = setTimeout(() => {
+    let rafId: number | null = requestAnimationFrame(() => {
       updateNodeInternals(id);
+      rafId = null;
+    });
+
+    const timer = setTimeout(() => {
+      requestAnimationFrame(() => {
+        updateNodeInternals(id);
+      });
     }, 320);
-    return () => clearTimeout(timer);
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
   }, [id, isOutlineOpen, isSpread, isFitContent, customSize, updateNodeInternals]);
 
   const { handleNodeWheel } = useNodeWheelScroll({ selected, isSpread });

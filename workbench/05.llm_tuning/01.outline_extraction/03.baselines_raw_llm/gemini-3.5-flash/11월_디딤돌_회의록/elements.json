@@ -1,0 +1,153 @@
+[
+  {
+    "id": "elem-1-1",
+    "outline_id": "out-1-1",
+    "type": "form_field",
+    "label": "1차 회의 기본 정보 및 안건",
+    "page": 1,
+    "box_2d": [
+      121,
+      121,
+      280,
+      879
+    ],
+    "content_summary": "일시: 2018.11.08, 장소: 6공학관 6108-1호, 참석자: 4명, 안건: GPS + 동영상 촬영 및 프로그램 테스트 최종 확인",
+    "structured_data": {
+      "date": "2018.11.08",
+      "location": "6공학관 6108-1호",
+      "attendees_count": 4,
+      "agenda": "GPS + 동영상 촬영 및 프로그램 테스트 최종 확인"
+    }
+  },
+  {
+    "id": "elem-1-2",
+    "outline_id": "out-1-2",
+    "type": "list",
+    "label": "1차 회의 내용 목록",
+    "page": 1,
+    "box_2d": [
+      280,
+      121,
+      390,
+      879
+    ],
+    "content_summary": "1. 드론 비행 후 GPS 센서 수집 확인, 2. 프로그램 최종 테스트 진행, 3. 결과보고서 작성 회의",
+    "structured_data": {
+      "items": [
+        "드론 비행 후 GPS 센서가 정상적으로 수집이 되는지 확인",
+        "프로그램 최종 테스트 진행",
+        "결과보고서 작성 회의"
+      ]
+    }
+  },
+  {
+    "id": "elem-1-3",
+    "outline_id": "out-1-3",
+    "type": "form_field",
+    "label": "1차 회의 지출금액",
+    "page": 1,
+    "box_2d": [
+      390,
+      121,
+      460,
+      879
+    ],
+    "content_summary": "지출금액 ₩40,000",
+    "structured_data": {
+      "expense_amount": 40000,
+      "currency": "KRW"
+    }
+  },
+  {
+    "id": "elem-1-4",
+    "outline_id": "out-1-3",
+    "type": "media",
+    "label": "1차 회의 증빙자료 첨부란",
+    "page": 1,
+    "box_2d": [
+      460,
+      121,
+      854,
+      879
+    ],
+    "content_summary": "증빙자료 (신용카드 영수증, 현금영수증 등) 부착 영역",
+    "structured_data": {
+      "document_type": "receipt_attachment_area"
+    }
+  },
+  {
+    "id": "elem-2-1",
+    "outline_id": "out-2-1",
+    "type": "form_field",
+    "label": "2차 회의 기본 정보 및 안건",
+    "page": 2,
+    "box_2d": [
+      121,
+      121,
+      280,
+      879
+    ],
+    "content_summary": "일시: 2018.11.16, 장소: 6공학관 6108-1호, 참석자: 3명, 안건: 최종 점검, 결과보고서 작성",
+    "structured_data": {
+      "date": "2018.11.16",
+      "location": "6공학관 6108-1호",
+      "attendees_count": 3,
+      "agenda": "최종 점검, 결과보고서 작성"
+    }
+  },
+  {
+    "id": "elem-2-2",
+    "outline_id": "out-2-2",
+    "type": "list",
+    "label": "2차 회의 내용 목록",
+    "page": 2,
+    "box_2d": [
+      280,
+      121,
+      390,
+      879
+    ],
+    "content_summary": "1. 제출 필요서류 최종 점검, 2. 결과보고서 작성",
+    "structured_data": {
+      "items": [
+        "제출 필요서류 최종 점검",
+        "결과보고서 작성"
+      ]
+    }
+  },
+  {
+    "id": "elem-2-3",
+    "outline_id": "out-2-3",
+    "type": "form_field",
+    "label": "2차 회의 지출금액",
+    "page": 2,
+    "box_2d": [
+      390,
+      121,
+      460,
+      879
+    ],
+    "content_summary": "지출금액 ₩29,000",
+    "structured_data": {
+      "expense_amount": 29000,
+      "currency": "KRW"
+    }
+  },
+  {
+    "id": "elem-2-4",
+    "outline_id": "out-2-3",
+    "type": "media",
+    "label": "2차 회의 증빙자료 첨부란",
+    "page": 2,
+    "box_2d": [
+      460,
+      121,
+      854,
+      879
+    ],
+    "content_summary": "증빙자료 (신용카드 영수증, 현금영수증 등) 부착 영역",
+    "structured_data": {
+      "document_type": "receipt_attachment_area"
+    }
+  }
+]
