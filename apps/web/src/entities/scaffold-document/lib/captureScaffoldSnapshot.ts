@@ -15,11 +15,26 @@ export async function captureScaffoldSnapshot(
   const pageElement = container.querySelector<HTMLElement>('.scaffold-page');
   const target = pageElement || container;
 
+  const pageW = pageElement ? Number.parseFloat(pageElement.getAttribute('data-w') || '595') : 595;
+  const pageH = pageElement ? Number.parseFloat(pageElement.getAttribute('data-h') || '842') : 842;
+
   try {
     const blob = await toBlob(target, {
       backgroundColor: '#ffffff',
+      width: pageElement ? pageW : undefined,
+      height: pageElement ? pageH : undefined,
       pixelRatio,
       cacheBust: true,
+      style: pageElement
+        ? {
+            transform: 'none',
+            margin: '0',
+            maxWidth: 'none',
+            maxHeight: 'none',
+            width: `${pageW}px`,
+            height: `${pageH}px`,
+          }
+        : undefined,
       // 인터랙션 중 발생하는 선택 하이라이트나 불필요한 컨트롤이 찍히지 않도록 방어
       filter: (node) => {
         if (node instanceof HTMLElement) {

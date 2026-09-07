@@ -277,6 +277,10 @@ def render_slot_overlay_png(
     try:
         idx = min(max(page_number, 1), len(doc)) - 1
         page = doc[idx]
+        try:
+            page.clean_contents()
+        except Exception:
+            pass
         pw, ph = page.rect.width, page.rect.height
 
         for i, s in enumerate(slots):
