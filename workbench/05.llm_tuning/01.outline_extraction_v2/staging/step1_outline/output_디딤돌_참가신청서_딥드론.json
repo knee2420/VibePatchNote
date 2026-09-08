@@ -1,5 +1,5 @@
 {
-  "document_title": "디딤돌_참가신청서_딥드론.pdf",
+  "document_title": "디딤돌 참가신청서_딥드론.pdf",
   "total_pages": 3,
   "outlines": [
     {
@@ -27,17 +27,26 @@
             132,
             165,
             144,
-            202
+            587
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-team",
+              "id": "elem-p1-1",
+              "outline_id": "node-1-1",
               "type": "key_value",
               "label": "팀명",
               "value": "딥드론",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                132,
+                165,
+                144,
+                587
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -52,17 +61,26 @@
             155,
             149,
             171,
-            208
+            339
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-type",
+              "id": "elem-p1-2",
+              "outline_id": "node-1-2",
               "type": "key_value",
               "label": "지원유형",
               "value": "학생연구",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                155,
+                149,
+                171,
+                339
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -77,17 +95,26 @@
             183,
             157,
             195,
-            198
+            727
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-title",
+              "id": "elem-p1-3",
+              "outline_id": "node-1-3",
               "type": "key_value",
               "label": "과제명",
               "value": "CNN을 활용한 해파리 모니터링 드론 개발",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                183,
+                157,
+                195,
+                727
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -117,17 +144,26 @@
                 208,
                 281,
                 220,
-                314
+                640
               ],
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-leader-name",
+                  "id": "elem-p1-4",
+                  "outline_id": "node-1-4-1",
                   "type": "key_value",
                   "label": "이름",
                   "value": "김 태 진",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    208,
+                    281,
+                    220,
+                    640
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
@@ -141,20 +177,11 @@
               "box_2d": [
                 229,
                 273,
-                250,
-                323
+                259,
+                739
               ],
               "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-p1-contact",
-                  "type": "key_value",
-                  "label": "연락처",
-                  "value": "전화번호 : 010-5599-7278, 전자우편(e-mail):kitto727@gmail.com",
-                  "items": null,
-                  "page": 1
-                }
-              ],
+              "elements": [],
               "children": [
                 {
                   "id": "node-1-4-2-1",
@@ -164,19 +191,28 @@
                   "page": 1,
                   "box_2d": [
                     229,
-                    345,
+                    273,
                     250,
-                    405
+                    611
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-phone",
+                      "id": "elem-p1-5",
+                      "outline_id": "node-1-4-2-1",
                       "type": "key_value",
                       "label": "전화번호",
                       "value": "010-5599-7278",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        229,
+                        273,
+                        250,
+                        611
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -191,17 +227,26 @@
                     248,
                     345,
                     259,
-                    465
+                    739
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-email",
+                      "id": "elem-p1-6",
+                      "outline_id": "node-1-4-2-2",
                       "type": "key_value",
                       "label": "전자우편(e-mail)",
                       "value": "kitto727@gmail.com",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        248,
+                        345,
+                        259,
+                        739
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -232,18 +277,27 @@
                   "box_2d": [
                     268,
                     382,
-                    280,
-                    412
+                    305,
+                    450
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-univ",
+                      "id": "elem-p1-7",
+                      "outline_id": "node-1-4-3-1",
                       "type": "key_value",
                       "label": "대학",
                       "value": "부산대",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        268,
+                        382,
+                        305,
+                        450
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -256,19 +310,28 @@
                   "page": 1,
                   "box_2d": [
                     268,
-                    485,
-                    280,
-                    545
+                    450,
+                    305,
+                    620
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-dept",
+                      "id": "elem-p1-8",
+                      "outline_id": "node-1-4-3-2",
                       "type": "key_value",
                       "label": "학과(부)",
                       "value": "정보컴퓨터공학부",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        268,
+                        450,
+                        305,
+                        620
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -281,19 +344,28 @@
                   "page": 1,
                   "box_2d": [
                     268,
-                    660,
-                    280,
-                    690
+                    620,
+                    305,
+                    700
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-grade",
+                      "id": "elem-p1-9",
+                      "outline_id": "node-1-4-3-3",
                       "type": "key_value",
                       "label": "학년",
                       "value": "4",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        268,
+                        620,
+                        305,
+                        700
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -306,19 +378,28 @@
                   "page": 1,
                   "box_2d": [
                     268,
-                    765,
-                    280,
-                    795
+                    700,
+                    305,
+                    844
                   ],
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p1-sno",
+                      "id": "elem-p1-10",
+                      "outline_id": "node-1-4-3-4",
                       "type": "key_value",
                       "label": "학번",
                       "value": "201224443",
                       "items": null,
-                      "page": 1
+                      "page": 1,
+                      "box_2d": [
+                        268,
+                        700,
+                        305,
+                        844
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -337,17 +418,26 @@
             318,
             128,
             330,
-            214
+            758
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-period",
+              "id": "elem-p1-11",
+              "outline_id": "node-1-5",
               "type": "key_value",
               "label": "과제수행 기간",
               "value": "2018 년 7 월 1 일 ~ 2018 년 11 월 23 일",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                318,
+                128,
+                330,
+                758
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -370,6 +460,40 @@
             {
               "id": "node-1-6-1",
               "level": 3,
+              "title": "시스템 구성도 및 해파리 사진",
+              "type": "media",
+              "page": 1,
+              "box_2d": [
+                352,
+                259,
+                475,
+                500
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-media1",
+                  "outline_id": "node-1-6-1",
+                  "type": "media",
+                  "label": "시스템 구성도 및 해파리 사진",
+                  "value": "시스템 구성도 및 해파리 사진",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    352,
+                    259,
+                    475,
+                    500
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-1-6-2",
+              "level": 3,
               "title": "1. 프로젝트 도출 배경",
               "type": "paragraph",
               "page": 1,
@@ -382,18 +506,27 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-sum1",
+                  "id": "elem-p1-12",
+                  "outline_id": "node-1-6-2",
                   "type": "paragraph",
                   "label": "1. 프로젝트 도출 배경",
                   "value": "해파리는 세계 곳곳의 어장과 연안 관광지에 대량으로 출몰하고 있어 전 세계적으로 많은 문제들을 일으키고 있다. 해파리는 경우에 따라서 수백만 평반 마일을 뒤덮을 만큼 개체수가 늘어나기도 하는데, 이렇게 늘어난 해파리들은 어업과 관광업 그리고 연안 바닷물을 냉각수로 이용하는 원자력 발전소에 큰 피해를 일으킨다.",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    352,
+                    500,
+                    364,
+                    684
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             },
             {
-              "id": "node-1-6-2",
+              "id": "node-1-6-3",
               "level": 3,
               "title": "2. CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
               "type": "paragraph",
@@ -407,12 +540,21 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-sum2",
+                  "id": "elem-p1-13",
+                  "outline_id": "node-1-6-3",
                   "type": "paragraph",
                   "label": "2. CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
                   "value": "저희 팀은 앞의 개발 필요성에 따라 사람의 수고를 줄이고, 정확도를 높일 수 있는 해파리 대량 발생 모니터링 시스템을 제안코자 합니다. 해파리 대량 발생 보고는 5월~12월까지 매주 발행해야하는 것으로 실제 집행부에서 많은 수고로움을 겪고 있습니다. 이에 특정 해역을 비행하고, 촬영을 한 뒤에 어떤 해파리가 얼마나 있는지 파악하여 실시간으로 분포도를 생성해주는 드론의 프로토타입을 개발하고자 합니다.",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    491,
+                    272,
+                    503,
+                    700
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
@@ -429,17 +571,26 @@
             615,
             132,
             627,
-            212
+            630
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-budget",
+              "id": "elem-p1-14",
+              "outline_id": "node-1-7",
               "type": "key_value",
               "label": "지원요청금액",
               "value": "1,000,000 원",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                615,
+                132,
+                627,
+                630
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -453,13 +604,14 @@
           "box_2d": [
             641,
             114,
-            652,
-            170
+            671,
+            472
           ],
           "purpose": null,
           "elements": [
             {
-              "id": "elem-p1-attach",
+              "id": "elem-p1-15",
+              "outline_id": "node-1-8",
               "type": "list",
               "label": "붙임 서류",
               "value": null,
@@ -467,7 +619,15 @@
                 "1. [서식1-1]의 팀 활동계획서 1부",
                 "2. 통장사본 1부"
               ],
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                641,
+                114,
+                671,
+                472
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
@@ -481,23 +641,48 @@
           "box_2d": [
             698,
             114,
-            711,
+            851,
             767
           ],
           "purpose": null,
-          "elements": [
-            {
-              "id": "elem-p1-submit-desc",
-              "type": "paragraph",
-              "label": "제출문",
-              "value": "위와 같이 부산대학교 창의미래설계 디딤돌 사업 지원신청서를 제출합니다.",
-              "items": null,
-              "page": 1
-            }
-          ],
+          "elements": [],
           "children": [
             {
               "id": "node-1-9-1",
+              "level": 3,
+              "title": "제출문구",
+              "type": "paragraph",
+              "page": 1,
+              "box_2d": [
+                698,
+                114,
+                711,
+                767
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-16",
+                  "outline_id": "node-1-9-1",
+                  "type": "paragraph",
+                  "label": "제출문구",
+                  "value": "위와 같이 부산대학교 창의미래설계 디딤돌 사업 지원신청서를 제출합니다.",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    698,
+                    114,
+                    711,
+                    767
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-1-9-2",
               "level": 3,
               "title": "제출일자",
               "type": "key_value",
@@ -511,21 +696,30 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-date",
+                  "id": "elem-p1-17",
+                  "outline_id": "node-1-9-2",
                   "type": "key_value",
                   "label": "제출일자",
                   "value": "2018 년 6 월 29 일",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    741,
+                    380,
+                    756,
+                    603
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             },
             {
-              "id": "node-1-9-2",
+              "id": "node-1-9-3",
               "level": 3,
               "title": "제출자",
-              "type": "media",
+              "type": "key_value",
               "page": 1,
               "box_2d": [
                 787,
@@ -536,18 +730,27 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-sign",
-                  "type": "media",
+                  "id": "elem-p1-18",
+                  "outline_id": "node-1-9-3",
+                  "type": "key_value",
                   "label": "제출자",
-                  "value": "제출자 : 팀장 김 태 진 (서명/인)",
+                  "value": "팀장 김 태 진 (서명/인)",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    787,
+                    309,
+                    801,
+                    674
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             },
             {
-              "id": "node-1-9-3",
+              "id": "node-1-9-4",
               "level": 3,
               "title": "수신처",
               "type": "key_value",
@@ -561,12 +764,21 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p1-receiver",
+                  "id": "elem-p1-19",
+                  "outline_id": "node-1-9-4",
                   "type": "key_value",
                   "label": "수신처",
                   "value": "부산대학교 ACE사업단장 귀하",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    833,
+                    114,
+                    851,
+                    506
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
@@ -580,7 +792,7 @@
       "level": 1,
       "title": "[ACE⁺] 창의미래설계 디딤돌 사업 활동계획서",
       "type": "header",
-      "page": 2,
+      "page": 1,
       "box_2d": [
         87,
         191,
@@ -594,8 +806,8 @@
           "id": "node-2-1",
           "level": 2,
           "title": "1. 목표",
-          "type": "list",
-          "page": 2,
+          "type": "header",
+          "page": 1,
           "box_2d": [
             133,
             109,
@@ -603,28 +815,87 @@
             175
           ],
           "purpose": null,
-          "elements": [
+          "elements": [],
+          "children": [
             {
-              "id": "elem-p2-goal",
-              "type": "list",
-              "label": "1. 목표",
-              "value": null,
-              "items": [
-                "○ CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
-                "- CNN 해파리 구별 학습의 정확도 70% 이상 달성(보름달물해파리, 노무라입깃해파리)",
-                "- 드론의 주행경로에 따른 면적 100 이상의 분포도 산출"
+              "id": "node-2-1-1",
+              "level": 3,
+              "title": "○ CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
+              "type": "paragraph",
+              "page": 1,
+              "box_2d": [
+                156,
+                140,
+                173,
+                563
               ],
-              "page": 2
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-1",
+                  "outline_id": "node-2-1-1",
+                  "type": "paragraph",
+                  "label": "과제 목표",
+                  "value": "CNN을 활용한 해파리 대량 발생 모니터링 드론 개발",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    156,
+                    140,
+                    173,
+                    563
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-2-1-2",
+              "level": 3,
+              "title": "세부 목표 목록",
+              "type": "list",
+              "page": 1,
+              "box_2d": [
+                178,
+                109,
+                218,
+                840
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-2",
+                  "outline_id": "node-2-1-2",
+                  "type": "list",
+                  "label": "세부 목표 목록",
+                  "value": null,
+                  "items": [
+                    "CNN 해파리 구별 학습의 정확도 70% 이상 달성(보름달물해파리, 노무라입깃해파리)",
+                    "드론의 주행경로에 따른 면적 100 이상의 분포도 산출"
+                  ],
+                  "page": 2,
+                  "box_2d": [
+                    178,
+                    109,
+                    218,
+                    840
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
             }
-          ],
-          "children": []
+          ]
         },
         {
           "id": "node-2-2",
           "level": 2,
           "title": "2. 팀원 명단",
           "type": "header",
-          "page": 2,
+          "page": 1,
           "box_2d": [
             238,
             109,
@@ -639,22 +910,64 @@
               "level": 3,
               "title": "팀원 명단 표",
               "type": "table",
-              "page": 2,
+              "page": 1,
               "box_2d": [
-                268,
-                128,
+                265,
+                112,
                 373,
-                876
+                883
               ],
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p2-members-table",
+                  "id": "elem-p2-3",
+                  "outline_id": "node-2-2-1",
                   "type": "table",
                   "label": "팀원 명단 표",
-                  "value": null,
+                  "value": [
+                    {
+                      "구분": "팀장",
+                      "연락처": "010-5599-7278 kitto727@gmail.com",
+                      "이름": "김태진",
+                      "학과": "정보컴퓨터공학부",
+                      "학년": "4",
+                      "학번": "201224443"
+                    },
+                    {
+                      "구분": "팀원",
+                      "연락처": "010-5594-9879 knee2420@네이버",
+                      "이름": "서민규",
+                      "학과": "기계공학부",
+                      "학년": "4",
+                      "학번": "201221253"
+                    },
+                    {
+                      "구분": "팀원",
+                      "연락처": "010-8923-8649 lhi714@naver.com",
+                      "이름": "이혜인",
+                      "학과": "정보컴퓨터공학부",
+                      "학년": "4",
+                      "학번": "201524555"
+                    },
+                    {
+                      "구분": "팀원",
+                      "연락처": "010-2707-7618 bnbchd@naver.com",
+                      "이름": "홍승우",
+                      "학과": "경영학과",
+                      "학년": "3",
+                      "학번": "201443362"
+                    }
+                  ],
                   "items": null,
-                  "page": 2
+                  "page": 2,
+                  "box_2d": [
+                    265,
+                    112,
+                    373,
+                    883
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
@@ -664,7 +977,7 @@
               "level": 3,
               "title": "◦ 팀원 구성 이유 및 역할",
               "type": "list",
-              "page": 2,
+              "page": 1,
               "box_2d": [
                 387,
                 121,
@@ -674,9 +987,10 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p2-role-reason",
+                  "id": "elem-p2-4",
+                  "outline_id": "node-2-2-2",
                   "type": "list",
-                  "label": "◦ 팀원 구성 이유 및 역할",
+                  "label": "팀원 구성 이유 및 역할",
                   "value": null,
                   "items": [
                     "김태진 : 정보컴퓨터공학부 학생으로 높은 프로그래밍 실력을 갖추고, 여러 번의 프로젝트를 통해 리더쉽을 갖추고 있음",
@@ -684,7 +998,15 @@
                     "이혜인 : 라즈베리파이, 아두이노 등의 IOT 코딩 경험이 많고, 드론 부분의 코딩을 담당할 예정",
                     "홍승우 : 해파리 문제에 많은 관심을 가지고 있고, 이 프로젝트의 실질적인 제안자. 기획과 보고서, PT 등을 담당할 예정"
                   ],
-                  "page": 2
+                  "page": 2,
+                  "box_2d": [
+                    387,
+                    121,
+                    398,
+                    331
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
@@ -696,7 +1018,7 @@
           "level": 2,
           "title": "3. 과제수행 계획",
           "type": "header",
-          "page": 2,
+          "page": 1,
           "box_2d": [
             545,
             109,
@@ -707,38 +1029,97 @@
           "elements": [],
           "children": [
             {
-              "id": "node-2-3-1",
+              "id": "node-2-3-0",
               "level": 3,
-              "title": "1. 개발 준비 단계",
+              "title": "주요과제 및 추진계획 / 추진일정",
               "type": "header",
-              "page": 2,
+              "page": 1,
               "box_2d": [
-                600,
-                114,
-                612,
-                265
+                575,
+                348,
+                587,
+                845
               ],
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-p2-step1-items",
-                  "type": "list",
-                  "label": "1. 개발 준비 단계 세부과제",
-                  "value": null,
-                  "items": [
-                    "▪ 프로그램과 제품의 전반적인 아키텍쳐 설계",
-                    "▪ 필요한 물품 구입 및 개발 환경 셋팅"
+                  "id": "elem-p2-5",
+                  "outline_id": "node-2-3-0",
+                  "type": "paragraph",
+                  "label": "헤더 라벨",
+                  "value": "주요과제 및 추진계획 / 추진일정",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    575,
+                    348,
+                    587,
+                    845
                   ],
-                  "page": 2
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
+              "children": []
+            },
+            {
+              "id": "node-2-3-1",
+              "level": 3,
+              "title": "1. 개발 준비 단계",
+              "type": "header",
+              "page": 1,
+              "box_2d": [
+                600,
+                114,
+                663,
+                850
+              ],
+              "purpose": null,
+              "elements": [],
               "children": [
                 {
                   "id": "node-2-3-1-1",
                   "level": 4,
+                  "title": "주요과제 및 추진계획",
+                  "type": "list",
+                  "page": 1,
+                  "box_2d": [
+                    626,
+                    124,
+                    663,
+                    493
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-p2-6",
+                      "outline_id": "node-2-3-1-1",
+                      "type": "list",
+                      "label": "주요과제 및 추진계획",
+                      "value": null,
+                      "items": [
+                        "프로그램과 제품의 전반적인 아키텍쳐 설계",
+                        "필요한 물품 구입 및 개발 환경 셋팅"
+                      ],
+                      "page": 2,
+                      "box_2d": [
+                        626,
+                        124,
+                        663,
+                        493
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-2-3-1-2",
+                  "level": 4,
                   "title": "추진일정",
                   "type": "key_value",
-                  "page": 2,
+                  "page": 1,
                   "box_2d": [
                     638,
                     772,
@@ -748,12 +1129,21 @@
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p2-step1-schedule",
+                      "id": "elem-p2-7",
+                      "outline_id": "node-2-3-1-2",
                       "type": "key_value",
                       "label": "추진일정",
                       "value": "8월 1,2주",
                       "items": null,
-                      "page": 2
+                      "page": 2,
+                      "box_2d": [
+                        638,
+                        772,
+                        650,
+                        850
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -765,34 +1155,59 @@
               "level": 3,
               "title": "2. 딥러닝 개발",
               "type": "header",
-              "page": 2,
+              "page": 1,
               "box_2d": [
                 676,
                 114,
-                688,
-                239
+                729,
+                850
               ],
               "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-p2-step2-items",
-                  "type": "list",
-                  "label": "2. 딥러닝 개발 세부과제",
-                  "value": null,
-                  "items": [
-                    "▪ 해파리 인식에 관한 딥러닝 방법을 조사 및 구현",
-                    "- 구현 후 성능을 높이는 작업은 과제가 끝날 때까지 지속되어야 할 것"
-                  ],
-                  "page": 2
-                }
-              ],
+              "elements": [],
               "children": [
                 {
                   "id": "node-2-3-2-1",
                   "level": 4,
+                  "title": "주요과제 및 추진계획",
+                  "type": "list",
+                  "page": 1,
+                  "box_2d": [
+                    702,
+                    124,
+                    729,
+                    850
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-p2-8",
+                      "outline_id": "node-2-3-2-1",
+                      "type": "list",
+                      "label": "주요과제 및 추진계획",
+                      "value": null,
+                      "items": [
+                        "해파리 인식에 관한 딥러닝 방법을 조사 및 구현",
+                        "구현 후 성능을 높이는 작업은 과제가 끝날 때까지 지속되어야 할 것"
+                      ],
+                      "page": 2,
+                      "box_2d": [
+                        702,
+                        124,
+                        729,
+                        850
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-2-3-2-2",
+                  "level": 4,
                   "title": "추진일정",
                   "type": "key_value",
-                  "page": 2,
+                  "page": 1,
                   "box_2d": [
                     702,
                     772,
@@ -802,12 +1217,21 @@
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p2-step2-schedule",
+                      "id": "elem-p2-9",
+                      "outline_id": "node-2-3-2-2",
                       "type": "key_value",
                       "label": "추진일정",
                       "value": "8월 3,4주",
                       "items": null,
-                      "page": 2
+                      "page": 2,
+                      "box_2d": [
+                        702,
+                        772,
+                        729,
+                        850
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -819,33 +1243,56 @@
               "level": 3,
               "title": "3. 드론 개발",
               "type": "header",
-              "page": 2,
+              "page": 1,
               "box_2d": [
                 742,
                 114,
-                754,
-                220
+                780,
+                850
               ],
               "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-p2-step3-items",
-                  "type": "list",
-                  "label": "3. 드론 개발 세부과제",
-                  "value": null,
-                  "items": [
-                    "l 드론과 라즈베리파이를 연동하여 드론에 추가적인 연산작업을 수행하게 함"
-                  ],
-                  "page": 2
-                }
-              ],
+              "elements": [],
               "children": [
                 {
                   "id": "node-2-3-3-1",
                   "level": 4,
+                  "title": "주요과제 및 추진계획",
+                  "type": "paragraph",
+                  "page": 1,
+                  "box_2d": [
+                    767,
+                    114,
+                    780,
+                    733
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-p2-10",
+                      "outline_id": "node-2-3-3-1",
+                      "type": "paragraph",
+                      "label": "주요과제 및 추진계획",
+                      "value": "드론과 라즈베리파이를 연동하여 드론에 추가적인 연산작업을 수행하게 함",
+                      "items": null,
+                      "page": 2,
+                      "box_2d": [
+                        767,
+                        114,
+                        780,
+                        733
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-2-3-3-2",
+                  "level": 4,
                   "title": "추진일정",
                   "type": "key_value",
-                  "page": 2,
+                  "page": 1,
                   "box_2d": [
                     742,
                     772,
@@ -855,12 +1302,21 @@
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p2-step3-schedule",
+                      "id": "elem-p2-11",
+                      "outline_id": "node-2-3-3-2",
                       "type": "key_value",
                       "label": "추진일정",
                       "value": "9월 1,2주",
                       "items": null,
-                      "page": 2
+                      "page": 2,
+                      "box_2d": [
+                        742,
+                        772,
+                        754,
+                        850
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -872,31 +1328,56 @@
               "level": 3,
               "title": "4. 딥러닝 + 드론 연동",
               "type": "header",
-              "page": 2,
+              "page": 1,
               "box_2d": [
                 793,
                 124,
-                805,
-                270
+                830,
+                850
               ],
               "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-p2-step4-items",
-                  "type": "paragraph",
-                  "label": "4. 딥러닝 + 드론 연동 세부내용",
-                  "value": "각각 개발해오던 드론과 CNN 러닝을 합치는 단계",
-                  "items": null,
-                  "page": 2
-                }
-              ],
+              "elements": [],
               "children": [
                 {
                   "id": "node-2-3-4-1",
                   "level": 4,
+                  "title": "주요과제 및 추진계획",
+                  "type": "paragraph",
+                  "page": 1,
+                  "box_2d": [
+                    818,
+                    114,
+                    830,
+                    522
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-p2-12",
+                      "outline_id": "node-2-3-4-1",
+                      "type": "paragraph",
+                      "label": "주요과제 및 추진계획",
+                      "value": "각각 개발해오던 드론과 CNN 러닝을 합치는 단계",
+                      "items": null,
+                      "page": 2,
+                      "box_2d": [
+                        818,
+                        114,
+                        830,
+                        522
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-2-3-4-2",
+                  "level": 4,
                   "title": "추진일정",
                   "type": "key_value",
-                  "page": 2,
+                  "page": 1,
                   "box_2d": [
                     793,
                     772,
@@ -906,12 +1387,21 @@
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p2-step4-schedule",
+                      "id": "elem-p2-13",
+                      "outline_id": "node-2-3-4-2",
                       "type": "key_value",
                       "label": "추진일정",
                       "value": "9월 3,4주",
                       "items": null,
-                      "page": 2
+                      "page": 2,
+                      "box_2d": [
+                        793,
+                        772,
+                        805,
+                        850
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -923,12 +1413,12 @@
               "level": 3,
               "title": "5. 실제 테스트 및 오류 수정",
               "type": "header",
-              "page": 2,
+              "page": 1,
               "box_2d": [
                 844,
                 124,
                 856,
-                320
+                829
               ],
               "purpose": null,
               "elements": [],
@@ -936,9 +1426,43 @@
                 {
                   "id": "node-2-3-5-1",
                   "level": 4,
+                  "title": "주요과제 및 추진계획",
+                  "type": "paragraph",
+                  "page": 1,
+                  "box_2d": [
+                    844,
+                    124,
+                    856,
+                    500
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-p2-14",
+                      "outline_id": "node-2-3-5-1",
+                      "type": "paragraph",
+                      "label": "주요과제 및 추진계획",
+                      "value": "실제 테스트 및 오류 수정",
+                      "items": null,
+                      "page": 2,
+                      "box_2d": [
+                        844,
+                        124,
+                        856,
+                        500
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-2-3-5-2",
+                  "level": 4,
                   "title": "추진일정",
                   "type": "key_value",
-                  "page": 2,
+                  "page": 1,
                   "box_2d": [
                     844,
                     772,
@@ -948,12 +1472,21 @@
                   "purpose": null,
                   "elements": [
                     {
-                      "id": "elem-p2-step5-schedule",
+                      "id": "elem-p2-15",
+                      "outline_id": "node-2-3-5-2",
                       "type": "key_value",
                       "label": "추진일정",
                       "value": "10월",
                       "items": null,
-                      "page": 2
+                      "page": 2,
+                      "box_2d": [
+                        844,
+                        772,
+                        856,
+                        829
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
                     }
                   ],
                   "children": []
@@ -961,177 +1494,281 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "node-3-1",
-      "level": 2,
-      "title": "4. 예상 소요비용",
-      "type": "header",
-      "page": 3,
-      "box_2d": [
-        89,
-        109,
-        106,
-        265
-      ],
-      "purpose": null,
-      "elements": [],
-      "children": [
+        },
         {
-          "id": "node-3-1-1",
-          "level": 3,
-          "title": "예상 소요비용 표",
-          "type": "table",
-          "page": 3,
+          "id": "node-3-1",
+          "level": 2,
+          "title": "4. 예상 소요비용",
+          "type": "header",
+          "page": 1,
           "box_2d": [
-            121,
-            137,
-            277,
-            827
+            89,
+            109,
+            106,
+            265
           ],
           "purpose": null,
-          "elements": [
+          "elements": [],
+          "children": [
             {
-              "id": "elem-p3-cost-table",
+              "id": "node-3-1-1",
+              "level": 3,
+              "title": "예상 소요비용 명세 표",
               "type": "table",
-              "label": "예상 소요비용 표",
-              "value": null,
-              "items": null,
-              "page": 3
-            }
-          ],
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": "node-3-2",
-      "level": 2,
-      "title": "5. 과제수행 점검 계획",
-      "type": "header",
-      "page": 3,
-      "box_2d": [
-        329,
-        109,
-        346,
-        316
-      ],
-      "purpose": null,
-      "elements": [],
-      "children": [
-        {
-          "id": "node-3-2-1",
-          "level": 3,
-          "title": "◦ 동영상 촬영 및 중간 레포트",
-          "type": "paragraph",
-          "page": 3,
-          "box_2d": [
-            352,
-            135,
-            373,
-            487
-          ],
-          "purpose": null,
-          "elements": [
-            {
-              "id": "elem-p3-chk-desc",
-              "type": "paragraph",
-              "label": "◦ 동영상 촬영 및 중간 레포트",
-              "value": "- 과제 수행하는 과정을 촬영하고, 지속적인 레포트 제출로 점검을 받을 계획이다",
-              "items": null,
-              "page": 3
-            }
-          ],
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": "node-3-3",
-      "level": 2,
-      "title": "6. 내․외부 기관 및 전문가와의 협력 계획(필요 시 작성)",
-      "type": "header",
-      "page": 3,
-      "box_2d": [
-        464,
-        109,
-        481,
-        643
-      ],
-      "purpose": null,
-      "elements": [],
-      "children": [
-        {
-          "id": "node-3-3-1",
-          "level": 3,
-          "title": "◦ 해파리 전문가, 드론 전문가, 딥러닝 전문가",
-          "type": "paragraph",
-          "page": 3,
-          "box_2d": [
-            486,
-            135,
-            508,
-            663
-          ],
-          "purpose": null,
-          "elements": [
-            {
-              "id": "elem-p3-coop-desc",
-              "type": "paragraph",
-              "label": "◦ 해파리 전문가, 드론 전문가, 딥러닝 전문가",
-              "value": "- 과제를 수행하면서 필요한 전문가들을 만나 상담할 예정",
-              "items": null,
-              "page": 3
-            }
-          ],
-          "children": []
-        }
-      ]
-    },
-    {
-      "id": "node-3-4",
-      "level": 2,
-      "title": "7. 기대효과 및 활용",
-      "type": "header",
-      "page": 3,
-      "box_2d": [
-        573,
-        109,
-        590,
-        306
-      ],
-      "purpose": null,
-      "elements": [],
-      "children": [
-        {
-          "id": "node-3-4-1",
-          "level": 3,
-          "title": "기대효과 및 활용 세부내용",
-          "type": "list",
-          "page": 3,
-          "box_2d": [
-            595,
-            135,
-            673,
-            903
-          ],
-          "purpose": null,
-          "elements": [
-            {
-              "id": "elem-p3-effect-desc",
-              "type": "list",
-              "label": "기대효과 및 활용 본문",
-              "value": null,
-              "items": [
-                "현재 해파리 모니터링 주간보고서를 5월～11월까지 매주 제작해야함. 하지만 사람의 목격과 증언에만 의존하고 있어서 정확도도 떨어지고, 필요한 인적 자원 낭비도 엄청나다",
-                "현장에 해파리 모니터링 드론이 도입이 된다면 해파리의 현황을 지속적으로 모니터링 할 수 있어 정확성도 높아지며, 적은 예산으로도 해파리 대책을 사전 대비할 수 있게된다"
+              "page": 1,
+              "box_2d": [
+                114,
+                111,
+                283,
+                871
               ],
-              "page": 3
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-1",
+                  "outline_id": "node-3-1-1",
+                  "type": "table",
+                  "label": "예상 소요비용 표",
+                  "value": [
+                    {
+                      "비고": "드론 * 1",
+                      "산출근거": "",
+                      "예산액": "200,000",
+                      "지출항목": "드론"
+                    },
+                    {
+                      "비고": "머신러닝 GPU 임대료(1시간에 5,000)",
+                      "산출근거": "",
+                      "예산액": "300,000",
+                      "지출항목": "AWS GPU 임대"
+                    },
+                    {
+                      "비고": "라즈베리파이 + GPS, 카메라센서 등",
+                      "산출근거": "",
+                      "예산액": "200,000",
+                      "지출항목": "라즈베리파이 및 센서들"
+                    },
+                    {
+                      "비고": "전체 합계 *30%",
+                      "산출근거": "",
+                      "예산액": "300,000",
+                      "지출항목": "회의비"
+                    },
+                    {
+                      "비고": "",
+                      "산출근거": "",
+                      "예산액": "1,000,000",
+                      "지출항목": "합 계"
+                    }
+                  ],
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    114,
+                    111,
+                    283,
+                    871
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
             }
+          ]
+        },
+        {
+          "id": "node-3-2",
+          "level": 2,
+          "title": "5. 과제수행 점검 계획",
+          "type": "header",
+          "page": 1,
+          "box_2d": [
+            329,
+            109,
+            346,
+            316
           ],
-          "children": []
+          "purpose": null,
+          "elements": [],
+          "children": [
+            {
+              "id": "node-3-2-1",
+              "level": 3,
+              "title": "◦ 동영상 촬영 및 중간 레포트",
+              "type": "list",
+              "page": 1,
+              "box_2d": [
+                352,
+                135,
+                429,
+                902
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-2",
+                  "outline_id": "node-3-2-1",
+                  "type": "list",
+                  "label": "점검 계획 세부 내용",
+                  "value": null,
+                  "items": [
+                    "◦ 동영상 촬영 및 중간 레포트",
+                    "- 과제 수행하는 과정을 촬영하고, 지속적인 레포트 제출로 점검을 받을 계획이다"
+                  ],
+                  "page": 3,
+                  "box_2d": [
+                    352,
+                    135,
+                    429,
+                    902
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-3-3",
+          "level": 2,
+          "title": "6. 내 ․ 외부 기관 및 전문가와의 협력 계획 ( 필요 시 작성 )",
+          "type": "header",
+          "page": 1,
+          "box_2d": [
+            464,
+            109,
+            481,
+            643
+          ],
+          "purpose": null,
+          "elements": [],
+          "children": [
+            {
+              "id": "node-3-3-1",
+              "level": 3,
+              "title": "◦ 해파리 전문가, 드론 전문가, 딥러닝 전문가",
+              "type": "list",
+              "page": 1,
+              "box_2d": [
+                486,
+                135,
+                536,
+                836
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-3",
+                  "outline_id": "node-3-3-1",
+                  "type": "list",
+                  "label": "협력 계획 세부 내용",
+                  "value": null,
+                  "items": [
+                    "◦ 해파리 전문가, 드론 전문가, 딥러닝 전문가",
+                    "- 과제를 수행하면서 필요한 전문가들을 만나 상담할 예정"
+                  ],
+                  "page": 3,
+                  "box_2d": [
+                    486,
+                    135,
+                    536,
+                    836
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-3-4",
+          "level": 2,
+          "title": "7. 기대효과 및 활용",
+          "type": "header",
+          "page": 1,
+          "box_2d": [
+            573,
+            109,
+            590,
+            306
+          ],
+          "purpose": null,
+          "elements": [],
+          "children": [
+            {
+              "id": "node-3-4-1",
+              "level": 3,
+              "title": "◦ 기대효과 문제점 및 현황",
+              "type": "paragraph",
+              "page": 1,
+              "box_2d": [
+                595,
+                135,
+                673,
+                903
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-4",
+                  "outline_id": "node-3-4-1",
+                  "type": "paragraph",
+                  "label": "기대효과 서술문",
+                  "value": "현재 해파리 모니터링 주간보고서를 5월～11월까지 매주 제작해야함. 하지만 사람의 목격과 증언에만 의존하고 있어서 정확도도 떨어지고, 필요한 인적 자원 낭비도 엄청나다",
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    595,
+                    135,
+                    673,
+                    903
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-3-4-2",
+              "level": 3,
+              "title": "- 드론 도입 효과 및 사전 대비 방안",
+              "type": "paragraph",
+              "page": 1,
+              "box_2d": [
+                683,
+                109,
+                743,
+                890
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-5",
+                  "outline_id": "node-3-4-2",
+                  "type": "paragraph",
+                  "label": "활용 방안 서술문",
+                  "value": "현장에 해파리 모니터링 드론이 도입이 된다면 해파리의 현황을 지속적으로 모니터링 할 수 있어 정확성도 높아지며, 적은 예산으로도 해파리 대책을 사전 대비할 수 있게된다",
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    683,
+                    109,
+                    743,
+                    890
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
         }
       ]
     }

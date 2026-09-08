@@ -1,24 +1,76 @@
 {
-  "document_title": "Atticus_LLC_Invoice_000081709.pdf",
+  "document_title": "Atticus LLC_ Invoice 000081709.pdf",
   "total_pages": 1,
   "outlines": [
     {
-      "id": "out-1",
+      "id": "outline-l1-doc",
       "level": 1,
       "title": "Invoice 000081709",
       "type": "header",
       "page": 1,
       "box_2d": [
-        175,
-        747,
+        35,
+        101,
         188,
         898
       ],
       "purpose": null,
-      "elements": [],
+      "elements": [
+        {
+          "id": "elem-inv-num",
+          "outline_id": "outline-l1-doc",
+          "type": "key_value",
+          "label": "Invoice",
+          "value": "000081709",
+          "items": null,
+          "page": 1,
+          "box_2d": [
+            175,
+            747,
+            188,
+            898
+          ],
+          "content_summary": null,
+          "structured_data": null
+        }
+      ],
       "children": [
         {
-          "id": "out-1-1",
+          "id": "outline-logo",
+          "level": 2,
+          "title": "Company Logo",
+          "type": "media",
+          "page": 1,
+          "box_2d": [
+            83,
+            101,
+            154,
+            535
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-logo-1",
+              "outline_id": "outline-logo",
+              "type": "media",
+              "label": "Company Logo",
+              "value": "Atticus",
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                83,
+                101,
+                154,
+                535
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-date",
           "level": 2,
           "title": "August 25th 2026",
           "type": "key_value",
@@ -32,33 +84,42 @@
           "purpose": null,
           "elements": [
             {
-              "id": "elem-1",
+              "id": "elem-date-1",
+              "outline_id": "outline-date",
               "type": "key_value",
               "label": "Date",
               "value": "August 25th 2026",
               "items": null,
-              "page": 1
+              "page": 1,
+              "box_2d": [
+                35,
+                778,
+                46,
+                893
+              ],
+              "content_summary": null,
+              "structured_data": null
             }
           ],
           "children": []
         },
         {
-          "id": "out-1-2",
+          "id": "outline-comp-info",
           "level": 2,
           "title": "Company info",
           "type": "header",
           "page": 1,
           "box_2d": [
             56,
-            789,
-            69,
+            598,
+            158,
             898
           ],
           "purpose": null,
           "elements": [],
           "children": [
             {
-              "id": "out-1-2-1",
+              "id": "outline-comp-name",
               "level": 3,
               "title": "Atticus LLC",
               "type": "key_value",
@@ -72,21 +133,30 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-2",
+                  "id": "elem-comp-name",
+                  "outline_id": "outline-comp-name",
                   "type": "key_value",
                   "label": "Company Name",
                   "value": "Atticus LLC",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    75,
+                    796,
+                    88,
+                    898
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             },
             {
-              "id": "out-1-2-2",
+              "id": "outline-comp-addr",
               "level": 3,
               "title": "Address",
-              "type": "key_value",
+              "type": "paragraph",
               "page": 1,
               "box_2d": [
                 89,
@@ -97,20 +167,29 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-3",
-                  "type": "key_value",
+                  "id": "elem-comp-addr",
+                  "outline_id": "outline-comp-addr",
+                  "type": "paragraph",
                   "label": "Address",
                   "value": "1309 Coffeen Ave. Ste. 2513 Sheridan Wyoming, 82801 United States",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    89,
+                    671,
+                    145,
+                    898
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             },
             {
-              "id": "out-1-2-3",
+              "id": "outline-tax-id",
               "level": 3,
-              "title": "Sales tax ID",
+              "title": "Sales tax ID: VAT - EU372031974 UK - GB383499055",
               "type": "key_value",
               "page": 1,
               "box_2d": [
@@ -122,130 +201,116 @@
               "purpose": null,
               "elements": [
                 {
-                  "id": "elem-4",
+                  "id": "elem-tax-id",
+                  "outline_id": "outline-tax-id",
                   "type": "key_value",
                   "label": "Sales tax ID",
                   "value": "VAT - EU372031974 UK - GB383499055",
                   "items": null,
-                  "page": 1
+                  "page": 1,
+                  "box_2d": [
+                    149,
+                    598,
+                    158,
+                    898
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
                 }
               ],
               "children": []
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "outline-billing-info",
+      "level": 2,
+      "title": "Billing info",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        216,
+        101,
+        291,
+        203
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
         {
-          "id": "out-1-3",
-          "level": 2,
-          "title": "Billing info",
-          "type": "header",
+          "id": "outline-billing-details",
+          "level": 3,
+          "title": "Customer Address & Name",
+          "type": "paragraph",
           "page": 1,
           "box_2d": [
-            216,
+            235,
             101,
-            230,
-            179
+            291,
+            203
           ],
           "purpose": null,
-          "elements": [],
-          "children": [
+          "elements": [
             {
-              "id": "out-1-3-1",
-              "level": 3,
-              "title": "qround",
-              "type": "key_value",
+              "id": "elem-billing-details",
+              "outline_id": "outline-billing-details",
+              "type": "paragraph",
+              "label": "Billing Details",
+              "value": "qround\\nSEO MINGYU\\nseoul, 40-6\\nSouth Korea",
+              "items": null,
               "page": 1,
               "box_2d": [
                 235,
                 101,
-                248,
-                148
-              ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-5",
-                  "type": "key_value",
-                  "label": "Company / Organization",
-                  "value": "qround",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
-            {
-              "id": "out-1-3-2",
-              "level": 3,
-              "title": "SEO MINGYU",
-              "type": "key_value",
-              "page": 1,
-              "box_2d": [
-                249,
-                101,
-                262,
-                192
-              ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-6",
-                  "type": "key_value",
-                  "label": "Name",
-                  "value": "SEO MINGYU",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
-            {
-              "id": "out-1-3-3",
-              "level": 3,
-              "title": "seoul, 40-6 South Korea",
-              "type": "key_value",
-              "page": 1,
-              "box_2d": [
-                263,
-                101,
                 291,
                 203
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-7",
-                  "type": "key_value",
-                  "label": "Address",
-                  "value": "seoul, 40-6 South Korea",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
+              "content_summary": null,
+              "structured_data": null
             }
-          ]
-        },
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "outline-total-usd-sec",
+      "level": 2,
+      "title": "Total (USD)",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        216,
+        776,
+        268,
+        898
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
         {
-          "id": "out-1-4",
-          "level": 2,
-          "title": "Total (USD)",
-          "type": "header",
+          "id": "outline-total-val",
+          "level": 3,
+          "title": "$147.00",
+          "type": "key_value",
           "page": 1,
           "box_2d": [
-            216,
-            776,
-            268,
+            231,
+            780,
+            254,
             898
           ],
           "purpose": null,
-          "elements": [],
-          "children": [
+          "elements": [
             {
-              "id": "out-1-4-1",
-              "level": 3,
-              "title": "Total (USD)",
+              "id": "elem-total-usd",
+              "outline_id": "outline-total-val",
               "type": "key_value",
+              "label": "Total (USD)",
+              "value": "$147.00",
+              "items": null,
               "page": 1,
               "box_2d": [
                 231,
@@ -253,24 +318,33 @@
                 254,
                 898
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-8",
-                  "type": "key_value",
-                  "label": "Total (USD)",
-                  "value": "$147.00",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-paid-method",
+          "level": 3,
+          "title": "Paid via credit card",
+          "type": "key_value",
+          "page": 1,
+          "box_2d": [
+            258,
+            776,
+            268,
+            898
+          ],
+          "purpose": null,
+          "elements": [
             {
-              "id": "out-1-4-2",
-              "level": 3,
-              "title": "Paid via credit card",
+              "id": "elem-payment-method",
+              "outline_id": "outline-paid-method",
               "type": "key_value",
+              "label": "Payment Method",
+              "value": "Paid via credit card",
+              "items": null,
               "page": 1,
               "box_2d": [
                 258,
@@ -278,41 +352,56 @@
                 268,
                 898
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-9",
-                  "type": "key_value",
-                  "label": "Payment Method",
-                  "value": "Paid via credit card",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
+              "content_summary": null,
+              "structured_data": null
             }
-          ]
-        },
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "outline-order-summary",
+      "level": 2,
+      "title": "Order Details & Summary",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        347,
+        106,
+        465,
+        895
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
         {
-          "id": "out-1-5",
-          "level": 2,
+          "id": "outline-items-table",
+          "level": 3,
           "title": "Description Amount Total",
-          "type": "header",
+          "type": "table",
           "page": 1,
           "box_2d": [
             347,
             106,
-            465,
+            403,
             895
           ],
           "purpose": null,
-          "elements": [],
-          "children": [
+          "elements": [
             {
-              "id": "out-1-5-1",
-              "level": 3,
-              "title": "Description Amount Total",
+              "id": "elem-line-items",
+              "outline_id": "outline-items-table",
               "type": "table",
+              "label": "Items Table",
+              "value": [
+                {
+                  "amount": "$147.00",
+                  "description": "Atticus - One-time payment ($147.00)",
+                  "total": "$147.00"
+                }
+              ],
+              "items": null,
               "page": 1,
               "box_2d": [
                 347,
@@ -320,30 +409,33 @@
                 403,
                 895
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-10",
-                  "type": "table",
-                  "label": "Line Items",
-                  "value": [
-                    {
-                      "Amount": "$147.00",
-                      "Description": "Atticus One-time payment ($147.00)",
-                      "Total": "$147.00"
-                    }
-                  ],
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-subtotal",
+          "level": 3,
+          "title": "Subtotal: $147.00",
+          "type": "key_value",
+          "page": 1,
+          "box_2d": [
+            426,
+            720,
+            438,
+            893
+          ],
+          "purpose": null,
+          "elements": [
             {
-              "id": "out-1-5-2",
-              "level": 3,
-              "title": "Subtotal:",
+              "id": "elem-subtotal",
+              "outline_id": "outline-subtotal",
               "type": "key_value",
+              "label": "Subtotal",
+              "value": "$147.00",
+              "items": null,
               "page": 1,
               "box_2d": [
                 426,
@@ -351,24 +443,33 @@
                 438,
                 893
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-11",
-                  "type": "key_value",
-                  "label": "Subtotal:",
-                  "value": "$147.00",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-summary-total",
+          "level": 3,
+          "title": "Total: $147.00",
+          "type": "key_value",
+          "page": 1,
+          "box_2d": [
+            454,
+            743,
+            465,
+            893
+          ],
+          "purpose": null,
+          "elements": [
             {
-              "id": "out-1-5-3",
-              "level": 3,
-              "title": "Total:",
+              "id": "elem-summary-total",
+              "outline_id": "outline-summary-total",
               "type": "key_value",
+              "label": "Total",
+              "value": "$147.00",
+              "items": null,
               "page": 1,
               "box_2d": [
                 454,
@@ -376,41 +477,50 @@
                 465,
                 893
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-12",
-                  "type": "key_value",
-                  "label": "Total:",
-                  "value": "$147.00",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
+              "content_summary": null,
+              "structured_data": null
             }
-          ]
-        },
+          ],
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "outline-footer",
+      "level": 2,
+      "title": "Footer Information",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        693,
+        269,
+        755,
+        730
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
         {
-          "id": "out-1-6",
-          "level": 2,
-          "title": "Support & Notice",
-          "type": "header",
+          "id": "outline-contact",
+          "level": 3,
+          "title": "Contact support: support@atticus.io",
+          "type": "key_value",
           "page": 1,
           "box_2d": [
             693,
-            269,
-            755,
-            730
+            373,
+            705,
+            626
           ],
           "purpose": null,
-          "elements": [],
-          "children": [
+          "elements": [
             {
-              "id": "out-1-6-1",
-              "level": 3,
-              "title": "Contact support: support@atticus.io",
+              "id": "elem-support",
+              "outline_id": "outline-contact",
               "type": "key_value",
+              "label": "Contact support",
+              "value": "support@atticus.io",
+              "items": null,
               "page": 1,
               "box_2d": [
                 693,
@@ -418,24 +528,33 @@
                 705,
                 626
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-13",
-                  "type": "key_value",
-                  "label": "Contact support",
-                  "value": "support@atticus.io",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-billing-link",
+          "level": 3,
+          "title": "Click here to manage your billing details and view purchase history",
+          "type": "paragraph",
+          "page": 1,
+          "box_2d": [
+            713,
+            307,
+            722,
+            693
+          ],
+          "purpose": null,
+          "elements": [
             {
-              "id": "out-1-6-2",
-              "level": 3,
-              "title": "Click here to manage your billing details and view purchase history",
+              "id": "elem-portal-notice",
+              "outline_id": "outline-billing-link",
               "type": "paragraph",
+              "label": "Billing Notice",
+              "value": "Click here to manage your billing details and view purchase history",
+              "items": null,
               "page": 1,
               "box_2d": [
                 713,
@@ -443,24 +562,33 @@
                 722,
                 693
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-14",
-                  "type": "paragraph",
-                  "label": "Manage billing details",
-                  "value": "Click here to manage your billing details and view purchase history",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
-            },
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "outline-copyright",
+          "level": 3,
+          "title": "Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
+          "type": "paragraph",
+          "page": 1,
+          "box_2d": [
+            746,
+            269,
+            755,
+            730
+          ],
+          "purpose": null,
+          "elements": [
             {
-              "id": "out-1-6-3",
-              "level": 3,
-              "title": "Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
+              "id": "elem-copyright",
+              "outline_id": "outline-copyright",
               "type": "paragraph",
+              "label": "Footer Notice",
+              "value": "Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
+              "items": null,
               "page": 1,
               "box_2d": [
                 746,
@@ -468,20 +596,11 @@
                 755,
                 730
               ],
-              "purpose": null,
-              "elements": [
-                {
-                  "id": "elem-15",
-                  "type": "paragraph",
-                  "label": "Copyright Notice",
-                  "value": "Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.",
-                  "items": null,
-                  "page": 1
-                }
-              ],
-              "children": []
+              "content_summary": null,
+              "structured_data": null
             }
-          ]
+          ],
+          "children": []
         }
       ]
     }

@@ -1,0 +1,363 @@
+{
+  "meta": {
+    "id": "scaffold-프로젝트_매니저의_5대_필수_관리_문서",
+    "title": "프로젝트_매니저의_5대_필수_관리_문서 와이어프레임 서식",
+    "targetDoc": "프로젝트_매니저의_5대_필수_관리_문서.pdf",
+    "sourcePdfFileName": "프로젝트_매니저의_5대_필수_관리_문서.pdf",
+    "description": "Tiptap 정밀 와이어프레임 서식 (슬롯 29개)",
+    "difficulty": "normal",
+    "totalPages": 1
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"1\">\n<div data-type=\"scaffold-block\" data-bid=\"0-r0c0\" data-x=\"43.1\" data-y=\"187.8\" data-w=\"157.5\" data-h=\"36.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\">문서명</div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r0c1\" data-x=\"200.6\" data-y=\"187.8\" data-w=\"214.5\" data-h=\"36.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\">핵심 목적</div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r0c2\" data-x=\"415.1\" data-y=\"187.8\" data-w=\"138.1\" data-h=\"36.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\">업데이트 주기</div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r1c0\" data-x=\"43.1\" data-y=\"224.6\" data-w=\"157.5\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"문서명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r1c1\" data-x=\"200.6\" data-y=\"224.6\" data-w=\"214.5\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"핵심 목적\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r1c2\" data-x=\"415.1\" data-y=\"224.6\" data-w=\"138.1\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"업데이트 주기\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r2c0\" data-x=\"43.1\" data-y=\"273.4\" data-w=\"157.5\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"문서명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r2c1\" data-x=\"200.6\" data-y=\"273.4\" data-w=\"214.5\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"핵심 목적\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r2c2\" data-x=\"415.1\" data-y=\"273.4\" data-w=\"138.1\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"업데이트 주기\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r3c0\" data-x=\"43.1\" data-y=\"322.1\" data-w=\"157.5\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"문서명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r3c1\" data-x=\"200.6\" data-y=\"322.1\" data-w=\"214.5\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"핵심 목적\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r3c2\" data-x=\"415.1\" data-y=\"322.1\" data-w=\"138.1\" data-h=\"48.8\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"업데이트 주기\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r4c0\" data-x=\"43.1\" data-y=\"370.9\" data-w=\"157.5\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"문서명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r4c1\" data-x=\"200.6\" data-y=\"370.9\" data-w=\"214.5\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"핵심 목적\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r4c2\" data-x=\"415.1\" data-y=\"370.9\" data-w=\"138.1\" data-h=\"48.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"업데이트 주기\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r5c0\" data-x=\"43.1\" data-y=\"419.6\" data-w=\"157.5\" data-h=\"48.9\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"문서명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r5c1\" data-x=\"200.6\" data-y=\"419.6\" data-w=\"214.5\" data-h=\"48.9\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s14\" data-mapping-num=\"14\" data-placeholder=\"핵심 목적\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"0-r5c2\" data-x=\"415.1\" data-y=\"419.6\" data-w=\"138.1\" data-h=\"48.9\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s15\" data-mapping-num=\"15\" data-placeholder=\"업데이트 주기\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L0\" data-x=\"24.0\" data-y=\"16.8\" data-w=\"68.1\" data-h=\"8.9\" data-fs=\"8.0\" data-align=\"left\" data-variant=\"text\">26. 8. 31. 오후 3:12</div>\n<div data-type=\"scaffold-block\" data-bid=\"L1\" data-x=\"283.7\" data-y=\"16.8\" data-w=\"125.9\" data-h=\"8.9\" data-fs=\"8.0\" data-align=\"left\" data-variant=\"text\">프로젝트 매니저의 5대 필수 관리 문서</div>\n<div data-type=\"scaffold-block\" data-bid=\"L2\" data-x=\"42.8\" data-y=\"48.9\" data-w=\"378.9\" data-h=\"27.4\" data-fs=\"24.0\" data-align=\"left\" data-variant=\"text\">프로젝트 매니저의 5대 필수 관리 문서</div>\n<div data-type=\"scaffold-block\" data-bid=\"L3\" data-x=\"42.8\" data-y=\"82.8\" data-w=\"233.1\" data-h=\"11.4\" data-fs=\"9.8\" data-align=\"left\" data-variant=\"text\">https://gemini.google.com/app/1a97c488d7681a18</div>\n<div data-type=\"scaffold-block\" data-bid=\"L4\" data-x=\"42.0\" data-y=\"110.1\" data-w=\"425.9\" data-h=\"13.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\">User prompt: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s16\" data-mapping-num=\"16\" data-placeholder=\"사용자 프롬프트 질문\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L5\" data-x=\"42.8\" data-y=\"140.1\" data-w=\"498.4\" data-h=\"14.0\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\">Response: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s17\" data-mapping-num=\"17\" data-placeholder=\"답변 본문\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L6\" data-x=\"42.8\" data-y=\"158.1\" data-w=\"287.4\" data-h=\"14.0\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s18\" data-mapping-num=\"18\" data-placeholder=\"답변 본문 이어짐\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L7\" data-x=\"42.8\" data-y=\"488.6\" data-w=\"280.4\" data-h=\"20.5\" data-fs=\"18.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s19\" data-mapping-num=\"19\" data-placeholder=\"항목 제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L8\" data-x=\"42.8\" data-y=\"528.6\" data-w=\"426.2\" data-h=\"14.0\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s20\" data-mapping-num=\"20\" data-placeholder=\"설명 본문\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L9\" data-x=\"72.8\" data-y=\"558.5\" data-w=\"456.6\" data-h=\"14.1\" data-fs=\"12.0\" data-align=\"center\" data-variant=\"text\">포함 내용: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s21\" data-mapping-num=\"21\" data-placeholder=\"포함 내용 상세\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L10\" data-x=\"72.8\" data-y=\"588.5\" data-w=\"470.4\" data-h=\"13.4\" data-fs=\"12.0\" data-align=\"center\" data-variant=\"text\">활용: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s22\" data-mapping-num=\"22\" data-placeholder=\"활용 내용 상세\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L11\" data-x=\"72.8\" data-y=\"606.6\" data-w=\"237.5\" data-h=\"12.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s23\" data-mapping-num=\"23\" data-placeholder=\"활용 내용 상세 이어짐\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L12\" data-x=\"42.8\" data-y=\"640.8\" data-w=\"249.7\" data-h=\"20.6\" data-fs=\"18.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s24\" data-mapping-num=\"24\" data-placeholder=\"항목 제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L13\" data-x=\"42.8\" data-y=\"680.8\" data-w=\"405.5\" data-h=\"12.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s25\" data-mapping-num=\"25\" data-placeholder=\"설명 본문\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L14\" data-x=\"72.8\" data-y=\"710.7\" data-w=\"460.7\" data-h=\"13.7\" data-fs=\"12.0\" data-align=\"center\" data-variant=\"text\">포함 내용: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s26\" data-mapping-num=\"26\" data-placeholder=\"포함 내용 상세\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L15\" data-x=\"72.8\" data-y=\"728.7\" data-w=\"43.4\" data-h=\"13.7\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s27\" data-mapping-num=\"27\" data-placeholder=\"포함 내용 상세 이어짐\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L16\" data-x=\"72.8\" data-y=\"758.7\" data-w=\"469.2\" data-h=\"14.1\" data-fs=\"12.0\" data-align=\"center\" data-variant=\"text\">활용: <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s28\" data-mapping-num=\"28\" data-placeholder=\"활용 내용 상세\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L17\" data-x=\"72.8\" data-y=\"776.8\" data-w=\"474.4\" data-h=\"14.0\" data-fs=\"12.0\" data-align=\"left\" data-variant=\"text\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s29\" data-mapping-num=\"29\" data-placeholder=\"활용 내용 상세 이어짐\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L18\" data-x=\"24.0\" data-y=\"818.5\" data-w=\"516.9\" data-h=\"8.9\" data-fs=\"8.0\" data-align=\"left\" data-variant=\"text\">https://gemini.google.com/app/1a97c488d7681a18?android-min-version=301356232&amp;ios-min-version=322.0&amp;is_sa=1&amp;campaign_id=test_autos…</div>\n<div data-type=\"scaffold-block\" data-bid=\"L19\" data-x=\"555.6\" data-y=\"818.5\" data-w=\"15.6\" data-h=\"8.9\" data-fs=\"8.0\" data-align=\"right\" data-variant=\"text\">1/14</div>\n<div data-type=\"scaffold-block\" data-bid=\"R0\" data-x=\"42.8\" data-y=\"187.5\" data-w=\"158.2\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R1\" data-x=\"201.0\" data-y=\"187.5\" data-w=\"214.5\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R2\" data-x=\"415.5\" data-y=\"187.5\" data-w=\"138.0\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R3\" data-x=\"42.8\" data-y=\"224.2\" data-w=\"158.2\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R4\" data-x=\"201.0\" data-y=\"224.2\" data-w=\"214.5\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R5\" data-x=\"415.5\" data-y=\"224.2\" data-w=\"138.0\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R6\" data-x=\"42.8\" data-y=\"273.0\" data-w=\"158.2\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R7\" data-x=\"201.0\" data-y=\"273.0\" data-w=\"214.5\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R8\" data-x=\"415.5\" data-y=\"273.0\" data-w=\"138.0\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R9\" data-x=\"42.8\" data-y=\"321.8\" data-w=\"158.2\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R10\" data-x=\"201.0\" data-y=\"321.8\" data-w=\"214.5\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R11\" data-x=\"415.5\" data-y=\"321.8\" data-w=\"138.0\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R12\" data-x=\"42.8\" data-y=\"370.5\" data-w=\"158.2\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R13\" data-x=\"201.0\" data-y=\"370.5\" data-w=\"214.5\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R14\" data-x=\"415.5\" data-y=\"370.5\" data-w=\"138.0\" data-h=\"0.7\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R15\" data-x=\"42.8\" data-y=\"419.2\" data-w=\"158.2\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R16\" data-x=\"201.0\" data-y=\"419.2\" data-w=\"214.5\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R17\" data-x=\"415.5\" data-y=\"419.2\" data-w=\"138.0\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R18\" data-x=\"42.8\" data-y=\"468.0\" data-w=\"158.2\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R19\" data-x=\"201.0\" data-y=\"468.0\" data-w=\"214.5\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R20\" data-x=\"415.5\" data-y=\"468.0\" data-w=\"138.0\" data-h=\"0.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\"></div>\n</div>",
+  "markdownContent": "문서명\n\n핵심 목적\n\n업데이트 주기\n\n[ 문서명 ]\n\n[ 핵심 목적 ]\n\n[ 업데이트 주기 ]\n\n[ 문서명 ]\n\n[ 핵심 목적 ]\n\n[ 업데이트 주기 ]\n\n[ 문서명 ]\n\n[ 핵심 목적 ]\n\n[ 업데이트 주기 ]\n\n[ 문서명 ]\n\n[ 핵심 목적 ]\n\n[ 업데이트 주기 ]\n\n[ 문서명 ]\n\n[ 핵심 목적 ]\n\n[ 업데이트 주기 ]\n\n26. 8. 31. 오후 3:12\n\n프로젝트 매니저의 5대 필수 관리 문서\n\n프로젝트 매니저의 5대 필수 관리 문서\n\nhttps://gemini.google.com/app/1a97c488d7681a18\n\nUser prompt: [ 사용자 프롬프트 질문 ]\n\nResponse: [ 답변 본문 ]\n\n[ 답변 본문 이어짐 ]\n\n[ 항목 제목 ]\n\n[ 설명 본문 ]\n\n포함 내용: [ 포함 내용 상세 ]\n\n활용: [ 활용 내용 상세 ]\n\n[ 활용 내용 상세 이어짐 ]\n\n[ 항목 제목 ]\n\n[ 설명 본문 ]\n\n포함 내용: [ 포함 내용 상세 ]\n\n[ 포함 내용 상세 이어짐 ]\n\n활용: [ 활용 내용 상세 ]\n\n[ 활용 내용 상세 이어짐 ]\n\nhttps://gemini.google.com/app/1a97c488d7681a18?android-min-version=301356232&ios-min-version=322.0&is_sa=1&campaign_id=test_autos…\n\n1/14",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "문서명",
+      "box_2d": [
+        267,
+        72,
+        325,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "핵심 목적",
+      "box_2d": [
+        267,
+        337,
+        325,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "업데이트 주기",
+      "box_2d": [
+        267,
+        698,
+        325,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "문서명",
+      "box_2d": [
+        325,
+        72,
+        383,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "핵심 목적",
+      "box_2d": [
+        325,
+        337,
+        383,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "업데이트 주기",
+      "box_2d": [
+        325,
+        698,
+        383,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "문서명",
+      "box_2d": [
+        383,
+        72,
+        441,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "핵심 목적",
+      "box_2d": [
+        383,
+        337,
+        441,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "업데이트 주기",
+      "box_2d": [
+        383,
+        698,
+        441,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "문서명",
+      "box_2d": [
+        441,
+        72,
+        498,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "핵심 목적",
+      "box_2d": [
+        441,
+        337,
+        498,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "업데이트 주기",
+      "box_2d": [
+        441,
+        698,
+        498,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "문서명",
+      "box_2d": [
+        498,
+        72,
+        556,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s14",
+      "number": 14,
+      "label": "핵심 목적",
+      "box_2d": [
+        498,
+        337,
+        556,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s15",
+      "number": 15,
+      "label": "업데이트 주기",
+      "box_2d": [
+        498,
+        698,
+        556,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s16",
+      "number": 16,
+      "label": "사용자 프롬프트 질문",
+      "box_2d": [
+        131,
+        201,
+        147,
+        787
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s17",
+      "number": 17,
+      "label": "답변 본문",
+      "box_2d": [
+        166,
+        174,
+        183,
+        910
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s18",
+      "number": 18,
+      "label": "답변 본문 이어짐",
+      "box_2d": [
+        188,
+        72,
+        204,
+        555
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s19",
+      "number": 19,
+      "label": "항목 제목",
+      "box_2d": [
+        580,
+        72,
+        605,
+        543
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s20",
+      "number": 20,
+      "label": "설명 본문",
+      "box_2d": [
+        628,
+        72,
+        644,
+        788
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s21",
+      "number": 21,
+      "label": "포함 내용 상세",
+      "box_2d": [
+        663,
+        214,
+        680,
+        890
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s22",
+      "number": 22,
+      "label": "활용 내용 상세",
+      "box_2d": [
+        699,
+        172,
+        713,
+        913
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s23",
+      "number": 23,
+      "label": "활용 내용 상세 이어짐",
+      "box_2d": [
+        720,
+        122,
+        736,
+        522
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s24",
+      "number": 24,
+      "label": "항목 제목",
+      "box_2d": [
+        761,
+        72,
+        786,
+        492
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s25",
+      "number": 25,
+      "label": "설명 본문",
+      "box_2d": [
+        809,
+        72,
+        824,
+        753
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s26",
+      "number": 26,
+      "label": "포함 내용 상세",
+      "box_2d": [
+        844,
+        214,
+        860,
+        897
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s27",
+      "number": 27,
+      "label": "포함 내용 상세 이어짐",
+      "box_2d": [
+        866,
+        122,
+        882,
+        195
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s28",
+      "number": 28,
+      "label": "활용 내용 상세",
+      "box_2d": [
+        901,
+        172,
+        918,
+        911
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s29",
+      "number": 29,
+      "label": "활용 내용 상세 이어짐",
+      "box_2d": [
+        923,
+        122,
+        939,
+        920
+      ],
+      "pageNumber": 1
+    }
+  ]
+}

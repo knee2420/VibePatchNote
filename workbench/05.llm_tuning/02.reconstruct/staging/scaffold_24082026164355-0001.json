@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "id": "scaffold-24082026164355-0001",
+    "title": "24082026164355-0001.pdf 와이어프레임 서식",
+    "targetDoc": "24082026164355-0001.pdf",
+    "sourcePdfFileName": "24082026164355-0001.pdf",
+    "description": "Tiptap 정밀 와이어프레임 서식 (슬롯 1개)",
+    "difficulty": "easy",
+    "totalPages": 1
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"1192\" data-h=\"842\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:1192px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-bid=\"img0\" data-x=\"0.0\" data-y=\"0.0\" data-w=\"1191.6\" data-h=\"842.4\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"image\" class=\"scaffold-block scaffold-block-image\" style=\"position:absolute;left:0.0px;top:0.0px;width:1191.6px;height:842.4px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;border:1px dashed #cbd5e1;background:#f8fafc\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"회사 로고\"></span></div>\n</div>",
+  "markdownContent": "# 24082026164355-0001.pdf\n\n[ 회사 로고 ]",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "회사 로고",
+      "box_2d": [
+        0,
+        0,
+        1000,
+        1000
+      ],
+      "pageNumber": 1
+    }
+  ]
+}
