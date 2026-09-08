@@ -92,6 +92,8 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
   const {
     isExtractingOutline,
+    outlineProgressStep,
+    outlineProgressMessage,
     isOutlineOpen,
     outlines,
     hasOutline,
@@ -129,7 +131,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     dimensionStyle,
   } = useDocumentLayout({
     viewerDefId: viewerDef.id,
-    isOutlineOpen: isOutlineOpen && hasOutline,
+    isOutlineOpen: isOutlineOpen && (hasOutline || isExtractingOutline),
   });
 
   // 노드 DOM 크기 변화를 실시간 감지하여 React Flow Handle 위치 캐시를 즉각 갱신
@@ -304,12 +306,15 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         </div>
 
         {/* 아웃라인 & 엘리먼트 트리 패널 */}
-        {isOutlineOpen && hasOutline && (
+        {isOutlineOpen && (hasOutline || isExtractingOutline) && (
           <DocumentOutlinePanel
             title={data.title}
             outlines={outlines}
             selectedElementId={selectedElementId}
             isRefreshing={isExtractingOutline}
+            isExtracting={isExtractingOutline}
+            progressStep={outlineProgressStep}
+            progressMessage={outlineProgressMessage}
             onSelectElement={handleSelectElement}
             onClose={toggleOutlinePanel}
             onRefresh={() => extractOutline(true)}

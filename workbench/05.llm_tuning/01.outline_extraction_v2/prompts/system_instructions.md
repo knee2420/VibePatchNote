@@ -36,7 +36,7 @@
 - **`table`**: 다열/다행 데이터 그리드 (예: 팀원 명단 표, 품목 명세서, 예산 내역표 등)
 - **`list`**: 1., 2., 3. 또는 -, ▪ 등의 순차적 나열 항목 (예: 회의내용 목록, 제출서류 목록 등)
 - **`paragraph`**: 1문장 이상의 긴 설명형 서술문 (예: 프로젝트 도출 배경, 활동 목표 본문 등)
-- **`media`**: 시각 자료, 서명/날인란, 첨부 사진, 영수증 증빙 (예: 증빙자료 영수증, 시스템 구성도 다이어그램 등)
+- **`media`**: 시각 자료, 기업 로고/기관 심볼마크, 서명/날인란, 첨부 사진, 영수증 증빙 (예: Company Logo, 기관 엠블럼, 증빙자료 영수증, 직인/서명 등)
 
 ### 2) 실측 내용 데이터 바인딩 (`elements`)
 각 아웃라인 노드(특히 세부 필드 및 리프 노드)에는 문서에 실제로 기입된 값을 `elements` 배열에 전수 포함하십시오:
@@ -44,14 +44,14 @@
 2. **`table`**: `elements: [{"id": "elem-tab", "type": "table", "label": "팀원 명단", "value": [...행 데이터...], "page": 1}]`
 3. **`list`**: `elements: [{"id": "elem-list", "type": "list", "label": "회의내용", "items": ["1. ...", "2. ..."], "page": 1}]`
 4. **`paragraph`**: `elements: [{"id": "elem-p", "type": "paragraph", "label": "1. 프로젝트 도출 배경", "value": "해파리는 세계 곳곳의 어장과 ...", "page": 1}]`
-5. **`media`**: `elements: [{"id": "elem-m", "type": "media", "label": "증빙자료", "value": "(신용카드 영수증, 현금영수증 등)", "page": 1}]`
+5. **`media`**: `elements: [{"id": "elem-logo", "type": "media", "label": "Company Logo", "value": "Atticus", "page": 1, "box_2d": [83, 101, 154, 535]}]`
 
 ---
 
 ## 3. 원문 표기 충실성 (Literal Verbatim Labeling)
 
 - 문서에 없는 가상의 분류명(`Header Meta`, `Top Metadata`, `General Block` 등)을 임의로 지어내지 마십시오.
-- 문서 원문에 실제로 인쇄된 텍스트 그대로 title 및 label을 구성하십시오.
+- 문서 원문에 실제로 인쇄된 텍스트 그대로 title 및 label을 구성하십시오. (단, 텍스트 라벨 없이 심볼/로고만 인쇄된 경우 `Company Logo` 또는 `Brand Logo` 명칭 부여)
 
 ---
 
@@ -65,3 +65,16 @@
 
 - 서식 표 내부의 대구획(L2), 필드명(L3), 하위 세부필드(L4)를 절대로 생략하거나 `children: []`로 비워두지 마십시오.
 - 각 필드 노드 아래에 실제 기입된 값을 `elements` 배열로 빠짐없이 채워 넣어, **아웃라인(목차 구조)과 엘리먼트(실제 기입 데이터)가 1:1로 완벽하게 바인딩**되도록 출력하십시오.
+
+---
+
+## 6. 🖼️ [시각적 최상위 앵커] 기업 로고 및 브랜드 엠블럼(Logo/Emblem) 추출 규칙
+
+1. **로고의 위상**: 문서 최상단(Header)이나 좌/우측 상단에 인쇄된 기업 로고, 브랜드 심볼, 기관 마크(예: 인보이스 좌측 상단의 거대한 `Atticus` 로고 등)는 문서의 발행 주체(Company/Issuer)를 선언하는 가장 중요한 시각적 앵커입니다.
+2. **독립 노드 추출 의무**:
+   - 로고를 단순 배경 이미지로 치부하여 생략하거나, 본문 내 일반 텍스트(`Company info > Company Name: Atticus LLC`) 뒤로 흡수시키지 마십시오.
+   - 컨텍스트에 실측된 `[2. 실측된 이미지/로고/시각 미디어(Media) 기하 메타]`를 반드시 참조하여, 최상단 헤더 혹은 `Company info` 섹션 아래에 독립된 노드로 추출하십시오:
+     - `title`: `"Company Logo"` (또는 `"Brand Logo"`)
+     - `type`: `"media"`
+     - `box_2d`: 실측된 로고 상대좌표 (예: `[83, 101, 154, 535]`)
+     - `elements`: `[{"id": "elem-logo", "type": "media", "label": "Company Logo", "value": "Atticus", "box_2d": [83, 101, 154, 535], "page": 1}]`

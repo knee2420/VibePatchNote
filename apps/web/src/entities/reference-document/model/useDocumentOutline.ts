@@ -37,6 +37,8 @@ export function useDocumentOutline({
   onError,
 }: UseDocumentOutlineOptions) {
   const [isExtractingOutline, setIsExtractingOutline] = useState(false);
+  const [outlineProgressStep, setOutlineProgressStep] = useState<number>(1);
+  const [outlineProgressMessage, setOutlineProgressMessage] = useState<string>('');
   const [isOutlineOpen, setIsOutlineOpen] = useState(initialIsOpen);
   const [outlines, setOutlines] = useState<DocumentOutlineNode[]>(initialOutlines || []);
   const [elements, setElements] = useState<DocumentElementItem[]>(initialElements || []);
@@ -57,15 +59,38 @@ export function useDocumentOutline({
       if (!filename || isExtractingOutline) return;
 
       setIsExtractingOutline(true);
+      setIsOutlineOpen(true); // 0ms 즉각 패널 오픈!
+      setOutlineProgressStep(1);
+      setOutlineProgressMessage('📄 [1/3] PDF 시각 기하(표·타이포·로고) 실측 중...');
+
+      // 단계별 진행 시뮬레이션 타이머 (체감 UX 향상)
+      const timers: NodeJS.Timeout[] = [];
+      timers.push(
+        setTimeout(() => {
+          setOutlineProgressStep(2);
+          setOutlineProgressMessage('🤖 [2/3] Gemini 모델이 L1~L4 계층 구조 및 컴포넌트 인지 분해 중...');
+        }, 2500)
+      );
+
+      timers.push(
+        setTimeout(() => {
+          setOutlineProgressStep(3);
+          setOutlineProgressMessage('🧩 [3/3] 컴포넌트(Company Logo, Key-Value) 실측값 바인딩 중...');
+        }, 6500)
+      );
 
       try {
         const response = await referenceDocumentApi.extractOutline(filename, forceRefresh);
+        timers.forEach(clearTimeout);
+
         const loadedOutlines = response.outlines || [];
         const loadedElements = response.elements || [];
 
+        setOutlineProgressStep(3);
+        setOutlineProgressMessage('✓ 분석 완료! 목차 트리를 표시합니다.');
         setOutlines(loadedOutlines);
         setElements(loadedElements);
-        setIsOutlineOpen(true); // 추출 완료 시 패널 자동 오픈!
+        setIsOutlineOpen(true);
 
         // React Flow 노드 상태 동기화
         setNodes((nds) =>
@@ -87,10 +112,14 @@ export function useDocumentOutline({
 
         optionsRef.current.onSuccess?.(response);
       } catch (err) {
+        timers.forEach(clearTimeout);
         console.error('[useDocumentOutline] Extract outline failed:', err);
+        setOutlineProgressMessage('❌ 아웃라인 분석 중 오류가 발생했습니다.');
         optionsRef.current.onError?.(err);
       } finally {
-        setIsExtractingOutline(false);
+        setTimeout(() => {
+          setIsExtractingOutline(false);
+        }, 600);
       }
     },
     [filename, isExtractingOutline, nodeId, setNodes]
@@ -122,6 +151,8 @@ export function useDocumentOutline({
 
   return {
     isExtractingOutline,
+    outlineProgressStep,
+    outlineProgressMessage,
     isOutlineOpen,
     outlines,
     elements,

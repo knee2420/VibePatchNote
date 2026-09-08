@@ -51,7 +51,36 @@ class DocumentContextBuilder:
             except Exception:
                 pass
 
-            # 2. 주요 타이포그래피 블록 (폰트 크기 및 위치)
+            # 2. 이미지 / 로고 / 시각 미디어(Media) 구조 실측
+            images_meta = []
+            try:
+                for img_idx, img_info in enumerate(page.get_image_info(xrefs=True), 1):
+                    b = img_info.get("bbox")
+                    if b:
+                        norm_box = [
+                            round(b[1] / ph * 1000),
+                            round(b[0] / pw * 1000),
+                            round(b[3] / ph * 1000),
+                            round(b[2] / pw * 1000),
+                        ]
+                        w = img_info.get("width", 0)
+                        h = img_info.get("height", 0)
+                        images_meta.append({
+                            "image_id": img_idx,
+                            "norm_bbox": norm_box,
+                            "width": w,
+                            "height": h,
+                        })
+                if images_meta:
+                    summary_lines.append("[2. 실측된 이미지/로고/시각 미디어(Media) 기하 메타]")
+                    for img in images_meta:
+                        pos_desc = "상단 헤더 영역" if img["norm_bbox"][0] < 250 else "본문/하단 영역"
+                        summary_lines.append(f"- 미디어(Media) {img['image_id']}: 상대좌표={img['norm_bbox']}, 크기={img['width']}x{img['height']}px ({pos_desc})")
+                    summary_lines.append("")
+            except Exception:
+                pass
+
+            # 3. 주요 타이포그래피 블록 (폰트 크기 및 위치)
             raw_blocks = page.get_text("dict").get("blocks", [])
             text_blocks = []
             for b in raw_blocks:
@@ -73,21 +102,22 @@ class DocumentContextBuilder:
                         })
 
             if text_blocks:
-                summary_lines.append("[2. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
-                for b in text_blocks[:self.max_text_blocks_per_page]:
+                summary_lines.append("[3. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
+                for b in text_blocks[: self.max_text_blocks_per_page]:
                     summary_lines.append(f"- (폰트:{b['size']}, 위치:{b['norm_bbox']}) {b['text']}")
                 summary_lines.append("")
 
-            # 3. 페이지 원문 텍스트 전문 (연속 텍스트 흐름)
+            # 4. 페이지 원문 텍스트 전문 (연속 텍스트 흐름)
             raw_page_text = page.get_text("text").strip()
             if raw_page_text:
-                summary_lines.append("[3. 페이지 원문 텍스트 전문 (Raw Text Flow)]")
+                summary_lines.append("[4. 페이지 원문 텍스트 전문 (Raw Text Flow)]")
                 summary_lines.append(raw_page_text)
                 summary_lines.append("")
 
             pages_data.append({
                 "page_number": p_num,
                 "tables": tables_meta,
+                "images": images_meta,
                 "text_blocks_count": len(text_blocks),
                 "raw_text_len": len(raw_page_text),
             })
