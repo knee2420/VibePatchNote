@@ -1,250 +1,184 @@
-"""Scaffold Engine — Outline Extraction Pipeline (Isolated Track).
+"""Scaffold Engine — Outline Extraction Pipeline (V2 Cognitive Layout Decomposition).
 
-기존 서식 복원 트랙과 완전히 격리된 문서 구조화(Outline & Element) 전용 파이프라인입니다.
+PyMuPDF 기반 3중 멀티모달 컨텍스트와 보편적 인지 분해 원칙을 적용하여,
+한국형 서식 표 및 문서 구조를 1-Stage로 전수 추출하는 고정밀 독립 엔진입니다.
 """
 from __future__ import annotations
 
 import json
 import logging
 from pathlib import Path
+import time
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
-
-from scaffold_engine.extract.geometry import PageGeometry, PdfGeometryExtractor
-from scaffold_engine.harness.agy_client import DEFAULT_MODEL, AgyHarness
-from scaffold_engine.core.interfaces import LlmHarness
+from scaffold_engine.harness.agy_client import DEFAULT_MODEL, AgyHarness, CLIExecutionResult
+from scaffold_engine.outline.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.models import (
     ElementItem,
     OutlineDocument,
     OutlineNode,
-)
-from scaffold_engine.outline.prompt import (
-    build_elements_prompt,
-    build_outline_prompt,
+    OutlineOutput,
 )
 
 logger = logging.getLogger(__name__)
 
-
-class _RawOutlineItem(BaseModel):
-    id: str
-    level: int = 1
-    title: str
-    page: int = 1
-    box_2d: Optional[List[int]] = None
-    purpose: Optional[str] = None
-    children: List["_RawOutlineItem"] = Field(default_factory=list)
-
-
-_RawOutlineItem.model_rebuild()
-
-
-class _OutlineOutput(BaseModel):
-    document_title: str
-    total_pages: int
-    outlines: List[_RawOutlineItem]
-
-
-class _RawElementItem(BaseModel):
-    id: str
-    outline_id: str
-    type: str = "paragraph"
-    label: str
-    page: int = 1
-    box_2d: List[int] = Field(default_factory=lambda: [0, 0, 1000, 1000])
-    content_summary: Optional[str] = None
-    structured_data: Optional[Dict[str, Any]] = None
-
-
-class _ElementsOutput(BaseModel):
-    elements: List[_RawElementItem]
+PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
+DEFAULT_SCHEMA_PATH = PROMPTS_DIR / "outline_schema.json"
+DEFAULT_INSTRUCTIONS_PATH = PROMPTS_DIR / "system_instructions.md"
 
 
 class OutlinePipeline:
-    """문서 목차(Outline Tree) 및 세부 컴포넌트(Element) 독립 추출 파이프라인."""
+    """PDF 시각 기하 + 원문 텍스트 융합 멀티모달 1-Stage 아웃라인 추출 파이프라인."""
 
     def __init__(
         self,
         model: str = DEFAULT_MODEL,
-        harness: Optional[LlmHarness] = None,
-        timeout_seconds: int = 90,
+        effort: str = "low",
+        timeout_seconds: int = 180,
+        schema_path: Optional[Path] = None,
+        instructions_path: Optional[Path] = None,
+        harness: Optional[AgyHarness] = None,
     ) -> None:
-        self.harness = harness or AgyHarness(model=model, timeout_seconds=timeout_seconds)
-        self.extractor = PdfGeometryExtractor()
+        self.model = model
+        self.effort = effort
+        self.harness = harness or AgyHarness(
+            model=model, effort=effort, timeout_seconds=timeout_seconds
+        )
+        self.context_builder = DocumentContextBuilder()
+        self.schema_path = schema_path or DEFAULT_SCHEMA_PATH
+        self.instructions_path = instructions_path or DEFAULT_INSTRUCTIONS_PATH
 
-    def run(self, pdf_path: Union[str, Path]) -> OutlineDocument:
-        """PDF를 분석하여 완성된 계층 목차와 엘리먼트가 바인딩된 OutlineDocument 반환."""
+    def run(
+        self,
+        pdf_path: Union[str, Path],
+        model: Optional[str] = None,
+        effort: Optional[str] = None,
+    ) -> OutlineDocument:
+        """PDF를 분석하여 완성된 계층 목차와 5대 엘리먼트가 바인딩된 OutlineDocument 반환."""
         pdf_path = Path(pdf_path).resolve()
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
 
-        logger.info("[OutlinePipeline] 분석 시작: %s", pdf_path.name)
+        logger.info("[OutlinePipeline] V2 분석 시작: %s (모델: %s)", pdf_path.name, model or self.model)
 
-        # 1. 기하 측정
-        pages = self.extractor.extract(pdf_path)
-        if not pages:
-            raise ValueError(f"PDF 페이지를 읽을 수 없습니다: {pdf_path.name}")
+        # 1. 시스템 프롬프트 지침 로드
+        instructions = ""
+        if self.instructions_path.exists():
+            instructions = self.instructions_path.read_text(encoding="utf-8")
 
-        # 2. Step 1: 아웃라인 추출
-        text_context = self._build_text_context(pages)
-        outline_prompt = build_outline_prompt(pdf_path.name, text_context)
-        raw_outline_res = self.harness.call_json(outline_prompt)
+        # 2. 3중 멀티모달 컨텍스트 추출 (표 기하 + 타이포그래피 블록 + 원문 텍스트 흐름)
+        t0 = time.time()
+        doc_ctx = self.context_builder.build_context(pdf_path)
+        ctx_duration = round(time.time() - t0, 3)
 
-        outlines = self._parse_outlines(raw_outline_res, pdf_path.name)
-        logger.info("[OutlinePipeline] Step 1 완료: 루트 노드 %d개", len(outlines))
-
-        # 3. Step 2: 엘리먼트 추출 및 아웃라인 바인딩
-        outline_summary = self._build_outline_summary(outlines)
-        geometry_summary = self._build_geometry_summary(pages)
-        elements_prompt = build_elements_prompt(pdf_path.name, outline_summary, geometry_summary)
-
-        raw_elements_res = self.harness.call_json(elements_prompt)
-        flat_elements = self._parse_and_bind_elements(raw_elements_res, outlines)
-        logger.info("[OutlinePipeline] Step 2 완료: 엘리먼트 %d개 바인딩", len(flat_elements))
-
-        # 4. 마크다운 목차 생성
-        markdown_outline = self._generate_markdown_outline(outlines)
-
-        return OutlineDocument(
-            document_title=pdf_path.name,
-            total_pages=len(pages),
-            outlines=outlines,
-            markdown_outline=markdown_outline,
-            flat_elements=flat_elements,
+        # 3. 통합 프롬프트 빌드
+        prompt = (
+            f"{instructions}\n\n"
+            f"======================================================================\n"
+            f"[분석 대상 문서 정보]\n"
+            f"- 대상 파일 경로: {doc_ctx['resolved_path']}\n"
+            f"- 파일명: {doc_ctx['filename']}\n"
+            f"- 총 페이지: {doc_ctx['total_pages']}페이지\n\n"
+            f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
+            f"{doc_ctx['context_text']}\n"
+            f"======================================================================\n\n"
+            f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
+            f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오."
         )
 
-    def _build_text_context(self, pages: List[PageGeometry]) -> str:
-        lines: List[str] = []
-        for p in pages:
-            lines.append(f"--- [페이지 {p.page_number}] ---")
-            # 텍스트 전체를 분석할 수 있도록 슬라이싱 제한 해제
-            for b in p.text_blocks:
-                text = b.text.replace("\n", " ").strip()
-                if text:
-                    lines.append(f"- (폰트:{b.size}, 위치:{b.bbox}) {text}")
-        return "\n".join(lines)
+        # 4. CLI 네이티브 구조화 실행
+        exec_res: CLIExecutionResult = self.harness.run_structured(
+            prompt=prompt,
+            schema_path=self.schema_path,
+            model=model or self.model,
+            effort=effort or self.effort,
+        )
 
-    def _build_outline_summary(self, nodes: List[OutlineNode]) -> str:
-        lines: List[str] = []
-        def walk(n_list: List[OutlineNode], depth: int = 0):
-            prefix = "  " * depth + "- "
-            for n in n_list:
-                lines.append(f"{prefix}ID: {n.id} | 제목: '{n.title}' | 레벨: {n.level} | 페이지: {n.page}")
-                if n.children:
-                    walk(n.children, depth + 1)
-        walk(nodes)
-        return "\n".join(lines)
+        telemetry = {
+            "ctx_duration": ctx_duration,
+            "cli_duration": exec_res.duration_seconds,
+            "tokens": {
+                "input": exec_res.input_tokens,
+                "output": exec_res.output_tokens,
+                "thinking": exec_res.thinking_tokens,
+                "total": exec_res.total_tokens,
+            },
+            "status": exec_res.status,
+        }
 
-    def _build_geometry_summary(self, pages: List[PageGeometry]) -> str:
-        lines: List[str] = []
-        for p in pages:
-            lines.append(f"--- [페이지 {p.page_number}] ---")
-            for t in p.tables:
-                lines.append(f"[실측 표 테이블] norm_bbox={t.norm_bbox}, col={t.col_count}, row={t.row_count}")
-            # 텍스트 전체를 분석할 수 있도록 슬라이싱 제한 해제
-            for b in p.text_blocks:
-                text = b.text.replace("\n", " ").strip()
-                if text:
-                    lines.append(f"[텍스트] bbox={b.bbox} text='{text}'")
-        return "\n".join(lines)
+        if exec_res.status != "SUCCESS" or not exec_res.structured_output:
+            logger.warning("[OutlinePipeline] CLI 구조화 출력 회수 실패 (%s): %s", exec_res.status, exec_res.error)
+            return self._fallback_outline(pdf_path, doc_ctx["total_pages"], telemetry)
 
-    def _parse_outlines(self, raw_json: Optional[Dict[str, Any]], filename: str) -> List[OutlineNode]:
-        if not raw_json:
-            return [OutlineNode(id="out-1", level=1, title=filename, page=1)]
-
+        # 5. 스키마 파싱 및 도메인 모델 생성
+        raw_output = exec_res.structured_output
         try:
-            parsed = _OutlineOutput.model_validate(raw_json)
-            def convert(items: List[_RawOutlineItem]) -> List[OutlineNode]:
-                res = []
-                for it in items:
-                    res.append(OutlineNode(
-                        id=it.id,
-                        level=it.level,
-                        title=it.title,
-                        page=it.page,
-                        box_2d=it.box_2d,
-                        purpose=it.purpose,
-                        elements=[],
-                        children=convert(it.children),
-                    ))
-                return res
-            return convert(parsed.outlines)
-        except Exception:
-            outlines_data = raw_json.get("outlines", [])
-            nodes = []
-            for idx, item in enumerate(outlines_data):
-                if isinstance(item, dict):
-                    nodes.append(OutlineNode(
+            parsed = OutlineOutput.model_validate(raw_output)
+            document = OutlineDocument.from_outline_output(parsed, telemetry=telemetry)
+            logger.info(
+                "[OutlinePipeline] V2 추출 성공: 루트 목차 %d건, 평면 엘리먼트 %d건 (소요: %ss)",
+                len(document.outlines),
+                len(document.flat_elements),
+                round(ctx_duration + exec_res.duration_seconds, 2),
+            )
+            return document
+        except Exception as ve:
+            logger.warning("[OutlinePipeline] Pydantic 검증 실패 (%s) — 관대 복구 시도", ve)
+            return self._lenient_parse(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+
+    def _fallback_outline(
+        self, pdf_path: Path, total_pages: int, telemetry: Dict[str, Any]
+    ) -> OutlineDocument:
+        """실패 시 안전 폴백 루트 아웃라인 노드 반환."""
+        root = OutlineNode(
+            id="out-root",
+            level=1,
+            title=pdf_path.name,
+            page=1,
+            box_2d=[50, 50, 950, 950],
+            purpose="문서 전체 (폴백)",
+            elements=[],
+            children=[],
+        )
+        return OutlineDocument(
+            document_title=pdf_path.name,
+            total_pages=total_pages,
+            outlines=[root],
+            markdown_outline=f"- **{pdf_path.name}** (p.1)",
+            flat_elements=[],
+            telemetry=telemetry,
+        )
+
+    def _lenient_parse(
+        self,
+        raw_json: Dict[str, Any],
+        filename: str,
+        total_pages: int,
+        telemetry: Dict[str, Any],
+    ) -> OutlineDocument:
+        """구조가 일부 어긋나더라도 유연하게 아웃라인을 복구합니다."""
+        outlines_data = raw_json.get("outlines") or []
+        nodes: List[OutlineNode] = []
+        for idx, item in enumerate(outlines_data):
+            if isinstance(item, dict):
+                nodes.append(
+                    OutlineNode(
                         id=item.get("id") or f"out-{idx+1}",
                         level=item.get("level", 1),
                         title=item.get("title") or f"섹션 {idx+1}",
                         page=item.get("page", 1),
                         box_2d=item.get("box_2d"),
                         purpose=item.get("purpose"),
-                    ))
-            return nodes or [OutlineNode(id="out-1", level=1, title=filename, page=1)]
+                        elements=[],
+                        children=[],
+                    )
+                )
+        if not nodes:
+            return self._fallback_outline(Path(filename), total_pages, telemetry)
 
-    def _parse_and_bind_elements(
-        self, raw_json: Optional[Dict[str, Any]], outlines: List[OutlineNode]
-    ) -> List[ElementItem]:
-        if not raw_json:
-            return []
-
-        node_map: Dict[str, OutlineNode] = {}
-        def map_nodes(nodes: List[OutlineNode]):
-            for n in nodes:
-                node_map[n.id] = n
-                if n.children:
-                    map_nodes(n.children)
-        map_nodes(outlines)
-
-        raw_elems: List[_RawElementItem] = []
-        try:
-            parsed = _ElementsOutput.model_validate(raw_json)
-            raw_elems = parsed.elements
-        except Exception:
-            for idx, item in enumerate(raw_json.get("elements", [])):
-                if isinstance(item, dict):
-                    raw_elems.append(_RawElementItem(
-                        id=item.get("id") or f"elem-{idx+1}",
-                        outline_id=item.get("outline_id") or "out-1",
-                        type=item.get("type", "paragraph"),
-                        label=item.get("label") or "컴포넌트",
-                        page=item.get("page", 1),
-                        box_2d=item.get("box_2d") or [0, 0, 1000, 1000],
-                        content_summary=item.get("content_summary"),
-                        structured_data=item.get("structured_data"),
-                    ))
-
-        flat: List[ElementItem] = []
-        for raw in raw_elems:
-            item = ElementItem(
-                id=raw.id,
-                outline_id=raw.outline_id,
-                type=raw.type,
-                label=raw.label,
-                page=raw.page,
-                box_2d=raw.box_2d,
-                content_summary=raw.content_summary,
-                structured_data=raw.structured_data,
-            )
-            flat.append(item)
-            target = node_map.get(raw.outline_id)
-            if target:
-                target.elements.append(item)
-            elif outlines:
-                outlines[0].elements.append(item)
-
-        return flat
-
-    def _generate_markdown_outline(self, nodes: List[OutlineNode], depth: int = 0) -> str:
-        lines: List[str] = []
-        for n in nodes:
-            indent = "  " * depth
-            p_info = f" (p.{n.page})" if n.page else ""
-            purpose_info = f" - {n.purpose}" if n.purpose else ""
-            lines.append(f"{indent}- **{n.title}**{p_info}{purpose_info}")
-            if n.children:
-                lines.append(self._generate_markdown_outline(n.children, depth + 1))
-        return "\n".join(lines)
+        output = OutlineOutput(
+            document_title=raw_json.get("document_title") or filename,
+            total_pages=raw_json.get("total_pages") or total_pages,
+            outlines=nodes,
+        )
+        return OutlineDocument.from_outline_output(output, telemetry=telemetry)

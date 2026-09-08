@@ -55,7 +55,7 @@ class ScaffoldDocumentResponse(BaseModel):
     slots: List[Dict[str, Any]] = Field(default_factory=list, description="슬롯 매핑 정보")
     archive: Optional[Dict[str, Any]] = Field(default=None, description="영속화된 아카이브 및 비전 에셋 메타")
 
-from app.documents.pipeline import ElementItem, OutlineNode
+from scaffold_engine import ElementItem, OutlineNode
 
 
 class ExtractOutlineRequest(BaseModel):

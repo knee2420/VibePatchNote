@@ -10,22 +10,41 @@
 """
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 import json
 import logging
 import os
+from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from .parsing import parse_json_payload
 
 logger = logging.getLogger(__name__)
 
-# 분류 작업에는 flash 계열이 충분히 정확하고 훨씬 빠르다.
+CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
+
+# 분류 및 구조화 작업 주력 모델 (Flash 계열이 충분히 정확하고 빠름)
 DEFAULT_MODEL = "gemini-3.8-flash-low"
-# 정상 경로는 15~25초. 재시도까지 최악 75x3=225초로 프런트 가드(240초) 안에 든다.
-DEFAULT_TIMEOUT_SECONDS = 75
+DEFAULT_TIMEOUT_SECONDS = 180
+
+
+@dataclass
+class CLIExecutionResult:
+    """CLI 실행 결과 엔벨로프 및 세션 텔레메트리."""
+    status: str
+    structured_output: Optional[Dict[str, Any]] = None
+    conversation_id: Optional[str] = None
+    duration_seconds: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    thinking_tokens: int = 0
+    total_tokens: int = 0
+    raw_response: str = ""
+    error: Optional[str] = None
 
 
 class AgyHarness:
@@ -36,10 +55,12 @@ class AgyHarness:
     def __init__(
         self,
         model: str = DEFAULT_MODEL,
+        effort: str = "low",
         timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         executable: str = "agy",
     ) -> None:
         self.model = model
+        self.effort = effort
         self.timeout_seconds = timeout_seconds
         self.executable = executable
 
@@ -80,6 +101,103 @@ class AgyHarness:
                     pass
         return None
 
+    def run_structured(
+        self,
+        prompt: str,
+        schema_path: Optional[Union[str, Path]] = None,
+        model: Optional[str] = None,
+        effort: Optional[str] = None,
+        conversation_id: Optional[str] = None,
+        timeout: Optional[int] = None,
+    ) -> CLIExecutionResult:
+        """
+        CLI 네이티브 구조화 출력(--json-schema, --output-format json) 및 텔레메트리를 직접 추출합니다.
+        """
+        target_model = model or self.model
+        target_effort = effort or self.effort
+        timeout_sec = timeout or self.timeout_seconds
+
+        cmd = [
+            self.executable,
+            "-p", prompt,
+            "--model", target_model,
+            "--effort", target_effort,
+            "--dangerously-skip-permissions",
+            "--disable-slash-commands",
+            "--output-format", "json",
+        ]
+
+        if schema_path and Path(schema_path).exists():
+            cmd.extend(["--json-schema", str(Path(schema_path).resolve())])
+
+        if conversation_id:
+            cmd.extend(["--conversation", conversation_id])
+
+        t0 = time.time()
+        try:
+            res = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout_sec,
+                check=False,
+                creationflags=CREATE_NO_WINDOW,
+            )
+        except subprocess.TimeoutExpired:
+            return CLIExecutionResult(
+                status="TIMEOUT",
+                error=f"CLI timed out after {timeout_sec}s",
+                duration_seconds=round(time.time() - t0, 3),
+            )
+        except Exception as e:
+            return CLIExecutionResult(
+                status="FAILED",
+                error=str(e),
+                duration_seconds=round(time.time() - t0, 3),
+            )
+
+        elapsed = round(time.time() - t0, 3)
+
+        if res.returncode != 0:
+            return CLIExecutionResult(
+                status="ERROR",
+                error=f"CLI exit {res.returncode}: {res.stderr[:500]}",
+                duration_seconds=elapsed,
+            )
+
+        raw_stdout = (res.stdout or "").strip()
+        try:
+            cli_meta = json.loads(raw_stdout)
+        except Exception:
+            return CLIExecutionResult(
+                status="PARSE_ERROR",
+                raw_response=raw_stdout,
+                error="Failed to parse CLI envelope JSON",
+                duration_seconds=elapsed,
+            )
+
+        usage = cli_meta.get("usage", {})
+        structured = cli_meta.get("structured_output")
+        if not structured and "response" in cli_meta:
+            try:
+                structured = json.loads(cli_meta["response"])
+            except Exception:
+                pass
+
+        return CLIExecutionResult(
+            status=cli_meta.get("status", "SUCCESS"),
+            structured_output=structured,
+            conversation_id=cli_meta.get("conversation_id"),
+            duration_seconds=cli_meta.get("duration_seconds", elapsed),
+            input_tokens=usage.get("input_tokens", 0),
+            output_tokens=usage.get("output_tokens", 0),
+            thinking_tokens=usage.get("thinking_tokens", 0),
+            total_tokens=usage.get("total_tokens", 0),
+            raw_response=raw_stdout,
+        )
+
     # --- 내부 ---
 
     def _invoke(self, prompt: str, schema_path: Optional[str], attempt: int) -> str:
@@ -93,6 +211,7 @@ class AgyHarness:
             result = subprocess.run(
                 cmd, capture_output=True, text=True, encoding="utf-8",
                 errors="replace", timeout=self.timeout_seconds, check=False,
+                creationflags=CREATE_NO_WINDOW,
             )
         except FileNotFoundError:
             logger.error("[agy] 실행 파일을 PATH 에서 찾을 수 없습니다: %s", self.executable)

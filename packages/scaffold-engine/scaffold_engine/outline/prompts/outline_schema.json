@@ -1,0 +1,231 @@
+{
+  "$defs": {
+    "ElementItem": {
+      "description": "아웃라인 섹션 내부에 속한 세부 컴포넌트 단위 및 실측 내용 값.",
+      "properties": {
+        "id": {
+          "description": "elem-1 등 고유 식별자",
+          "title": "Id",
+          "type": "string"
+        },
+        "outline_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "소속 아웃라인 노드 ID (예: out-1)",
+          "title": "Outline Id"
+        },
+        "type": {
+          "default": "key_value",
+          "description": "5대 컴포넌트 분류 유형: key_value | table | list | paragraph | media | form_field",
+          "title": "Type",
+          "type": "string"
+        },
+        "label": {
+          "description": "항목명 / 라벨 (예: 팀명, 성명, 지출내역 표)",
+          "title": "Label",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "기입된 실제 값(문자열, 숫자, 테이블 등)",
+          "title": "Value"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "list 타입인 경우 세부 불릿/항목 목록",
+          "title": "Items"
+        },
+        "page": {
+          "default": 1,
+          "description": "페이지 번호 (1-based)",
+          "title": "Page",
+          "type": "integer"
+        },
+        "box_2d": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표",
+          "title": "Box 2D"
+        },
+        "content_summary": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "내용 요약 또는 원문 발췌",
+          "title": "Content Summary"
+        },
+        "structured_data": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "표 데이터(columns, rows), Key-Value 쌍 등 구조화 메타",
+          "title": "Structured Data"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "ElementItem",
+      "type": "object"
+    },
+    "OutlineNode": {
+      "description": "문서의 계층적 목차 및 섹션 뼈대.",
+      "properties": {
+        "id": {
+          "description": "아웃라인 노드 식별자 (예: out-1, out-1-1)",
+          "title": "Id",
+          "type": "string"
+        },
+        "level": {
+          "default": 1,
+          "description": "계층 깊이: 1 (대주제/장), 2 (절/소주제), 3 (세부항목), 4 (하위 세부필드)",
+          "title": "Level",
+          "type": "integer"
+        },
+        "title": {
+          "description": "섹션 제목 / 서식 라벨",
+          "title": "Title",
+          "type": "string"
+        },
+        "type": {
+          "default": "key_value",
+          "description": "컴포넌트 분류: header | key_value | table | list | paragraph | media",
+          "title": "Type",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "description": "페이지 번호 (1-based)",
+          "title": "Page",
+          "type": "integer"
+        },
+        "box_2d": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "[ymin, xmin, ymax, xmax] 0~1000 전체 섹션 추정 영역",
+          "title": "Box 2D"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "해당 섹션의 도메인/비즈니스 목적 및 역할 요약",
+          "title": "Purpose"
+        },
+        "elements": {
+          "description": "이 섹션에 소속된 세부 엘리먼트 목록",
+          "items": {
+            "$ref": "#/$defs/ElementItem"
+          },
+          "title": "Elements",
+          "type": "array"
+        },
+        "children": {
+          "description": "하위 아웃라인 노드 목록",
+          "items": {
+            "$ref": "#/$defs/OutlineNode"
+          },
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "title"
+      ],
+      "title": "OutlineNode",
+      "type": "object"
+    }
+  },
+  "description": "V2 CLI 네이티브 구조화 출력 스키마.",
+  "properties": {
+    "document_title": {
+      "description": "분석 대상 문서 파일명",
+      "title": "Document Title",
+      "type": "string"
+    },
+    "total_pages": {
+      "default": 1,
+      "description": "실제 분석한 총 페이지 수",
+      "title": "Total Pages",
+      "type": "integer"
+    },
+    "outlines": {
+      "description": "계층적 목차 트리 (L1~L4 아웃라인 및 5대 컴포넌트 요소 전수 바인딩)",
+      "items": {
+        "$ref": "#/$defs/OutlineNode"
+      },
+      "title": "Outlines",
+      "type": "array"
+    }
+  },
+  "required": [
+    "document_title"
+  ],
+  "title": "OutlineOutput",
+  "type": "object"
+}

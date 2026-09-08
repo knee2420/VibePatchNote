@@ -5,9 +5,14 @@
 - 개발 빌드 및 프로덕션 번들에 절대 포함되지 않으며, 프로젝트의 핵심 지식 베이스로 기능합니다.
 
 ## 디렉토리 체계 요약
+- **`01.requirements_analysis/`**: 기획 의도, 전역 기능(Features) 및 원자적 기능 단위(Atomic Features) 요구사항 명세 (`01-requirements-analysis.md` 준수).
+- **`02.tech_specs_candidates/`**: 기술 스펙 후보군, 대안 비교 분석(Trade-offs) 및 PoC 결과 검토 (`02-tech-specs-candidates.md` 준수).
 - **`03.patch_note/`**: 타임라인별 불변 패치노트 카드(Immutable Patch Card) 및 변경 이력 아카이브 (`03-patch-note.md` 가이드 준수).
 - **`04.measurement/`**: 성능 회귀·버그·병목을 **측정으로 규명한 진단 카드**(Evidence Trail) 및 배제된 가설 기록 (`04-measurement.md` 가이드 준수).
-- **`96.data_pipeline/`**: 고밀도 지식 카드(C-XX) 및 인덱스 기반 메타 데이터베이스 (`pipeline_96_generator` / `pipeline_96_reader` 대상).
-- **`97.reference/`**: 외부 레퍼런스, 표준 아키텍처 가이드, 벤치마킹 자료 보관.
-- **`98.collection/`**: 원본 수집 자료, 도메인 실데이터 저장소.
-- **`99.archive/`**: 완료된 기록, 공식 Git 클론 저장소(FSD, AHA 등), 지난 의사결정(ADR), 마일스톤 보관.
+- **`05.llm_tuning/`**: 핵심 LLM 파이프라인(목차 추출, 세그먼트 스캔, 스캐폴드 생성 등) 태스크별 튜닝 & 정량 벤치마크 워크벤치 (`05-llm-tuning.md` 가이드 준수).
+- **`95.data_source/`**: 테스트 및 파이프라인 검증용 원본 문서(PDF, Word 등) 보관소 (Read-Only, `95-data-source.md` 준수).
+- **`96.data_pipeline/`**: 고밀도 지식 카드(C-XX) 및 인덱스 기반 메타 데이터베이스 (`pipeline_96_generator` / `pipeline_96_reader` 대상, `96-data-pipeline.md` 준수).
+- **`97.reference/`**: 외부 레퍼런스, 표준 아키텍처 가이드, 벤치마킹 자료 보관 (`97-reference.md` 준수).
+- **`98.collection/`**: 리서치 수집물 및 분석 초안 관리 공간 (Inbox Pattern: `checking/` ➔ `picked/` 이동 라이프사이클, `98-collection.md` 준수).
+- **`99.archive/`**: 완료된 기록, 공식 Git 클론 저장소(FSD, AHA 등), 지난 의사결정(ADR), 마일스톤 보관 (`99-archive.md` 준수).
+

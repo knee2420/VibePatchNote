@@ -4,12 +4,12 @@ import {
   BookOpen,
   Scaling,
   Image as ImageIcon,
-  ScanText,
   Loader2,
   Edit3,
   Sparkles,
   PanelRightClose,
   PanelRightOpen,
+  FlaskConical,
 } from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
@@ -167,38 +167,41 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
           </button>
         )}
 
-        {/* Scan & Analyze Button (AI/agy-cli Structure Detection) */}
+        {/* [실험실 / 보류 기능] 구분선 및 단순 영역 스캔 (HITL Masking Test) */}
         {onScan && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onScan();
-            }}
-            disabled={isScanning}
-            className={`
-              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
-              ${
+          <>
+            <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5" title="실험 기능 구분선" />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onScan();
+              }}
+              disabled={isScanning}
+              className={`
+                p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
+                ${
+                  isScanning
+                    ? 'text-amber-600 bg-amber-100 animate-pulse'
+                    : hasSegments
+                    ? 'text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200'
+                    : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                }
+              `}
+              title={
                 isScanning
-                  ? 'text-indigo-600 bg-indigo-100 animate-pulse'
+                  ? '[실험] 문서 영역 분석 중...'
                   : hasSegments
-                  ? 'text-indigo-600 bg-indigo-100 hover:bg-indigo-200'
-                  : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
+                  ? '[실험] 문서 영역 재스캔 (마스킹 테스트)'
+                  : '[실험실] 단순 평면 영역 스캔 (HITL 마스킹 테스트용)'
               }
-            `}
-            title={
-              isScanning
-                ? 'agy-cli 문서 영역 분석 중...'
-                : hasSegments
-                ? '문서 영역 재스캔 (agy-cli 분석)'
-                : '스캔 혹은 문서 분석 (표, 개조식 목록, 섹션 감지)'
-            }
-          >
-            {isScanning ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-600" />
-            ) : (
-              <ScanText className="w-3.5 h-3.5" />
-            )}
-          </button>
+            >
+              {isScanning ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
+              ) : (
+                <FlaskConical className="w-3.5 h-3.5" />
+              )}
+            </button>
+          </>
         )}
 
         {/* Mask Edit Mode Toggle Button (Visible when segments exist) */}

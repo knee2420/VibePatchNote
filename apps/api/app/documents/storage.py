@@ -1,7 +1,7 @@
 """아웃라인 및 엘리먼트 데이터의 디스크 스토리지 영속화 관리자 (SSOT).
 
 저장 경로 규격:
-storage/outlines/{doc_slug}/
+storage/outlines/{doc_slug}/ 또는 통합 문서 패키지(document_storage)
   ├── manifest.json      (메타데이터: 제목, 페이지수, 노드수, 생성일시, 모델)
   ├── outline_tree.json  (계층 아웃라인 트리 + 소속 엘리먼트 전체 JSON)
   ├── elements.json      (뷰어 하이라이트용 평면 엘리먼트 배열)
@@ -11,12 +11,10 @@ from datetime import datetime, timezone
 import json
 import logging
 from pathlib import Path
-import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from app.core.config import settings
 from app.core.storage.document_storage import document_storage, slugify_document_name
-from app.documents.pipeline.context import DocumentPipelineContext, ElementItem, OutlineNode
 
 logger = logging.getLogger(__name__)
 
@@ -52,58 +50,46 @@ class OutlineStorageRepository:
             (legacy_dir / "outline_tree.json").exists() or (legacy_dir / "tree.json").exists()
         )
 
-    def save(self, ctx: DocumentPipelineContext) -> Path:
-        """파이프라인 실행 완료 컨텍스트를 신규 통합 문서 패키지에 영속화합니다."""
-        pkg = document_storage.get_package(ctx.filename)
+    def save_outline_document(self, filename: str, doc: Any) -> Path:
+        """scaffold-engine의 OutlineDocument 인스턴스를 통합 스토리지에 영속화합니다."""
+        pkg = document_storage.get_package(filename)
         pkg.ensure()
 
-        total_pages = ctx.metadata.get("total_pages") or len(ctx.geometry_pages) or 1
-        outlines_data = [n.model_dump(by_alias=True) for n in ctx.outlines]
-        elements_data = [e.model_dump(by_alias=True) for e in ctx.flat_elements]
+        total_pages = getattr(doc, "total_pages", 1)
+        outlines = getattr(doc, "outlines", [])
+        flat_elements = getattr(doc, "flat_elements", [])
+        markdown_outline = getattr(doc, "markdown_outline", "")
+
+        outlines_data = [
+            n.model_dump(by_alias=True) if hasattr(n, "model_dump") else n
+            for n in outlines
+        ]
+        elements_data = [
+            e.model_dump(by_alias=True) if hasattr(e, "model_dump") else e
+            for e in flat_elements
+        ]
 
         # 1. 아웃라인 및 엘리먼트 통합 저장
         outline_dir = pkg.outline.save(
-            document_title=ctx.filename,
+            document_title=filename,
             total_pages=total_pages,
             outlines=outlines_data,
             elements=elements_data,
-            markdown_outline=ctx.markdown_outline,
+            markdown_outline=markdown_outline,
             model=settings.agent_cli_model,
         )
 
-        # 2. 비전 실측 캐시 저장 (향후 스캐폴드 및 뷰어가 중복 렌더링 없이 공유 가능)
-        if ctx.geometry_pages:
-            try:
-                for idx, p in enumerate(ctx.geometry_pages, start=1):
-                    if hasattr(p, "image_bytes") and p.image_bytes:
-                        pkg.vision.save_page_image(idx, p.image_bytes)
-                pkg.vision.save_geometry({
-                    "total_pages": len(ctx.geometry_pages),
-                    "pages": [
-                        {
-                            "page_number": p.page_number if hasattr(p, "page_number") else i,
-                            "width": getattr(p, "width", 0),
-                            "height": getattr(p, "height", 0),
-                            "blocks_count": len(getattr(p, "blocks", [])),
-                        }
-                        for i, p in enumerate(ctx.geometry_pages, start=1)
-                    ]
-                })
-            except Exception as vis_err:
-                logger.warning("[OutlineStorage] Non-fatal vision cache save failed: %s", vis_err)
-
-        # 3. 문서 패키지 전역 manifest 갱신
+        # 2. 문서 패키지 전역 manifest 갱신
         now_iso = datetime.now(timezone.utc).isoformat()
         pkg.save_manifest({
-            "document_title": ctx.filename,
-            "source_file_name": ctx.filename,
+            "document_title": filename,
+            "source_file_name": filename,
             "total_pages": total_pages,
             "has_outline": True,
-            "has_vision": len(ctx.geometry_pages) > 0,
             "updated_at": now_iso,
         })
 
-        ctx.log(f"[storage] 통합 문서 스토리지 영속화 완료: {outline_dir.resolve()}")
+        logger.info("[storage] 통합 문서 스토리지 영속화 완료: %s", outline_dir.resolve())
         return outline_dir
 
     def load(self, filename: str) -> Optional[Dict[str, Any]]:

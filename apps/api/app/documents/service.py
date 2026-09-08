@@ -9,16 +9,15 @@ from fastapi import HTTPException, UploadFile
 
 from urllib.parse import unquote
 
+import asyncio
+
 from app.core.config import settings
 from app.core.storage.document_storage import document_storage
 from app.core.workflow.engine import NativeWorkflowEngine
-from app.documents.pipeline import (
-    DocumentPipelineContext,
-    create_outline_and_elements_pipeline,
-    outline_storage,
-)
+from app.documents.storage import outline_storage
+from scaffold_engine import OutlinePipeline, OutlineDocument
 
-from .prompts import build_segment_scan_prompt
+from .experimental import build_segment_scan_prompt
 
 logger = logging.getLogger(__name__)
 
@@ -166,24 +165,21 @@ class ExtractionService:
                     "manifest": manifest,
                 }
 
-        logger.info("[ExtractionService] Running fresh outline pipeline for %s", file_path.name)
-        ctx = DocumentPipelineContext(file_path=file_path, filename=file_path.name)
-        runner = create_outline_and_elements_pipeline()
-        await runner.run(ctx)
-
-        loaded = outline_storage.load(file_path.name)
-        manifest = loaded.get("manifest", {}) if loaded else {}
+        logger.info("[ExtractionService] Running fresh OutlinePipeline (scaffold-engine) for %s", file_path.name)
+        pipeline = OutlinePipeline()
+        doc: OutlineDocument = await asyncio.to_thread(pipeline.run, file_path)
+        outline_storage.save_outline_document(file_path.name, doc)
 
         return {
             "status": "completed",
             "document_title": file_path.name,
-            "total_pages": ctx.metadata.get("total_pages") or len(ctx.geometry_pages) or 1,
-            "total_outlines": len(ctx.outlines),
-            "total_elements": len(ctx.flat_elements),
-            "outlines": [n.model_dump(by_alias=True) for n in ctx.outlines],
-            "elements": [e.model_dump(by_alias=True) for e in ctx.flat_elements],
-            "markdown_outline": ctx.markdown_outline,
-            "manifest": manifest,
+            "total_pages": doc.total_pages,
+            "total_outlines": len(doc.outlines),
+            "total_elements": len(doc.flat_elements),
+            "outlines": [n.model_dump(by_alias=True) for n in doc.outlines],
+            "elements": [e.model_dump(by_alias=True) for e in doc.flat_elements],
+            "markdown_outline": doc.markdown_outline,
+            "manifest": doc.telemetry,
         }
 
     def get_document_outline(self, filename: str) -> Optional[Dict[str, Any]]:
