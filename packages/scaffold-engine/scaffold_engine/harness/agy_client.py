@@ -141,19 +141,32 @@ class AgyCliHarness(BaseLlmHarness):
         if conversation_id:
             cmd.extend(["--conversation", conversation_id])
 
+        # 호출이 길게 매달릴 수 있으므로 시작 시점도 남긴다(행 진단용).
+        logger.info(
+            "[agy] 호출 시작 model=%s prompt=%d자 schema=%s timeout=%ds",
+            target_model, len(prompt), bool(schema_file), timeout_sec,
+        )
+
+        prompt_file = None
         t0 = time.time()
         try:
-            res = subprocess.run(
-                cmd,
-                input=_stdin_envelope(prompt),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=timeout_sec,
-                check=False,
-                creationflags=CREATE_NO_WINDOW,
-            )
+            # 프롬프트를 디스크 파일로 먼저 영속화하여 던짐 (사용자 요청: 파일 기반 전달)
+            temp_dir = Path(tempfile.gettempdir())
+            prompt_file = temp_dir / f"agy_prompt_{int(time.time() * 1000)}.ndjson"
+            prompt_file.write_text(_stdin_envelope(prompt), encoding="utf-8")
+
+            with open(prompt_file, "r", encoding="utf-8") as stdin_f:
+                res = subprocess.run(
+                    cmd,
+                    stdin=stdin_f,
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=timeout_sec,
+                    check=False,
+                    creationflags=CREATE_NO_WINDOW,
+                )
         except subprocess.TimeoutExpired:
             logger.error("[agy] 타임아웃 (%ds, model=%s)", timeout_sec, target_model)
             return LlmExecutionResult(
@@ -165,6 +178,7 @@ class AgyCliHarness(BaseLlmHarness):
                     "command": cmd,
                     "timeout_seconds": timeout_sec,
                     "prompt_chars": len(prompt),
+                    "prompt_file": str(prompt_file) if prompt_file else None,
                 },
             )
         except FileNotFoundError:
@@ -187,6 +201,11 @@ class AgyCliHarness(BaseLlmHarness):
             )
         finally:
             self._cleanup_schema(schema_file, is_temp_schema)
+            if prompt_file and prompt_file.exists():
+                try:
+                    prompt_file.unlink()
+                except Exception:
+                    pass
 
         elapsed = round(time.time() - t0, 3)
         raw_stdout = (res.stdout or "").strip()
@@ -212,6 +231,20 @@ class AgyCliHarness(BaseLlmHarness):
 
         usage = envelope.get("usage") or {}
         response_text = envelope.get("response") or ""
+        status = envelope.get("status", "SUCCESS")
+
+        # 성공 경로에도 반드시 흔적을 남긴다. 수백 초짜리 호출이 로그에 한 줄도
+        # 없으면 엔진 로그만 보고는 LLM 이 돌았는지조차 알 수 없다.
+        logger.info(
+            "[agy] model=%s status=%s %.2fs (prompt=%d자, tokens: in=%d out=%d total=%d)",
+            target_model,
+            status,
+            elapsed,
+            len(prompt),
+            usage.get("input_tokens", 0),
+            usage.get("output_tokens", 0),
+            usage.get("total_tokens", 0),
+        )
 
         # 스키마 준수 객체가 있으면 그것이 정본. 없을 때만 본문에서 관대 복원한다.
         structured = envelope.get("structured_output")
@@ -219,7 +252,7 @@ class AgyCliHarness(BaseLlmHarness):
             structured = parse_json_payload(response_text) if response_text else None
 
         return LlmExecutionResult(
-            status=envelope.get("status", "SUCCESS"),
+            status=status,
             model=target_model,
             structured_output=structured,
             raw_response=response_text or raw_stdout,

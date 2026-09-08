@@ -33,6 +33,18 @@ def setup_logging(base_logs_dir: Optional[Path] = None) -> Path:
 
     formatter = logging.Formatter(_LOG_FORMAT)
 
+    def _attach_file_handler(target: logging.Logger, path: Path) -> None:
+        """이미 같은 파일을 보는 핸들러가 있으면 새로 열지 않는다.
+
+        핸들러 객체를 먼저 만들고 나중에 중복 검사를 하면, 추가되지 않은 핸들러가
+        파일을 연 채로 남아 재호출마다 핸들이 샌다.
+        """
+        if any(getattr(h, "baseFilename", None) == str(path) for h in target.handlers):
+            return
+        handler = logging.FileHandler(str(path), encoding="utf-8", mode="a")
+        handler.setFormatter(formatter)
+        target.addHandler(handler)
+
     # 1. 루트 로거 기본 설정 (콘솔 + debug.log)
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
@@ -43,29 +55,16 @@ def setup_logging(base_logs_dir: Optional[Path] = None) -> Path:
         console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
 
-    debug_file = base_logs_dir / "debug.log"
-    if not any(getattr(h, "baseFilename", None) == str(debug_file) for h in root_logger.handlers):
-        debug_handler = logging.FileHandler(str(debug_file), encoding="utf-8", mode="a")
-        debug_handler.setFormatter(formatter)
-        root_logger.addHandler(debug_handler)
+    _attach_file_handler(root_logger, base_logs_dir / "debug.log")
 
     # 2. API 앱 전용 파일 핸들러 (logs/app.log)
     app_file = base_logs_dir / "app.log"
-    app_handler = logging.FileHandler(str(app_file), encoding="utf-8", mode="a")
-    app_handler.setFormatter(formatter)
-
     for app_name in ("vibe.api", "app"):
-        l = logging.getLogger(app_name)
-        if not any(getattr(h, "baseFilename", None) == str(app_file) for h in l.handlers):
-            l.addHandler(app_handler)
+        _attach_file_handler(logging.getLogger(app_name), app_file)
 
     # 3. scaffold-engine 전용 파일 핸들러 (logs/engines/scaffold_engine.log)
-    scaffold_file = engines_dir / "scaffold_engine.log"
-    scaffold_handler = logging.FileHandler(str(scaffold_file), encoding="utf-8", mode="a")
-    scaffold_handler.setFormatter(formatter)
-
-    engine_logger = logging.getLogger("scaffold_engine")
-    if not any(getattr(h, "baseFilename", None) == str(scaffold_file) for h in engine_logger.handlers):
-        engine_logger.addHandler(scaffold_handler)
+    _attach_file_handler(
+        logging.getLogger("scaffold_engine"), engines_dir / "scaffold_engine.log"
+    )
 
     return base_logs_dir

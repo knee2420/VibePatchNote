@@ -35,3 +35,6 @@ Thumbs.db
 
 # Vite
 *.local
+
+# 런타임 로그 / LLM 트레이스 산출물 (*.log 만으로는 jsonl/json 트레이스가 안 걸린다)
+apps/api/logs/

@@ -5,11 +5,12 @@ PyMuPDF 기반 3중 멀티모달 컨텍스트와 보편적 인지 분해 원칙�
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from scaffold_engine.harness import (
     DEFAULT_MODEL,
@@ -30,6 +31,10 @@ from scaffold_engine.outline.schemas.models import (
 logger = logging.getLogger(__name__)
 
 DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "outline_schema.json"
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 class OutlinePipeline:
@@ -86,19 +91,23 @@ class OutlinePipeline:
         if self.system_instructions_path.exists():
             instructions = self.system_instructions_path.read_text(encoding="utf-8")
 
-        # 2. 3중 멀티모달 컨텍스트 추출 (표 기하 + 타이포그래피 블록 + 원문 텍스트 흐름)
+        # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화 (.context.md / .elements.json)
+        ctx_started_at = _utc_now_iso()
         t0 = time.time()
-        doc_ctx = self.context_builder.build_context(pdf_path)
+        context_dir = pdf_path.parent / ".context"
+        doc_ctx = self.context_builder.build_context(pdf_path, output_dir=context_dir)
         ctx_duration = round(time.time() - t0, 3)
+        ctx_ended_at = _utc_now_iso()
 
-        # 3. 통합 프롬프트 빌드
+        # 3. 통합 프롬프트 빌드 (파일 참조 및 최적화 지침)
+        ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
         prompt = (
             f"{instructions}\n\n"
             f"======================================================================\n"
             f"[분석 대상 문서 정보]\n"
-            f"- 대상 파일 경로: {doc_ctx['resolved_path']}\n"
-            f"- 파일명: {doc_ctx['filename']}\n"
-            f"- 총 페이지: {doc_ctx['total_pages']}페이지\n\n"
+            f"- 대상 파일: {doc_ctx['filename']}\n"
+            f"- 총 페이지: {doc_ctx['total_pages']}페이지\n"
+            f"{ctx_file_info}\n"
             f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
             f"{doc_ctx['context_text']}\n"
             f"======================================================================\n\n"
@@ -107,12 +116,58 @@ class OutlinePipeline:
         )
 
         # 4. CLI / LLM 네이티브 구조화 실행
+        llm_started_at = _utc_now_iso()
+        llm_t0 = time.time()
         exec_res: LlmExecutionResult = self.harness.run_structured(
             prompt=prompt,
             schema_path=self.schema_path,
             model=target_model,
             effort=target_effort,
         )
+        llm_duration = round(time.time() - llm_t0, 3)
+        llm_ended_at = _utc_now_iso()
+
+        context_chars = len(doc_ctx.get("context_text", ""))
+
+        # `steps` 는 호스트 트레이서가 Span 으로 그대로 복원하는 실측 구간 목록이다.
+        # 엔진은 tracer 를 import 하지 않고 순수 dict 만 방출한다(P1 유지).
+        # 사후에 Span 을 만들면 start==end 가 되어 duration 이 0 이 되므로,
+        # 잰 시각을 여기서 반드시 함께 실어 보낸다.
+        steps: List[Dict[str, Any]] = [
+            {
+                "name": "DocumentContextBuilder",
+                "run_type": "tool",
+                "start_time": ctx_started_at,
+                "end_time": ctx_ended_at,
+                "duration_seconds": ctx_duration,
+                "inputs": {"filename": pdf_path.name, "total_pages": doc_ctx.get("total_pages", 1)},
+                "outputs": {"context_chars": context_chars},
+                "status": "SUCCESS",
+            },
+            {
+                "name": f"LLM:{target_model}",
+                "run_type": "llm",
+                "start_time": llm_started_at,
+                "end_time": llm_ended_at,
+                # 프로세스 기동까지 포함한 실제 벽시계 시간. CLI 가 자기 기준으로 보고한
+                # 값은 metadata 에 따로 남겨 둔다(둘의 차이가 곧 기동 오버헤드다).
+                "duration_seconds": llm_duration,
+                "inputs": {"prompt_chars": len(prompt), "prompt_snippet": prompt[:300]},
+                "metadata": {
+                    **(getattr(exec_res, "telemetry_metadata", None) or {}),
+                    "cli_reported_duration": exec_res.duration_seconds,
+                },
+                "tokens": {
+                    "input": exec_res.input_tokens,
+                    "output": exec_res.output_tokens,
+                    "thinking": exec_res.thinking_tokens,
+                    "cache_read": exec_res.cache_read_tokens,
+                    "total": exec_res.total_tokens,
+                },
+                "status": exec_res.status,
+                "error": exec_res.error,
+            },
+        ]
 
         # 이 dict 형태가 호스트 감사 로그(`app.core.llm.telemetry`)의 입력 규격이다.
         # 키를 바꾸면 `documents/service.py` 의 매핑도 함께 고쳐야 한다.
@@ -130,9 +185,10 @@ class OutlinePipeline:
             "status": exec_res.status,
             "error": exec_res.error,
             "total_pages": doc_ctx.get("total_pages", 1),
-            "context_chars": len(doc_ctx.get("context_text", "")),
+            "context_chars": context_chars,
             "prompt_snippet": prompt[:300],
             "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
+            "steps": steps,
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
@@ -148,8 +204,35 @@ class OutlinePipeline:
 
         # 5. 스키마 유효성 검증 및 표준화
         raw_output = exec_res.structured_output
+        val_started_at = _utc_now_iso()
+        val_t0 = time.time()
         try:
             validated = OutlineOutput.model_validate(raw_output)
+            val_error = None
+        except Exception as ve:
+            validated, val_error = None, str(ve)
+        steps.append({
+            "name": "OutlineSchemaValidation",
+            "run_type": "parser",
+            "start_time": val_started_at,
+            "end_time": _utc_now_iso(),
+            "duration_seconds": round(time.time() - val_t0, 3),
+            "status": "SUCCESS" if val_error is None else "FAILED",
+            "error": val_error,
+        })
+
+        if validated is None:
+            logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s) — 관대 복구 시도", val_error)
+            recovered_doc = self._lenient_recover(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+            return {
+                "success": True,
+                "document_title": pdf_path.name,
+                "data": raw_output,
+                "document": recovered_doc,
+                "telemetry": telemetry,
+            }
+
+        try:
             document = OutlineDocument.from_outline_output(validated, telemetry=telemetry)
             logger.info(
                 "[OutlinePipeline] 성공: 루트 노드 %d건, 엘리먼트 %d건 (시간: %ss)",
@@ -165,7 +248,7 @@ class OutlinePipeline:
                 "telemetry": telemetry,
             }
         except Exception as ve:
-            logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s) — 관대 복구 시도", ve)
+            logger.warning("[OutlinePipeline] 문서 표준화 실패 (%s) — 관대 복구 시도", ve)
             recovered_doc = self._lenient_recover(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
             return {
                 "success": True,

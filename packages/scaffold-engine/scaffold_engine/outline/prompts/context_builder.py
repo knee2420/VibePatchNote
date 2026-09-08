@@ -9,12 +9,12 @@ except ImportError:
 
 
 class DocumentContextBuilder:
-    """PDF 원본으로부터 표 구조 메타, 타이포그래피 블록, 원문 텍스트 전문을 추출하여 결합합니다."""
+    """PDF 원본으로부터 표 구조 메타, 타이포그래피 블록, 원문 텍스트 전문을 추출하고 파일로 영속화합니다."""
 
     def __init__(self, max_text_blocks_per_page: int = 5) -> None:
         self.max_text_blocks_per_page = max_text_blocks_per_page
 
-    def build_context(self, pdf_path: Path) -> Dict[str, Any]:
+    def build_context(self, pdf_path: Path, output_dir: Optional[Path] = None) -> Dict[str, Any]:
         pdf_path = Path(pdf_path).resolve()
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
@@ -102,10 +102,8 @@ class DocumentContextBuilder:
                         })
 
             if text_blocks:
-                # 폰트 크기 내림차순 정렬 후 상위 블록 선별 (헤딩/섹션 구조 최우선 보존)
                 sorted_blocks = sorted(text_blocks, key=lambda x: x["size"], reverse=True)
                 selected_blocks = sorted_blocks[: self.max_text_blocks_per_page]
-                # 다시 시각적 읽기 순서(Y좌표 -> X좌표)로 정렬하여 인과적 흐름 보존
                 selected_blocks.sort(key=lambda x: (x["norm_bbox"][0], x["norm_bbox"][1]))
 
                 summary_lines.append("[3. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
@@ -130,10 +128,21 @@ class DocumentContextBuilder:
 
         doc.close()
 
+        context_md_text = "\n".join(summary_lines)
+
+        # 사용자 요청: 컨텍스트 마크다운(.context.md) 파일을 디스크에 영속화
+        context_file_path = None
+        if output_dir:
+            output_dir = Path(output_dir).resolve()
+            output_dir.mkdir(parents=True, exist_ok=True)
+            context_file_path = output_dir / f"{pdf_path.stem}.context.md"
+            context_file_path.write_text(context_md_text, encoding="utf-8")
+
         return {
             "filename": pdf_path.name,
             "resolved_path": str(pdf_path),
             "total_pages": total_pages,
-            "context_text": "\n".join(summary_lines),
+            "context_text": context_md_text,
+            "context_file_path": str(context_file_path) if context_file_path else None,
             "pages_meta": pages_data,
         }

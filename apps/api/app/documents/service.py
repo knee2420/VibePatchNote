@@ -12,7 +12,13 @@ from urllib.parse import unquote
 import asyncio
 
 from app.core.config import settings
-from app.core.llm import llm_manager, record_llm_run, LlmExecutionResult, trace_session
+from app.core.llm import (
+    LlmExecutionResult,
+    llm_manager,
+    record_llm_run,
+    span_context,
+    trace_session,
+)
 from app.core.storage.document_storage import document_storage
 from app.core.workflow.engine import NativeWorkflowEngine
 from app.documents.storage import outline_storage
@@ -210,51 +216,41 @@ class ExtractionService:
             inputs={"filename": file_path.name, "model": getattr(harness, "model", "")},
             document_name=file_path.name,
         ) as trace:
-            doc: OutlineDocument = await asyncio.to_thread(pipeline.run, file_path)
+            # 엔진 호출 구간은 실시간 Span 으로 잡고, 엔진이 자기 스레드 안에서 잰
+            # 세부 단계(`telemetry["steps"]`)는 그 아래에 실측 시각 그대로 복원한다.
+            with span_context(
+                "OutlinePipeline.run",
+                run_type="chain",
+                inputs={"filename": file_path.name},
+            ):
+                doc: OutlineDocument = await asyncio.to_thread(pipeline.run, file_path)
+                trace.replay_steps((doc.telemetry or {}).get("steps"))
+
             status_val = doc.telemetry.get("status", "SUCCESS") if doc.telemetry else "SUCCESS"
             error_val = doc.telemetry.get("error") if doc.telemetry else None
 
-            # 하위 Span: Context 빌더 & LLM 실행
-            if doc.telemetry:
-                ctx_span = trace.create_span(
-                    name="DocumentContextBuilder",
-                    run_type="tool",
-                    inputs={"filename": file_path.name, "total_pages": doc.total_pages},
-                    metadata={"context_chars": doc.telemetry.get("context_chars", 0)},
-                )
-                trace.finish_span(
-                    ctx_span,
-                    outputs={"context_chars": doc.telemetry.get("context_chars", 0)},
-                    status="SUCCESS",
-                )
-
-                llm_span = trace.create_span(
-                    name=f"LLM:{doc.telemetry.get('model', harness.model)}",
-                    run_type="llm",
-                    inputs={"prompt_snippet": doc.telemetry.get("prompt_snippet")},
-                    metadata=doc.telemetry.get("telemetry_metadata", {}),
-                )
-                trace.finish_span(
-                    llm_span,
-                    tokens=doc.telemetry.get("tokens"),
-                    status=status_val,
-                    error=error_val,
-                )
-
             # 성공 시에만 영구 캐시 저장 (실패/타임아웃 폴백 문서는 캐시하지 않음)
             if status_val == "SUCCESS":
-                outline_storage.save_outline_document(file_path.name, doc)
-                trace.finish(
-                    outputs={"total_outlines": len(doc.outlines), "total_elements": len(doc.flat_elements)},
-                    status="SUCCESS",
-                )
+                with span_context(
+                    "OutlineStorage.save",
+                    run_type="tool",
+                    inputs={"filename": file_path.name},
+                ):
+                    outline_storage.save_outline_document(file_path.name, doc)
             else:
-                logger.warning("[ExtractionService] Outline extraction status is %s; bypassing outline disk cache.", status_val)
-                trace.finish(
-                    outputs={"total_outlines": len(doc.outlines), "total_elements": len(doc.flat_elements)},
-                    status=status_val,
-                    error=error_val,
+                logger.warning(
+                    "[ExtractionService] Outline extraction status is %s; bypassing outline disk cache.",
+                    status_val,
                 )
+
+            trace.finish(
+                outputs={
+                    "total_outlines": len(doc.outlines),
+                    "total_elements": len(doc.flat_elements),
+                },
+                status=status_val,
+                error=error_val,
+            )
 
             # Audit Trail 레거시 호환
             if doc.telemetry:
@@ -270,7 +266,9 @@ class ExtractionService:
                 )
 
         return {
-            "status": "completed",
+            # 폴백 문서를 정상 결과로 오인하지 않도록 실패를 그대로 드러낸다.
+            # 스키마 계약: completed | failed
+            "status": "completed" if status_val == "SUCCESS" else "failed",
             "document_title": file_path.name,
             "total_pages": doc.total_pages,
             "total_outlines": len(doc.outlines),
