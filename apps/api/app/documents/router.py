@@ -36,6 +36,31 @@ async def get_document_outline(filename: str):
     return ExtractOutlineResponse(**result)
 
 
+@router.get("/runs/{filename}")
+async def get_document_runs(filename: str):
+    """문서의 최근 LLM 실행 감사 로그(텔레메트리, 소요시간, 토큰, 에러 등)를 조회합니다."""
+    return extraction_service.get_document_runs(filename)
+
+
+@router.get("/traces")
+async def get_traces(limit: int = 50):
+    """LangSmith 스타일 전체 파이프라인 Trace 요약 인덱스를 조회합니다."""
+    from app.core.llm import list_traces
+    return list_traces(limit=limit)
+
+
+@router.get("/traces/{trace_id}")
+async def get_trace_by_id(trace_id: str):
+    """지정된 Trace ID 의 Full Span 트리 및 세부 실행 데이터를 조회합니다."""
+    from app.core.llm import get_trace
+    from fastapi import HTTPException
+    trace_data = get_trace(trace_id)
+    if not trace_data:
+        raise HTTPException(status_code=404, detail=f"Trace {trace_id} not found")
+    return trace_data
+
+
+
 @router.post("/upload", response_model=UploadResponse)
 async def upload_reference_document(file: UploadFile = File(...)):
     """Phase 1: 참고 문서를 업로드하고 후속 파이프라인 메타를 돌려받습니다."""

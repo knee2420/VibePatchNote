@@ -12,6 +12,7 @@ from urllib.parse import unquote
 import asyncio
 
 from app.core.config import settings
+from app.core.llm import llm_manager, record_llm_run, LlmExecutionResult, trace_session
 from app.core.storage.document_storage import document_storage
 from app.core.workflow.engine import NativeWorkflowEngine
 from app.documents.storage import outline_storage
@@ -27,6 +28,34 @@ SEGMENT_CACHE_SUFFIX = ".segments.json"
 # 네이티브 워크플로우 잡 큐가 붙기 전까지 사용하는 고정 식별자.
 # TODO: 워크플로우 잡 큐 도입 시 실제 잡 ID 로 교체할 것.
 PLACEHOLDER_JOB_ID = "native-job-1234"
+
+
+def _result_from_pipeline_telemetry(
+    telemetry: Dict[str, Any], fallback_model: str
+) -> LlmExecutionResult:
+    """OutlinePipeline 텔레메트리 dict → 감사 로그 표준 엔벨로프.
+
+    파이프라인은 컨텍스트 구성 시간과 LLM 시간을 나눠 담고 토큰은 `tokens` 하위에 중첩합니다.
+    키 이름을 맞추는 지점은 여기 한 곳뿐입니다.
+    """
+    tokens = telemetry.get("tokens") or {}
+    ctx_seconds = float(telemetry.get("ctx_duration", 0.0) or 0.0)
+    llm_seconds = float(telemetry.get("cli_duration", 0.0) or 0.0)
+    return LlmExecutionResult(
+        status=telemetry.get("status") or "SUCCESS",
+        model=telemetry.get("model") or fallback_model,
+        duration_seconds=round(ctx_seconds + llm_seconds, 3),
+        input_tokens=tokens.get("input", 0),
+        output_tokens=tokens.get("output", 0),
+        thinking_tokens=tokens.get("thinking", 0),
+        cache_read_tokens=tokens.get("cache_read", 0),
+        total_tokens=tokens.get("total", 0),
+        error=telemetry.get("error"),
+        telemetry_metadata={
+            "ctx_duration": ctx_seconds,
+            "llm_duration": llm_seconds,
+        },
+    )
 
 
 def _safe_filename(filename: Optional[str]) -> str:
@@ -152,23 +181,93 @@ class ExtractionService:
             cached = outline_storage.load(file_path.name)
             if cached:
                 manifest = cached.get("manifest", {})
-                logger.info("[ExtractionService] Cached outline loaded for %s", file_path.name)
-                return {
-                    "status": "completed",
-                    "document_title": manifest.get("document_title", file_path.name),
-                    "total_pages": manifest.get("total_pages", 1),
-                    "total_outlines": manifest.get("total_outlines", 0),
-                    "total_elements": manifest.get("total_elements", 0),
-                    "outlines": cached.get("outlines", []),
-                    "elements": cached.get("elements", []),
-                    "markdown_outline": cached.get("markdown_outline", ""),
-                    "manifest": manifest,
-                }
+                # 실패 폴백 문서(purpose 에 "폴백" 포함)는 유효 캐시로 인정하지 않고 재추출
+                is_fallback = any(
+                    "폴백" in str(o.get("purpose", ""))
+                    for o in cached.get("outlines", [])
+                )
+                if not is_fallback:
+                    logger.info("[ExtractionService] Cached outline loaded for %s", file_path.name)
+                    return {
+                        "status": "completed",
+                        "document_title": manifest.get("document_title", file_path.name),
+                        "total_pages": manifest.get("total_pages", 1),
+                        "total_outlines": manifest.get("total_outlines", 0),
+                        "total_elements": manifest.get("total_elements", 0),
+                        "outlines": cached.get("outlines", []),
+                        "elements": cached.get("elements", []),
+                        "markdown_outline": cached.get("markdown_outline", ""),
+                        "manifest": manifest,
+                    }
 
-        logger.info("[ExtractionService] Running fresh OutlinePipeline (scaffold-engine) for %s", file_path.name)
-        pipeline = OutlinePipeline()
-        doc: OutlineDocument = await asyncio.to_thread(pipeline.run, file_path)
-        outline_storage.save_outline_document(file_path.name, doc)
+        logger.info("[ExtractionService] Running fresh OutlinePipeline (scaffold-engine) with core.llm for %s", file_path.name)
+        harness = llm_manager.get_harness()
+        pipeline = OutlinePipeline(harness=harness)
+
+        # LangSmith 스타일 Trace 세션 시작
+        with trace_session(
+            name="OutlineExtractionPipeline",
+            inputs={"filename": file_path.name, "model": getattr(harness, "model", "")},
+            document_name=file_path.name,
+        ) as trace:
+            doc: OutlineDocument = await asyncio.to_thread(pipeline.run, file_path)
+            status_val = doc.telemetry.get("status", "SUCCESS") if doc.telemetry else "SUCCESS"
+            error_val = doc.telemetry.get("error") if doc.telemetry else None
+
+            # 하위 Span: Context 빌더 & LLM 실행
+            if doc.telemetry:
+                ctx_span = trace.create_span(
+                    name="DocumentContextBuilder",
+                    run_type="tool",
+                    inputs={"filename": file_path.name, "total_pages": doc.total_pages},
+                    metadata={"context_chars": doc.telemetry.get("context_chars", 0)},
+                )
+                trace.finish_span(
+                    ctx_span,
+                    outputs={"context_chars": doc.telemetry.get("context_chars", 0)},
+                    status="SUCCESS",
+                )
+
+                llm_span = trace.create_span(
+                    name=f"LLM:{doc.telemetry.get('model', harness.model)}",
+                    run_type="llm",
+                    inputs={"prompt_snippet": doc.telemetry.get("prompt_snippet")},
+                    metadata=doc.telemetry.get("telemetry_metadata", {}),
+                )
+                trace.finish_span(
+                    llm_span,
+                    tokens=doc.telemetry.get("tokens"),
+                    status=status_val,
+                    error=error_val,
+                )
+
+            # 성공 시에만 영구 캐시 저장 (실패/타임아웃 폴백 문서는 캐시하지 않음)
+            if status_val == "SUCCESS":
+                outline_storage.save_outline_document(file_path.name, doc)
+                trace.finish(
+                    outputs={"total_outlines": len(doc.outlines), "total_elements": len(doc.flat_elements)},
+                    status="SUCCESS",
+                )
+            else:
+                logger.warning("[ExtractionService] Outline extraction status is %s; bypassing outline disk cache.", status_val)
+                trace.finish(
+                    outputs={"total_outlines": len(doc.outlines), "total_elements": len(doc.flat_elements)},
+                    status=status_val,
+                    error=error_val,
+                )
+
+            # Audit Trail 레거시 호환
+            if doc.telemetry:
+                record_llm_run(
+                    document_name=file_path.name,
+                    task_name="outline_extraction",
+                    result=_result_from_pipeline_telemetry(doc.telemetry, harness.model),
+                    extra_metadata={
+                        "trace_id": trace.trace_id,
+                        "total_outlines": len(doc.outlines),
+                        "total_elements": len(doc.flat_elements),
+                    },
+                )
 
         return {
             "status": "completed",
@@ -200,6 +299,28 @@ class ExtractionService:
             "markdown_outline": cached.get("markdown_outline", ""),
             "manifest": manifest,
         }
+
+    def get_document_runs(self, filename: str) -> list[Dict[str, Any]]:
+        """저장소에 보관된 해당 문서의 LLM 실행 감사 로그(Audit Trail) 목록을 최신순으로 조회합니다."""
+        try:
+            from app.core.storage.document_storage import slugify_document_name
+            storage_base = Path(settings.documents_storage_dir)
+            doc_slug = slugify_document_name(filename)
+            runs_dir = storage_base / doc_slug / "runs"
+            if not runs_dir.exists():
+                return []
+            run_files = sorted(runs_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+            runs = []
+            for rf in run_files[:20]:
+                try:
+                    with open(rf, "r", encoding="utf-8") as f:
+                        runs.append(json.load(f))
+                except Exception:
+                    pass
+            return runs
+        except Exception as e:
+            logger.warning("[ExtractionService] get_document_runs 조회 실패: %s", e)
+            return []
 
 
     # --- 내부 헬퍼 ---

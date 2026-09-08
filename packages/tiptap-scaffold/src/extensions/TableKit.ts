@@ -66,7 +66,15 @@ export const CustomTable = Table.extend({
           });
           if (!rows.length) return;
 
-          const width = Math.max(...rows.map((r) => r.length));
+          // 앞머리 빈 유령 셀 정규화: 1행의 첫 셀이 비어있고 뒷 셀들에 유효 내용이 있으면 유령 셀 슬라이스
+          const sanitizedRows = rows.map((r) => {
+            if (r.length > 1 && r[0] === '' && r.slice(1).some((c) => c !== '')) {
+              return r.slice(1);
+            }
+            return r;
+          });
+
+          const width = Math.max(...sanitizedRows.map((r) => r.length));
           const pad = (r: string[]) => {
             const copy = r.slice();
             while (copy.length < width) copy.push('');
@@ -74,11 +82,11 @@ export const CustomTable = Table.extend({
           };
           const line = (cells: string[]) => `| ${pad(cells).join(' | ')} |`;
 
-          state.write(line(rows[0]));
+          state.write(line(sanitizedRows[0]));
           state.ensureNewLine();
           state.write(`| ${Array(width).fill('---').join(' | ')} |`);
           state.ensureNewLine();
-          rows.slice(1).forEach((r) => {
+          sanitizedRows.slice(1).forEach((r) => {
             state.write(line(r));
             state.ensureNewLine();
           });

@@ -170,7 +170,7 @@ class HtmlAssembler:
                     f'data-fs="{block.size or 10:.1f}"'
                     + (' data-fill="true"' if filled else "")
                 )
-                out.append(f"<{tag} {attrs}>{fragment}</{tag}>")
+                out.append(f"<{tag} {attrs}><p>{fragment}</p></{tag}>")
             out.append("</tr>")
         out.append("</tbody></table></div>")
         return "".join(out)

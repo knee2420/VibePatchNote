@@ -11,7 +11,12 @@ from pathlib import Path
 import time
 from typing import Any, Dict, Optional, Union
 
-from scaffold_engine.harness.agy_client import DEFAULT_MODEL, AgyHarness, CLIExecutionResult
+from scaffold_engine.harness import (
+    DEFAULT_MODEL,
+    BaseLlmHarness,
+    HarnessFactory,
+    LlmExecutionResult,
+)
 from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
 from scaffold_engine.outline.schemas.models import (
@@ -32,16 +37,16 @@ class OutlinePipeline:
 
     def __init__(
         self,
-        harness: Optional[AgyHarness] = None,
+        harness: Optional[BaseLlmHarness] = None,
         schema_path: Optional[Path] = None,
         system_instructions_path: Optional[Path] = None,
         default_model: str = DEFAULT_MODEL,
-        default_effort: str = "low",
+        default_effort: Optional[str] = None,
         timeout_seconds: int = 180,
     ) -> None:
         self.default_model = default_model
         self.default_effort = default_effort
-        self.harness = harness or AgyHarness(
+        self.harness = harness or HarnessFactory.create(
             model=default_model, effort=default_effort, timeout_seconds=timeout_seconds
         )
         self.context_builder = DocumentContextBuilder()
@@ -101,28 +106,37 @@ class OutlinePipeline:
             f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오."
         )
 
-        # 4. CLI 네이티브 구조화 실행
-        exec_res: CLIExecutionResult = self.harness.run_structured(
+        # 4. CLI / LLM 네이티브 구조화 실행
+        exec_res: LlmExecutionResult = self.harness.run_structured(
             prompt=prompt,
             schema_path=self.schema_path,
             model=target_model,
             effort=target_effort,
         )
 
+        # 이 dict 형태가 호스트 감사 로그(`app.core.llm.telemetry`)의 입력 규격이다.
+        # 키를 바꾸면 `documents/service.py` 의 매핑도 함께 고쳐야 한다.
         telemetry = {
+            "model": target_model,
             "ctx_duration": ctx_duration,
             "cli_duration": exec_res.duration_seconds,
             "tokens": {
                 "input": exec_res.input_tokens,
                 "output": exec_res.output_tokens,
                 "thinking": exec_res.thinking_tokens,
+                "cache_read": exec_res.cache_read_tokens,
                 "total": exec_res.total_tokens,
             },
             "status": exec_res.status,
+            "error": exec_res.error,
+            "total_pages": doc_ctx.get("total_pages", 1),
+            "context_chars": len(doc_ctx.get("context_text", "")),
+            "prompt_snippet": prompt[:300],
+            "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
-            logger.warning("[OutlinePipeline] CLI 회수 실패 (%s): %s", exec_res.status, exec_res.error)
+            logger.error("[OutlinePipeline] LLM 실행 실패 (%s): %s", exec_res.status, exec_res.error)
             fallback_doc = self._create_fallback_document(pdf_path, doc_ctx["total_pages"], telemetry)
             return {
                 "success": False,

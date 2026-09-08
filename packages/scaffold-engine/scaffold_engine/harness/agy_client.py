@@ -1,135 +1,143 @@
-"""`LlmHarness` 구현체 #1 — Antigravity CLI(agy).
+"""`BaseLlmHarness` 구현체 #1 — Antigravity CLI(agy).
 
 규칙: `.agents/rules/50-develop/agy-cli/01_scripting_guide/rule.md`
+
 - `--dangerously-skip-permissions` 필수 (헤드리스에서 권한 프롬프트가 자동 거부됨)
-- 윈도우 UTF-8 입출력 강제
+- 윈도우 UTF-8 입출력 강제 / `CREATE_NO_WINDOW` 로 콘솔 창 억제
 - `--json-schema` 로 구조화 출력 강제 (단, 항상 지켜지지는 않으므로 파서가 방어)
 
-새 벤더를 붙이려면 이 파일을 복제하지 말고 `LlmHarness` 를 구현한 클래스를
-`harness/` 에 추가한 뒤 `ScaffoldPipeline(harness=...)` 로 주입하면 된다.
+**전송 방식: stdin NDJSON (`--input-format stream-json`).**
+
+프롬프트를 `-p <prompt>` 로 명령줄에 실으면 윈도우 32KB 명령줄 한계에 걸려
+대형 문서 컨텍스트에서 `WinError 206` 으로 죽는다. `-p` 는 stdin 을 읽지 않으므로
+(값을 비우면 "empty prompt" 에러를 뱉는다) 유일한 우회로가 stream-json 입력이다.
+
+실측 확인 (2026-09-08, agy.exe):
+
+- 입력: `{"event":"user","message":{"role":"user","content":[{"type":"text","text":...}]}}` 한 줄.
+  `event` 필드가 없으면 CLI 가 거부한다.
+- 출력: NDJSON. 마지막 `{"event":"result","result":{...}}` 의 `result` 가
+  `--output-format json` 단일 엔벨로프와 **동일한 형태**(status/response/usage/...)다.
+- `--json-schema` 병용 시 `result.structured_output` 에 스키마 준수 객체가 담긴다.
+  `result.response` 쪽에는 `toolAction` 등 부수 필드가 섞이므로 structured_output 을 우선한다.
+
+새 벤더를 붙이려면 이 파일을 복제하지 말고 `BaseLlmHarness` 를 구현한 클래스를
+`harness/` 에 추가한 뒤 `HarnessFactory.register(provider, builder)` 로 등록한다.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import json
 import logging
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import time
-from typing import Any, Dict, Optional, Union
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple, Union
 
+from .base import (
+    STATUS_FAILED,
+    STATUS_PARSE_ERROR,
+    STATUS_TIMEOUT,
+    BaseLlmHarness,
+    LlmExecutionResult,
+)
 from .parsing import parse_json_payload
+from .registry import DEFAULT_MODEL_NAME, get_model_spec, resolve_effort
 
 logger = logging.getLogger(__name__)
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
-# 분류 및 구조화 작업 주력 모델 (Flash 계열이 충분히 정확하고 빠름)
-DEFAULT_MODEL = "gemini-3.8-flash-low"
+DEFAULT_MODEL = DEFAULT_MODEL_NAME
 DEFAULT_TIMEOUT_SECONDS = 180
 
 
-@dataclass
-class CLIExecutionResult:
-    """CLI 실행 결과 엔벨로프 및 세션 텔레메트리."""
-    status: str
-    structured_output: Optional[Dict[str, Any]] = None
-    conversation_id: Optional[str] = None
-    duration_seconds: float = 0.0
-    input_tokens: int = 0
-    output_tokens: int = 0
-    thinking_tokens: int = 0
-    total_tokens: int = 0
-    raw_response: str = ""
-    error: Optional[str] = None
+def _stdin_envelope(prompt: str) -> str:
+    """stream-json 입력 한 줄을 만든다."""
+    return json.dumps(
+        {
+            "event": "user",
+            "message": {"role": "user", "content": [{"type": "text", "text": prompt}]},
+        },
+        ensure_ascii=False,
+    ) + "\n"
 
 
-class AgyHarness:
-    """agy-cli 헤드리스 실행 클라이언트."""
+def _extract_result_envelope(stdout: str) -> Optional[Dict[str, Any]]:
+    """NDJSON 스트림에서 최종 결과 엔벨로프를 회수한다.
+
+    `--output-format json` 의 단일 객체 응답도 함께 흡수하므로,
+    전송 방식을 되돌리더라도 파싱부는 그대로 쓸 수 있다.
+    """
+    envelope: Optional[Dict[str, Any]] = None
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line.startswith("{"):
+            continue
+        try:
+            msg = json.loads(line)
+        except Exception:
+            continue
+        if not isinstance(msg, dict):
+            continue
+        if msg.get("event") == "result" and isinstance(msg.get("result"), dict):
+            envelope = msg["result"]
+        elif "status" in msg and "usage" in msg:
+            envelope = msg
+    return envelope
+
+
+class AgyCliHarness(BaseLlmHarness):
+    """agy-cli 헤드리스 실행 어댑터."""
 
     name = "agy"
 
     def __init__(
         self,
         model: str = DEFAULT_MODEL,
-        effort: str = "low",
+        effort: Optional[str] = None,
         timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
         executable: str = "agy",
     ) -> None:
-        self.model = model
+        super().__init__(model=model, timeout_seconds=timeout_seconds)
         self.effort = effort
-        self.timeout_seconds = timeout_seconds
         self.executable = executable
-
-    def run_json(
-        self,
-        prompt: str,
-        schema: Optional[Dict[str, Any]] = None,
-        retries: int = 2,
-        retry_hint: str = "",
-        list_key: str = "blocks",
-    ) -> Optional[Dict[str, Any]]:
-        """프롬프트를 실행하고 JSON 을 회수한다. 형식 위반 시 힌트를 덧붙여 재시도."""
-        schema_path = None
-        if schema is not None:
-            handle = tempfile.NamedTemporaryFile(
-                "w", suffix=".json", delete=False, encoding="utf-8"
-            )
-            json.dump(schema, handle)
-            handle.close()
-            schema_path = handle.name
-
-        try:
-            for attempt in range(retries + 1):
-                body = prompt if attempt == 0 else prompt + retry_hint
-                raw = self._invoke(body, schema_path, attempt)
-                payload = parse_json_payload(raw, list_key)
-                if payload and payload.get(list_key):
-                    return payload
-                logger.warning(
-                    "[agy] 형식 회수 실패 (시도 %d/%d). 앞부분: %s",
-                    attempt + 1, retries + 1, (raw or "")[:200],
-                )
-        finally:
-            if schema_path:
-                try:
-                    os.unlink(schema_path)
-                except OSError:
-                    pass
-        return None
 
     def run_structured(
         self,
         prompt: str,
+        *,
         schema_path: Optional[Union[str, Path]] = None,
+        json_schema: Optional[Dict[str, Any]] = None,
         model: Optional[str] = None,
         effort: Optional[str] = None,
         conversation_id: Optional[str] = None,
         timeout: Optional[int] = None,
-    ) -> CLIExecutionResult:
-        """
-        CLI 네이티브 구조화 출력(--json-schema, --output-format json) 및 텔레메트리를 직접 추출합니다.
-        """
+    ) -> LlmExecutionResult:
         target_model = model or self.model
-        target_effort = effort or self.effort
+        spec = get_model_spec(target_model)
         timeout_sec = timeout or self.timeout_seconds
 
         cmd = [
             self.executable,
-            "-p", prompt,
             "--model", target_model,
-            "--effort", target_effort,
+            "--input-format", "stream-json",
+            "--output-format", "stream-json",
             "--dangerously-skip-permissions",
             "--disable-slash-commands",
-            "--output-format", "json",
         ]
 
-        if schema_path and Path(schema_path).exists():
-            cmd.extend(["--json-schema", str(Path(schema_path).resolve())])
+        # effort 판정의 유일한 출처는 registry.resolve_effort 다.
+        # 모델명이 이미 effort 를 담고 있으면(-low 등) None 이 돌아와 플래그가 붙지 않는다.
+        resolved_effort = resolve_effort(spec, effort or self.effort)
+        if resolved_effort:
+            cmd.extend(["--effort", resolved_effort])
 
+        schema_file, is_temp_schema = self._resolve_schema_file(schema_path, json_schema)
+        if schema_file:
+            cmd.extend(["--json-schema", schema_file])
         if conversation_id:
             cmd.extend(["--conversation", conversation_id])
 
@@ -137,6 +145,7 @@ class AgyHarness:
         try:
             res = subprocess.run(
                 cmd,
+                input=_stdin_envelope(prompt),
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
@@ -146,85 +155,122 @@ class AgyHarness:
                 creationflags=CREATE_NO_WINDOW,
             )
         except subprocess.TimeoutExpired:
-            return CLIExecutionResult(
-                status="TIMEOUT",
+            logger.error("[agy] 타임아웃 (%ds, model=%s)", timeout_sec, target_model)
+            return LlmExecutionResult(
+                status=STATUS_TIMEOUT,
+                model=target_model,
                 error=f"CLI timed out after {timeout_sec}s",
                 duration_seconds=round(time.time() - t0, 3),
+                telemetry_metadata={
+                    "command": cmd,
+                    "timeout_seconds": timeout_sec,
+                    "prompt_chars": len(prompt),
+                },
+            )
+        except FileNotFoundError:
+            logger.error("[agy] 실행 파일을 찾을 수 없음: %s", self.executable)
+            return LlmExecutionResult(
+                status=STATUS_FAILED,
+                model=target_model,
+                error=f"CLI executable not found: {self.executable}",
+                duration_seconds=round(time.time() - t0, 3),
+                telemetry_metadata={"command": cmd},
             )
         except Exception as e:
-            return CLIExecutionResult(
-                status="FAILED",
+            logger.exception("[agy] 프로세스 호출 오류: %s", e)
+            return LlmExecutionResult(
+                status=STATUS_FAILED,
+                model=target_model,
                 error=str(e),
                 duration_seconds=round(time.time() - t0, 3),
+                telemetry_metadata={"command": cmd},
             )
+        finally:
+            self._cleanup_schema(schema_file, is_temp_schema)
 
         elapsed = round(time.time() - t0, 3)
-
-        if res.returncode != 0:
-            return CLIExecutionResult(
-                status="ERROR",
-                error=f"CLI exit {res.returncode}: {res.stderr[:500]}",
-                duration_seconds=elapsed,
-            )
-
         raw_stdout = (res.stdout or "").strip()
-        try:
-            cli_meta = json.loads(raw_stdout)
-        except Exception:
-            return CLIExecutionResult(
-                status="PARSE_ERROR",
+        envelope = _extract_result_envelope(raw_stdout)
+
+        if envelope is None:
+            detail = (res.stderr or raw_stdout or "").strip()
+            failed = res.returncode != 0
+            logger.error(
+                "[agy] 결과 엔벨로프 회수 실패 (code=%d): %s", res.returncode, detail[:300]
+            )
+            return LlmExecutionResult(
+                status=STATUS_FAILED if failed else STATUS_PARSE_ERROR,
+                model=target_model,
                 raw_response=raw_stdout,
-                error="Failed to parse CLI envelope JSON",
+                error=(
+                    f"CLI exit {res.returncode}: {detail[:500]}"
+                    if failed
+                    else "Failed to parse CLI result envelope"
+                ),
                 duration_seconds=elapsed,
             )
 
-        usage = cli_meta.get("usage", {})
-        structured = cli_meta.get("structured_output")
-        if not structured and "response" in cli_meta:
-            try:
-                structured = json.loads(cli_meta["response"])
-            except Exception:
-                pass
+        usage = envelope.get("usage") or {}
+        response_text = envelope.get("response") or ""
 
-        return CLIExecutionResult(
-            status=cli_meta.get("status", "SUCCESS"),
+        # 스키마 준수 객체가 있으면 그것이 정본. 없을 때만 본문에서 관대 복원한다.
+        structured = envelope.get("structured_output")
+        if not isinstance(structured, dict):
+            structured = parse_json_payload(response_text) if response_text else None
+
+        return LlmExecutionResult(
+            status=envelope.get("status", "SUCCESS"),
+            model=target_model,
             structured_output=structured,
-            conversation_id=cli_meta.get("conversation_id"),
-            duration_seconds=cli_meta.get("duration_seconds", elapsed),
+            raw_response=response_text or raw_stdout,
+            conversation_id=envelope.get("conversation_id") or conversation_id,
+            duration_seconds=envelope.get("duration_seconds", elapsed),
             input_tokens=usage.get("input_tokens", 0),
             output_tokens=usage.get("output_tokens", 0),
             thinking_tokens=usage.get("thinking_tokens", 0),
+            cache_read_tokens=usage.get("cache_read_tokens", 0),
             total_tokens=usage.get("total_tokens", 0),
-            raw_response=raw_stdout,
+            error=envelope.get("error"),
+            telemetry_metadata={
+                "provider": spec.provider,
+                "transport": "stream-json/stdin",
+                "effort_flag": resolved_effort,
+                "prompt_chars": len(prompt),
+                "wall_seconds": elapsed,
+                "command": cmd,
+            },
         )
 
     # --- 내부 ---
 
-    def _invoke(self, prompt: str, schema_path: Optional[str], attempt: int) -> str:
-        cmd = [self.executable, "-p", prompt, "--model", self.model,
-               "--output-format", "json", "--dangerously-skip-permissions"]
-        if schema_path:
-            cmd[-1:-1] = ["--json-schema", schema_path]
+    @staticmethod
+    def _resolve_schema_file(
+        schema_path: Optional[Union[str, Path]],
+        json_schema: Optional[Dict[str, Any]],
+    ) -> Tuple[Optional[str], bool]:
+        """`--json-schema` 에 넘길 파일 경로를 확정한다. 반환: (경로, 임시파일여부)"""
+        if schema_path and Path(schema_path).exists():
+            return str(Path(schema_path).resolve()), False
+        if json_schema:
+            try:
+                handle = tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".json", delete=False, encoding="utf-8"
+                )
+                json.dump(json_schema, handle, ensure_ascii=False, indent=2)
+                handle.close()
+                return handle.name, True
+            except Exception as e:
+                logger.warning("[agy] 임시 스키마 생성 실패 — 스키마 없이 진행: %s", e)
+        return None, False
 
-        started = time.time()
-        try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, encoding="utf-8",
-                errors="replace", timeout=self.timeout_seconds, check=False,
-                creationflags=CREATE_NO_WINDOW,
-            )
-        except FileNotFoundError:
-            logger.error("[agy] 실행 파일을 PATH 에서 찾을 수 없습니다: %s", self.executable)
-            return ""
-        except subprocess.TimeoutExpired:
-            logger.error("[agy] %d초 타임아웃 (시도 %d)", self.timeout_seconds, attempt + 1)
-            return ""
-        except OSError as exc:
-            logger.error("[agy] 실행 오류: %s", exc)
-            return ""
+    @staticmethod
+    def _cleanup_schema(schema_file: Optional[str], is_temp: bool) -> None:
+        if is_temp and schema_file and os.path.exists(schema_file):
+            try:
+                os.unlink(schema_file)
+            except OSError:
+                pass
 
-        elapsed = round(time.time() - started, 1)
-        if result.returncode != 0:
-            logger.warning("[agy] 종료코드 %d: %s", result.returncode, (result.stderr or "")[:300])
-        logger.info("[agy] model=%s %ss (시도 %d)", self.model, elapsed, attempt + 1)
-        return (result.stdout or "").strip()
+
+# 하위 호환 별칭 (`core/pipeline.py` 등 기존 참조 지점 보호)
+AgyHarness = AgyCliHarness

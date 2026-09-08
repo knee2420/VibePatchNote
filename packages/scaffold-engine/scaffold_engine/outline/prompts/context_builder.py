@@ -11,7 +11,7 @@ except ImportError:
 class DocumentContextBuilder:
     """PDF 원본으로부터 표 구조 메타, 타이포그래피 블록, 원문 텍스트 전문을 추출하여 결합합니다."""
 
-    def __init__(self, max_text_blocks_per_page: int = 150) -> None:
+    def __init__(self, max_text_blocks_per_page: int = 5) -> None:
         self.max_text_blocks_per_page = max_text_blocks_per_page
 
     def build_context(self, pdf_path: Path) -> Dict[str, Any]:
@@ -80,7 +80,7 @@ class DocumentContextBuilder:
             except Exception:
                 pass
 
-            # 3. 주요 타이포그래피 블록 (폰트 크기 및 위치)
+            # 3. 주요 타이포그래피 블록 (폰트 크기 및 위치 — 헤딩/섹션 구조 후보 선별)
             raw_blocks = page.get_text("dict").get("blocks", [])
             text_blocks: List[Dict[str, Any]] = []
             for b in raw_blocks:
@@ -102,12 +102,18 @@ class DocumentContextBuilder:
                         })
 
             if text_blocks:
+                # 폰트 크기 내림차순 정렬 후 상위 블록 선별 (헤딩/섹션 구조 최우선 보존)
+                sorted_blocks = sorted(text_blocks, key=lambda x: x["size"], reverse=True)
+                selected_blocks = sorted_blocks[: self.max_text_blocks_per_page]
+                # 다시 시각적 읽기 순서(Y좌표 -> X좌표)로 정렬하여 인과적 흐름 보존
+                selected_blocks.sort(key=lambda x: (x["norm_bbox"][0], x["norm_bbox"][1]))
+
                 summary_lines.append("[3. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
-                for b in text_blocks[: self.max_text_blocks_per_page]:
+                for b in selected_blocks:
                     summary_lines.append(f"- (폰트:{b['size']}, 위치:{b['norm_bbox']}) {b['text']}")
                 summary_lines.append("")
 
-            # 4. 페이지 원문 텍스트 전문 (연속 텍스트 흐름)
+            # 4. 페이지 원문 텍스트 전문 (연속 텍스트 흐름 — 100% 무손실 원문 전문)
             raw_page_text = page.get_text("text").strip()
             if raw_page_text:
                 summary_lines.append("[4. 페이지 원문 텍스트 전문 (Raw Text Flow)]")

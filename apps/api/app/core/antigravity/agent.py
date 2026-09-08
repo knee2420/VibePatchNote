@@ -1,9 +1,9 @@
 """
 Antigravity 에이전트 하네스 — AI 통신의 최하단 뼈대.
 
-packages/scaffold-engine의 표준 AgyHarness로 단일화되어,
-별도 :8001 브릿지 데몬 없이도 공식 CLI(agy) 헤드리스 프로토콜(--output-format json,
---json-schema, Windows CREATE_NO_WINDOW)을 안전하고 신속하게 수행합니다.
+`app.core.llm` 허브(= `scaffold_engine.harness` 계약)로 단일화되어, 별도 :8001 브릿지
+데몬 없이도 공식 CLI(agy) 헤드리스 프로토콜(stream-json stdin, --json-schema,
+Windows CREATE_NO_WINDOW)을 안전하고 신속하게 수행합니다.
 
 이 모듈은 "프롬프트를 넣으면 텍스트/JSON 을 돌려준다" 는 범용 통로만 제공합니다.
 어떤 도메인의 프롬프트인지 이 계층은 알지 못하며, 알아서도 안 됩니다.
@@ -12,14 +12,14 @@ import logging
 from typing import Any, Dict, Optional
 
 from app.core.config import settings
-from scaffold_engine.harness import AgyHarness, parse_json_payload
+from app.core.llm import llm_manager, parse_json_payload
 
 logger = logging.getLogger(__name__)
 
 
 class AntigravityAgent:
     """
-    Antigravity 에이전트 하네스 (scaffold-engine AgyHarness 일원화).
+    Antigravity 에이전트 하네스 (app.core.llm 일원화).
     단일 프로세스 무창(CREATE_NO_WINDOW) 및 CLI 네이티브 구조화 통신을 제공합니다.
     """
 
@@ -34,10 +34,10 @@ class AntigravityAgent:
         self.timeout_seconds = timeout_seconds or settings.agent_cli_timeout_seconds
         self.executable = executable or settings.agent_cli_bin
         self.effort = effort
-        self.harness = AgyHarness(
+        self.harness = llm_manager.get_harness(
             model=self.model,
             effort=self.effort,
-            timeout_seconds=self.timeout_seconds,
+            timeout=self.timeout_seconds,
             executable=self.executable,
         )
 
@@ -101,7 +101,7 @@ class AntigravityAgent:
 
         # 1. 스키마가 제공된 경우 표준 run_json(schema 템프파일 + 자동 재시도) 활용
         if schema is not None:
-            data = self.harness.run_json(prompt, schema=schema)
+            data = self.harness.run_json(prompt, schema=schema, timeout=self.timeout_seconds)
             if data is not None:
                 return data
 

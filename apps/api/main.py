@@ -1,4 +1,4 @@
-"""Document Builder Backend Harness 진입점."""
+"""Document Builder Backend Harness 진입점 (FastAPI)."""
 import logging
 import sys
 from pathlib import Path
@@ -8,22 +8,12 @@ _PACKAGES_DIR = Path(__file__).resolve().parents[2] / "packages"
 if str(_PACKAGES_DIR / "scaffold-engine") not in sys.path:
     sys.path.insert(0, str(_PACKAGES_DIR / "scaffold-engine"))
 
-# 로깅 디렉터리 및 핸들러 초기화
-_LOGS_DIR = Path(__file__).resolve().parent / "logs"
-_LOGS_DIR.mkdir(parents=True, exist_ok=True)
-_LOG_FILE = _LOGS_DIR / "debug.log"
+from app.core.logging_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s] [%(levelname)s] [%(name)s:%(lineno)d] %(message)s",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(str(_LOG_FILE), encoding="utf-8", mode="a"),
-    ],
-)
+_LOGS_DIR = setup_logging()
 logger = logging.getLogger("vibe.api")
-logger.info("================ BACKEND LOGGING INITIALIZED ================")
-logger.info("Log file target: %s", _LOG_FILE)
+logger.info("================ MULTI-TARGET LOGGING INITIALIZED ================")
+logger.info("Base logs directory: %s", _LOGS_DIR)
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
