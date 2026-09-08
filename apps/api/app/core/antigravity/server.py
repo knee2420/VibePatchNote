@@ -1,9 +1,9 @@
 """
-Antigravity Agent Bridge Server (:8001)
+[DEPRECATED / SUNSET] Antigravity Agent Bridge Server (:8001)
 
-독립 터미널에서 상시 대기하며 LLM 추론 요청을 실시간으로 중계하는 전용 에이전트 서버.
-- 터미널 창에 프롬프트 크기, 모델, 소요 시간, 결과를 컬러 로그로 실시간 표시합니다.
-- Windows 창 깜빡임(CREATE_NO_WINDOW)을 완벽 차단하며, 문제 발생 시 Ctrl+C 로 즉시 재시작할 수 있습니다.
+이 서버는 packages/scaffold-engine의 표준 AgyHarness로 일원화되어 공식적으로 은퇴(Sunset)되었습니다.
+모든 LLM 추론 및 구조화 통신은 AntigravityAgent -> AgyHarness를 통해 인프로세스로 직접 안전하게 수행됩니다.
+더 이상 별도의 터미널에서 `pnpm dev:agent`를 실행할 필요가 없습니다.
 """
 import json
 import logging
@@ -20,14 +20,13 @@ import uvicorn
 # Windows 프로세스 창 깜빡임 방지 플래그 (CREATE_NO_WINDOW = 0x08000000)
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
-# 기본 모델 설정 (agy CLI 지원 정식 고속 모델: gemini-3.8-flash-low)
 DEFAULT_MODEL = os.getenv("AGENT_CLI_MODEL", "gemini-3.8-flash-low")
 DEFAULT_BIN = os.getenv("AGENT_CLI_BIN", "agy")
 
 app = FastAPI(
-    title="Antigravity Agent Bridge Server",
-    description="상주형 Antigravity CLI 브릿지 관제 서버",
-    version="1.0.0",
+    title="Antigravity Agent Bridge Server [DEPRECATED]",
+    description="[DEPRECATED] packages/scaffold-engine/harness/AgyHarness 로 통합되었습니다.",
+    version="1.0.0-deprecated",
 )
 
 # 콘솔 ANSI 컬러 팔레트
@@ -167,13 +166,12 @@ def run_prompt_json(req: AgentPromptRequest) -> AgentJsonResponse:
 
 
 def main() -> None:
-    print(f"\n{BOLD}{GREEN}==============================================================={RESET}")
-    print(f"{BOLD}{GREEN}  🤖 Antigravity Agent Bridge Server (:8001){RESET}")
-    print(f"  • Port: {BOLD}8001{RESET} | Executable: {BOLD}{DEFAULT_BIN}{RESET}")
-    print(f"  • Default Model: {CYAN}{DEFAULT_MODEL}{RESET} (Fast Flash)")
-    print(f"  • Windows No-Window Guard: {BOLD}{'ENABLED' if CREATE_NO_WINDOW else 'N/A'}{RESET}")
-    print(f"  • Press {RED}Ctrl+C{RESET} to stop or restart anytime.")
-    print(f"{BOLD}{GREEN}==============================================================={RESET}\n")
+    print(f"\n{BOLD}{YELLOW}==============================================================={RESET}")
+    print(f"{BOLD}{YELLOW}  ⚠️  Antigravity Agent Bridge Server (:8001) [SUNSET/DEPRECATED]{RESET}")
+    print(f"  • 이 서버는 packages/scaffold-engine 의 AgyHarness 로 공식 일원화되었습니다.")
+    print(f"  • apps/api 가 직접 CLI 를 인프로세스로 안전하게 호출하므로 이 서버는 더 이상 필요하지 않습니다.")
+    print(f"  • Press {RED}Ctrl+C{RESET} to stop.")
+    print(f"{BOLD}{YELLOW}==============================================================={RESET}\n")
 
     uvicorn.run(app, host="127.0.0.1", port=8001, log_level="warning")
 

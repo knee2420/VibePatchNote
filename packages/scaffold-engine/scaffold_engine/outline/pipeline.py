@@ -9,44 +9,44 @@ import json
 import logging
 from pathlib import Path
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from scaffold_engine.harness.agy_client import DEFAULT_MODEL, AgyHarness, CLIExecutionResult
-from scaffold_engine.outline.context_builder import DocumentContextBuilder
-from scaffold_engine.outline.models import (
+from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
+from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
+from scaffold_engine.outline.schemas.models import (
     ElementItem,
     OutlineDocument,
+    OutlineItem,
     OutlineNode,
     OutlineOutput,
 )
 
 logger = logging.getLogger(__name__)
 
-PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
-DEFAULT_SCHEMA_PATH = PROMPTS_DIR / "outline_schema.json"
-DEFAULT_INSTRUCTIONS_PATH = PROMPTS_DIR / "system_instructions.md"
+DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "outline_schema.json"
 
 
 class OutlinePipeline:
-    """PDF 시각 기하 + 원문 텍스트 융합 멀티모달 1-Stage 아웃라인 추출 파이프라인."""
+    """PDF 시각 기하 + 원문 텍스트 융합 멀티모달 1-Stage 아웃라인 추출 파이프라인 (V2 정식)."""
 
     def __init__(
         self,
-        model: str = DEFAULT_MODEL,
-        effort: str = "low",
-        timeout_seconds: int = 180,
-        schema_path: Optional[Path] = None,
-        instructions_path: Optional[Path] = None,
         harness: Optional[AgyHarness] = None,
+        schema_path: Optional[Path] = None,
+        system_instructions_path: Optional[Path] = None,
+        default_model: str = DEFAULT_MODEL,
+        default_effort: str = "low",
+        timeout_seconds: int = 180,
     ) -> None:
-        self.model = model
-        self.effort = effort
+        self.default_model = default_model
+        self.default_effort = default_effort
         self.harness = harness or AgyHarness(
-            model=model, effort=effort, timeout_seconds=timeout_seconds
+            model=default_model, effort=default_effort, timeout_seconds=timeout_seconds
         )
         self.context_builder = DocumentContextBuilder()
         self.schema_path = schema_path or DEFAULT_SCHEMA_PATH
-        self.instructions_path = instructions_path or DEFAULT_INSTRUCTIONS_PATH
+        self.system_instructions_path = system_instructions_path or SYSTEM_INSTRUCTIONS_PATH
 
     def run(
         self,
@@ -54,17 +54,32 @@ class OutlinePipeline:
         model: Optional[str] = None,
         effort: Optional[str] = None,
     ) -> OutlineDocument:
-        """PDF를 분석하여 완성된 계층 목차와 5대 엘리먼트가 바인딩된 OutlineDocument 반환."""
+        """본 프로젝트 서비스 레이어용 표준 진입점 (OutlineDocument 반환)."""
+        res = self.execute(pdf_path=pdf_path, model=model, effort=effort)
+        if res.get("document") and isinstance(res["document"], OutlineDocument):
+            return res["document"]
+        return res["fallback_document"]
+
+    def execute(
+        self,
+        pdf_path: Union[str, Path],
+        model: Optional[str] = None,
+        effort: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """실험실(V2 벤치마크) 및 CLI 호환 진입점."""
         pdf_path = Path(pdf_path).resolve()
         if not pdf_path.exists():
-            raise FileNotFoundError(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
+            raise FileNotFoundError(f"PDF 파일이 존재하지 않습니다: {pdf_path}")
 
-        logger.info("[OutlinePipeline] V2 분석 시작: %s (모델: %s)", pdf_path.name, model or self.model)
+        target_model = model or self.default_model
+        target_effort = effort or self.default_effort
+
+        logger.info("[OutlinePipeline] V2 실행 시작: %s (model: %s, effort: %s)", pdf_path.name, target_model, target_effort)
 
         # 1. 시스템 프롬프트 지침 로드
         instructions = ""
-        if self.instructions_path.exists():
-            instructions = self.instructions_path.read_text(encoding="utf-8")
+        if self.system_instructions_path.exists():
+            instructions = self.system_instructions_path.read_text(encoding="utf-8")
 
         # 2. 3중 멀티모달 컨텍스트 추출 (표 기하 + 타이포그래피 블록 + 원문 텍스트 흐름)
         t0 = time.time()
@@ -90,8 +105,8 @@ class OutlinePipeline:
         exec_res: CLIExecutionResult = self.harness.run_structured(
             prompt=prompt,
             schema_path=self.schema_path,
-            model=model or self.model,
-            effort=effort or self.effort,
+            model=target_model,
+            effort=target_effort,
         )
 
         telemetry = {
@@ -107,30 +122,49 @@ class OutlinePipeline:
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
-            logger.warning("[OutlinePipeline] CLI 구조화 출력 회수 실패 (%s): %s", exec_res.status, exec_res.error)
-            return self._fallback_outline(pdf_path, doc_ctx["total_pages"], telemetry)
+            logger.warning("[OutlinePipeline] CLI 회수 실패 (%s): %s", exec_res.status, exec_res.error)
+            fallback_doc = self._create_fallback_document(pdf_path, doc_ctx["total_pages"], telemetry)
+            return {
+                "success": False,
+                "status": exec_res.status,
+                "error": exec_res.error or "No structured output returned",
+                "telemetry": telemetry,
+                "fallback_document": fallback_doc,
+            }
 
-        # 5. 스키마 파싱 및 도메인 모델 생성
+        # 5. 스키마 유효성 검증 및 표준화
         raw_output = exec_res.structured_output
         try:
-            parsed = OutlineOutput.model_validate(raw_output)
-            document = OutlineDocument.from_outline_output(parsed, telemetry=telemetry)
+            validated = OutlineOutput.model_validate(raw_output)
+            document = OutlineDocument.from_outline_output(validated, telemetry=telemetry)
             logger.info(
-                "[OutlinePipeline] V2 추출 성공: 루트 목차 %d건, 평면 엘리먼트 %d건 (소요: %ss)",
+                "[OutlinePipeline] 성공: 루트 노드 %d건, 엘리먼트 %d건 (시간: %ss)",
                 len(document.outlines),
                 len(document.flat_elements),
                 round(ctx_duration + exec_res.duration_seconds, 2),
             )
-            return document
+            return {
+                "success": True,
+                "document_title": pdf_path.name,
+                "data": validated.model_dump(by_alias=True),
+                "document": document,
+                "telemetry": telemetry,
+            }
         except Exception as ve:
-            logger.warning("[OutlinePipeline] Pydantic 검증 실패 (%s) — 관대 복구 시도", ve)
-            return self._lenient_parse(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+            logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s) — 관대 복구 시도", ve)
+            recovered_doc = self._lenient_recover(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+            return {
+                "success": True,
+                "document_title": pdf_path.name,
+                "data": raw_output,
+                "document": recovered_doc,
+                "telemetry": telemetry,
+            }
 
-    def _fallback_outline(
+    def _create_fallback_document(
         self, pdf_path: Path, total_pages: int, telemetry: Dict[str, Any]
     ) -> OutlineDocument:
-        """실패 시 안전 폴백 루트 아웃라인 노드 반환."""
-        root = OutlineNode(
+        root = OutlineItem(
             id="out-root",
             level=1,
             title=pdf_path.name,
@@ -149,36 +183,39 @@ class OutlinePipeline:
             telemetry=telemetry,
         )
 
-    def _lenient_parse(
+    def _lenient_recover(
         self,
         raw_json: Dict[str, Any],
         filename: str,
         total_pages: int,
         telemetry: Dict[str, Any],
     ) -> OutlineDocument:
-        """구조가 일부 어긋나더라도 유연하게 아웃라인을 복구합니다."""
         outlines_data = raw_json.get("outlines") or []
-        nodes: List[OutlineNode] = []
-        for idx, item in enumerate(outlines_data):
-            if isinstance(item, dict):
-                nodes.append(
-                    OutlineNode(
-                        id=item.get("id") or f"out-{idx+1}",
-                        level=item.get("level", 1),
-                        title=item.get("title") or f"섹션 {idx+1}",
-                        page=item.get("page", 1),
-                        box_2d=item.get("box_2d"),
-                        purpose=item.get("purpose"),
+        items: List[OutlineItem] = []
+        for idx, it in enumerate(outlines_data):
+            if isinstance(it, dict):
+                items.append(
+                    OutlineItem(
+                        id=it.get("id") or f"out-{idx+1}",
+                        level=it.get("level", 1),
+                        title=it.get("title") or f"섹션 {idx+1}",
+                        page=it.get("page", 1),
+                        box_2d=it.get("box_2d"),
+                        purpose=it.get("purpose"),
                         elements=[],
                         children=[],
                     )
                 )
-        if not nodes:
-            return self._fallback_outline(Path(filename), total_pages, telemetry)
+        if not items:
+            return self._create_fallback_document(Path(filename), total_pages, telemetry)
 
         output = OutlineOutput(
             document_title=raw_json.get("document_title") or filename,
             total_pages=raw_json.get("total_pages") or total_pages,
-            outlines=nodes,
+            outlines=items,
         )
         return OutlineDocument.from_outline_output(output, telemetry=telemetry)
+
+
+# 별칭 지원
+OutlineExtractionStep = OutlinePipeline

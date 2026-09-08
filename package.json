@@ -3,7 +3,6 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
-    "dev:agent": "pnpm --filter @vibe/api dev:agent",
     "dev:tuning": "python workbench/05.llm_tuning/studio/app.py",
     "build": "turbo run build",
     "lint": "turbo run lint",
