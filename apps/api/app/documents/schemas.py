@@ -14,11 +14,6 @@ class UploadResponse(BaseModel):
     file_url: str = Field(..., description="프런트엔드가 렌더링할 파일 URL")
 
 
-class ExtractionStatusResponse(BaseModel):
-    status: str
-    progress: int
-
-
 class SegmentItem(BaseModel):
     """스캔 결과의 평면 세그먼트 1건 (프런트 캔버스 오버레이가 그대로 소비)."""
 

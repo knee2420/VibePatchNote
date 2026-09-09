@@ -83,8 +83,4 @@ export const referenceDocumentApi = {
       filename,
       force_refresh: forceRefresh,
     }),
-
-  /** 스토리지에 캐시된 아웃라인 패키지를 조회합니다. */
-  getOutline: (filename: string) =>
-    httpClient.get<ExtractOutlineResponse>(`${BASE_PATH}/outline/${encodeURIComponent(filename)}`),
 };

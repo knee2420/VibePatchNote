@@ -16,15 +16,8 @@ export interface ScaffoldArchiveDetail extends ScaffoldArchiveMeta {
   slots: ScaffoldSlot[];
 }
 
-export interface ScaffoldArchiveListResponse {
-  total: number;
-  items: ScaffoldArchiveMeta[];
-}
-
 /** 스캐폴드 아카이브(서식 보관함) 통신 단일 진입점. */
 export const scaffoldArchiveApi = {
-  list: () => httpClient.get<ScaffoldArchiveListResponse>(BASE_PATH),
-
   get: (scaffoldId: string) =>
     httpClient.get<ScaffoldArchiveDetail>(`${BASE_PATH}/${encodeURIComponent(scaffoldId)}`),
 

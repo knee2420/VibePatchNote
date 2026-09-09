@@ -20,10 +20,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.bootstrap.container import Container
 from app.documents import router as documents_router
-from app.hitl import router as hitl_router
 from app.scaffolds import router as scaffolds_router
-from app.templates import router as templates_router
 from app.workspaces import router as workspaces_router
 
 app = FastAPI(
@@ -31,6 +30,11 @@ app = FastAPI(
     description="FastAPI Orchestrator for the Native Workflow Pipeline",
     version="0.1.0",
 )
+
+# 객체 그래프는 Container 한 곳에서 조립하고, 라우터에서만 FastAPI 의존성으로 꺼낸다.
+container = Container()
+container.wire(modules=[documents_router])
+app.container = container
 
 # 모든 HTTP 요청/응답을 파일에 기록하는 추적 미들웨어
 @app.middleware("http")
@@ -77,8 +81,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Upload & Analyze"])
 app.include_router(scaffolds_router, prefix="/api/v1/scaffolds", tags=["Scaffolds & Vision Archives"])
-app.include_router(hitl_router.router, prefix="/api/v1/hitl", tags=["Human-in-the-Loop"])
-app.include_router(templates_router.router, prefix="/api/v1/templates", tags=["Templates & Assets"])
 app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])
 
 

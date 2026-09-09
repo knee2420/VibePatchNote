@@ -14,17 +14,17 @@ import asyncio
 from app.core.config import settings
 from app.core.llm import (
     LlmExecutionResult,
-    llm_manager,
     record_llm_run,
     span_context,
     trace_session,
 )
-from app.core.storage.document_storage import document_storage
 from app.core.workflow.engine import NativeWorkflowEngine
-from app.documents.storage import outline_storage
-from scaffold_engine import OutlinePipeline, OutlineDocument
+from app.scaffolds.service import ScaffoldArchiveService
+from scaffold_engine import OutlinePipeline, OutlineDocument, ScaffoldPipeline
+from scaffold_engine.harness import BaseLlmHarness
 
 from .experimental import build_segment_scan_prompt
+from .ports import DocumentAnalysisRepository
 
 logger = logging.getLogger(__name__)
 
@@ -135,8 +135,17 @@ class ExtractionService:
     NativeWorkflowEngine 에 위임합니다. 프롬프트는 이 도메인의 `prompts.py` 가 소유합니다.
     """
 
-    def __init__(self, workflow_engine: Optional[NativeWorkflowEngine] = None) -> None:
-        self.workflow_engine = workflow_engine or NativeWorkflowEngine()
+    def __init__(
+        self,
+        workflow_engine: NativeWorkflowEngine,
+        document_analysis: DocumentAnalysisRepository,
+        llm_harness: BaseLlmHarness,
+        scaffold_archives: ScaffoldArchiveService,
+    ) -> None:
+        self._workflow_engine = workflow_engine
+        self._document_analysis = document_analysis
+        self._llm_harness = llm_harness
+        self._scaffold_archives = scaffold_archives
 
     async def register_upload(self, file: UploadFile) -> Dict[str, Any]:
         """
@@ -152,13 +161,6 @@ class ExtractionService:
             "file_url": build_public_file_url(saved_path.name),
         }
 
-    async def get_extraction_status(self, job_id: str) -> Dict[str, Any]:
-        """
-        추출 파이프라인의 진행 상태를 돌려줍니다.
-        TODO: 잡 큐 도입 시 job_id 로 실제 진행률을 조회할 것.
-        """
-        return {"status": "completed", "progress": 100}
-
     async def scan_document_segments(self, filename: str) -> Dict[str, Any]:
         """
         Phase 2: 업로드된 문서의 논리 영역(표/목록/섹션)을 실시간 추출합니다.
@@ -168,7 +170,7 @@ class ExtractionService:
         logger.info("[ExtractionService] Starting fresh segment scan for %s", file_path.name)
 
         prompt = build_segment_scan_prompt(file_path)
-        raw_result = await self.workflow_engine.execute_agent_json(prompt)
+        raw_result = await self._workflow_engine.execute_agent_json(prompt)
 
         response_data = self._to_scan_response(raw_result, file_path)
         self._store_cached_scan(file_path, response_data)
@@ -183,8 +185,8 @@ class ExtractionService:
         """
         file_path = resolve_uploaded_file(filename)
 
-        if not force_refresh and outline_storage.exists(file_path.name):
-            cached = outline_storage.load(file_path.name)
+        if not force_refresh and self._document_analysis.outline_exists(file_path.name):
+            cached = self._document_analysis.load_outline(file_path.name)
             if cached:
                 manifest = cached.get("manifest", {})
                 # 실패 폴백 문서(purpose 에 "폴백" 포함)는 유효 캐시로 인정하지 않고 재추출
@@ -207,13 +209,12 @@ class ExtractionService:
                     }
 
         logger.info("[ExtractionService] Running fresh OutlinePipeline (scaffold-engine) with core.llm for %s", file_path.name)
-        harness = llm_manager.get_harness()
-        pipeline = OutlinePipeline(harness=harness)
+        pipeline = OutlinePipeline(harness=self._llm_harness)
 
         # LangSmith 스타일 Trace 세션 시작
         with trace_session(
             name="OutlineExtractionPipeline",
-            inputs={"filename": file_path.name, "model": getattr(harness, "model", "")},
+            inputs={"filename": file_path.name, "model": self._llm_harness.model},
             document_name=file_path.name,
         ) as trace:
             # 엔진 호출 구간은 실시간 Span 으로 잡고, 엔진이 자기 스레드 안에서 잰
@@ -236,7 +237,7 @@ class ExtractionService:
                     run_type="tool",
                     inputs={"filename": file_path.name},
                 ):
-                    outline_storage.save_outline_document(file_path.name, doc)
+                    self._document_analysis.save_outline(file_path.name, doc)
             else:
                 logger.warning(
                     "[ExtractionService] Outline extraction status is %s; bypassing outline disk cache.",
@@ -257,7 +258,7 @@ class ExtractionService:
                 record_llm_run(
                     document_name=file_path.name,
                     task_name="outline_extraction",
-                    result=_result_from_pipeline_telemetry(doc.telemetry, harness.model),
+                    result=_result_from_pipeline_telemetry(doc.telemetry, self._llm_harness.model),
                     extra_metadata={
                         "trace_id": trace.trace_id,
                         "total_outlines": len(doc.outlines),
@@ -279,48 +280,6 @@ class ExtractionService:
             "manifest": doc.telemetry,
         }
 
-    def get_document_outline(self, filename: str) -> Optional[Dict[str, Any]]:
-        """저장소에 캐시된 아웃라인 패키지를 조회합니다."""
-        file_path = resolve_uploaded_file(filename)
-        cached = outline_storage.load(file_path.name)
-        if not cached:
-            return None
-        manifest = cached.get("manifest", {})
-        return {
-            "status": "completed",
-            "document_title": manifest.get("document_title", file_path.name),
-            "total_pages": manifest.get("total_pages", 1),
-            "total_outlines": manifest.get("total_outlines", 0),
-            "total_elements": manifest.get("total_elements", 0),
-            "outlines": cached.get("outlines", []),
-            "elements": cached.get("elements", []),
-            "markdown_outline": cached.get("markdown_outline", ""),
-            "manifest": manifest,
-        }
-
-    def get_document_runs(self, filename: str) -> list[Dict[str, Any]]:
-        """저장소에 보관된 해당 문서의 LLM 실행 감사 로그(Audit Trail) 목록을 최신순으로 조회합니다."""
-        try:
-            from app.core.storage.document_storage import slugify_document_name
-            storage_base = Path(settings.documents_storage_dir)
-            doc_slug = slugify_document_name(filename)
-            runs_dir = storage_base / doc_slug / "runs"
-            if not runs_dir.exists():
-                return []
-            run_files = sorted(runs_dir.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
-            runs = []
-            for rf in run_files[:20]:
-                try:
-                    with open(rf, "r", encoding="utf-8") as f:
-                        runs.append(json.load(f))
-                except Exception:
-                    pass
-            return runs
-        except Exception as e:
-            logger.warning("[ExtractionService] get_document_runs 조회 실패: %s", e)
-            return []
-
-
     # --- 내부 헬퍼 ---
 
     @staticmethod
@@ -329,8 +288,7 @@ class ExtractionService:
 
     def _load_cached_scan(self, file_path: Path) -> Optional[Dict[str, Any]]:
         """신규 통합 스토리지에서 세그먼트 캐시를 조회하며, 레거시 파일이 있으면 자동 마이그레이션합니다."""
-        pkg = document_storage.get_package(file_path.name)
-        cached = pkg.segments.load()
+        cached = self._document_analysis.load_segment_scan(file_path.name)
         if cached:
             return cached
 
@@ -341,7 +299,7 @@ class ExtractionService:
                 with open(legacy_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 # 신규 스토리지로 마이그레이션
-                pkg.segments.save(data)
+                self._document_analysis.save_segment_scan(file_path.name, data)
                 logger.info("[ExtractionService] Migrated legacy segment cache to document package: %s", file_path.name)
                 return data
             except Exception as exc:
@@ -352,8 +310,7 @@ class ExtractionService:
     def _store_cached_scan(self, file_path: Path, payload: Dict[str, Any]) -> None:
         """세그먼트 캐시를 문서 패키지 전용 디렉터리(storage/documents/{slug}/segments/)에 보관합니다."""
         try:
-            pkg = document_storage.get_package(file_path.name)
-            pkg.segments.save(payload)
+            self._document_analysis.save_segment_scan(file_path.name, payload)
         except Exception as exc:
             logger.warning("Failed to write segment cache for %s: %s", file_path.name, exc)
 
@@ -419,7 +376,7 @@ class ExtractionService:
             raise
 
         try:
-            pipeline = ScaffoldPipeline()
+            pipeline = ScaffoldPipeline(harness=self._llm_harness)
             logger.info("[ExtractionService] Starting async thread execution for ScaffoldPipeline...")
             result = await asyncio.to_thread(pipeline.run, file_path)
             logger.info("[ExtractionService] ScaffoldPipeline finished for %s, slots=%d, html_len=%d", file_path.name, len(result.slots), len(result.html_content))
@@ -427,10 +384,9 @@ class ExtractionService:
             # --- 신규 파이프라인 인터셉트: 전용 아카이브 모듈에 파일 및 비전 오버레이 영속화 ---
             archive_meta_dict = None
             try:
-                from app.scaffolds.service import scaffold_archive_service
                 logger.info("[ExtractionService] Archiving scaffold to storage and generating vision overlay...")
                 archive_meta = await asyncio.to_thread(
-                    scaffold_archive_service.archive_scaffold, file_path, result
+                    self._scaffold_archives.archive_scaffold, file_path, result
                 )
                 archive_meta_dict = archive_meta.model_dump(by_alias=True)
                 logger.info("[ExtractionService] Archived successfully: %s", archive_meta.scaffold_id)
@@ -448,8 +404,3 @@ class ExtractionService:
         except Exception as exc:
             logger.exception("[ExtractionService] ScaffoldPipeline execution failed for %s: %s", file_path.name, exc)
             raise
-
-
-
-
-extraction_service = ExtractionService()

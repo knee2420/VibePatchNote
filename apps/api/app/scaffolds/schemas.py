@@ -107,10 +107,3 @@ class ScaffoldArchiveContents(BaseModel):
     origin_markdown_content: str = ""
     prompt_spec_md: str = ""
     slots: List[SlotMappingItem] = Field(default_factory=list)
-
-
-class ScaffoldArchiveListResponse(BaseModel):
-    """아카이브 목록 응답."""
-
-    total: int
-    items: List[ScaffoldArchiveMeta]

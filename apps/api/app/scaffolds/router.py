@@ -5,19 +5,12 @@ from fastapi.responses import FileResponse
 
 from .schemas import (
     ScaffoldArchiveDetail,
-    ScaffoldArchiveListResponse,
     ScaffoldArchiveMeta,
     ScaffoldRenderUpdate,
 )
 from .service import scaffold_archive_service
 
 router = APIRouter()
-
-
-@router.get("", response_model=ScaffoldArchiveListResponse)
-async def list_archives():
-    """보관된 스캐폴드 서식 목록을 최신순으로 조회합니다."""
-    return scaffold_archive_service.list_archives()
 
 
 @router.get("/{scaffold_id}", response_model=ScaffoldArchiveDetail)

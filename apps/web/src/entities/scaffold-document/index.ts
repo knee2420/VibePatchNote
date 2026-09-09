@@ -15,5 +15,4 @@ export {
 export {
   scaffoldArchiveApi,
   type ScaffoldArchiveDetail,
-  type ScaffoldArchiveListResponse,
 } from './api/scaffoldArchiveApi';

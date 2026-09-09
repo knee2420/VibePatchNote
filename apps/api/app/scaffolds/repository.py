@@ -79,9 +79,6 @@ class IScaffoldRepository(Protocol):
     def find_contents(self, scaffold_id: str) -> Optional[ScaffoldArchiveContents]:
         ...
 
-    def find_all_records(self) -> List[ScaffoldArchiveRecord]:
-        ...
-
     def resolve_dir(self, scaffold_id: str) -> Path:
         ...
 
@@ -313,32 +310,6 @@ class LocalScaffoldRepository:
         except Exception as exc:
             logger.exception("[LocalScaffoldRepository] Failed to read archive for %s: %s", scaffold_id, exc)
             return None
-
-    def find_all_records(self) -> List[ScaffoldArchiveRecord]:
-        """저장된 모든 아카이브 레코드를 통합 수집하여 최신순으로 조회."""
-        seen_ids = set()
-        results: List[ScaffoldArchiveRecord] = []
-
-        # 1. 신규 문서 패키지 하위의 스캐폴드 탐색 (1순위)
-        for p in document_storage.find_all_scaffold_dirs():
-            record = self._read_record(p)
-            if record and record.scaffold_id not in seen_ids:
-                seen_ids.add(record.scaffold_id)
-                results.append(record)
-
-        # 2. 레거시 디렉터리가 남아있는 경우에만 폴백 탐색
-        if self.root_dir.exists():
-            for p in self.root_dir.iterdir():
-                if not p.is_dir():
-                    continue
-                record = self._read_record(p)
-                if record and record.scaffold_id not in seen_ids:
-                    seen_ids.add(record.scaffold_id)
-                    results.append(record)
-
-        # 생성일자(created_at) 내림차순 정렬
-        results.sort(key=lambda r: r.created_at or "", reverse=True)
-        return results
 
     def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
         """경로 조작(..) 방어 및 물리적 에셋 파일 경로 해석."""

@@ -28,7 +28,6 @@ from .repository import (
 from .schemas import (
     ASSET_VISION_RENDER,
     ScaffoldArchiveDetail,
-    ScaffoldArchiveListResponse,
     ScaffoldArchiveMeta,
     ScaffoldArchiveRecord,
 )
@@ -174,11 +173,6 @@ class ScaffoldArchiveService:
             return None
         contents = self.repository.find_contents(scaffold_id)
         return self._to_meta(contents.record) if contents else None
-
-    def list_archives(self) -> ScaffoldArchiveListResponse:
-        """전체 아카이브 목록 조회."""
-        items = [self._to_meta(record) for record in self.repository.find_all_records()]
-        return ScaffoldArchiveListResponse(total=len(items), items=items)
 
     def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
         """에셋 파일 경로 해석 위임."""
