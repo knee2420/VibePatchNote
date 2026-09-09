@@ -5,15 +5,14 @@ LangSmith 사상을 벤치마킹한 LLM 및 도메인 엔진 정밀 관제 트�
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 import contextvars
-from datetime import datetime, timezone
 import json
 import logging
-from pathlib import Path
-import time
-from typing import Any, Dict, Generator, List, Optional
 import uuid
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Generator, List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -312,7 +311,6 @@ def trace_session(
         metadata=metadata or {},
     )
     token = _active_trace.set(trace)
-    t0 = time.time()
     try:
         yield trace
         if trace.status == "RUNNING":

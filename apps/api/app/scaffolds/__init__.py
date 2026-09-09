@@ -1,16 +1,13 @@
-"""scaffolds domain package."""
+"""scaffolds 도메인의 Public API."""
+from .adapters import LocalScaffoldRepository
 from .formatters import ManifestFormatter, PromptSpecFormatter
-from .repository import IScaffoldRepository, LocalScaffoldRepository, local_scaffold_repository
-from .router import router
-from .service import ScaffoldArchiveService, scaffold_archive_service
+from .ports import ScaffoldRepository
+from .service import ScaffoldArchiveService
 
 __all__ = [
-    "router",
-    "scaffold_archive_service",
     "ScaffoldArchiveService",
-    "local_scaffold_repository",
     "LocalScaffoldRepository",
-    "IScaffoldRepository",
+    "ScaffoldRepository",
     "PromptSpecFormatter",
     "ManifestFormatter",
 ]

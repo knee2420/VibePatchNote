@@ -1,0 +1,35 @@
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"main.py" = ["E402"]
+
+[tool.importlinter]
+root_package = "app"
+
+[[tool.importlinter.contracts]]
+name = "Core must not import domains"
+type = "forbidden"
+source_modules = ["app.core"]
+forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces"]
+
+[[tool.importlinter.contracts]]
+name = "Documents must not depend on workspaces"
+type = "forbidden"
+source_modules = ["app.documents.service", "app.documents.adapters"]
+forbidden_modules = ["app.workspaces"]
+
+[[tool.importlinter.contracts]]
+name = "Scaffolds must not depend on other domains"
+type = "forbidden"
+source_modules = ["app.scaffolds.service", "app.scaffolds.adapters"]
+forbidden_modules = ["app.documents", "app.workspaces"]
+
+[[tool.importlinter.contracts]]
+name = "Workspaces must not depend on document domains"
+type = "forbidden"
+source_modules = ["app.workspaces.service", "app.workspaces.adapters"]
+forbidden_modules = ["app.documents", "app.scaffolds"]

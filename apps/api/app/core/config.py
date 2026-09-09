@@ -40,6 +40,12 @@ class Settings:
         self.documents_storage_dir: Path = Path(
             os.getenv("VIBE_DOCUMENTS_STORAGE_DIR", str(BASE_DIR / "storage" / "documents"))
         )
+        self.legacy_document_source_dir: Path = Path(
+            os.getenv(
+                "VIBE_LEGACY_DOCUMENT_SOURCE_DIR",
+                str(BASE_DIR.parent / "workbench" / "95.data_source"),
+            )
+        )
         self.db_file: Path = Path(os.getenv("VIBE_DB_FILE", str(BASE_DIR / "workspaces_db.json")))
         # 업로드 파일을 프런트엔드에 돌려줄 때 사용할 외부 노출 오리진.
         self.public_base_url: str = os.getenv("VIBE_PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")

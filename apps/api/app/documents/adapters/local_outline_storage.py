@@ -7,11 +7,11 @@ storage/outlines/{doc_slug}/ 또는 통합 문서 패키지(document_storage)
   ├── elements.json      (뷰어 하이라이트용 평면 엘리먼트 배열)
   └── outline.md         (마크다운 형태의 가독성 목차)
 """
-from datetime import datetime, timezone
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 
 from app.core.config import settings
 from app.core.storage.document_storage import document_storage, slugify_document_name
@@ -151,5 +151,3 @@ class OutlineStorageRepository:
             logger.error("스토리지 로드 실패 (%s): %s", filename, exc)
             return None
 
-
-outline_storage = OutlineStorageRepository()

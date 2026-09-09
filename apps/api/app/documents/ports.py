@@ -4,9 +4,24 @@
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Protocol
 
-from scaffold_engine import OutlineDocument
+from scaffold_engine import OutlineDocument, ScaffoldExtractResult
+
+
+class DocumentSourceRepository(Protocol):
+    """원본 문서의 저장과 조회 계약."""
+
+    def save(self, filename: str, content: bytes) -> Path: ...
+
+    def resolve(self, filename: str) -> Path: ...
+
+
+class SegmentScanPort(Protocol):
+    """문서 세그먼트 분석 실행 계약."""
+
+    async def scan(self, prompt: str) -> dict[str, Any] | None: ...
 
 
 class DocumentAnalysisRepository(Protocol):
@@ -21,3 +36,9 @@ class DocumentAnalysisRepository(Protocol):
     def load_segment_scan(self, filename: str) -> dict[str, Any] | None: ...
 
     def save_segment_scan(self, filename: str, payload: dict[str, Any]) -> None: ...
+
+
+class ScaffoldArchivePort(Protocol):
+    """documents가 scaffold 산출물을 보관하기 위해 요구하는 계약."""
+
+    def archive_scaffold(self, pdf_path: Path, result: ScaffoldExtractResult) -> Any: ...

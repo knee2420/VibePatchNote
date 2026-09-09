@@ -19,12 +19,9 @@ from scaffold_engine.vision import (
     render_slot_overlay_png,
 )
 
+from .adapters.local_scaffold_repository import sanitize_scaffold_id
 from .formatters import ManifestFormatter, PromptSpecFormatter
-from .repository import (
-    IScaffoldRepository,
-    local_scaffold_repository,
-    sanitize_scaffold_id,
-)
+from .ports import ScaffoldRepository
 from .schemas import (
     ASSET_VISION_RENDER,
     ScaffoldArchiveDetail,
@@ -38,8 +35,8 @@ logger = logging.getLogger(__name__)
 class ScaffoldArchiveService:
     """스캐폴드 아카이빙 비즈니스 로직 조율자."""
 
-    def __init__(self, repository: Optional[IScaffoldRepository] = None) -> None:
-        self.repository = repository or local_scaffold_repository
+    def __init__(self, repository: ScaffoldRepository) -> None:
+        self.repository = repository
 
     def archive_scaffold(
         self,
@@ -177,6 +174,3 @@ class ScaffoldArchiveService:
     def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
         """에셋 파일 경로 해석 위임."""
         return self.repository.get_asset_file(scaffold_id, asset_subpath)
-
-
-scaffold_archive_service = ScaffoldArchiveService()

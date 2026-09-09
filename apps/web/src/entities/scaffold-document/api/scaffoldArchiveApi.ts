@@ -32,9 +32,23 @@ export const scaffoldArchiveApi = {
   },
 
   /** 편집된 작업본을 아카이브에 되씁니다. 엔진 원본은 보존됩니다. */
-  saveRender: (scaffoldId: string, htmlContent: string, markdownContent?: string) =>
-    httpClient.put<ScaffoldArchiveMeta>(
+  saveRender: (scaffoldId: string, htmlContent: string, markdownContent?: string) => {
+    // `undefined` 는 JSON.stringify 시 조용히 빠져 `{}` 요청이 된다. 호출 경계에서
+    // 바로 실패시켜 서버의 422와 원인 불명의 저장 실패를 막는다.
+    if (typeof htmlContent !== 'string') {
+      return Promise.reject(
+        new TypeError('Scaffold render HTML must be a string before it can be saved.')
+      );
+    }
+
+    const payload: { htmlContent: string; markdownContent?: string } = { htmlContent };
+    if (typeof markdownContent === 'string') {
+      payload.markdownContent = markdownContent;
+    }
+
+    return httpClient.put<ScaffoldArchiveMeta>(
       `${BASE_PATH}/${encodeURIComponent(scaffoldId)}/render`,
-      { htmlContent, markdownContent }
-    ),
+      payload
+    );
+  },
 };

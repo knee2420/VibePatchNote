@@ -1,3 +1,5 @@
-# 개발·CI 환경은 운영 의존성에 테스트 도구를 더한다.
+# Development and CI dependencies.
 -r requirements.txt
 pytest>=8.0
+ruff>=0.9.0
+import-linter>=2.0

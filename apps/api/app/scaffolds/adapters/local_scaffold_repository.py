@@ -8,14 +8,15 @@ import logging
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List, Optional
 
-from app.core.config import settings
-from app.core.storage.document_storage import document_storage
 from pydantic import ValidationError
 from scaffold_engine.types import SlotMappingItem
 
-from .schemas import (
+from app.core.config import settings
+from app.core.storage.document_storage import document_storage
+
+from ..schemas import (
     ASSET_HTML,
     ASSET_MANIFEST,
     ASSET_MARKDOWN,
@@ -43,47 +44,6 @@ def sanitize_scaffold_id(name: str) -> str:
     """안전한 파일시스템 디렉터리 및 URL 식별자로 정제."""
     clean = re.sub(r"[^\w\-.]", "_", name)
     return clean.strip("_") or "scaffold"
-
-
-class IScaffoldRepository(Protocol):
-    """스캐폴드 아티팩트 저장소 추상 인터페이스 (DIP 준수)."""
-
-    def save_artifacts(
-        self,
-        record: ScaffoldArchiveRecord,
-        html_content: str,
-        markdown_content: str,
-        slots: List[SlotMappingItem],
-        prompt_spec_md: str,
-        original_png: Optional[bytes] = None,
-        overlay_png: Optional[bytes] = None,
-        render_png: Optional[bytes] = None,
-    ) -> Path:
-        ...
-
-    def save_render(
-        self,
-        scaffold_id: str,
-        html_content: str,
-        markdown_content: Optional[str],
-        updated_at: str,
-    ) -> Optional[ScaffoldArchiveRecord]:
-        ...
-
-    def save_render_image(self, scaffold_id: str, png_bytes: bytes) -> bool:
-        ...
-
-    def has_asset(self, scaffold_id: str, asset_subpath: str) -> bool:
-        ...
-
-    def find_contents(self, scaffold_id: str) -> Optional[ScaffoldArchiveContents]:
-        ...
-
-    def resolve_dir(self, scaffold_id: str) -> Path:
-        ...
-
-    def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
-        ...
 
 
 class LocalScaffoldRepository:
@@ -326,5 +286,3 @@ class LocalScaffoldRepository:
             return target_file
         return None
 
-
-local_scaffold_repository = LocalScaffoldRepository()

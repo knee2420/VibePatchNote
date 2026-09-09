@@ -1,35 +1,28 @@
 """documents 도메인의 비즈니스 로직."""
-import json
+import asyncio
 import logging
-import shutil
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import HTTPException, UploadFile
+from scaffold_engine import OutlineDocument, OutlinePipeline, ScaffoldPipeline
+from scaffold_engine.harness import BaseLlmHarness
 
-from urllib.parse import unquote
-
-import asyncio
-
-from app.core.config import settings
 from app.core.llm import (
     LlmExecutionResult,
     record_llm_run,
     span_context,
     trace_session,
 )
-from app.core.workflow.engine import NativeWorkflowEngine
-from app.scaffolds.service import ScaffoldArchiveService
-from scaffold_engine import OutlinePipeline, OutlineDocument, ScaffoldPipeline
-from scaffold_engine.harness import BaseLlmHarness
 
 from .experimental import build_segment_scan_prompt
-from .ports import DocumentAnalysisRepository
+from .ports import (
+    DocumentAnalysisRepository,
+    DocumentSourceRepository,
+    ScaffoldArchivePort,
+    SegmentScanPort,
+)
 
 logger = logging.getLogger(__name__)
-
-# 분석 결과 디스크 캐시 확장자. 같은 문서를 다시 스캔할 때 재분석을 건너뜁니다.
-SEGMENT_CACHE_SUFFIX = ".segments.json"
 
 # 네이티브 워크플로우 잡 큐가 붙기 전까지 사용하는 고정 식별자.
 # TODO: 워크플로우 잡 큐 도입 시 실제 잡 ID 로 교체할 것.
@@ -64,113 +57,56 @@ def _result_from_pipeline_telemetry(
     )
 
 
-def _safe_filename(filename: Optional[str]) -> str:
-    """경로 구분자를 제거해 업로드 디렉터리 밖으로 벗어나는 것을 막습니다."""
-    candidate = Path(filename or "").name
-    if not candidate or candidate in {".", ".."}:
-        raise HTTPException(status_code=400, detail="Invalid file name")
-    return candidate
-
-
-def save_uploaded_file(file: UploadFile) -> Path:
-    """업로드된 파일을 로컬 파일시스템에 저장하고 저장 경로를 돌려줍니다."""
-    settings.ensure_directories()
-    file_path = settings.upload_dir / _safe_filename(file.filename)
-
-    try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except OSError as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to save file: {exc}") from exc
-
-    return file_path
-
-
-def resolve_uploaded_file(filename: str) -> Path:
-    """
-    다운로드 또는 스캔 요청된 파일의 실제 경로를 확인합니다.
-    1. URL 인코딩 해제 (예: %20 -> 공백)
-    2. settings.upload_dir 에서 탐색
-    3. 확장자(.pdf) 누락 시 .pdf 붙여서 재탐색
-    4. workbench/95.data_source 폴백 탐색
-    """
-    decoded = unquote(filename or "")
-    safe_name = _safe_filename(decoded)
-    upload_dir = settings.upload_dir.resolve()
-
-    candidate = (upload_dir / safe_name).resolve()
-    if str(candidate).startswith(str(upload_dir)) and candidate.exists():
-        return candidate
-
-    # 확장자 누락 폴백 (.pdf)
-    if not candidate.suffix:
-        pdf_candidate = (upload_dir / f"{safe_name}.pdf").resolve()
-        if str(pdf_candidate).startswith(str(upload_dir)) and pdf_candidate.exists():
-            return pdf_candidate
-
-    # workbench/95.data_source 폴백
-    source_dir = (Path(__file__).resolve().parents[3] / "workbench" / "95.data_source").resolve()
-    if source_dir.exists():
-        src_candidate = (source_dir / safe_name).resolve()
-        if str(src_candidate).startswith(str(source_dir)) and src_candidate.exists():
-            return src_candidate
-        if not src_candidate.suffix:
-            src_pdf = (source_dir / f"{safe_name}.pdf").resolve()
-            if str(src_pdf).startswith(str(source_dir)) and src_pdf.exists():
-                return src_pdf
-
-    raise HTTPException(status_code=404, detail=f"File not found: {filename}")
-
-
-def build_public_file_url(filename: str) -> str:
-    """프런트엔드가 접근할 수 있는 파일 URL을 조립합니다."""
-    return f"{settings.public_base_url}/api/v1/documents/files/{filename}"
-
-
 class ExtractionService:
     """
     Phase 1~2 오케스트레이터.
 
     업로드 접수와 세그먼트 스캔을 담당하며, 실제 에이전트 실행은
-    NativeWorkflowEngine 에 위임합니다. 프롬프트는 이 도메인의 `prompts.py` 가 소유합니다.
+    엔진의 JSON 실행기에 위임합니다. 프롬프트는 이 도메인의 `prompts.py` 가 소유합니다.
     """
 
     def __init__(
         self,
-        workflow_engine: NativeWorkflowEngine,
+        segment_scanner: SegmentScanPort,
         document_analysis: DocumentAnalysisRepository,
+        document_source: DocumentSourceRepository,
         llm_harness: BaseLlmHarness,
-        scaffold_archives: ScaffoldArchiveService,
+        scaffold_archives: ScaffoldArchivePort,
     ) -> None:
-        self._workflow_engine = workflow_engine
+        self._segment_scanner = segment_scanner
         self._document_analysis = document_analysis
+        self._document_source = document_source
         self._llm_harness = llm_harness
         self._scaffold_archives = scaffold_archives
 
-    async def register_upload(self, file: UploadFile) -> Dict[str, Any]:
+    async def register_upload(self, filename: str, content: bytes) -> Dict[str, Any]:
         """
         Phase 1: 참고 문서를 저장하고 후속 파이프라인이 참조할 메타를 돌려줍니다.
         TODO: 저장 직후 네이티브 워크플로우 엔진을 비동기로 트리거할 것.
         """
-        saved_path = save_uploaded_file(file)
+        saved_path = self._document_source.save(filename, content)
 
         return {
             "status": "processing",
             "job_id": PLACEHOLDER_JOB_ID,
             "message": "Reference document uploaded successfully.",
-            "file_url": build_public_file_url(saved_path.name),
+            "filename": saved_path.name,
         }
+
+    def get_uploaded_file(self, filename: str) -> Path:
+        """HTTP 어댑터가 파일 응답으로 변환할 원본 문서를 찾는다."""
+        return self._document_source.resolve(filename)
 
     async def scan_document_segments(self, filename: str) -> Dict[str, Any]:
         """
         Phase 2: 업로드된 문서의 논리 영역(표/목록/섹션)을 실시간 추출합니다.
         캐싱 없이 항상 최신 프롬프트와 비전 엔진으로 새롭게 분석합니다.
         """
-        file_path = resolve_uploaded_file(filename)
+        file_path = self._document_source.resolve(filename)
         logger.info("[ExtractionService] Starting fresh segment scan for %s", file_path.name)
 
         prompt = build_segment_scan_prompt(file_path)
-        raw_result = await self._workflow_engine.execute_agent_json(prompt)
+        raw_result = await self._segment_scanner.scan(prompt)
 
         response_data = self._to_scan_response(raw_result, file_path)
         self._store_cached_scan(file_path, response_data)
@@ -183,7 +119,7 @@ class ExtractionService:
         문서의 계층적 아웃라인과 세부 엘리먼트를 2-Stage 파이프라인으로 추출합니다.
         force_refresh가 False이고 스토리지에 캐시가 존재하면 즉시 반환합니다.
         """
-        file_path = resolve_uploaded_file(filename)
+        file_path = self._document_source.resolve(filename)
 
         if not force_refresh and self._document_analysis.outline_exists(file_path.name):
             cached = self._document_analysis.load_outline(file_path.name)
@@ -282,31 +218,6 @@ class ExtractionService:
 
     # --- 내부 헬퍼 ---
 
-    @staticmethod
-    def _legacy_cache_path(file_path: Path) -> Path:
-        return file_path.with_name(f"{file_path.name}{SEGMENT_CACHE_SUFFIX}")
-
-    def _load_cached_scan(self, file_path: Path) -> Optional[Dict[str, Any]]:
-        """신규 통합 스토리지에서 세그먼트 캐시를 조회하며, 레거시 파일이 있으면 자동 마이그레이션합니다."""
-        cached = self._document_analysis.load_segment_scan(file_path.name)
-        if cached:
-            return cached
-
-        # 레거시 폴백: uploads/*.segments.json
-        legacy_file = self._legacy_cache_path(file_path)
-        if legacy_file.exists():
-            try:
-                with open(legacy_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                # 신규 스토리지로 마이그레이션
-                self._document_analysis.save_segment_scan(file_path.name, data)
-                logger.info("[ExtractionService] Migrated legacy segment cache to document package: %s", file_path.name)
-                return data
-            except Exception as exc:
-                logger.warning("Legacy segment cache unreadable (%s): %s", legacy_file.name, exc)
-
-        return None
-
     def _store_cached_scan(self, file_path: Path, payload: Dict[str, Any]) -> None:
         """세그먼트 캐시를 문서 패키지 전용 디렉터리(storage/documents/{slug}/segments/)에 보관합니다."""
         try:
@@ -363,13 +274,10 @@ class ExtractionService:
         Phase 3: PDF 문서를 분석하여 Tiptap 스캐폴딩(HTML DOM & Markdown)을 생성합니다.
         순수 AI 엔진 패키지(`packages/scaffold-engine`)에 위임합니다.
         """
-        from scaffold_engine import ScaffoldPipeline
-        import asyncio
-
         logger.info("[ExtractionService] >>> extract_scaffold requested for filename: '%s'", filename)
 
         try:
-            file_path = resolve_uploaded_file(filename)
+            file_path = self._document_source.resolve(filename)
             logger.info("[ExtractionService] Resolved file path: %s (exists=%s)", file_path, file_path.exists())
         except Exception as exc:
             logger.exception("[ExtractionService] Failed to resolve file for '%s': %s", filename, exc)

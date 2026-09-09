@@ -3,8 +3,9 @@ import re
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from app.core.config import settings
 from scaffold_engine.types import ScaffoldMeta, SlotMappingItem
+
+from app.core.config import settings
 
 from .schemas import (
     ASSET_HTML,

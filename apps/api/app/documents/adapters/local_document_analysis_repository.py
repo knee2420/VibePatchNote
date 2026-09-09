@@ -3,9 +3,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.storage.document_storage import DocumentStorageManager
-from app.documents.storage import OutlineStorageRepository
 from scaffold_engine import OutlineDocument
+
+from app.core.storage.document_storage import DocumentStorageManager
+
+from .local_outline_storage import OutlineStorageRepository
 
 
 class LocalDocumentAnalysisRepository:

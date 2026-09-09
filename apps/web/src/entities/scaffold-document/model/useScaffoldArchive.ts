@@ -143,6 +143,9 @@ export function useScaffoldArchive(
   useEffect(() => {
     if (!scaffoldId || data.archiveMissing) return;
     if (syncedHtmlRef.current === null) return; // 하이드레이션 전 편집은 있을 수 없다
+    // 구 캔버스 데이터나 하이드레이션 중인 노드에는 본문이 아직 없을 수 있다.
+    // undefined 는 JSON 직렬화에서 누락되어 서버에는 `{}`로 전달된다.
+    if (typeof html !== 'string') return;
     if (html === syncedHtmlRef.current) return; // 실제 변경분만 보낸다
 
     if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);

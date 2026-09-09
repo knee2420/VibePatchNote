@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "venv\\Scripts\\python.exe -m uvicorn main:app --reload --port 8000",
     "build": "venv\\Scripts\\python.exe -m compileall -q app main.py",
-    "lint": "venv\\Scripts\\python.exe -m compileall -q app main.py",
+    "lint": "venv\\Scripts\\python.exe -m compileall -q app main.py && venv\\Scripts\\python.exe -m ruff check app main.py && venv\\Scripts\\lint-imports.exe",
     "test": "venv\\Scripts\\python.exe -m pytest"
   }
 }

@@ -15,12 +15,11 @@ storage/documents/{doc_slug}/
               ├── content.md / render.md
               └── slots.json
 """
-from datetime import datetime, timezone
 import json
 import logging
-from pathlib import Path
 import re
-import shutil
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from app.core.config import settings

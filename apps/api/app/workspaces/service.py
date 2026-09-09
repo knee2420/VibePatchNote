@@ -1,112 +1,92 @@
-"""workspaces 도메인의 비즈니스 로직."""
-import json
+"""workspaces 도메인의 유스케이스."""
+from __future__ import annotations
+
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Any
 
-from app.core.config import settings
-
-from .schemas import WorkspaceSessionCreate, WorkspaceSessionResponse, WorkspaceSessionUpdate
-
-# 실행 위치와 무관하게 항상 같은 파일을 바라보도록 절대 경로를 사용합니다.
-DB_FILE = settings.db_file
+from .models import CreateWorkspaceCommand, UpdateWorkspaceCommand, WorkspaceSession
+from .ports import WorkspaceRepository
 
 
-def load_db():
-    if not DB_FILE.exists():
-        now = datetime.now(timezone.utc)
-        initial_db = {
-            "default-session-1": {
-                "id": "default-session-1",
-                "title": "기본 튜토리얼 세션",
-                "description": "이것은 서버 시작 시 생성된 기본 세션입니다.",
-                "nodes": [],
-                "edges": [],
-                "created_at": now.isoformat(),
-                "updated_at": now.isoformat()
-            }
-        }
-        DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(DB_FILE, "w", encoding="utf-8") as f:
-            json.dump(initial_db, f, indent=4)
-        return initial_db
+class WorkspaceService:
+    """세션 상태 전이를 조율하고 영속화는 포트에 위임한다."""
 
-    with open(DB_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    def __init__(self, repository: WorkspaceRepository) -> None:
+        self._repository = repository
 
-
-def save_db(db_data):
-    DB_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(db_data, f, indent=4)
-
-def _dict_to_model(data: dict) -> WorkspaceSessionResponse:
-    if "created_at" in data and isinstance(data["created_at"], str):
-        data["created_at"] = datetime.fromisoformat(data["created_at"])
-    if "updated_at" in data and isinstance(data["updated_at"], str):
-        data["updated_at"] = datetime.fromisoformat(data["updated_at"])
-    return WorkspaceSessionResponse(**data)
-
-def create_workspace(data: WorkspaceSessionCreate) -> WorkspaceSessionResponse:
-    db = load_db()
-    session_id = str(uuid.uuid4())
-    now_dt = datetime.now(timezone.utc)
-    new_session_dict = {
-        "id": session_id,
-        "title": data.title,
-        "description": data.description,
-        "nodes": [],
-        "edges": [],
-        "created_at": now_dt.isoformat(),
-        "updated_at": now_dt.isoformat()
-    }
-    db[session_id] = new_session_dict
-    save_db(db)
-    return _dict_to_model(new_session_dict)
-
-def get_workspace(session_id: str) -> Optional[WorkspaceSessionResponse]:
-    db = load_db()
-    if session_id in db:
-        return _dict_to_model(db[session_id])
-    return None
-
-def get_all_workspaces() -> List[WorkspaceSessionResponse]:
-    db = load_db()
-    return [_dict_to_model(v) for v in db.values()]
-
-def update_workspace(session_id: str, data: WorkspaceSessionUpdate) -> Optional[WorkspaceSessionResponse]:
-    db = load_db()
-    if session_id not in db:
-        # Upsert: Create missing session to recover orphaned frontend states
-        now_dt = datetime.now(timezone.utc)
-        db[session_id] = {
+    def create_workspace(self, data: CreateWorkspaceCommand) -> WorkspaceSession:
+        sessions = self._repository.load_all()
+        session_id = str(uuid.uuid4())
+        now = datetime.now(timezone.utc).isoformat()
+        session = {
             "id": session_id,
-            "title": data.title if data.title else "Recovered Session",
-            "description": data.description if data.description else "",
+            "title": data.title,
+            "description": data.description,
             "nodes": [],
             "edges": [],
-            "created_at": now_dt.isoformat(),
-            "updated_at": now_dt.isoformat()
+            "created_at": now,
+            "updated_at": now,
         }
-    
-    session = db[session_id]
-    if data.title is not None:
-        session["title"] = data.title
-    if data.description is not None:
-        session["description"] = data.description
-    if data.nodes is not None:
-        session["nodes"] = data.nodes
-    if data.edges is not None:
-        session["edges"] = data.edges
-        
-    session["updated_at"] = datetime.now(timezone.utc).isoformat()
-    save_db(db)
-    return _dict_to_model(session)
+        sessions[session_id] = session
+        self._repository.save_all(sessions)
+        return self._to_response(session)
 
-def delete_workspace(session_id: str) -> bool:
-    db = load_db()
-    if session_id in db:
-        del db[session_id]
-        save_db(db)
+    def get_workspace(self, session_id: str) -> WorkspaceSession | None:
+        session = self._repository.load_all().get(session_id)
+        return self._to_response(session) if session else None
+
+    def get_all_workspaces(self) -> list[WorkspaceSession]:
+        return [self._to_response(session) for session in self._repository.load_all().values()]
+
+    def update_workspace(
+        self,
+        session_id: str,
+        data: UpdateWorkspaceCommand,
+    ) -> WorkspaceSession:
+        sessions = self._repository.load_all()
+        session = sessions.get(session_id)
+        if session is None:
+            session = self._recovered_session(session_id, data)
+            sessions[session_id] = session
+
+        for field in ("title", "description", "nodes", "edges"):
+            value = getattr(data, field)
+            if value is not None:
+                session[field] = value
+
+        session["updated_at"] = datetime.now(timezone.utc).isoformat()
+        self._repository.save_all(sessions)
+        return self._to_response(session)
+
+    def delete_workspace(self, session_id: str) -> bool:
+        sessions = self._repository.load_all()
+        if session_id not in sessions:
+            return False
+        del sessions[session_id]
+        self._repository.save_all(sessions)
         return True
-    return False
+
+    @staticmethod
+    def _recovered_session(
+        session_id: str,
+        data: UpdateWorkspaceCommand,
+    ) -> dict[str, Any]:
+        now = datetime.now(timezone.utc).isoformat()
+        return {
+            "id": session_id,
+            "title": data.title or "Recovered Session",
+            "description": data.description or "",
+            "nodes": [],
+            "edges": [],
+            "created_at": now,
+            "updated_at": now,
+        }
+
+    @staticmethod
+    def _to_response(data: dict[str, Any]) -> WorkspaceSession:
+        copied = dict(data)
+        for field in ("created_at", "updated_at"):
+            if isinstance(copied.get(field), str):
+                copied[field] = datetime.fromisoformat(copied[field])
+        return WorkspaceSession(**copied)
