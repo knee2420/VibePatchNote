@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "id": "scaffold-v2-11월_디딤돌_회의록",
+    "title": "11월_디딤돌_회의록 와이어프레임 서식 (v2 Vision-Outline 통합형)",
+    "targetDoc": "11월_디딤돌_회의록.pdf",
+    "sourcePdfFileName": "11월_디딤돌_회의록.pdf",
+    "description": "비전 중심 아웃라인 기반 고정밀 와이어프레임 서식 (슬롯 13개)",
+    "difficulty": "easy",
+    "totalPages": 2
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"72.2\" data-y=\"102.1\" data-w=\"450.6\" data-h=\"616.4\" class=\"scaffold-frame\" style=\"position:absolute;left:72.2px;top:102.1px;width:450.6px;height:616.4px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:72.2px;top:102.1px;width:450.6px;height:616.4px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"일 시\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">2018.11.08</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"장 소\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">6공학관 6108-1호</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"참 석 자\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">4명</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"안 건\"></span></p></td><td style=\"border:1px solid #334155;width:364.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"안 건\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:86.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">회의내용</p></th><td style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">1. 드론 비행 후 GPS 센서가 정상적으로 수집이 되는지 확인\n2. 프로그램 최종 테스트 진행\n3. 결과보고서 작성 회의</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:86.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">지출금액</p></th><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">₩40,000</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"증빙자료 (신용카드 영수증, 현금영수증 등)\"></span></p></td><td style=\"border:1px solid #334155;width:364.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"증빙자료 (신용카드 영수증, 현금영수증 등)\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:229.7px;top:73.2px;width:135.7px;height:16.8px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">회의비 사용 내역</div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"2\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"72.2\" data-y=\"102.1\" data-w=\"450.6\" data-h=\"616.4\" class=\"scaffold-frame\" style=\"position:absolute;left:72.2px;top:102.1px;width:450.6px;height:616.4px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:72.2px;top:102.1px;width:450.6px;height:616.4px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"일 시\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">2018.11.16</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"장 소\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">6공학관 6108-1호</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"참 석 자\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">3명</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"안 건\"></span></p></td><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">최종 점검, 결과보고서 작성</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:86.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">회의내용</p></th><td style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">1. 제출 필요서류 최종 점검\n2. 결과보고서 작성</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:86.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">지출금액</p></th><th style=\"border:1px solid #334155;width:364.4px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">₩29,000</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:86.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"증빙자료 (신용카드 영수증, 현금영수증 등)\"></span></p></td><td style=\"border:1px solid #334155;width:364.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"증빙자료 (신용카드 영수증, 현금영수증 등)\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:229.7px;top:73.2px;width:135.7px;height:16.8px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">회의비 사용 내역</div>\n</div>",
+  "markdownContent": "# 11월 디딤돌 회의록.pdf\n\n# 회의비 사용 내역\n\n---\n\n# 회의비 사용 내역",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "일 시",
+      "box_2d": [
+        121,
+        121,
+        166,
+        266
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "장 소",
+      "box_2d": [
+        166,
+        121,
+        207,
+        266
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "참 석 자",
+      "box_2d": [
+        207,
+        121,
+        265,
+        266
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "안 건",
+      "box_2d": [
+        265,
+        121,
+        313,
+        266
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "안 건",
+      "box_2d": [
+        265,
+        266,
+        313,
+        879
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+      "box_2d": [
+        520,
+        121,
+        854,
+        266
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+      "box_2d": [
+        520,
+        266,
+        854,
+        879
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "일 시",
+      "box_2d": [
+        121,
+        121,
+        166,
+        266
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "장 소",
+      "box_2d": [
+        166,
+        121,
+        207,
+        266
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "참 석 자",
+      "box_2d": [
+        207,
+        121,
+        265,
+        266
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "안 건",
+      "box_2d": [
+        265,
+        121,
+        313,
+        266
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+      "box_2d": [
+        520,
+        121,
+        854,
+        266
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "증빙자료 (신용카드 영수증, 현금영수증 등)",
+      "box_2d": [
+        520,
+        266,
+        854,
+        879
+      ],
+      "pageNumber": 2
+    }
+  ]
+}

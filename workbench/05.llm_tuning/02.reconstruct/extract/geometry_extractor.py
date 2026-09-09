@@ -176,9 +176,10 @@ class PdfGeometryExtractor:
                 )
 
         def inside_table(bb) -> bool:
+            cx = (bb[0] + bb[2]) / 2
+            cy = (bb[1] + bb[3]) / 2
             return any(
-                bb[0] >= t[0] - 2 and bb[1] >= t[1] - 2
-                and bb[2] <= t[2] + 2 and bb[3] <= t[3] + 2
+                t[0] - 5 <= cx <= t[2] + 5 and t[1] - 5 <= cy <= t[3] + 5
                 for t in covered
             )
 

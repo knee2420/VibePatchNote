@@ -147,8 +147,9 @@ class ReconstructLlmClient:
             try:
                 html_text = html_file.read_text(encoding="utf-8")
                 blocks = []
-                block_pattern = re.compile(
-                    r'<div\s+[^>]*data-type="scaffold-block"[^>]*data-bid="([^"]+)"[^>]*>(.*?)</div>',
+                # scaffold-block 과 표 셀(th, td) 모두 파싱
+                elem_pattern = re.compile(
+                    r'<(div\s+[^>]*data-type="scaffold-block"|th|td)\s+[^>]*data-bid="([^"]+)"[^>]*>(.*?)</(?:div|th|td)>',
                     re.DOTALL
                 )
                 slot_pattern = re.compile(
@@ -156,15 +157,15 @@ class ReconstructLlmClient:
                     re.DOTALL
                 )
 
-                for match in block_pattern.finditer(html_text):
-                    bid = match.group(1)
-                    inner = match.group(2)
+                for match in elem_pattern.finditer(html_text):
+                    bid = match.group(2)
+                    inner = match.group(3)
                     slot_match = slot_pattern.search(inner)
 
                     if slot_match:
                         placeholder = slot_match.group(1)
-                        # slot 태그 제거 후 남은 텍스트가 유의미하면 mixed
                         text_outside_slot = re.sub(r'<span[^>]*>.*?</span>', '', inner).strip()
+                        text_outside_slot = re.sub(r'<p[^>]*>|</p>', '', text_outside_slot).strip()
                         if text_outside_slot:
                             blocks.append({
                                 "id": bid,

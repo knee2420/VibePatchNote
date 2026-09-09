@@ -1,0 +1,135 @@
+{
+  "meta": {
+    "id": "scaffold-v2-Atticus_LLC_Invoice_000081709",
+    "title": "Atticus_LLC_Invoice_000081709 와이어프레임 서식 (v2 Vision-Outline 통합형)",
+    "targetDoc": "Atticus_LLC_Invoice_000081709.pdf",
+    "sourcePdfFileName": "Atticus_LLC_Invoice_000081709.pdf",
+    "description": "비전 중심 아웃라인 기반 고정밀 와이어프레임 서식 (슬롯 10개)",
+    "difficulty": "easy",
+    "totalPages": 1
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:444.5px;top:147.3px;width:89.8px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Invoice:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"Invoice\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"image\" class=\"scaffold-block scaffold-block-image\" style=\"position:absolute;left:60.1px;top:69.9px;width:258.2px;height:59.8px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;\" class=\"scaffold-block scaffold-block-image\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box;border:1px dashed #cbd5e1;background:#f8fafc\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"Company Logo\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:462.9px;top:29.5px;width:68.4px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Date:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"Date\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:355.8px;top:47.2px;width:178.5px;height:85.9px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">Company info</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:473.6px;top:63.1px;width:60.7px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Company Name:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"Company Name\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:399.2px;top:74.9px;width:135.1px;height:47.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">1309 Coffeen Ave. Ste. 2513 Sheridan Wyoming, 82801 United States</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:355.8px;top:125.5px;width:178.5px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Sales tax ID:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"Sales tax ID\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:60.1px;top:181.9px;width:60.7px;height:63.1px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">Billing info</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:60.1px;top:197.9px;width:60.7px;height:47.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">qround\\nSEO MINGYU\\nseoul, 40-6\\nSouth Korea</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:461.7px;top:181.9px;width:72.6px;height:43.8px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">Total (USD)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:464.1px;top:194.5px;width:70.2px;height:19.4px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Total (USD):</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"Total (USD)\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:461.7px;top:217.2px;width:72.6px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Payment Method:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"Payment Method\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:63.1px;top:292.2px;width:469.5px;height:99.4px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">Order Details &amp; Summary</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:428.4px;top:358.7px;width:102.9px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Subtotal:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"Subtotal\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:442.1px;top:382.3px;width:89.2px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Total:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"Total\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:160.1px;top:583.5px;width:274.3px;height:52.2px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">Footer Information</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:221.9px;top:583.5px;width:150.5px;height:14.0px;font-size:10.5px;display:flex;align-items:center;gap:4px;color:#334155;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><span style=\"font-weight:600;color:#1e293b;\">Contact support:</span> <span data-type=\"scaffold-slot\" class=\"scaffold-slot\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"Contact support\"></span></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:182.7px;top:600.3px;width:229.7px;height:14.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">Click here to manage your billing details and view purchase history</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:160.1px;top:628.1px;width:274.3px;height:14.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.</p></div>\n</div>",
+  "markdownContent": "# Atticus LLC_ Invoice 000081709.pdf\n\n- **Invoice**: [ Invoice ]\n![Company Logo]([ Company Logo ])\n- **Date**: [ Date ]\n## Company info\n- **Company Name**: [ Company Name ]\n\n1309 Coffeen Ave. Ste. 2513 Sheridan Wyoming, 82801 United States\n\n- **Sales tax ID**: [ Sales tax ID ]\n## Billing info\n\nqround\\nSEO MINGYU\\nseoul, 40-6\\nSouth Korea\n\n## Total (USD)\n- **Total (USD)**: [ Total (USD) ]\n- **Payment Method**: [ Payment Method ]\n## Order Details & Summary\n- **Subtotal**: [ Subtotal ]\n- **Total**: [ Total ]\n## Footer Information\n- **Contact support**: [ Contact support ]\n\nClick here to manage your billing details and view purchase history\n\n\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved.\n",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "Invoice",
+      "box_2d": [
+        175,
+        747,
+        188,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "Company Logo",
+      "box_2d": [
+        83,
+        101,
+        154,
+        535
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "Date",
+      "box_2d": [
+        35,
+        778,
+        46,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "Company Name",
+      "box_2d": [
+        75,
+        796,
+        88,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "Sales tax ID",
+      "box_2d": [
+        149,
+        598,
+        158,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "Total (USD)",
+      "box_2d": [
+        231,
+        780,
+        254,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "Payment Method",
+      "box_2d": [
+        258,
+        776,
+        268,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "Subtotal",
+      "box_2d": [
+        426,
+        720,
+        438,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "Total",
+      "box_2d": [
+        454,
+        743,
+        465,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "Contact support",
+      "box_2d": [
+        693,
+        373,
+        705,
+        626
+      ],
+      "pageNumber": 1
+    }
+  ]
+}

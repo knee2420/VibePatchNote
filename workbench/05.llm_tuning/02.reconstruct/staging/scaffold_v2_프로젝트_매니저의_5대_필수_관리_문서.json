@@ -1,0 +1,1695 @@
+{
+  "meta": {
+    "id": "scaffold-v2-프로젝트_매니저의_5대_필수_관리_문서",
+    "title": "프로젝트_매니저의_5대_필수_관리_문서 와이어프레임 서식 (v2 Vision-Outline 통합형)",
+    "targetDoc": "프로젝트_매니저의_5대_필수_관리_문서.pdf",
+    "sourcePdfFileName": "프로젝트_매니저의_5대_필수_관리_문서.pdf",
+    "description": "비전 중심 아웃라인 기반 고정밀 와이어프레임 서식 (슬롯 140개)",
+    "difficulty": "normal",
+    "totalPages": 14
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.1\" data-y=\"187.8\" data-w=\"510.1\" data-h=\"280.7\" class=\"scaffold-frame\" style=\"position:absolute;left:43.1px;top:187.8px;width:510.1px;height:280.7px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.1px;top:187.8px;width:510.1px;height:280.7px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s14\" data-mapping-num=\"14\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s15\" data-mapping-num=\"15\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:157.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s16\" data-mapping-num=\"16\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:214.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s17\" data-mapping-num=\"17\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:138.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s18\" data-mapping-num=\"18\" data-placeholder=\"5대 필수 관리 문서 요약표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:48.8px;width:379.0px;height:27.8px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">프로젝트 매니저의 5대 필수 관리 문서</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.2px;top:110.3px;width:499.2px;height:61.5px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">Project Manager 에게 꼭 필요한 필수 관리 문서가 뭐라고 생각하나?</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.2px;top:110.3px;width:499.2px;height:61.5px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">프로젝트 매니저(PM)가 일정, 리소스, 리스크를 통제하고 산출물을 방어하기 위해 반드시 유지해야 하는 핵심 관리 문서는 크게 5가지로 압축됩니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:488.3px;width:280.2px;height:21.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">프로젝트의 존재 이유와 PM의 권한을 공식적으로 선언하는 베이스캠프 역할을 합니다. 포함 내용: 프로젝트 배경, 최종 목표(KPI), 핵심 이해관계자, 대략적인 예산과 핵심 마일스톤. 활용: 프로젝트 진행 중 방향성이 흔들리거나 이해관계자 간 의견 충돌이 발생할 때, 최초 합의된 목표를 상기시키는 의사결정의 기준점이 됩니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:640.7px;width:249.9px;height:21.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">이해관계자의 비즈니스 요구를 구체적인 기능과 제약 조건으로 번역한 문서입니다. 포함 내용: 유저 스토리, 기능 상세 스펙, 비기능적 요구사항(성능, 보안 등), 제외 범위(Out of Scope). 활용: Notion과 같은 문서 기반 협업 공간에 단일 진실 공급원(SSOT)으로 구축하여 기획, 개발, 디자인 파트가 동일한 목표를 보게 합니다. PM이 프로젝트 범위 크립(Scope Creep, 요구사항이 계속 늘어나는 현상)을 방어하는 가장 강력한 무기입니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"2\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:80.8px;width:205.9px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">프로젝트 전체를 관리 가능한 최소 작업 단위(Work Package)로 쪼갠 일정 지도입니다. 포함 내용: 계층형 작업 목록, 각 작업의 시작/종료일, 선행/후행 작업 간의 의존성, 작업별 담당자. 활용: 단순한 To-Do 리스트를 넘어, 특정 작업이 지연될 때 전체 일정에 미치는 영향을 파악하고 리소스를 재분배하는 데 사용됩니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:233.2px;width:340.3px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">불확실성을 선제적으로 통제하고, 이미 발생한 문제를 추적하여 해결하는 문서입니다. 포함 내용: 리스크 내용, 발생 확률(상/중/하), 비즈니스 영향도, 대응 전략(회피/완화/수용), 현재 진행 상태. 활용: Jira나 Trello 등의 칸반/티켓 기반 트래커와 연동하여 실시간으로 이슈 상태를 관리합니다. 정기 미팅에서 &#x27;현재 상태&#x27;를 모니터링하고 담당자의 조치를 압박하는 용도로 쓰입니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:403.3px;width:351.0px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">의사결정 히스토리를 증명하고 다음 행동을 강제하는 법적 효력에 가까운 기록입니다. 포함 내용: 회의 일시, 참석자, 주요 결정 사항, 액션 아이템(담당자와 완료 기한 필수 포함). 활용: 구두로만 합의된 내용은 반드시 휘발되거나 왜곡됩니다. Slack 등을 통해 회의 직후 관련자 모두에게 공유하여 합의 사항을 픽스하고, 다음 회의 시작 시 이전 액션 아이템의 완료 여부부터 점검합니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:488.3px;width:510.5px;height:67.4px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">흠.. 개발자에 치우쳐진 것 보다는 프로젝트를 좀 더 폭넓게 잡아봤으면 하는데, 프로젝트가 여러가지잖아</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:488.3px;width:510.5px;height:67.4px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">IT나 소프트웨어 개발에 국한하지 않고 건설, 마케팅 캠페인 등 모든 산업군에 적용되는 범용적인 관점에서 PM이 쥐고 있어야 할 5대 관리 문서를 재정의합니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"3\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.1\" data-y=\"43.0\" data-w=\"510.1\" data-h=\"280.7\" class=\"scaffold-frame\" style=\"position:absolute;left:43.1px;top:43.0px;width:510.1px;height:280.7px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.1px;top:43.0px;width:510.1px;height:280.7px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s19\" data-mapping-num=\"19\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s20\" data-mapping-num=\"20\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s21\" data-mapping-num=\"21\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s22\" data-mapping-num=\"22\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s23\" data-mapping-num=\"23\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s24\" data-mapping-num=\"24\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s25\" data-mapping-num=\"25\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s26\" data-mapping-num=\"26\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s27\" data-mapping-num=\"27\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s28\" data-mapping-num=\"28\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s29\" data-mapping-num=\"29\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s30\" data-mapping-num=\"30\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s31\" data-mapping-num=\"31\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s32\" data-mapping-num=\"32\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s33\" data-mapping-num=\"33\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:153.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s34\" data-mapping-num=\"34\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:208.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s35\" data-mapping-num=\"35\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td><td style=\"border:1px solid #334155;width:148.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s36\" data-mapping-num=\"36\" data-placeholder=\"5대 범용 관리 문서 요약표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:343.5px;width:357.0px;height:21.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">프로젝트가 왜 필요한지(비즈니스 케이스), 예산은 얼마인지, 최종 결정권자는 누구인지 경영진으로부터 공식 승인을 받는 문서입니다. 비개발 프로젝트 예시: 신규 오프라인 매장 오픈 시 예상 기대 수익(ROI), 타겟 오픈일 등 명시. 핵심 가치: 최초 승인받은 목표와 예산 범위를 벗어난 무리한 요구를 방어하는 근거.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:532.1px;width:358.8px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">우리가 &#x27;무엇을&#x27;, &#x27;언제까지&#x27; 할 것인지 전체 지도를 그리는 문서입니다. 과업(Task) 중심으로 작성됩니다. 비개발 프로젝트 예시: 컨퍼런스 기획 작업 의존성과 일정 시각화. 핵심 가치: 특정 작업 지연 시 전체 마감 영향 즉각 파악 및 일정 조율.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:720.7px;width:448.0px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">소프트웨어와 달리 일반 프로젝트는 돈과 실물 자산이 복잡하게 얽혀 있어 별도 예산 관리가 필수입니다. 비개발 프로젝트 예시: 장비 대여료, 원자재비, 용역비 등 기성금 지급 내역과 잔여 예산 매주 추적. 핵심 가치: 예산 초과(Over-budget) 방지 및 협력업체 작업 중단 사태 방지.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"4\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:164.2px;width:469.4px;height:47.1px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">프로젝트에 영향을 주거나 받는 모든 집단을 분류하고, 누구에게 언제 어떤 방식으로 보고할지 규정합니다. 비개발 프로젝트 예시: 발주처(월간 대면), 주민(공청회), 하도급(주간 실무) 등 소통 방식 세팅. 핵심 가치: &#x27;전달받은 적 없다&#x27;는 상황 원천 차단 및 신속한 의사결정 지원.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:397.4px;width:331.4px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">통제할 수 없는 외부 변수를 미리 예측하고 대비책을 세우며, 실제 터진 문제를 어떻게 수습했는지 기록합니다. 비개발 프로젝트 예시: 폭우 리스크 대응 플랜, 수입 통관 지연 이슈 조치 현황. 핵심 가치: PM이 플랜 B를 가동할 수 있게 하며 Lessons Learned로 축적.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:46.3px;width:502.7px;height:30.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">고전적인 문서 관리 방식과 소프트웨어 베이스의 문서 관리 방식을 구분해서 표현하는 개념이 있나?</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"5\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"606.3\" data-w=\"510.2\" data-h=\"183.9\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:606.3px;width:510.2px;height:183.9px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:606.3px;width:510.2px;height:183.9px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s37\" data-mapping-num=\"37\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s38\" data-mapping-num=\"38\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s39\" data-mapping-num=\"39\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s40\" data-mapping-num=\"40\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s41\" data-mapping-num=\"41\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s42\" data-mapping-num=\"42\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s43\" data-mapping-num=\"43\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s44\" data-mapping-num=\"44\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s45\" data-mapping-num=\"45\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s46\" data-mapping-num=\"46\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s47\" data-mapping-num=\"47\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s48\" data-mapping-num=\"48\" data-placeholder=\"고전적 vs 소프트웨어 기반 문서 관리 비교표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:46.3px;width:502.7px;height:30.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">정적 문서: &#x27;작성 완료&#x27; 시점에 정보 박제, 기획서_v1.2_최종.docx 형태 파생. 살아있는 문서: Notion 등 워크스페이스에서 실시간 피드백과 현황이 덧붙여지며 계속 진화(Evolving).</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:176.8px;width:502.7px;height:25.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">파일 기반: 로컬 PC/폴더에 존재하여 최신 버전 혼란 발생. 단일 진실 공급원(SSOT): 고유 URL/DB를 바라보며 항상 최신 정보 유지 및 자동 버전 기록.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:319.9px;width:502.7px;height:25.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">문서 중심: 관리 최소 단위가 1개의 파일. 데이터/블록 중심: 텍스트 한 줄, 표의 셀 하나가 독립 데이터(Block)로 작동 (Jira 티켓, Trello 카드).</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:518.6px;width:341.5px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">문서를 단순히 &#x27;기록하는 종이&#x27;에서 &#x27;업무를 구동하는 시스템&#x27;으로 바꾸어 놓았습니다. 가장 큰 차이는 자동화와 연결성으로, Jira 티켓 상태 변경 시 Slack 알림 전송 등 문서가 프로젝트를 움직이는 트리거 역할을 수행합니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"6\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"43.0\" data-w=\"510.2\" data-h=\"85.7\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:43.0px;width:510.2px;height:85.7px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:43.0px;width:510.2px;height:85.7px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s49\" data-mapping-num=\"49\" data-placeholder=\"협업 도구\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s50\" data-mapping-num=\"50\" data-placeholder=\"협업 도구\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s51\" data-mapping-num=\"51\" data-placeholder=\"협업 도구\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:75.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s52\" data-mapping-num=\"52\" data-placeholder=\"협업 도구\"></span></p></td><td style=\"border:1px solid #334155;width:224.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s53\" data-mapping-num=\"53\" data-placeholder=\"협업 도구\"></span></p></td><td style=\"border:1px solid #334155;width:210.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s54\" data-mapping-num=\"54\" data-placeholder=\"협업 도구\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"526.8\" data-w=\"510.2\" data-h=\"231.9\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:526.8px;width:510.2px;height:231.9px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:526.8px;width:510.2px;height:231.9px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:63.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s55\" data-mapping-num=\"55\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:109.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s56\" data-mapping-num=\"56\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:146.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s57\" data-mapping-num=\"57\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:190.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s58\" data-mapping-num=\"58\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:63.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s59\" data-mapping-num=\"59\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:109.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s60\" data-mapping-num=\"60\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:146.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s61\" data-mapping-num=\"61\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:190.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s62\" data-mapping-num=\"62\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:63.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s63\" data-mapping-num=\"63\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:109.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s64\" data-mapping-num=\"64\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:146.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s65\" data-mapping-num=\"65\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:190.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s66\" data-mapping-num=\"66\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:63.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s67\" data-mapping-num=\"67\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:109.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s68\" data-mapping-num=\"68\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:146.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s69\" data-mapping-num=\"69\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:190.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s70\" data-mapping-num=\"70\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:63.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s71\" data-mapping-num=\"71\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:109.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s72\" data-mapping-num=\"72\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:146.2px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s73\" data-mapping-num=\"73\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:190.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s74\" data-mapping-num=\"74\" data-placeholder=\"문서의 3단계 진화 과정 비교표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.2px;top:262.7px;width:512.9px;height:85.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">살아있는 문서 (Living Document) 여기서 조금 더 파생해보자고. 에이전트를 통한 자동화 관점에서 회의관리와 일정/로드맵의 분리가 어떻게 융합되는지?</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:778.8px;width:421.2px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">회의 관리와 로드맵/일정의 분리가 사라지는 현상이 에이전틱 단계의 핵심입니다. MCP나 AI 파이프라인을 통해 회의록(텍스트)과 WBS(일정)가 유기적으로 연결됩니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"7\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:470.6px;width:254.6px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">과거의 &#x27;현황 추적자(Tracker)&#x27;에서, 자동화 파이프라인과 프롬프트를 설계하는 &#x27;시스템 아키텍트(Architect)&#x27;이자 AI 판단을 승인하는 &#x27;검토자(Reviewer)&#x27;로 진화합니다. 문서는 프로젝트를 통제하는 &#x27;소프트웨어의 UI&#x27; 그 자체로 변모합니다.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:572.5px;width:195.1px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">찾다보니 docsumo 라는 서비스가 있는데 자세히 알려줘</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:572.5px;width:195.1px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">영수증, 송장, 은행 거래 내역서 등 비정형 문서에서 데이터를 자동으로 추출해 정형 데이터로 변환해 주는 지능형 문서 처리(IDP) 및 문서 AI 플랫폼입니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"8\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"658.0\" data-w=\"510.2\" data-h=\"134.4\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:658.0px;width:510.2px;height:134.4px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:658.0px;width:510.2px;height:134.4px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:99.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s75\" data-mapping-num=\"75\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:148.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s76\" data-mapping-num=\"76\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:262.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s77\" data-mapping-num=\"77\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:99.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s78\" data-mapping-num=\"78\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:148.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s79\" data-mapping-num=\"79\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:262.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s80\" data-mapping-num=\"80\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:99.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s81\" data-mapping-num=\"81\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:148.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s82\" data-mapping-num=\"82\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:262.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s83\" data-mapping-num=\"83\" data-placeholder=\"Docsumo 요금제 비교표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:589.3px;width:169.0px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">처리하는 문서의 양(볼륨)과 요구되는 자동화 수준에 따라 나뉩니다.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"9\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"43.0\" data-w=\"510.2\" data-h=\"85.7\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:43.0px;width:510.2px;height:85.7px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:43.0px;width:510.2px;height:85.7px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:99.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">플랜 (Plan)</p></th><th style=\"border:1px solid #334155;width:148.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">주요 타겟</p></th><th style=\"border:1px solid #334155;width:262.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">핵심 제공 사항</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:99.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s84\" data-mapping-num=\"84\" data-placeholder=\"Enterprise 플랜\"></span></p></td><td style=\"border:1px solid #334155;width:148.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s85\" data-mapping-num=\"85\" data-placeholder=\"Enterprise 플랜\"></span></p></td><td style=\"border:1px solid #334155;width:262.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s86\" data-mapping-num=\"86\" data-placeholder=\"Enterprise 플랜\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"484.8\" data-w=\"510.2\" data-h=\"231.9\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:484.8px;width:510.2px;height:231.9px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:484.8px;width:510.2px;height:231.9px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:59.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s87\" data-mapping-num=\"87\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:237.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s88\" data-mapping-num=\"88\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:213.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s89\" data-mapping-num=\"89\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:59.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s90\" data-mapping-num=\"90\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:237.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s91\" data-mapping-num=\"91\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:213.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s92\" data-mapping-num=\"92\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:59.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s93\" data-mapping-num=\"93\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:237.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s94\" data-mapping-num=\"94\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:213.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s95\" data-mapping-num=\"95\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:59.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s96\" data-mapping-num=\"96\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:237.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s97\" data-mapping-num=\"97\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:213.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s98\" data-mapping-num=\"98\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:59.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s99\" data-mapping-num=\"99\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:237.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s100\" data-mapping-num=\"100\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:213.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s101\" data-mapping-num=\"101\" data-placeholder=\"Docsumo vs Upstage 비교표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:252.6px;width:254.6px;height:25.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">그럼 upstage랑 같다고 보면 되지?</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:736.7px;width:87.5px;height:20.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">1. 한국어 및 로컬라이제이션: Upstage는 한국어 OCR 및 행정 문서 모델 압도적. Docsumo는 영문 청구서 및 해외 물류 최적화. 2. 기술적 접근 방식: Upstage는 Solar LLM 기반 맥락 이해 강점, Docsumo는 ERP 연동 파이프라인 특화. 3. 제품 확장성: Docsumo는 단일 문서 추출 집중, Upstage는 챗봇 및 LLM API 등 포괄적 솔루션 제공.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"10\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:589.3px;width:224.9px;height:25.3px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">IDP 분야에서 가장 뛰어난 성능을 보인다고 평가받는 서비스는 뭐지? 독수모의 대안들을 알려줘</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:628.1px;width:396.2px;height:20.2px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">1. 글로벌 엔터프라이즈 최강자 (정확도 및 성능 표준)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:668.5px;width:214.8px;height:16.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">특징: 수십 년간 글로벌 OCR 시장 1위 업계 표준. 강점: 다중 페이지 및 왜곡 스캔본 최고 안정성. 추천 대상: 대규모 레거시 연동과 컴플라이언스 필요한 대기업.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"11\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:96.8px;width:92.8px;height:16.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">특징: 비정형 문서 및 인간 필기체(Handwriting) 인식 최강자. 강점: 최대 99% 이상 정확도 및 신뢰도 기반 사람 검토 분기. 추천 대상: 수기 신청서, 보험 청구서 등 필기체 혼합 환경.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:278.7px;width:391.5px;height:20.2px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">2. 현대적 AI SaaS 대안 (Docsumo의 직접 경쟁군)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:319.1px;width:54.1px;height:16.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">특징: 템플릿 없는 AI 선두 주자 클라우드 네이티브 IDP. 강점: 거래 문서 양식 변화 대응 및 직관적 교정 UI. 추천 대상: 다양한 양식 인보이스/공급망 문서 처리 기업.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:500.1px;width:66.0px;height:15.2px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">특징: 개발자 친화적 API와 직관적 웹 인터페이스. 강점: 사전 학습 모델 및 몇 분 만의 초고속 커스텀 모델 배포. 추천 대상: 빠른 PoC 및 즉각 API 연동 원하는 스타트업.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:663.4px;width:390.3px;height:20.2px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">3. 빅테크 클라우드 Document AI (비용 및 확장성)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:698.8px;width:284.4px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">강점: MS 생태계 완벽 연동, 최저 수준 대규모 데이터 처리 비용. 추천 대상: Azure 인프라 운영 기업.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"12\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"267.3\" data-w=\"510.2\" data-h=\"280.7\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:267.3px;width:510.2px;height:280.7px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:267.3px;width:510.2px;height:280.7px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s102\" data-mapping-num=\"102\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s103\" data-mapping-num=\"103\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s104\" data-mapping-num=\"104\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s105\" data-mapping-num=\"105\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s106\" data-mapping-num=\"106\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s107\" data-mapping-num=\"107\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s108\" data-mapping-num=\"108\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s109\" data-mapping-num=\"109\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s110\" data-mapping-num=\"110\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s111\" data-mapping-num=\"111\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s112\" data-mapping-num=\"112\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s113\" data-mapping-num=\"113\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s114\" data-mapping-num=\"114\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s115\" data-mapping-num=\"115\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s116\" data-mapping-num=\"116\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s117\" data-mapping-num=\"117\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s118\" data-mapping-num=\"118\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s119\" data-mapping-num=\"119\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s120\" data-mapping-num=\"120\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s121\" data-mapping-num=\"121\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:112.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s122\" data-mapping-num=\"122\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:138.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s123\" data-mapping-num=\"123\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:108.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s124\" data-mapping-num=\"124\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td><td style=\"border:1px solid #334155;width:150.8px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s125\" data-mapping-num=\"125\" data-placeholder=\"한눈에 보는 대안 비교표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:96.8px;width:186.2px;height:16.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">강점: 구글 LLM 및 멀티모달 AI 결합 복잡 비정형 문서 의미 분석. 추천 대상: 문서 요약, 검색, 추출 통합 환경.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:547.2px;width:254.6px;height:42.1px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">아니지 내 요구사항과 의도를 전혀 잘못 파악했네. OCR 과 비정형 데이터 처리가 메인이 아니라 각 문서 간의 연결, ADP 가 핵심 기능이라고. 혹시 독수모도 이정도 까지는 안되는건가?</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"13\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:47.1px;width:213.6px;height:21.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">1. 단일 트랜잭션 중심: 개별 파일을 정형 데이터로 변환하는 &#x27;파이프&#x27;에 불과. 2. 맥락(Context) 부재: 회의록에서 WBS, PRD 등으로 의미론적 연결 및 변경 전파 기능 부재. 회계 필드 단순 대조(2-way/3-way Matching)만 지원.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:205.4px;width:442.7px;height:21.0px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">2. 문서 간 연결과 전파를 실제로 수행하는 도구 및 아키텍처</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:295.5px;width:378.4px;height:16.0px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">① 관계형 문서 및 워크스페이스 엔진 (Relational Workspace)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:336.8px;width:135.7px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">회의록, 고객 피드백, PRD, 백로그, 리스크 대장이 개별 Entity이자 양방향 관계로 연결되어, 텍스트 지정 시 로드맵/PRD 실시간 동기화.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:505.2px;width:76.2px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">표와 텍스트가 페이지 간 수식/데이터로 결합(Pack &amp; Formula), 버튼 클릭으로 다른 페이지 로드맵 행 변경 자동화.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:632.3px;width:382.6px;height:16.0px;font-size:11.0px;font-weight:600;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">② 크로스 문서 AI 분석 및 매트릭스 엔진 (Cross-Document AI)</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:673.5px;width:105.9px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">수천 개 문서를 동시 분석하여 상관관계를 매트릭스(표) 형태로 추출/비교, 문서 간 일정/비용 상충 추론.</p></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"14\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"43.0\" data-y=\"287.5\" data-w=\"510.2\" data-h=\"213.9\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:287.5px;width:510.2px;height:213.9px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:43.0px;top:287.5px;width:510.2px;height:213.9px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:78.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s126\" data-mapping-num=\"126\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:256.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s127\" data-mapping-num=\"127\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:174.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s128\" data-mapping-num=\"128\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:78.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s129\" data-mapping-num=\"129\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:256.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s130\" data-mapping-num=\"130\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:174.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s131\" data-mapping-num=\"131\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:78.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s132\" data-mapping-num=\"132\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:256.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s133\" data-mapping-num=\"133\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:174.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s134\" data-mapping-num=\"134\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:78.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s135\" data-mapping-num=\"135\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:256.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s136\" data-mapping-num=\"136\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:174.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s137\" data-mapping-num=\"137\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:78.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s138\" data-mapping-num=\"138\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:256.5px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s139\" data-mapping-num=\"139\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td><td style=\"border:1px solid #334155;width:174.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s140\" data-mapping-num=\"140\" data-placeholder=\"LLM 기반 에이전틱 파이프라인 4단계 표\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:84.2px;width:105.9px;height:16.8px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">Slack, Notion, Jira 등 조직 내 SaaS를 실시간 인덱싱하여 회의록 결정사항과 Jira/PRD 충돌 감지 및 연결고리 도출.</p></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:42.8px;top:223.1px;width:286.8px;height:16.0px;font-size:10px;line-height:1.4;color:#334155;overflow:hidden;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\"><p style=\"margin:0;\">회의록 -&gt; 프로젝트 문서 자동 갱신 파이프라인을 구축할 때 사용하는 아키텍처입니다.</p></div>\n</div>",
+  "markdownContent": "# 프로젝트 매니저의 5대 필수 관리 문서.pdf\n\n# 프로젝트 매니저의 5대 필수 관리 문서\n\nProject Manager 에게 꼭 필요한 필수 관리 문서가 뭐라고 생각하나?\n\n\n프로젝트 매니저(PM)가 일정, 리소스, 리스크를 통제하고 산출물을 방어하기 위해 반드시 유지해야 하는 핵심 관리 문서는 크게 5가지로 압축됩니다.\n\n\n프로젝트의 존재 이유와 PM의 권한을 공식적으로 선언하는 베이스캠프 역할을 합니다. 포함 내용: 프로젝트 배경, 최종 목표(KPI), 핵심 이해관계자, 대략적인 예산과 핵심 마일스톤. 활용: 프로젝트 진행 중 방향성이 흔들리거나 이해관계자 간 의견 충돌이 발생할 때, 최초 합의된 목표를 상기시키는 의사결정의 기준점이 됩니다.\n\n\n이해관계자의 비즈니스 요구를 구체적인 기능과 제약 조건으로 번역한 문서입니다. 포함 내용: 유저 스토리, 기능 상세 스펙, 비기능적 요구사항(성능, 보안 등), 제외 범위(Out of Scope). 활용: Notion과 같은 문서 기반 협업 공간에 단일 진실 공급원(SSOT)으로 구축하여 기획, 개발, 디자인 파트가 동일한 목표를 보게 합니다. PM이 프로젝트 범위 크립(Scope Creep, 요구사항이 계속 늘어나는 현상)을 방어하는 가장 강력한 무기입니다.\n\n\n---\n\n\n프로젝트 전체를 관리 가능한 최소 작업 단위(Work Package)로 쪼갠 일정 지도입니다. 포함 내용: 계층형 작업 목록, 각 작업의 시작/종료일, 선행/후행 작업 간의 의존성, 작업별 담당자. 활용: 단순한 To-Do 리스트를 넘어, 특정 작업이 지연될 때 전체 일정에 미치는 영향을 파악하고 리소스를 재분배하는 데 사용됩니다.\n\n\n불확실성을 선제적으로 통제하고, 이미 발생한 문제를 추적하여 해결하는 문서입니다. 포함 내용: 리스크 내용, 발생 확률(상/중/하), 비즈니스 영향도, 대응 전략(회피/완화/수용), 현재 진행 상태. 활용: Jira나 Trello 등의 칸반/티켓 기반 트래커와 연동하여 실시간으로 이슈 상태를 관리합니다. 정기 미팅에서 '현재 상태'를 모니터링하고 담당자의 조치를 압박하는 용도로 쓰입니다.\n\n\n의사결정 히스토리를 증명하고 다음 행동을 강제하는 법적 효력에 가까운 기록입니다. 포함 내용: 회의 일시, 참석자, 주요 결정 사항, 액션 아이템(담당자와 완료 기한 필수 포함). 활용: 구두로만 합의된 내용은 반드시 휘발되거나 왜곡됩니다. Slack 등을 통해 회의 직후 관련자 모두에게 공유하여 합의 사항을 픽스하고, 다음 회의 시작 시 이전 액션 아이템의 완료 여부부터 점검합니다.\n\n\n흠.. 개발자에 치우쳐진 것 보다는 프로젝트를 좀 더 폭넓게 잡아봤으면 하는데, 프로젝트가 여러가지잖아\n\n\nIT나 소프트웨어 개발에 국한하지 않고 건설, 마케팅 캠페인 등 모든 산업군에 적용되는 범용적인 관점에서 PM이 쥐고 있어야 할 5대 관리 문서를 재정의합니다.\n\n\n---\n\n\n프로젝트가 왜 필요한지(비즈니스 케이스), 예산은 얼마인지, 최종 결정권자는 누구인지 경영진으로부터 공식 승인을 받는 문서입니다. 비개발 프로젝트 예시: 신규 오프라인 매장 오픈 시 예상 기대 수익(ROI), 타겟 오픈일 등 명시. 핵심 가치: 최초 승인받은 목표와 예산 범위를 벗어난 무리한 요구를 방어하는 근거.\n\n\n우리가 '무엇을', '언제까지' 할 것인지 전체 지도를 그리는 문서입니다. 과업(Task) 중심으로 작성됩니다. 비개발 프로젝트 예시: 컨퍼런스 기획 작업 의존성과 일정 시각화. 핵심 가치: 특정 작업 지연 시 전체 마감 영향 즉각 파악 및 일정 조율.\n\n\n소프트웨어와 달리 일반 프로젝트는 돈과 실물 자산이 복잡하게 얽혀 있어 별도 예산 관리가 필수입니다. 비개발 프로젝트 예시: 장비 대여료, 원자재비, 용역비 등 기성금 지급 내역과 잔여 예산 매주 추적. 핵심 가치: 예산 초과(Over-budget) 방지 및 협력업체 작업 중단 사태 방지.\n\n\n---\n\n\n프로젝트에 영향을 주거나 받는 모든 집단을 분류하고, 누구에게 언제 어떤 방식으로 보고할지 규정합니다. 비개발 프로젝트 예시: 발주처(월간 대면), 주민(공청회), 하도급(주간 실무) 등 소통 방식 세팅. 핵심 가치: '전달받은 적 없다'는 상황 원천 차단 및 신속한 의사결정 지원.\n\n\n통제할 수 없는 외부 변수를 미리 예측하고 대비책을 세우며, 실제 터진 문제를 어떻게 수습했는지 기록합니다. 비개발 프로젝트 예시: 폭우 리스크 대응 플랜, 수입 통관 지연 이슈 조치 현황. 핵심 가치: PM이 플랜 B를 가동할 수 있게 하며 Lessons Learned로 축적.\n\n\n고전적인 문서 관리 방식과 소프트웨어 베이스의 문서 관리 방식을 구분해서 표현하는 개념이 있나?\n\n\n---\n\n\n정적 문서: '작성 완료' 시점에 정보 박제, 기획서_v1.2_최종.docx 형태 파생. 살아있는 문서: Notion 등 워크스페이스에서 실시간 피드백과 현황이 덧붙여지며 계속 진화(Evolving).\n\n\n파일 기반: 로컬 PC/폴더에 존재하여 최신 버전 혼란 발생. 단일 진실 공급원(SSOT): 고유 URL/DB를 바라보며 항상 최신 정보 유지 및 자동 버전 기록.\n\n\n문서 중심: 관리 최소 단위가 1개의 파일. 데이터/블록 중심: 텍스트 한 줄, 표의 셀 하나가 독립 데이터(Block)로 작동 (Jira 티켓, Trello 카드).\n\n\n문서를 단순히 '기록하는 종이'에서 '업무를 구동하는 시스템'으로 바꾸어 놓았습니다. 가장 큰 차이는 자동화와 연결성으로, Jira 티켓 상태 변경 시 Slack 알림 전송 등 문서가 프로젝트를 움직이는 트리거 역할을 수행합니다.\n\n\n---\n\n\n살아있는 문서 (Living Document) 여기서 조금 더 파생해보자고. 에이전트를 통한 자동화 관점에서 회의관리와 일정/로드맵의 분리가 어떻게 융합되는지?\n\n\n회의 관리와 로드맵/일정의 분리가 사라지는 현상이 에이전틱 단계의 핵심입니다. MCP나 AI 파이프라인을 통해 회의록(텍스트)과 WBS(일정)가 유기적으로 연결됩니다.\n\n\n---\n\n\n과거의 '현황 추적자(Tracker)'에서, 자동화 파이프라인과 프롬프트를 설계하는 '시스템 아키텍트(Architect)'이자 AI 판단을 승인하는 '검토자(Reviewer)'로 진화합니다. 문서는 프로젝트를 통제하는 '소프트웨어의 UI' 그 자체로 변모합니다.\n\n\n찾다보니 docsumo 라는 서비스가 있는데 자세히 알려줘\n\n\n영수증, 송장, 은행 거래 내역서 등 비정형 문서에서 데이터를 자동으로 추출해 정형 데이터로 변환해 주는 지능형 문서 처리(IDP) 및 문서 AI 플랫폼입니다.\n\n\n---\n\n\n처리하는 문서의 양(볼륨)과 요구되는 자동화 수준에 따라 나뉩니다.\n\n\n---\n\n\n그럼 upstage랑 같다고 보면 되지?\n\n\n1. 한국어 및 로컬라이제이션: Upstage는 한국어 OCR 및 행정 문서 모델 압도적. Docsumo는 영문 청구서 및 해외 물류 최적화. 2. 기술적 접근 방식: Upstage는 Solar LLM 기반 맥락 이해 강점, Docsumo는 ERP 연동 파이프라인 특화. 3. 제품 확장성: Docsumo는 단일 문서 추출 집중, Upstage는 챗봇 및 LLM API 등 포괄적 솔루션 제공.\n\n\n---\n\n\nIDP 분야에서 가장 뛰어난 성능을 보인다고 평가받는 서비스는 뭐지? 독수모의 대안들을 알려줘\n\n### 1. 글로벌 엔터프라이즈 최강자 (정확도 및 성능 표준)\n\n특징: 수십 년간 글로벌 OCR 시장 1위 업계 표준. 강점: 다중 페이지 및 왜곡 스캔본 최고 안정성. 추천 대상: 대규모 레거시 연동과 컴플라이언스 필요한 대기업.\n\n\n---\n\n\n특징: 비정형 문서 및 인간 필기체(Handwriting) 인식 최강자. 강점: 최대 99% 이상 정확도 및 신뢰도 기반 사람 검토 분기. 추천 대상: 수기 신청서, 보험 청구서 등 필기체 혼합 환경.\n\n### 2. 현대적 AI SaaS 대안 (Docsumo의 직접 경쟁군)\n\n특징: 템플릿 없는 AI 선두 주자 클라우드 네이티브 IDP. 강점: 거래 문서 양식 변화 대응 및 직관적 교정 UI. 추천 대상: 다양한 양식 인보이스/공급망 문서 처리 기업.\n\n\n특징: 개발자 친화적 API와 직관적 웹 인터페이스. 강점: 사전 학습 모델 및 몇 분 만의 초고속 커스텀 모델 배포. 추천 대상: 빠른 PoC 및 즉각 API 연동 원하는 스타트업.\n\n### 3. 빅테크 클라우드 Document AI (비용 및 확장성)\n\n강점: MS 생태계 완벽 연동, 최저 수준 대규모 데이터 처리 비용. 추천 대상: Azure 인프라 운영 기업.\n\n\n---\n\n\n강점: 구글 LLM 및 멀티모달 AI 결합 복잡 비정형 문서 의미 분석. 추천 대상: 문서 요약, 검색, 추출 통합 환경.\n\n\n아니지 내 요구사항과 의도를 전혀 잘못 파악했네. OCR 과 비정형 데이터 처리가 메인이 아니라 각 문서 간의 연결, ADP 가 핵심 기능이라고. 혹시 독수모도 이정도 까지는 안되는건가?\n\n\n---\n\n\n1. 단일 트랜잭션 중심: 개별 파일을 정형 데이터로 변환하는 '파이프'에 불과. 2. 맥락(Context) 부재: 회의록에서 WBS, PRD 등으로 의미론적 연결 및 변경 전파 기능 부재. 회계 필드 단순 대조(2-way/3-way Matching)만 지원.\n\n### 2. 문서 간 연결과 전파를 실제로 수행하는 도구 및 아키텍처\n### ① 관계형 문서 및 워크스페이스 엔진 (Relational Workspace)\n\n회의록, 고객 피드백, PRD, 백로그, 리스크 대장이 개별 Entity이자 양방향 관계로 연결되어, 텍스트 지정 시 로드맵/PRD 실시간 동기화.\n\n\n표와 텍스트가 페이지 간 수식/데이터로 결합(Pack & Formula), 버튼 클릭으로 다른 페이지 로드맵 행 변경 자동화.\n\n### ② 크로스 문서 AI 분석 및 매트릭스 엔진 (Cross-Document AI)\n\n수천 개 문서를 동시 분석하여 상관관계를 매트릭스(표) 형태로 추출/비교, 문서 간 일정/비용 상충 추론.\n\n\n---\n\n\nSlack, Notion, Jira 등 조직 내 SaaS를 실시간 인덱싱하여 회의록 결정사항과 Jira/PRD 충돌 감지 및 연결고리 도출.\n\n\n회의록 -> 프로젝트 문서 자동 갱신 파이프라인을 구축할 때 사용하는 아키텍처입니다.\n",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        223,
+        72,
+        267,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        223,
+        337,
+        267,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        223,
+        698,
+        267,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        267,
+        72,
+        325,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        267,
+        337,
+        325,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        267,
+        698,
+        325,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        325,
+        72,
+        383,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        325,
+        337,
+        383,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        325,
+        698,
+        383,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        383,
+        72,
+        441,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        383,
+        337,
+        441,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        383,
+        698,
+        441,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        441,
+        72,
+        498,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s14",
+      "number": 14,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        441,
+        337,
+        498,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s15",
+      "number": 15,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        441,
+        698,
+        498,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s16",
+      "number": 16,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        498,
+        72,
+        556,
+        337
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s17",
+      "number": 17,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        498,
+        337,
+        556,
+        698
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s18",
+      "number": 18,
+      "label": "5대 필수 관리 문서 요약표",
+      "box_2d": [
+        498,
+        698,
+        556,
+        930
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s19",
+      "number": 19,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        51,
+        72,
+        95,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s20",
+      "number": 20,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        51,
+        330,
+        95,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s21",
+      "number": 21,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        51,
+        680,
+        95,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s22",
+      "number": 22,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        95,
+        72,
+        153,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s23",
+      "number": 23,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        95,
+        330,
+        153,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s24",
+      "number": 24,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        95,
+        680,
+        153,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s25",
+      "number": 25,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        153,
+        72,
+        211,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s26",
+      "number": 26,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        153,
+        330,
+        211,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s27",
+      "number": 27,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        153,
+        680,
+        211,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s28",
+      "number": 28,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        211,
+        72,
+        269,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s29",
+      "number": 29,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        211,
+        330,
+        269,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s30",
+      "number": 30,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        211,
+        680,
+        269,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s31",
+      "number": 31,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        269,
+        72,
+        326,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s32",
+      "number": 32,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        269,
+        330,
+        326,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s33",
+      "number": 33,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        269,
+        680,
+        326,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s34",
+      "number": 34,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        326,
+        72,
+        385,
+        330
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s35",
+      "number": 35,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        326,
+        330,
+        385,
+        680
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s36",
+      "number": 36,
+      "label": "5대 범용 관리 문서 요약표",
+      "box_2d": [
+        326,
+        680,
+        385,
+        930
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s37",
+      "number": 37,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        720,
+        72,
+        785,
+        200
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s38",
+      "number": 38,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        720,
+        200,
+        785,
+        577
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s39",
+      "number": 39,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        720,
+        577,
+        785,
+        930
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s40",
+      "number": 40,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        785,
+        72,
+        843,
+        200
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s41",
+      "number": 41,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        785,
+        200,
+        843,
+        577
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s42",
+      "number": 42,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        785,
+        577,
+        843,
+        930
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s43",
+      "number": 43,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        843,
+        72,
+        881,
+        200
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s44",
+      "number": 44,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        843,
+        200,
+        881,
+        577
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s45",
+      "number": 45,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        843,
+        577,
+        881,
+        930
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s46",
+      "number": 46,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        881,
+        72,
+        939,
+        200
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s47",
+      "number": 47,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        881,
+        200,
+        939,
+        577
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s48",
+      "number": 48,
+      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+      "box_2d": [
+        881,
+        577,
+        939,
+        930
+      ],
+      "pageNumber": 5
+    },
+    {
+      "id": "s49",
+      "number": 49,
+      "label": "협업 도구",
+      "box_2d": [
+        51,
+        72,
+        116,
+        200
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s50",
+      "number": 50,
+      "label": "협업 도구",
+      "box_2d": [
+        51,
+        200,
+        116,
+        577
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s51",
+      "number": 51,
+      "label": "협업 도구",
+      "box_2d": [
+        51,
+        577,
+        116,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s52",
+      "number": 52,
+      "label": "협업 도구",
+      "box_2d": [
+        116,
+        72,
+        153,
+        200
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s53",
+      "number": 53,
+      "label": "협업 도구",
+      "box_2d": [
+        116,
+        200,
+        153,
+        577
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s54",
+      "number": 54,
+      "label": "협업 도구",
+      "box_2d": [
+        116,
+        577,
+        153,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s55",
+      "number": 55,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        626,
+        72,
+        691,
+        180
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s56",
+      "number": 56,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        626,
+        180,
+        691,
+        364
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s57",
+      "number": 57,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        626,
+        364,
+        691,
+        609
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s58",
+      "number": 58,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        626,
+        609,
+        691,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s59",
+      "number": 59,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        691,
+        72,
+        727,
+        180
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s60",
+      "number": 60,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        691,
+        180,
+        727,
+        364
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s61",
+      "number": 61,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        691,
+        364,
+        727,
+        609
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s62",
+      "number": 62,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        691,
+        609,
+        727,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s63",
+      "number": 63,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        727,
+        72,
+        785,
+        180
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s64",
+      "number": 64,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        727,
+        180,
+        785,
+        364
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s65",
+      "number": 65,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        727,
+        364,
+        785,
+        609
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s66",
+      "number": 66,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        727,
+        609,
+        785,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s67",
+      "number": 67,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        785,
+        72,
+        843,
+        180
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s68",
+      "number": 68,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        785,
+        180,
+        843,
+        364
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s69",
+      "number": 69,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        785,
+        364,
+        843,
+        609
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s70",
+      "number": 70,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        785,
+        609,
+        843,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s71",
+      "number": 71,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        843,
+        72,
+        901,
+        180
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s72",
+      "number": 72,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        843,
+        180,
+        901,
+        364
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s73",
+      "number": 73,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        843,
+        364,
+        901,
+        609
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s74",
+      "number": 74,
+      "label": "문서의 3단계 진화 과정 비교표",
+      "box_2d": [
+        843,
+        609,
+        901,
+        930
+      ],
+      "pageNumber": 6
+    },
+    {
+      "id": "s75",
+      "number": 75,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        782,
+        72,
+        825,
+        239
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s76",
+      "number": 76,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        782,
+        239,
+        825,
+        488
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s77",
+      "number": 77,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        782,
+        488,
+        825,
+        930
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s78",
+      "number": 78,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        825,
+        72,
+        883,
+        239
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s79",
+      "number": 79,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        825,
+        239,
+        883,
+        488
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s80",
+      "number": 80,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        825,
+        488,
+        883,
+        930
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s81",
+      "number": 81,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        883,
+        72,
+        941,
+        239
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s82",
+      "number": 82,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        883,
+        239,
+        941,
+        488
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s83",
+      "number": 83,
+      "label": "Docsumo 요금제 비교표",
+      "box_2d": [
+        883,
+        488,
+        941,
+        930
+      ],
+      "pageNumber": 8
+    },
+    {
+      "id": "s84",
+      "number": 84,
+      "label": "Enterprise 플랜",
+      "box_2d": [
+        95,
+        72,
+        153,
+        239
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s85",
+      "number": 85,
+      "label": "Enterprise 플랜",
+      "box_2d": [
+        95,
+        239,
+        153,
+        488
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s86",
+      "number": 86,
+      "label": "Enterprise 플랜",
+      "box_2d": [
+        95,
+        488,
+        153,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s87",
+      "number": 87,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        576,
+        72,
+        620,
+        172
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s88",
+      "number": 88,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        576,
+        172,
+        620,
+        572
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s89",
+      "number": 89,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        576,
+        572,
+        620,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s90",
+      "number": 90,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        620,
+        72,
+        677,
+        172
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s91",
+      "number": 91,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        620,
+        172,
+        677,
+        572
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s92",
+      "number": 92,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        620,
+        572,
+        677,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s93",
+      "number": 93,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        677,
+        72,
+        735,
+        172
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s94",
+      "number": 94,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        677,
+        172,
+        735,
+        572
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s95",
+      "number": 95,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        677,
+        572,
+        735,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s96",
+      "number": 96,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        735,
+        72,
+        793,
+        172
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s97",
+      "number": 97,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        735,
+        172,
+        793,
+        572
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s98",
+      "number": 98,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        735,
+        572,
+        793,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s99",
+      "number": 99,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        793,
+        72,
+        851,
+        172
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s100",
+      "number": 100,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        793,
+        172,
+        851,
+        572
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s101",
+      "number": 101,
+      "label": "Docsumo vs Upstage 비교표",
+      "box_2d": [
+        793,
+        572,
+        851,
+        930
+      ],
+      "pageNumber": 9
+    },
+    {
+      "id": "s102",
+      "number": 102,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        317,
+        72,
+        361,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s103",
+      "number": 103,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        317,
+        262,
+        361,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s104",
+      "number": 104,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        317,
+        494,
+        361,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s105",
+      "number": 105,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        317,
+        676,
+        361,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s106",
+      "number": 106,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        361,
+        72,
+        419,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s107",
+      "number": 107,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        361,
+        262,
+        419,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s108",
+      "number": 108,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        361,
+        494,
+        419,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s109",
+      "number": 109,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        361,
+        676,
+        419,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s110",
+      "number": 110,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        419,
+        72,
+        477,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s111",
+      "number": 111,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        419,
+        262,
+        477,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s112",
+      "number": 112,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        419,
+        494,
+        477,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s113",
+      "number": 113,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        419,
+        676,
+        477,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s114",
+      "number": 114,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        477,
+        72,
+        535,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s115",
+      "number": 115,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        477,
+        262,
+        535,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s116",
+      "number": 116,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        477,
+        494,
+        535,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s117",
+      "number": 117,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        477,
+        676,
+        535,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s118",
+      "number": 118,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        535,
+        72,
+        593,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s119",
+      "number": 119,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        535,
+        262,
+        593,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s120",
+      "number": 120,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        535,
+        494,
+        593,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s121",
+      "number": 121,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        535,
+        676,
+        593,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s122",
+      "number": 122,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        593,
+        72,
+        651,
+        262
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s123",
+      "number": 123,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        593,
+        262,
+        651,
+        494
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s124",
+      "number": 124,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        593,
+        494,
+        651,
+        676
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s125",
+      "number": 125,
+      "label": "한눈에 보는 대안 비교표",
+      "box_2d": [
+        593,
+        676,
+        651,
+        930
+      ],
+      "pageNumber": 12
+    },
+    {
+      "id": "s126",
+      "number": 126,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        342,
+        72,
+        385,
+        205
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s127",
+      "number": 127,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        342,
+        205,
+        385,
+        636
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s128",
+      "number": 128,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        342,
+        636,
+        385,
+        930
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s129",
+      "number": 129,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        385,
+        72,
+        422,
+        205
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s130",
+      "number": 130,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        385,
+        205,
+        422,
+        636
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s131",
+      "number": 131,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        385,
+        636,
+        422,
+        930
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s132",
+      "number": 132,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        422,
+        72,
+        480,
+        205
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s133",
+      "number": 133,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        422,
+        205,
+        480,
+        636
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s134",
+      "number": 134,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        422,
+        636,
+        480,
+        930
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s135",
+      "number": 135,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        480,
+        72,
+        538,
+        205
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s136",
+      "number": 136,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        480,
+        205,
+        538,
+        636
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s137",
+      "number": 137,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        480,
+        636,
+        538,
+        930
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s138",
+      "number": 138,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        538,
+        72,
+        596,
+        205
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s139",
+      "number": 139,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        538,
+        205,
+        596,
+        636
+      ],
+      "pageNumber": 14
+    },
+    {
+      "id": "s140",
+      "number": 140,
+      "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+      "box_2d": [
+        538,
+        636,
+        596,
+        930
+      ],
+      "pageNumber": 14
+    }
+  ]
+}
