@@ -1,6 +1,9 @@
 """
 엔진별/서버별 분리 로깅 구성기.
 FastAPI 앱, 도메인 엔진(scaffold_engine), 그리고 통합 디버그 스트림을 분리하여 기록합니다.
+
+로그는 `state/log/` 에 둔다. 지워도 앱이 정상 동작해야 하는 자료이고, 실제로
+보존기간이 지나면 지운다. 위치를 아는 것은 저장 게이트뿐이다.
 """
 from __future__ import annotations
 
@@ -15,14 +18,15 @@ _LOG_FORMAT = "[%(asctime)s] [%(levelname)s] [%(name)s:%(lineno)d] %(message)s"
 def setup_logging(base_logs_dir: Optional[Path] = None) -> Path:
     """
     다중 타깃 로깅 시스템을 초기화합니다.
-    - logs/app.log: API 웹 서버 및 라우터 요청
-    - logs/debug.log: 전체 통합 스트림 (기존 호환성 유지)
-    - logs/engines/scaffold_engine.log: scaffold-engine 파이프라인 및 하네스 로그
-    - logs/traces/: LangSmith 스타일 정밀 추적 디렉터리 준비
+    - state/log/app.log: API 웹 서버 및 라우터 요청
+    - state/log/debug.log: 전체 통합 스트림
+    - state/log/engines/scaffold_engine.log: scaffold-engine 파이프라인 및 하네스 로그
+    - state/log/traces/: 정밀 추적 디렉터리 준비
     """
     if base_logs_dir is None:
-        # apps/api/logs
-        base_logs_dir = Path(__file__).resolve().parents[2] / "logs"
+        from app.core.config import settings
+
+        base_logs_dir = settings.storage.log
 
     engines_dir = base_logs_dir / "engines"
     traces_dir = base_logs_dir / "traces" / "runs"

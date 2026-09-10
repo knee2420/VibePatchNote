@@ -11,24 +11,55 @@ from app.workspaces.adapters.local_workspace_repository import LocalWorkspaceRep
 
 
 def test_document_source_adapter_saves_and_resolves(tmp_path: Path) -> None:
-    uploads = tmp_path / "uploads"
-    repository = LocalDocumentSourceRepository(uploads, tmp_path / "legacy")
+    """경로는 doc_id 로만 만들고, 사람이 읽는 이름은 meta.json 안에서만 산다."""
+    repository = LocalDocumentSourceRepository(tmp_path / "documents")
 
-    saved = repository.save("reference.pdf", b"pdf-bytes")
+    meta = repository.save("참고 문서: v2.pdf", b"pdf-bytes")
 
-    assert saved.read_bytes() == b"pdf-bytes"
-    assert repository.resolve("reference").name == "reference.pdf"
+    assert meta.original_name == "참고 문서: v2.pdf"
+    assert repository.resolve_file(meta.doc_id).read_bytes() == b"pdf-bytes"
+    # 이름에 콜론·공백·한글이 있어도 경로에는 실리지 않는다.
+    assert meta.doc_id in {package.name for package in (tmp_path / "documents").iterdir()}
+    assert repository.find_by_name("참고 문서: v2.pdf").doc_id == meta.doc_id
 
 
 def test_workspace_adapter_persists_sessions(tmp_path: Path) -> None:
-    database_file = tmp_path / "workspaces.json"
-    repository = LocalWorkspaceRepository(database_file)
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
+    repository = LocalWorkspaceRepository(sessions_dir)
 
-    sessions = repository.load_all()
-    sessions["test"] = {"id": "test", "title": "Test"}
-    repository.save_all(sessions)
+    repository.save({"id": "test", "title": "Test", "nodes": [], "edges": []})
 
-    assert LocalWorkspaceRepository(database_file).load_all()["test"]["title"] == "Test"
+    assert LocalWorkspaceRepository(sessions_dir).load("test")["title"] == "Test"
+
+
+def test_workspace_adapter_strips_derived_copies(tmp_path: Path) -> None:
+    """세션은 포인터만 갖는다. 파생 사본을 다시 넣으면 정본과 갈라진다."""
+    sessions_dir = tmp_path / "sessions"
+    sessions_dir.mkdir()
+    repository = LocalWorkspaceRepository(sessions_dir)
+
+    repository.save(
+        {
+            "id": "s1",
+            "title": "S",
+            "edges": [],
+            "nodes": [
+                {
+                    "id": "n1",
+                    "data": {
+                        "docId": "doc-1",
+                        "outlines": [{"id": "o1"}],
+                        "elements": [{"id": "e1"}],
+                        "htmlContent": "<p>본문</p>",
+                    },
+                }
+            ],
+        }
+    )
+
+    stored = repository.load("s1")
+    assert stored["nodes"][0]["data"] == {"docId": "doc-1"}
 
 
 def test_packages_do_not_import_app_modules() -> None:

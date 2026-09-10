@@ -4,12 +4,14 @@
 좌표는 측정 단계에서만 생성된다. 상세는 `core/pipeline.py` 참조.
 """
 from .core.pipeline import ScaffoldPipeline, ScannedDocumentError
+from .contracts import ModelExecutor
 from .json_runner import JsonPromptRunner
 from .outline import ElementItem, OutlineDocument, OutlineNode, OutlinePipeline
 from .types import ScaffoldExtractResult, ScaffoldMeta, SlotMappingItem
 
 __all__ = [
     "ScaffoldPipeline",
+    "ModelExecutor",
     "JsonPromptRunner",
     "ScannedDocumentError",
     "ScaffoldExtractResult",

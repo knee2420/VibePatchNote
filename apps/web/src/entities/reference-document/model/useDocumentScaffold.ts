@@ -8,8 +8,9 @@ const SCAFFOLD_TIMEOUT_MS = 240_000;
 
 interface UseDocumentScaffoldOptions {
   nodeId: string;
+  /** 문서 식별자. 스캐폴드는 이 문서를 참조하는 별개의 애그리거트로 만들어진다. */
+  docId?: string;
   title: string;
-  url?: string;
   onSuccess?: (title: string) => void;
   onError?: (err: unknown) => void;
 }
@@ -22,22 +23,18 @@ interface UseDocumentScaffoldOptions {
  */
 export function useDocumentScaffold({
   nodeId,
+  docId,
   title,
-  url,
   onSuccess,
   onError,
 }: UseDocumentScaffoldOptions) {
   const [isExtractingScaffold, setIsExtractingScaffold] = useState(false);
   const { getNode, setNodes, setEdges } = useReactFlow();
 
-  // URL 또는 제목에서 순수 파일명 추출 (URL 인코딩 해제)
-  const rawName = url ? url.split('/').pop() || title : title;
-  const filename = decodeURIComponent(rawName);
-
   const extractScaffold = useCallback(async () => {
-    if (!filename || isExtractingScaffold) return;
+    if (!docId || isExtractingScaffold) return;
 
-    console.info('[useDocumentScaffold] Starting extractScaffold -> filename:', filename, 'title:', title, 'url:', url);
+    console.info('[useDocumentScaffold] Starting extractScaffold -> docId:', docId, 'title:', title);
 
     setIsExtractingScaffold(true);
 
@@ -75,7 +72,8 @@ export function useDocumentScaffold({
         id: newScaffoldId,
         sourceNodeId: nodeId, // 원본 참고 문서 카드 노드 ID 연결 (격리용 SSOT)
         title: `${title} 서식 틀`,
-        sourcePdfFileName: filename,
+        docId,
+        sourcePdfFileName: title,
         htmlContent: '',
         markdownContent: '',
         status: 'generating' as const,
@@ -175,7 +173,7 @@ export function useDocumentScaffold({
       );
 
       const res = await Promise.race([
-        referenceDocumentApi.extractScaffold(filename),
+        referenceDocumentApi.extractScaffold(docId),
         timeoutPromise,
       ]);
 
@@ -214,7 +212,7 @@ export function useDocumentScaffold({
     } catch (err) {
       timers.forEach((t) => clearTimeout(t));
       const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error('[useDocumentScaffold] Error extracting scaffold for', filename, ':', err);
+      console.error('[useDocumentScaffold] Error extracting scaffold for', docId, ':', err);
 
       // 실패 시 노드에 실제 에러 상세 메시지 기록
       setNodes((nds) =>
@@ -238,7 +236,7 @@ export function useDocumentScaffold({
       setIsExtractingScaffold(false);
     }
 
-  }, [filename, isExtractingScaffold, nodeId, title, url, getNode, setNodes, setEdges, onSuccess, onError]);
+  }, [docId, isExtractingScaffold, nodeId, title, getNode, setNodes, setEdges, onSuccess, onError]);
 
 
   return {

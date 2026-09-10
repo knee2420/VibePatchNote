@@ -1,79 +1,75 @@
-"""LLM 실행 감사 로그(Audit Trail) 저장소.
+"""LLM 실행 기록을 관측 계층에 남긴다.
 
-모든 LLM 호출 내역을 `storage/documents/{doc_slug}/runs/{run_id}.json` 에 보관해,
-프론트/백엔드가 언제든 실행 추이를 재검토하고 디버깅할 수 있게 한다.
+기록은 두 갈래로 갈라진다. 같은 실행을 두 곳에 적는 중복이 아니라, 성격이 다른
+두 자료다.
 
-감사 로그는 **부수 기능**이다. 여기서 예외가 나도 본 작업을 막지 않는다.
+- **원장** `data/ledger/{YYYY-MM}.jsonl`
+  모델·토큰·비용·실패 코드. 작고, 집계 대상이며, **쿼터 판정과 비용 귀속의 근거**다.
+  지우면 다시 만들 수 없으므로 `data/` 에 두고 영구 보존한다.
+
+- **트레이스** `state/log/traces/`
+  프롬프트·응답 본문을 포함한 디버그 자료. 크고, 문서 원문을 담을 수 있어 민감하며,
+  보존기간이 필요하다. 그래서 `state/` 에 두고 기간이 지나면 정리한다.
+
+기록 실패가 본 작업을 막지는 않는다. 다만 조용히 넘기지도 않는다.
 """
 from __future__ import annotations
 
-import json
 import logging
-import uuid
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from scaffold_engine.harness import LlmExecutionResult
 
-from app.core.config import settings
-from app.core.storage.document_storage import slugify_document_name
+from app.core.agent_runtime.models import LedgerEntry, RunCost
+from app.core.agent_runtime.ports import LedgerPort
 
 logger = logging.getLogger(__name__)
 
-# 보관하는 프롬프트 발췌 길이
-PROMPT_SNIPPET_CHARS = 500
+
+def cost_of(result: LlmExecutionResult) -> RunCost:
+    """실행 결과에서 자원 사용량만 뽑아낸다."""
+    return RunCost(
+        input_tokens=result.input_tokens or 0,
+        output_tokens=result.output_tokens or 0,
+        thinking_tokens=result.thinking_tokens or 0,
+        cache_read_tokens=result.cache_read_tokens or 0,
+        total_tokens=result.total_tokens or 0,
+    )
 
 
-def record_llm_run(
-    document_name: str,
-    task_name: str,
-    result: LlmExecutionResult,
-    prompt_snippet: Optional[str] = None,
-    extra_metadata: Optional[Dict[str, Any]] = None,
-) -> Optional[str]:
-    """LLM 실행 결과를 디스크 감사 로그로 기록하고 run_id 를 돌려준다. 실패 시 None."""
-    try:
-        runs_dir = Path(settings.documents_storage_dir) / slugify_document_name(document_name) / "runs"
-        runs_dir.mkdir(parents=True, exist_ok=True)
+class LedgerExecutionRecorder:
+    """`ExecutionRecorder` 의 원장 구현."""
 
-        now = datetime.now(timezone.utc)
-        run_id = f"run-{now.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
-        run_file = runs_dir / f"{run_id}.json"
+    def __init__(self, ledger: LedgerPort) -> None:
+        self._ledger = ledger
 
-        snippet = prompt_snippet
-        if snippet and len(snippet) > PROMPT_SNIPPET_CHARS:
-            snippet = snippet[:PROMPT_SNIPPET_CHARS] + "..."
-
-        record = {
-            "run_id": run_id,
-            "task_name": task_name,
-            "document_name": document_name,
-            "timestamp": now.isoformat(),
-            "model": result.model,
-            "status": result.status,
-            "duration_seconds": result.duration_seconds,
-            "tokens": {
-                "input": result.input_tokens,
-                "output": result.output_tokens,
-                "thinking": result.thinking_tokens,
-                "cache_read": result.cache_read_tokens,
-                "total": result.total_tokens,
-            },
-            "error": result.error,
-            "prompt_snippet": snippet,
-            "telemetry_metadata": result.telemetry_metadata,
-            "extra_metadata": extra_metadata or {},
-        }
-
-        with open(run_file, "w", encoding="utf-8") as f:
-            json.dump(record, f, ensure_ascii=False, indent=2)
-
-        logger.info(
-            "[LlmTelemetry] 감사 로그 기록: %s (status=%s, %.2fs, tokens=%d)",
-            run_file.name, result.status, result.duration_seconds, result.total_tokens,
-        )
-        return run_id
-    except Exception as e:
-        logger.warning("[LlmTelemetry] 감사 로그 기록 실패: %s", e)
-        return None
+    def record(
+        self,
+        *,
+        task_name: str,
+        result: LlmExecutionResult,
+        doc_id: str | None = None,
+        run_id: str | None = None,
+        trace_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        telemetry = result.telemetry_metadata or {}
+        failure_code = telemetry.get("failure_code") or telemetry.get("primary_failure_code")
+        try:
+            self._ledger.record(
+                LedgerEntry(
+                    run_id=run_id,
+                    trace_id=trace_id,
+                    doc_id=doc_id,
+                    task_name=task_name,
+                    provider=str(telemetry.get("provider") or ""),
+                    model=result.model or "",
+                    status=result.status or "",
+                    failure_code=failure_code,
+                    duration_seconds=result.duration_seconds or 0.0,
+                    cost=cost_of(result),
+                    metadata={**telemetry, **(metadata or {})},
+                )
+            )
+        except Exception as exc:  # 관측은 부수 기능이다. 본 작업을 막지 않는다.
+            logger.warning("[Ledger] 실행 기록 실패 (%s): %s", task_name, exc)

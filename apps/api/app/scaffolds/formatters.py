@@ -90,12 +90,14 @@ class ManifestFormatter:
         title: str,
         source_pdf_file_name: str,
         slots_count: int,
+        doc_id: str = "",
         page_number: int = 1,
         created_at: Optional[str] = None,
     ) -> ScaffoldArchiveRecord:
         """디스크에 기록할 환경 비종속 코어 레코드를 만든다."""
         return ScaffoldArchiveRecord(
             scaffold_id=scaffold_id,
+            doc_id=doc_id,
             title=title,
             source_pdf_file_name=source_pdf_file_name,
             created_at=created_at or datetime.now(timezone.utc).isoformat(),

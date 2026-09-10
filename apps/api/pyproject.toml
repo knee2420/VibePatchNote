@@ -9,18 +9,57 @@ select = ["E4", "E7", "E9", "F", "I"]
 
 [tool.importlinter]
 root_package = "app"
+# 엔진 패키지를 금지 대상으로 지정하려면 외부 패키지도 그래프에 포함해야 한다.
+include_external_packages = true
 
 [[tool.importlinter.contracts]]
 name = "Core must not import domains"
 type = "forbidden"
 source_modules = ["app.core"]
-forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces"]
+forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces", "app.llm_settings"]
+
+# Agent Runtime 은 실행의 생애주기만 안다. 문서·PDF·프롬프트를 알기 시작하면
+# 다른 도메인이 이 런타임을 재사용할 수 없게 된다.
+[[tool.importlinter.contracts]]
+name = "Agent Runtime is domain agnostic"
+type = "forbidden"
+source_modules = ["app.core.agent_runtime"]
+forbidden_modules = [
+    "app.documents",
+    "app.scaffolds",
+    "app.workspaces",
+    "app.llm_settings",
+    "app.core.config",
+    "scaffold_engine",
+]
+
+# 저장 경로를 전역으로 공개하면 누구나 어댑터를 건너뛰고 디스크에 직접 쓸 수 있다.
+# 경로를 아는 것은 저장 게이트(core.storage)와 조립 지점(bootstrap), 그리고
+# 각 도메인의 adapters 뿐이다.
+[[tool.importlinter.contracts]]
+name = "Storage paths are known only to adapters and bootstrap"
+type = "forbidden"
+# 직접 import 만 본다. core.llm 이 설정을 읽는 것은 정상이고, 그 경유까지 막으면
+# 규칙의 뜻("경로를 스스로 만들지 마라")이 아니라 그래프 모양을 규제하게 된다.
+allow_indirect_imports = true
+source_modules = [
+    "app.documents.use_cases",
+    "app.documents.service",
+    "app.documents.agents",
+    "app.scaffolds.service",
+    "app.workspaces.service",
+]
+forbidden_modules = ["app.core.config"]
 
 [[tool.importlinter.contracts]]
-name = "Documents must not depend on workspaces"
+name = "Documents must not depend on other domains"
 type = "forbidden"
-source_modules = ["app.documents.service", "app.documents.adapters"]
-forbidden_modules = ["app.workspaces"]
+source_modules = [
+    "app.documents.service",
+    "app.documents.use_cases",
+    "app.documents.adapters",
+]
+forbidden_modules = ["app.workspaces", "app.scaffolds"]
 
 [[tool.importlinter.contracts]]
 name = "Scaffolds must not depend on other domains"

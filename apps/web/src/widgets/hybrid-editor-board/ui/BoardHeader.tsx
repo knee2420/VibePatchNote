@@ -1,7 +1,10 @@
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { ProviderStatusBadge } from '@/entities/llm-configuration';
+import { PendingAgreementsPopover } from '@/features/agent-run-panel';
 import { CanvasSettingsPopover } from '@/features/canvas-settings';
+import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 
 import { BoardTitleEditor } from './BoardTitleEditor';
 
@@ -59,6 +62,12 @@ export function BoardHeader({
             업로드 중...
           </span>
         )}
+
+        {/* AI 공급자 상태. 정상이면 아이콘만, 막히면 이유까지 펼칩니다. */}
+        <ProviderStatusBadge onOpenSettings={requestLlmSettings} />
+
+        {/* 사람의 결정을 기다리는 실행. 보류는 실패가 아니므로 따로 보여 줍니다. */}
+        <PendingAgreementsPopover />
 
         {/* Obsidian Style View & Environment Settings Popover */}
         <CanvasSettingsPopover onClearSession={onClearSession} />

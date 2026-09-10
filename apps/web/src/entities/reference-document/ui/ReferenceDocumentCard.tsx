@@ -11,6 +11,7 @@ import {
 import { viewerRegistry, type ViewerHighlight } from '@vibe/document-viewer';
 
 import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
+import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeResize } from '../lib/useNodeResize';
@@ -98,17 +99,16 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     outlines,
     hasOutline,
     selectedElementId,
+    outlineError,
     setSelectedElementId,
     extractOutline,
     toggleOutlinePanel,
   } = useDocumentOutline({
     nodeId: id,
-    title: data.title,
-    url: data.url,
-    initialOutlines: data.outlines,
-    initialElements: data.elements,
+    docId: data.docId,
     initialIsOpen: data.isOutlineOpen,
-    onError: () => alert('문서 아웃라인 추출 중 오류가 발생했습니다.'),
+    initialStatus: data.outlineStatus,
+    initialError: data.outlineError,
   });
 
   const handleSelectElement = useCallback(
@@ -195,9 +195,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     deleteSegment,
   } = useSegmentEditing({
     nodeId: id,
-    title: data.title,
-    url: data.url,
-    initialSegments: data.segments,
+    docId: data.docId,
     onScanSuccess: (loaded) =>
       alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`),
     onScanError: () => alert('문서 영역 스캔 중 오류가 발생했습니다.'),
@@ -205,8 +203,8 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
 
   const { isExtractingScaffold, extractScaffold } = useDocumentScaffold({
     nodeId: id,
+    docId: data.docId,
     title: data.title,
-    url: data.url,
     onSuccess: (scaffoldTitle) =>
       alert(`스캐폴딩 추출 완료: [${scaffoldTitle}] 노드가 캔버스에 연결되었습니다.`),
     onError: (err) => {
@@ -318,6 +316,8 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
             onSelectElement={handleSelectElement}
             onClose={toggleOutlinePanel}
             onRefresh={() => extractOutline(true)}
+            error={outlineError}
+            onConfigureLlm={requestLlmSettings}
           />
         )}
       </div>

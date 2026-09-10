@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
-import { stripArchivedNodeBody } from '@/shared/lib';
+import { pickPersistedNodeData } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 
@@ -27,7 +27,7 @@ export function useActiveSessionTitle() {
       try {
         await workspaceApi.update(activeSessionId, {
           title: trimmed,
-          nodes: stripArchivedNodeBody(nodes),
+          nodes: pickPersistedNodeData(nodes),
           edges,
         });
       } catch (error) {

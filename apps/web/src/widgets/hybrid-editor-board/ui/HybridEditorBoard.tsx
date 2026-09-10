@@ -11,6 +11,7 @@ import { CanvasDropOverlay, useCanvasFileDrop } from '@/features/canvas-file-dro
 import { CanvasNodeActionBar } from '@/features/canvas-node-actions';
 import { CanvasLeftToolbar, CanvasSearchModal, useCanvasMode } from '@/features/canvas-toolbar';
 import { ScaffoldFocusModal } from '@/features/scaffold-focus';
+import { LlmSettingsDialog } from '@/features/llm-settings';
 import { SessionListSheet, useSessionActions, useSessionSync } from '@/features/workspace';
 import { useCanvasSettings } from '@/shared/model';
 import { InfiniteCanvas } from '@/shared/ui';
@@ -123,6 +124,7 @@ function HybridEditorBoardContent() {
           onClose={() => setIsSessionSheetOpen(false)}
         />
         <ScaffoldFocusModal />
+        <LlmSettingsDialog />
       </div>
     </div>
   );

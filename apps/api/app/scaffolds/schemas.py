@@ -3,6 +3,11 @@
 이 저장소가 스캐폴드 본문의 단일 진실 공급원(SSOT)이다. 캔버스 노드/세션 DB 는
 scaffoldId 포인터만 들고 있고, 본문은 언제나 여기서 읽고 여기에 쓴다.
 
+스캐폴드는 문서의 하위 구조가 아니라 자기 식별자와 수명주기를 가진 별개의
+애그리거트다. 그래서 `data/knowledge/scaffolds/{scaffold_id}` 에 최상위로 놓고,
+문서와는 `doc_id` 로만 연결한다. 문서 패키지 안에 묻어 두면 id 하나를 찾는 데
+전체 문서 디렉터리를 훑어야 한다.
+
 저장 형태와 전송 형태는 분리한다.
 
 - **저장(ScaffoldArchiveRecord)**: 실행 환경에 종속되지 않는 코어 메타만 필드명
@@ -45,8 +50,9 @@ class ScaffoldArchiveRecord(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="ignore")
 
     scaffold_id: str = Field(..., description="스캐폴드 고유 식별자")
+    doc_id: str = Field(default="", description="원본 문서 식별자. 삭제 연쇄와 역참조의 근거")
     title: str = Field(..., description="서식 제목")
-    source_pdf_file_name: str = Field(..., description="원본 PDF 파일명")
+    source_pdf_file_name: str = Field(..., description="원본 파일명(사람이 읽는 표시용)")
     created_at: str = Field(..., description="아카이브 생성 일시 (ISO-8601)")
     slots_count: int = Field(default=0, description="추출된 슬롯 수")
     difficulty: str = Field(default="easy", description="서식 복잡도")

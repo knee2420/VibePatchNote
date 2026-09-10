@@ -1,9 +1,24 @@
 """scaffolds 저장소 계층 (SRP & DIP: 물리적 디스크 I/O 및 경로 보안 전담).
 
+    data/knowledge/scaffolds/{scaffold_id}/
+      ├── manifest.json     환경 비종속 코어 레코드 (doc_id 포함)
+      ├── scaffold.html     엔진 원본 (불변, 회귀 추적 기준선)
+      ├── content.md
+      ├── render.html       사용자 작업본
+      ├── render.md
+      ├── prompt_spec.md
+      ├── slots.json
+      └── vision/
+
+스캐폴드는 자기 식별자를 가진 애그리거트 루트다. 문서 패키지 안에 묻어 두면
+id 하나를 찾는 데 전체 문서 디렉터리를 훑어야 하고, 그 순간 scaffolds 도메인이
+documents 의 저장 구조를 알게 된다.
+
 저장소는 URL 을 모른다. 실행 환경에 종속되지 않는 코어 레코드(manifest.json)와
 본문 아티팩트만 다루고, 공개 URL 조립은 상위 계층(service/formatters)이 맡는다.
 """
-import json
+from __future__ import annotations
+
 import logging
 import re
 import shutil
@@ -13,8 +28,7 @@ from typing import Any, Dict, List, Optional
 from pydantic import ValidationError
 from scaffold_engine.types import SlotMappingItem
 
-from app.core.config import settings
-from app.core.storage.document_storage import document_storage
+from app.core.storage import read_json, safe_segment, write_json
 
 from ..schemas import (
     ASSET_HTML,
@@ -40,41 +54,17 @@ _LEGACY_MD_FENCE = re.compile(
 )
 
 
-def sanitize_scaffold_id(name: str) -> str:
-    """안전한 파일시스템 디렉터리 및 URL 식별자로 정제."""
-    clean = re.sub(r"[^\w\-.]", "_", name)
-    return clean.strip("_") or "scaffold"
-
-
 class LocalScaffoldRepository:
-    """
-    로컬 파일시스템 기반 스캐폴드 아티팩트 저장소 구현체 (Document-Centric SSOT & Fallback).
-    
-    신규 스캐폴드는 `storage/documents/{doc_slug}/scaffolds/{scaffold_id}`에 저장하고,
-    기존 레거시 `storage/scaffolds/{scaffold_id}`와의 하위 호환성을 완벽히 보장합니다.
-    """
+    """로컬 파일시스템 기반 스캐폴드 아티팩트 저장소."""
 
-    def __init__(self, root_dir: Optional[Path] = None) -> None:
-        self.root_dir = root_dir or settings.scaffold_storage_dir
-
-    def _ensure_root(self) -> Path:
-        self.root_dir.mkdir(parents=True, exist_ok=True)
-        return self.root_dir
+    def __init__(self, root_dir: Path) -> None:
+        self._root = root_dir
 
     def resolve_dir(self, scaffold_id: str) -> Path:
-        """
-        scaffold_id에 해당하는 디렉터리를 탐색합니다.
-        1순위: 신규 통합 문서 패키지 내부 (storage/documents/*/scaffolds/{scaffold_id})
-        2순위: 기존 레거시 스캐폴드 디렉터리 (storage/scaffolds/{scaffold_id})
-        """
-        clean_id = sanitize_scaffold_id(scaffold_id)
-        # 1. 신규 문서 패키지 탐색
-        pkg_scaffold_dir = document_storage.find_scaffold_dir(clean_id)
-        if pkg_scaffold_dir:
-            return pkg_scaffold_dir
+        """id 하나로 곧바로 위치가 정해진다. 탐색이 필요 없다."""
+        return (self._root / safe_segment(scaffold_id)).resolve()
 
-        # 2. 레거시 디렉터리 폴백
-        return (self.root_dir / clean_id).resolve()
+    # --- 쓰기 -----------------------------------------------------------
 
     def save_artifacts(
         self,
@@ -87,15 +77,9 @@ class LocalScaffoldRepository:
         overlay_png: Optional[bytes] = None,
         render_png: Optional[bytes] = None,
     ) -> Path:
-        """스캐폴드 아티팩트를 문서 중심 디렉터리에 물리적으로 기록."""
-        clean_id = sanitize_scaffold_id(record.scaffold_id)
-
-        # 항상 문서 패키지 하위의 scaffolds/ 에 영속화
-        doc_key = record.source_pdf_file_name or "scaffold"
-        pkg = document_storage.get_package(doc_key)
-        pkg.ensure()
-        archive_dir = pkg.scaffolds_dir / clean_id
+        archive_dir = self.resolve_dir(record.scaffold_id)
         created_now = not archive_dir.exists()
+        archive_dir.mkdir(parents=True, exist_ok=True)
 
         try:
             (archive_dir / "vision").mkdir(parents=True, exist_ok=True)
@@ -109,8 +93,7 @@ class LocalScaffoldRepository:
 
             # 2. 좌표는 엔진 필드명(snake_case) 그대로 저장한다. 전송용 별칭은 응답 시 입힌다.
             slots_data: List[Dict[str, Any]] = [slot.model_dump() for slot in slots]
-            with open(archive_dir / ASSET_SLOTS, "w", encoding="utf-8") as f:
-                json.dump(slots_data, f, ensure_ascii=False, indent=2)
+            write_json(archive_dir / ASSET_SLOTS, slots_data)
 
             # 3. 비전 바이너리 아티팩트 기록
             if original_png:
@@ -135,8 +118,7 @@ class LocalScaffoldRepository:
 
     @staticmethod
     def _write_manifest(archive_dir: Path, record: ScaffoldArchiveRecord) -> None:
-        with open(archive_dir / ASSET_MANIFEST, "w", encoding="utf-8") as f:
-            json.dump(record.model_dump(), f, ensure_ascii=False, indent=2)
+        write_json(archive_dir / ASSET_MANIFEST, record.model_dump(mode="json"))
 
     def save_render(
         self,
@@ -169,11 +151,7 @@ class LocalScaffoldRepository:
         return record
 
     def save_render_image(self, scaffold_id: str, png_bytes: bytes) -> bool:
-        """재구성본(Tiptap 이 실제로 그린 화면)의 스냅샷 PNG 를 보관한다.
-
-        원본 PDF 렌더(original)·슬롯 오버레이(overlay)와 나란히 두어, 한 서식의
-        '원본 / 좌표 검증 / 재구성 결과' 세 장면을 같은 자리에서 비교할 수 있게 한다.
-        """
+        """재구성본(Tiptap 이 실제로 그린 화면)의 스냅샷 PNG 를 보관한다."""
         archive_dir = self.resolve_dir(scaffold_id)
         if not (archive_dir / ASSET_MANIFEST).exists():
             return False
@@ -187,40 +165,77 @@ class LocalScaffoldRepository:
         )
         return True
 
+    def delete(self, scaffold_id: str) -> bool:
+        archive_dir = self.resolve_dir(scaffold_id)
+        if not archive_dir.exists():
+            return False
+        shutil.rmtree(archive_dir, ignore_errors=True)
+        return True
+
+    def delete_for_document(self, doc_id: str) -> int:
+        """문서 삭제에 연쇄된다. 원본이 사라지면 그 원본의 서식도 남을 이유가 없다."""
+        removed = 0
+        for record in self.list_for_document(doc_id):
+            if self.delete(record.scaffold_id):
+                removed += 1
+        return removed
+
+    # --- 읽기 -----------------------------------------------------------
+
+    def list_all(self) -> List[ScaffoldArchiveRecord]:
+        if not self._root.exists():
+            return []
+        found: List[ScaffoldArchiveRecord] = []
+        for archive_dir in self._root.iterdir():
+            if not archive_dir.is_dir():
+                continue
+            record = self._read_record(archive_dir)
+            if record:
+                found.append(record)
+        return found
+
+    def list_for_document(self, doc_id: str) -> List[ScaffoldArchiveRecord]:
+        return [record for record in self.list_all() if record.doc_id == doc_id]
+
     def has_asset(self, scaffold_id: str, asset_subpath: str) -> bool:
-        """아카이브에 해당 에셋이 실제로 존재하는지 확인한다."""
         return self.get_asset_file(scaffold_id, asset_subpath) is not None
+
+    def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
+        """에셋 경로를 해석한다. 아카이브 밖으로 나가는 경로는 거부한다."""
+        archive_dir = self.resolve_dir(scaffold_id)
+        candidate = (archive_dir / asset_subpath).resolve()
+        try:
+            candidate.relative_to(archive_dir)
+        except ValueError:
+            logger.warning("[LocalScaffoldRepository] Rejected traversal: %s", asset_subpath)
+            return None
+        return candidate if candidate.is_file() else None
 
     def _read_record(self, archive_dir: Path) -> Optional[ScaffoldArchiveRecord]:
         """manifest.json 을 코어 레코드로 복원. 구 포맷의 URL 키는 무시된다."""
-        manifest_file = archive_dir / ASSET_MANIFEST
-        if not manifest_file.exists():
+        raw = read_json(archive_dir / ASSET_MANIFEST)
+        if not raw:
             return None
         try:
-            with open(manifest_file, "r", encoding="utf-8") as f:
-                return ScaffoldArchiveRecord(**json.load(f))
-        except Exception as exc:
-            logger.warning("[LocalScaffoldRepository] Corrupted manifest in %s: %s", archive_dir.name, exc)
+            return ScaffoldArchiveRecord(**raw)
+        except ValidationError as exc:
+            logger.warning(
+                "[LocalScaffoldRepository] Corrupted manifest in %s: %s", archive_dir.name, exc
+            )
             return None
 
     def _read_slots(self, archive_dir: Path) -> List[SlotMappingItem]:
         """슬롯 JSON 을 엔진 모델로 복원. 별칭/필드명 표기 모두 수용한다."""
-        slots_file = archive_dir / ASSET_SLOTS
-        if not slots_file.exists():
-            return []
-        try:
-            with open(slots_file, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-        except Exception as exc:
-            logger.warning("[LocalScaffoldRepository] Unreadable slots in %s: %s", archive_dir.name, exc)
-            return []
-
+        raw = read_json(archive_dir / ASSET_SLOTS)
         slots: List[SlotMappingItem] = []
         for item in raw if isinstance(raw, list) else []:
             try:
                 slots.append(SlotMappingItem.model_validate(item))
             except ValidationError as exc:
-                logger.warning("[LocalScaffoldRepository] Skipped malformed slot in %s: %s", archive_dir.name, exc)
+                logger.warning(
+                    "[LocalScaffoldRepository] Skipped malformed slot in %s: %s",
+                    archive_dir.name, exc,
+                )
         return slots
 
     @staticmethod
@@ -247,42 +262,20 @@ class LocalScaffoldRepository:
         if not record:
             return None
 
-        try:
-            spec_file = archive_dir / ASSET_PROMPT_SPEC
-            prompt_spec_md = spec_file.read_text(encoding="utf-8") if spec_file.exists() else ""
+        prompt_spec_md = self._read_text(archive_dir / ASSET_PROMPT_SPEC)
+        origin_html = self._read_text(archive_dir / ASSET_HTML)
+        origin_markdown = self._read_markdown(archive_dir, prompt_spec_md)
 
-            origin_html = self._read_text(archive_dir / ASSET_HTML)
-            origin_markdown = self._read_markdown(archive_dir, prompt_spec_md)
+        # 작업본이 있으면 그것이 현재 본문. 없으면 엔진 원본이 곧 현재 본문이다.
+        render_html = self._read_text(archive_dir / ASSET_RENDER_HTML)
+        render_markdown = self._read_text(archive_dir / ASSET_RENDER_MARKDOWN)
 
-            # 작업본이 있으면 그것이 현재 본문. 없으면 엔진 원본이 곧 현재 본문이다.
-            render_html = self._read_text(archive_dir / ASSET_RENDER_HTML)
-            render_markdown = self._read_text(archive_dir / ASSET_RENDER_MARKDOWN)
-
-            return ScaffoldArchiveContents(
-                record=record,
-                html_content=render_html or origin_html,
-                markdown_content=render_markdown or origin_markdown,
-                origin_html_content=origin_html,
-                origin_markdown_content=origin_markdown,
-                prompt_spec_md=prompt_spec_md,
-                slots=self._read_slots(archive_dir),
-            )
-        except Exception as exc:
-            logger.exception("[LocalScaffoldRepository] Failed to read archive for %s: %s", scaffold_id, exc)
-            return None
-
-    def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
-        """경로 조작(..) 방어 및 물리적 에셋 파일 경로 해석."""
-        archive_dir = self.resolve_dir(scaffold_id)
-
-        target_file = (archive_dir / asset_subpath).resolve()
-        try:
-            target_file.relative_to(archive_dir)
-        except ValueError:
-            logger.warning("[LocalScaffoldRepository] Directory traversal blocked: %s / %s", scaffold_id, asset_subpath)
-            return None
-
-        if target_file.is_file():
-            return target_file
-        return None
-
+        return ScaffoldArchiveContents(
+            record=record,
+            html_content=render_html or origin_html,
+            markdown_content=render_markdown or origin_markdown,
+            origin_html_content=origin_html,
+            origin_markdown_content=origin_markdown,
+            prompt_spec_md=prompt_spec_md,
+            slots=self._read_slots(archive_dir),
+        )

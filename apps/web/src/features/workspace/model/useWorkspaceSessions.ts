@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import type { WorkspaceSession } from '@/entities/workspace-session';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
-import { stripArchivedNodeBody } from '@/shared/lib';
+import { pickPersistedNodeData } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 import { useSessionActions } from './useSessionActions';
@@ -62,7 +62,7 @@ export function useWorkspaceSessions({ enabled }: UseWorkspaceSessionsOptions) {
     try {
       await workspaceApi.update(activeSessionId, {
         title: activeSessionTitle,
-        nodes: stripArchivedNodeBody(nodes),
+        nodes: pickPersistedNodeData(nodes),
         edges,
       });
       await refresh();

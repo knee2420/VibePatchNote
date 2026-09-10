@@ -24,7 +24,9 @@ applies_to: "모든 코드 변경 (apps/**, packages/**)"
 VibePatchNote/
 ├── apps/
 │   ├── web/  React · Vite · Tailwind · FSD
-│   └── api/  FastAPI · 도메인 패키지
+│   └── api/  FastAPI · 헥사고날 도메인 · Agent Runtime
+│       ├── config/  data/  cache/  state/   ← 런타임 데이터 (수명주기 등급)
+│       └── migrations/                      ← 저장 레이아웃 마이그레이션
 └── packages/
     ├── scaffold-engine       Python 문서 분석 엔진
     ├── document-viewer       문서 뷰어
@@ -35,8 +37,10 @@ VibePatchNote/
 - 앱은 수직 계층(HTTP → 유스케이스 → 인프라)으로 나눈다.
 - 패키지는 수평 파이프라인(측정 → 판정 → 조립 → 채점)으로 나눈다.
 - 따라서 앱의 레이어 규칙을 패키지에 그대로 적용하지 않는다.
-- 프론트 경계는 린터가 강제한다. 백엔드 경계는 현재 리뷰로 확인하며,
-  `ruff`와 `import-linter` 도입 후 자동화한다.
+- 런타임 데이터는 **수명주기 등급**으로 나눈다. 디렉터리 이름이 곧
+  "지워도 되는가 / 백업하는가"의 답이다. 정본은 [`60-data/rule.md`](../60-data/rule.md).
+- 프론트 경계는 `oxlint`가, 백엔드 경계는 `ruff` + `import-linter`(계약 6건)가
+  강제한다. 둘 다 `pnpm lint`에서 실행된다.
 
 ## 2. 불변 원칙
 
@@ -83,10 +87,10 @@ app → pages → widgets → features → entities → shared
 app/       providers, routes, styles
 pages/     dashboard, editor
 widgets/   hybrid-editor-board, project-dashboard
-features/  api-health, canvas-file-drop, canvas-node-actions,
-           canvas-settings, canvas-toolbar, workspace
-entities/  canvas-board, reference-document, resource-card,
-           segment, workspace-session
+features/  agent-run-panel, api-health, canvas-file-drop, canvas-node-actions,
+           canvas-settings, canvas-toolbar, llm-settings, scaffold-focus, workspace
+entities/  agent-run, canvas-board, llm-configuration, reference-document,
+           resource-card, scaffold-document, segment, workspace-session
 shared/    api, config, lib, model, ui
 ```
 
@@ -98,36 +102,47 @@ bootstrap → <domain> → core → packages/scaffold-engine
 
 화살표 오른쪽으로만 import한다.
 
-- `bootstrap/`: 객체 그래프 조립. 실제 구현체 선택은 여기서만 한다.
+- `bootstrap/`: 객체 그래프 조립. 실제 구현체 선택과 **저장 등급 루트 주입**은
+  여기서만 한다.
 - `<domain>/`: HTTP, 유스케이스, 계약, 구현을 함께 둔다.
-- `core/`: 설정, 로깅, LLM 실행·관측, 저장 경로 같은 도메인 무관 인프라.
-- `models.py`: 여러 도메인이 공유하는 Pydantic 모델.
+- `core/`: 로깅, LLM 실행·관측, Agent Runtime, 저장 게이트 같은 도메인 무관 인프라.
 - `core/`가 도메인 import, 도메인 고유 명사, 프롬프트 문자열을 가지면
   위반이다.
-- `documents → scaffolds`만 단방향 참조를 허용한다. 다른 도메인 간
-  참조는 금지한다.
-- `workspaces`는 본문을 소유하지 않고 `documentId`, `scaffoldId`
-  포인터만 보관한다.
+- **도메인 간 직접 참조는 전부 금지한다.** 다른 도메인의 동작이 필요하면
+  자기 `ports.py`에 계약을 정의하고 컨테이너가 구현체를 주입한다
+  (예: `documents`가 스캐폴드를 지울 때 쓰는 `ScaffoldArchivePort`).
+- `workspaces`는 본문을 소유하지 않고 `docId`, `scaffoldId` 포인터만 보관한다.
 
-도메인은 아래 구조를 따른다.
+도메인은 아래 구조를 따른다. 세그먼트 이름은 고정이며 임의로 늘리지 않는다.
 
 ```text
 app/<domain>/
 ├── __init__.py   # 외부 공개 API
 ├── router.py     # HTTP 입출력과 서비스 호출
 ├── schemas.py    # 요청·응답 Pydantic 모델
-├── service.py    # 유스케이스 조율
+├── models.py     # (해당하면) 이 도메인의 프레임워크 독립 모델
+├── errors.py     # (해당하면) 실패를 UI 계약으로 번역
+├── service.py    # 유스케이스로 넘기는 얇은 경계
 ├── ports.py      # 외부 의존 계약(Protocol)
+├── use_cases/    # 유스케이스 하나당 파일 하나
+├── agents/       # (해당하면) LLM 이 개입하는 업무 정의
 └── adapters/     # 파일·DB·외부 API 구현
 ```
+
+`use_cases/`는 두 갈래로 나뉜다. **LLM 이 개입하는가**가 그 경계다.
+
+| 갈래 | 특징 | 산출물 |
+| --- | --- | --- |
+| 일반 | Agent Runtime 을 쓰지 않는다 | 결정적이면 `cache/` 가능 |
+| Agent | `<domain>/agents/` + `core/agent_runtime` 경유 | `data/` 에 provenance 동반 아티팩트 |
 
 - 라우터에는 비즈니스 로직, DB·파일 접근, 함수 내부 import를 두지 않는다.
 - 서비스는 구체 클래스가 아닌 `ports.py`의 `Protocol`에 의존한다.
 - 어댑터 선택과 서비스 생성은 `bootstrap/container.py`에서만 한다.
 - 모듈 전역 싱글턴은 만들지 않는다.
 - 프롬프트는 실행하는 도메인의 `prompts.py` 또는 엔진이 소유한다.
-- `storage.py`, `manager.py`, `utils.py` 같은 모호한 최상위 파일은
-  만들지 않는다.
+- `storage.py`, `utils.py`, `helpers.py` 같은 모호한 최상위 파일은
+  도메인에 만들지 않는다. 이름이 역할을 말해야 한다.
 
 #### DI·포트·HTTP 경계의 기준
 
@@ -135,12 +150,14 @@ app/<domain>/
   어댑터는 컨테이너의 provider로 조립하고, 라우터는 주입받은 서비스만 쓴다.
 - 파일·DB·LLM·외부 API·다른 도메인처럼 교체 가능하거나 외부 I/O를 하는
   의존성은 반드시 포트(`Protocol`)로 표현한다.
-- `documents → scaffolds` 참조는 허용하되, 구현 서비스나 저장소를 직접
-  가져오지 않는다. 필요한 동작을 포트로 정의해 컨테이너에서 주입한다.
+- 다른 도메인의 동작이 필요하면 구현을 가져오지 말고 **자기 포트로 정의**한다.
+  구현체는 컨테이너가 주입한다. 이 역전이 없으면 도메인 간 결합이 생긴다.
 - `router.py`만 FastAPI의 `UploadFile`, `Request`, `HTTPException`을 안다.
   서비스는 프레임워크 타입 대신 명시적 입력값과 도메인 오류를 사용한다.
-- 서비스는 저장 형식과 파일 경로를 직접 다루지 않는다. 형식·경로·I/O는
-  도메인 어댑터와 `core/storage`의 책임으로 나눈다.
+- 서비스와 유스케이스는 저장 형식과 파일 경로를 직접 다루지 않는다.
+  등급 루트는 `core/storage`가, 그 안의 레이아웃은 도메인 어댑터가 소유한다.
+  `app.core.config`를 유스케이스·서비스·에이전트에서 import 하면
+  `import-linter` 계약이 막는다.
 
 ### 3.3 공용 패키지: `packages/*`
 
@@ -152,11 +169,9 @@ app/<domain>/
 - 호스트에 독립적이고, 재사용 가능하며, 라이브러리 API 또는 CLI 진입점이
   있을 때만 패키지로 승격한다.
 
-외부 Dify 클라이언트에 의존하지 않는다. 현재 분석 파이프라인의 정본은
-`scaffold-engine`이다. 존치 여부가 결정되기 전까지 새 기능에서
-`app/core/workflow/`를 사용하지 않는다. 기존 workflow 의존 기능은
-`scaffold-engine` 파이프라인과 그 공개 계약으로 순차 이관하고, 이관 뒤
-`app/core/workflow/`를 제거한다.
+외부 Dify 클라이언트에 의존하지 않는다. 분석 파이프라인의 정본은
+`scaffold-engine`이고, 실행 제어의 정본은 `core/agent_runtime`이다.
+(과거의 `app/core/workflow/`는 제거되었다. 새로 만들지 않는다.)
 
 ## 4. 금지와 대안
 
@@ -178,8 +193,12 @@ app/<domain>/
 - `core/`에서 도메인을 import하거나 도메인 세부를 저장하지 않는다.
   필요한 값은 인자로 주입하고, 도메인 세부는 `adapters/`에 둔다.
 - 도메인·패키지 내부 모듈을 직접 import하지 않는다. Public API를 쓴다.
-- 경로, 모델명, 타임아웃은 `core/config.py`의 `settings`로 관리한다.
-- 산출물 존재는 파일 유무가 아니라 `manifest.json`의 상태 필드로 판단한다.
+- 모델명·타임아웃·외부 URL·CORS는 `core/config.py`의 `settings`로 관리한다.
+  **저장 경로는 `settings`에 두지 않는다.** 등급 루트는 `core/storage`가 소유하고,
+  어댑터는 주입받은 루트만 쓴다.
+- 산출물 존재는 파일 유무가 아니라 **채택본 포인터**(`HEAD.json`)와
+  **출처**(`provenance.json`)로 판단한다. LLM 산출물은 provenance 없이 존재할 수 없다.
+- LLM 산출물을 `cache/`에 두지 않는다. 재현되지 않고 비용이 드는 것은 캐시가 아니다.
 - 외부 CLI·API 실패를 성공으로 위장하지 않는다. 실패 상태를 응답에 드러낸다.
 - FastAPI 응답 변환은 라우터에서 한다. 서비스는 HTTP 상태 코드가 아닌
   도메인 오류를 반환하거나 발생시킨다.
@@ -196,13 +215,16 @@ app/<domain>/
 | 위젯 조합 | `widgets/hybrid-editor-board/ui/HybridEditorBoard.tsx` |
 | 페이지 조합 | `pages/editor/ui/EditorPage.tsx` |
 | API 라우터 | `apps/api/app/documents/router.py` |
+| 유스케이스 (일반) | `documents/use_cases/register_document.py` |
+| 유스케이스 (Agent) | `documents/use_cases/extract_outline.py` |
 | 포트·어댑터 | `documents/ports.py`, `documents/adapters/` |
+| Agent 정의 | `documents/agents/outline_analysis_agent.py` |
+| 실행 상태·재개 | `apps/api/app/core/agent_runtime/` |
 | DI 조립 | `apps/api/app/bootstrap/container.py` |
 | 설정 | `apps/api/app/core/config.py` |
+| 저장 등급 게이트 | `apps/api/app/core/storage/paths.py` |
+| 저장 마이그레이션 | `apps/api/migrations/` |
 | 패키지 계약·불변식 | `scaffold-engine/core/interfaces.py`, `core/pipeline.py` |
-
-`workspaces`의 직접 파일 I/O와 `scaffolds/repository.py`는 이행 중인
-옛 구조다. 새 코드의 본으로 삼지 않는다.
 
 ## 6. 완료 게이트
 
@@ -216,11 +238,14 @@ pnpm --filter @vibe/api test
 ```
 
 - 각 게이트는 오류 0이어야 한다. 새 경고도 추가하지 않는다.
+  (`pnpm lint`가 `ruff`와 `import-linter` 계약까지 함께 실행한다.)
 - 백엔드를 변경했다면 `python -c "import main"`과 실제 엔드포인트 호출을
   추가로 확인한다.
-- 백엔드 경계 변경은 `ruff check`, `import-linter`, `pytest`를 통과해야 한다.
-  아직 자동화가 없다면 해당 도입 작업을 변경 범위에 포함한다.
+- **저장 레이아웃을 바꿨다면** `pnpm -F @vibe/api migrate:status`로 버전을 확인하고,
+  마이그레이션 단계를 `migrations/`에 추가했는지 점검한다. 버전이 어긋나면
+  서버는 부팅을 거부한다.
 - 동작 변경은 실행으로 검증한다. 빌드 통과는 동작 검증이 아니다.
+  화면 동작이 바뀐 경우의 검증 수단은 [`30-workflow/workflow-principles.md`](../30-workflow/workflow-principles.md) §2를 따른다.
 - 검증을 실행하지 않았거나 실패했다면 완료라고 보고하지 않는다.
 
 ## 7. 예외 처리
@@ -263,6 +288,7 @@ docs(rules): 아키텍처 헌법 정리
 
 - [레이어 상세](./layers.md)
 - [위반 사례](./examples/violation-catalog.md)
-- [아키텍처 규칙](../10-architecture/)
+- [아키텍처 규칙](../10-architecture/) — Agent Runtime 경계 포함
 - [모듈화 규칙](../20-modularity/)
 - [개발 컨벤션](../50-develop/convention/)
+- [**데이터 관리**](../60-data/rule.md) — 수명주기 등급, 아티팩트, 실행 상태, 마이그레이션

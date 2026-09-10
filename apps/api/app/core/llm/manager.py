@@ -24,6 +24,9 @@ from scaffold_engine.harness import (
 
 from app.core.config import settings
 from app.core.llm.adapters import GoogleGenAiHarness, LocalGemmaHarness
+from app.core.llm.credentials import CredentialStore, OsCredentialStore
+from app.core.llm.fallback import FallbackLlmHarness
+from app.core.llm.provider_state import ProviderStateStore
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +34,12 @@ logger = logging.getLogger(__name__)
 class LlmManager:
     """백엔드 중앙 LLM 진입점."""
 
-    def __init__(self) -> None:
+    def __init__(self, credentials: CredentialStore | None = None) -> None:
         self._default_model: str = settings.agent_cli_model
         self._default_timeout: int = settings.agent_cli_timeout_seconds
         self._executable: str = settings.agent_cli_bin
+        self._credentials = credentials or OsCredentialStore()
+        self._provider_state = ProviderStateStore(settings.storage.provider_state_file)
         self._register_providers()
 
     # --- 프로바이더 등록 -------------------------------------------------
@@ -67,7 +72,7 @@ class LlmManager:
     def _build_google_genai(
         self, spec: ModelSpec, effort: Optional[str], timeout_seconds: int
     ) -> BaseLlmHarness:
-        return GoogleGenAiHarness(model=spec.name, timeout_seconds=timeout_seconds)
+        return GoogleGenAiHarness(model=spec.name, api_key=self._credentials.get_google_api_key(), timeout_seconds=timeout_seconds)
 
     # --- 공개 API --------------------------------------------------------
 
@@ -79,8 +84,9 @@ class LlmManager:
         executable: Optional[str] = None,
     ) -> BaseLlmHarness:
         """모델 프로필에 맞는 하네스를 돌려준다."""
-        target_model = model or self._default_model
-        timeout_seconds = timeout or self._default_timeout
+        # 설정 UI가 갱신한 프로세스 런타임 정책을 다음 실행부터 즉시 사용한다.
+        target_model = model or settings.agent_cli_model
+        timeout_seconds = timeout or settings.agent_cli_timeout_seconds
 
         # 호출부가 실행 파일을 직접 지정한 경우에만 팩토리를 우회한다.
         if executable:
@@ -97,9 +103,18 @@ class LlmManager:
                 target_model, spec.provider,
             )
 
-        return HarnessFactory.create(
+        harness = HarnessFactory.create(
             model=target_model, effort=effort, timeout_seconds=timeout_seconds
         )
+        if get_model_spec(target_model).provider == "agy_cli":
+            return FallbackLlmHarness(
+                primary=harness,
+                credentials=self._credentials,
+                google_model=settings.google_api_model,
+                google_timeout_seconds=settings.google_api_timeout_seconds,
+                provider_state=self._provider_state,
+            )
+        return harness
 
     def run_structured(
         self,

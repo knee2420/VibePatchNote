@@ -16,7 +16,6 @@ class WorkspaceService:
         self._repository = repository
 
     def create_workspace(self, data: CreateWorkspaceCommand) -> WorkspaceSession:
-        sessions = self._repository.load_all()
         session_id = str(uuid.uuid4())
         now = datetime.now(timezone.utc).isoformat()
         session = {
@@ -28,12 +27,11 @@ class WorkspaceService:
             "created_at": now,
             "updated_at": now,
         }
-        sessions[session_id] = session
-        self._repository.save_all(sessions)
+        self._repository.save(session)
         return self._to_response(session)
 
     def get_workspace(self, session_id: str) -> WorkspaceSession | None:
-        session = self._repository.load_all().get(session_id)
+        session = self._repository.load(session_id)
         return self._to_response(session) if session else None
 
     def get_all_workspaces(self) -> list[WorkspaceSession]:
@@ -44,11 +42,9 @@ class WorkspaceService:
         session_id: str,
         data: UpdateWorkspaceCommand,
     ) -> WorkspaceSession:
-        sessions = self._repository.load_all()
-        session = sessions.get(session_id)
+        session = self._repository.load(session_id)
         if session is None:
             session = self._recovered_session(session_id, data)
-            sessions[session_id] = session
 
         for field in ("title", "description", "nodes", "edges"):
             value = getattr(data, field)
@@ -56,16 +52,11 @@ class WorkspaceService:
                 session[field] = value
 
         session["updated_at"] = datetime.now(timezone.utc).isoformat()
-        self._repository.save_all(sessions)
+        self._repository.save(session)
         return self._to_response(session)
 
     def delete_workspace(self, session_id: str) -> bool:
-        sessions = self._repository.load_all()
-        if session_id not in sessions:
-            return False
-        del sessions[session_id]
-        self._repository.save_all(sessions)
-        return True
+        return self._repository.delete(session_id)
 
     @staticmethod
     def _recovered_session(

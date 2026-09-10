@@ -279,7 +279,7 @@ UPLOAD_DIR = "uploads"           # ❌ 상대 경로
 모노레포 루트에서 turbo로 실행하면 전혀 다른 곳을 바라봅니다.
 게다가 `main.py`는 `allow_origins=["*"]` + `allow_credentials=True` 조합이었습니다.
 
-**수정**
+**수정 (1차 — 당시)**
 
 ```python
 # app/core/config.py — 경로·CORS·외부 URL 의 SSOT
@@ -292,7 +292,30 @@ class Settings:
         self.cors_origins = self._read_cors_origins()   # 화이트리스트
 ```
 
-**교훈:** 백엔드에서 경로/호스트/허용치를 쓸 일이 생기면 **반드시 `app/core/config.py`를 경유**하십시오.
+**수정 (2차 — 현재. 위 코드는 더 이상 정답이 아니다)**
+
+경로를 `settings`에 **전역 공개한 것 자체가 다음 위반의 원인**이 되었습니다.
+누구나 어댑터를 건너뛰고 디스크에 직접 쓸 수 있었고, 실제로 `core/llm/telemetry.py`가
+문서 저장 트리에 직접 기록했습니다(V-11 참조).
+
+```python
+# app/core/config.py — 이제 경로 상수를 두지 않는다
+class Settings:
+    def __init__(self) -> None:
+        self.storage = StorageRoots(BASE_DIR)   # 등급 루트 4개만
+        self.public_base_url = ...              # 경로가 아닌 값만 남는다
+```
+
+```python
+# bootstrap/container.py — 어느 도메인이 어느 등급을 쓰는지 정하는 유일한 곳
+document_source_repository = providers.Singleton(
+    LocalDocumentSourceRepository,
+    root_dir=providers.Object(_storage.knowledge_of("documents")),
+)
+```
+
+**교훈:** 경로를 쓸 일이 생기면 `core/storage`의 등급 루트를 **주입받으십시오**.
+전역에서 꺼내 쓰는 순간 경계가 사라집니다. 정본은 [`60-data/rule.md`](../../60-data/rule.md).
 
 ---
 
@@ -320,6 +343,74 @@ error eslint(no-restricted-imports): '@/features/canvas-toolbar' import is restr
 
 ---
 
+## V-11. 파생 데이터가 원본 저장소를 오염시킴 🔴
+
+**증상**
+
+세션 DB(`workspaces_db.json`)가 노드 9개에 **349KB** 까지 자랐습니다.
+
+```text
+ref-pdf-...-oww2  총 77,230B  →  outlines 46,538B + elements 30,245B
+```
+
+`outlines` / `elements` / `segments` 는 백엔드 아티팩트 저장소에 정본이 있는
+파생물인데, 캔버스 노드가 **값으로 복사**해 세션 DB 와 localStorage 에 이중으로
+남기고 있었습니다. 재분석하면 세 곳이 갈라집니다.
+
+흥미로운 점: 스캐폴드는 이 문제를 이미 풀어 두었습니다(`stripArchivedNodeBody`).
+**같은 규칙이 한 노드 타입에만 적용된 상태**였고, 그 방식이 블랙리스트라
+`referenceDocument` 의 필드는 목록에 없어서 그대로 샜습니다.
+
+**수정**
+
+```ts
+// ❌ 지울 것을 적는다 — 필드가 늘 때마다 샌다
+const ARCHIVED_BODY_FIELDS = ['htmlContent', 'markdownContent', 'slots', 'archive'];
+
+// ✅ 남길 것을 적는다 — 새지 않는다
+const PERSISTED_NODE_DATA_FIELDS: Record<string, readonly string[]> = {
+  referenceDocument: ['docId', 'title', 'url', 'isOutlineOpen', 'outlineStatus', ...],
+  scaffoldDocument:  ['scaffoldId', 'docId', 'sourceNodeId', 'status', ...],
+};
+```
+
+결과: 349KB → **5.7KB**.
+
+**교훈:** 다른 애그리거트는 **식별자로만** 참조하십시오(DDD Rule 3).
+그리고 이런 규칙은 블랙리스트가 아니라 **화이트리스트**로 강제해야 합니다.
+
+> ⚠️ React Flow 의 `Node<T extends Record<string, unknown>>` 제약 때문에
+> **타입 시스템은 이 규칙을 잡아 주지 못합니다.** 인덱스 시그니처가 모든 필드를
+> 통과시킵니다. 그래서 강제 수단은 영속화 경계의 런타임 화이트리스트와
+> 서버측 마지막 관문(`LocalWorkspaceRepository._without_derived`)입니다.
+
+---
+
+## V-12. 저장 경로 전역 공개가 어댑터 우회를 낳음 🔴
+
+**증상**
+
+```python
+# core/llm/telemetry.py — LLM 코어가 문서 저장 트리에 직접 쓴다
+runs_dir = Path(settings.documents_storage_dir) / slugify_document_name(name) / "runs"
+```
+
+`settings` 가 구체 경로 9개를 전역 공개하자, `core` 가 도메인 어댑터를 전부
+건너뛰고 도메인 저장소에 기록했습니다. `"Core must not import domains"` 계약은
+`app.documents` 를 import 하지 않았으므로 **통과**했습니다 — 계약이 문자로만
+지켜진 경우입니다.
+
+**수정**
+
+- `settings` 에서 경로 상수 9개 제거, `core/storage/paths.py`(`StorageRoots`)로 이전
+- import-linter 계약 추가: `"Storage paths are known only to adapters and bootstrap"`
+- 관측 기록은 원장(`data/ledger/`)과 트레이스(`state/log/traces/`)로 분리
+
+**교훈:** 경계를 우회할 **수단**이 공개돼 있으면 언젠가 우회됩니다.
+계약이 통과했다고 경계가 지켜진 것은 아닙니다.
+
+---
+
 ## 빠른 자가진단
 
 새 코드를 작성한 뒤 아래를 스스로 물어보십시오.
@@ -333,4 +424,8 @@ error eslint(no-restricted-imports): '@/features/canvas-toolbar' import is restr
 - [ ] 훅 안에서 `alert`/`confirm`/`prompt`를 호출했는가? → P4 위반
 - [ ] 노드 타입/엔드포인트 경로를 문자열 리터럴로 썼는가? → P5 위반
 - [ ] "하위 호환용" 재수출 파일을 남겼는가? → V-01 재발
-- [ ] `pnpm lint && pnpm typecheck && pnpm build`를 **실제로 실행**했는가? → P7
+- [ ] 캔버스 노드 `data`에 분석 결과·본문을 넣었는가? → V-11 재발 (포인터만)
+- [ ] `settings`에서 저장 경로를 꺼내 썼는가? → V-12 재발 (등급 루트를 주입받는다)
+- [ ] LLM 산출물을 `cache/`에 저장했는가? → [`60-data`](../../60-data/rule.md) §2 위반
+- [ ] `pnpm lint && pnpm typecheck && pnpm build && pnpm --filter @vibe/api test`를
+      **실제로 실행**했는가? → P7

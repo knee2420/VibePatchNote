@@ -12,9 +12,19 @@
 
 ```text
 apps/web    @vibe/web              React 19 + Vite + Tailwind v4 + React Flow + Tiptap
-apps/api    @vibe/api              FastAPI + Native Workflow Engine
+apps/api    @vibe/api              FastAPI + Agent Runtime
+packages/scaffold-engine           호스트 비의존 문서 스캐폴딩 엔진
 packages/document-viewer           호스트 비의존 문서 뷰어 엔진
 packages/config                    공통 TypeScript 설정
+```
+
+런타임 데이터는 수명주기 등급으로 나뉩니다. **디렉터리 이름이 곧 취급 방식입니다.**
+
+```text
+apps/api/config/   설정        지우면 사용자 선택이 초기화
+apps/api/data/     원본·산출물   지우면 복구 불가 · 백업 대상
+apps/api/cache/    결정적 파생   지워도 재계산으로 복구
+apps/api/state/    상태·로그     지워도 무해
 ```
 
 ---
@@ -32,6 +42,8 @@ app → pages → widgets → features → entities → shared
 4. **백엔드 통신은 `shared/api`의 `httpClient`로만 한다.** `fetch()` 직접 호출·호스트 하드코딩 금지.
 5. **통신·상태 로직을 JSX에 두지 않는다.** `features/*/model/use*.ts` 훅으로 분리한다.
 6. **린트 규칙을 `disable` 주석으로 끄지 않는다.** 경계 에러는 설계가 틀렸다는 신호다.
+7. **다른 애그리거트는 식별자로만 참조한다.** 캔버스 노드에 `outlines`/`elements`/`segments`/본문 사본 금지 — `docId`·`scaffoldId` 포인터만. ([`60-data`](./.agents/rules/60-data/rule.md))
+8. **저장 경로를 직접 만들지 않는다.** `app.core.storage` 를 거치고, 어느 등급에 두는지는 `bootstrap/container.py` 가 정한다.
 
 위 1~3, 그리고 순환 참조는 **`pnpm lint`가 에러로 차단**합니다.
 
@@ -85,4 +97,6 @@ pnpm lint && pnpm typecheck && pnpm build
 | [`.agents/rules/00-core/rule.md`](./.agents/rules/00-core/rule.md) | **헌법 (정본)** — 배치 결정표, 절대 금지, 완료 게이트 |
 | [`.agents/rules/00-core/layers.md`](./.agents/rules/00-core/layers.md) | 레이어별 ✅/❌ 코드 대조 |
 | [`.agents/rules/00-core/examples/violation-catalog.md`](./.agents/rules/00-core/examples/violation-catalog.md) | 실제 위반 사례 10건과 수정 방법 |
+| [`.agents/rules/60-data/rule.md`](./.agents/rules/60-data/rule.md) | **데이터 관리 (정본)** — 수명주기 등급, 아티팩트·실행상태·원장, 마이그레이션 |
+| [`.agents/rules/10-architecture/agent-runtime.md`](./.agents/rules/10-architecture/agent-runtime.md) | Agent Runtime 경계 |
 | [`.agents/rules/README.md`](./.agents/rules/README.md) | 전체 규칙 인덱스와 우선순위 |

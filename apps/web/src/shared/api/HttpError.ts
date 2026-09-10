@@ -5,11 +5,18 @@
 export class HttpError extends Error {
   readonly status: number;
   readonly detail: string;
+  readonly payload?: ApiErrorPayload;
 
-  constructor(status: number, detail: string) {
+  constructor(status: number, detail: string, payload?: ApiErrorPayload) {
     super(`HTTP ${status}: ${detail}`);
     this.name = 'HttpError';
     this.status = status;
     this.detail = detail;
+    this.payload = payload;
   }
+}
+
+export interface ApiErrorPayload {
+  error?: { code: string; message: string; retryable?: boolean; requiresAction?: string };
+  traceId?: string;
 }

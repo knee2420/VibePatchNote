@@ -5,6 +5,7 @@ from dependency_injector import providers
 from fastapi.testclient import TestClient
 
 import main
+from app.documents.models import DocumentMeta
 
 
 class FakeHarness:
@@ -16,35 +17,38 @@ class FakeHarness:
         return {"segments": []}
 
 
-class FakeExtractionService:
-    """라우터 검증용 문서 유스케이스 대역. 파일 시스템에는 쓰지 않는다."""
+class FakeDocumentService:
+    """라우터 검증용 문서 서비스 대역. 파일 시스템에는 쓰지 않는다."""
 
-    async def register_upload(self, _filename: str, _content: bytes) -> dict[str, str]:
+    def register_upload(self, _filename: str, _content: bytes) -> DocumentMeta:
+        return DocumentMeta(
+            doc_id="doc-test",
+            original_name="reference.pdf",
+            stored_name="source.pdf",
+            sha256="0" * 64,
+            mime="application/pdf",
+            size=8,
+        )
+
+
+class FailedOutlineService:
+    def resolve_doc_id(self, doc_id: str | None, filename: str | None) -> str:
+        return doc_id or "doc-test"
+
+    async def extract_document_outline(
+        self, _doc_id: str, force_refresh: bool = False
+    ) -> dict[str, object]:
         return {
-            "status": "processing",
-            "job_id": "test-job",
-            "message": "accepted",
-            "filename": "reference.pdf",
+            "status": "failed", "docId": "doc-test", "document_title": "reference.pdf",
+            "total_pages": 1, "total_outlines": 0, "total_elements": 0,
+            "outlines": [], "elements": [], "markdown_outline": "", "traceId": "trace-test",
+            "error": {
+                "code": "FALLBACK_NOT_CONFIGURED",
+                "message": "Google API 설정이 필요합니다.",
+                "retryable": False,
+                "requiresAction": "configure_google_api",
+            },
         }
-
-
-class FakeDocumentAnalysisRepository:
-    """로컬 파일 시스템에 접근하지 않는 분석 결과 저장소 대역."""
-
-    def outline_exists(self, _filename: str) -> bool:
-        return False
-
-    def load_outline(self, _filename: str) -> dict[str, object] | None:
-        return None
-
-    def save_outline(self, _filename: str, _document: object) -> None:
-        pass
-
-    def load_segment_scan(self, _filename: str) -> dict[str, object] | None:
-        return None
-
-    def save_segment_scan(self, _filename: str, _payload: dict[str, object]) -> None:
-        pass
 
 
 class FakeDocumentSourceRepository:
@@ -53,8 +57,20 @@ class FakeDocumentSourceRepository:
     def save(self, _filename: str, _content: bytes) -> object:
         raise AssertionError("This fake is not used by this test")
 
-    def resolve(self, _filename: str) -> object:
+    def get(self, _doc_id: str) -> None:
+        return None
+
+    def find_by_name(self, _filename: str) -> None:
+        return None
+
+    def list_all(self) -> list[object]:
+        return []
+
+    def resolve_file(self, _doc_id: str) -> object:
         raise AssertionError("This fake is not used by this test")
+
+    def delete(self, _doc_id: str) -> bool:
+        return False
 
 
 class FakeSegmentScanner:
@@ -78,32 +94,30 @@ class FakeWorkspaceService:
         return []
 
 
-def test_extraction_service_shares_one_harness_with_workflow() -> None:
-    """문서 서비스와 워크플로우 노드는 같은 주입 하네스를 사용해야 한다."""
+def test_use_cases_share_one_harness_with_engine_runner() -> None:
+    """아웃라인 유스케이스와 엔진 JSON 실행기는 같은 주입 하네스를 사용해야 한다."""
     fake_harness = FakeHarness()
-    fake_repository = FakeDocumentAnalysisRepository()
     fake_source = FakeDocumentSourceRepository()
     fake_scanner = FakeSegmentScanner()
 
     with (
         main.container.llm_harness.override(providers.Object(fake_harness)),
-        main.container.document_analysis_repository.override(providers.Object(fake_repository)),
         main.container.document_source_repository.override(providers.Object(fake_source)),
         main.container.segment_scanner.override(providers.Object(fake_scanner)),
     ):
-        service = main.container.extraction_service()
+        extract_outline = main.container.extract_outline()
+        scan_segments = main.container.scan_document_segments()
         json_runner = main.container.json_prompt_runner()
 
-    assert service._llm_harness is fake_harness
+    assert extract_outline._harness is fake_harness
     assert json_runner._harness is fake_harness
-    assert service._document_analysis is fake_repository
-    assert service._document_source is fake_source
-    assert service._segment_scanner is fake_scanner
+    assert extract_outline._source is fake_source
+    assert scan_segments._scanner is fake_scanner
 
 
 def test_documents_upload_route_resolves_injected_service() -> None:
     """HTTP 어댑터가 전역 서비스 없이 컨테이너 서비스로 호출되는지 확인한다."""
-    with main.container.extraction_service.override(providers.Object(FakeExtractionService())):
+    with main.container.document_service.override(providers.Object(FakeDocumentService())):
         with TestClient(main.app) as client:
             response = client.post(
                 "/api/v1/documents/upload",
@@ -111,7 +125,29 @@ def test_documents_upload_route_resolves_injected_service() -> None:
             )
 
     assert response.status_code == 200
-    assert response.json()["job_id"] == "test-job"
+    body = response.json()
+    assert body["docId"] == "doc-test"
+    assert body["file_url"].endswith("/api/v1/documents/doc-test/file")
+
+
+def test_outline_failure_is_not_reported_as_http_success() -> None:
+    with main.container.document_service.override(providers.Object(FailedOutlineService())):
+        with TestClient(main.app) as client:
+            response = client.post(
+                "/api/v1/documents/outline", json={"docId": "doc-test"}
+            )
+
+    assert response.status_code == 424
+    assert response.json()["error"]["code"] == "FALLBACK_NOT_CONFIGURED"
+    assert response.json()["traceId"] == "trace-test"
+
+
+def test_outline_request_without_any_identifier_is_rejected() -> None:
+    """어느 문서를 말하는지 서버가 추측하지 않는다."""
+    with TestClient(main.app) as client:
+        response = client.post("/api/v1/documents/outline", json={})
+
+    assert response.status_code == 422
 
 
 def test_scaffolds_route_resolves_injected_service() -> None:

@@ -7,7 +7,6 @@
 이 변환의 책임은 이 계층에만 있다.
 """
 import logging
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -19,7 +18,8 @@ from scaffold_engine.vision import (
     render_slot_overlay_png,
 )
 
-from .adapters.local_scaffold_repository import sanitize_scaffold_id
+from app.core.storage import new_id
+
 from .formatters import ManifestFormatter, PromptSpecFormatter
 from .ports import ScaffoldRepository
 from .schemas import (
@@ -40,14 +40,18 @@ class ScaffoldArchiveService:
 
     def archive_scaffold(
         self,
+        doc_id: str,
         pdf_path: Path,
         result: ScaffoldExtractResult,
         page_number: int = 1,
     ) -> ScaffoldArchiveMeta:
-        """스캐폴딩 결과와 시각 비전을 아카이브로 오케스트레이션하여 영속화."""
+        """스캐폴딩 결과와 시각 비전을 아카이브로 오케스트레이션하여 영속화.
+
+        식별자는 파일명이 아니라 대리키다. 파일명을 넣으면 이름을 바꾼 순간
+        같은 서식이 다른 id 를 갖게 되고, 한글·공백이 그대로 경로에 실린다.
+        """
         now_iso = datetime.now(timezone.utc).isoformat()
-        stem = sanitize_scaffold_id(pdf_path.stem)
-        scaffold_id = f"scaffold-{stem}-{int(time.time())}"
+        scaffold_id = new_id("scaffold")
         title = result.meta.title or f"{pdf_path.stem} 서식 틀"
 
         # 1. 비전 이미지 합성 — 원본 / 슬롯 오버레이 / 재구성본 세 장면.
@@ -83,6 +87,7 @@ class ScaffoldArchiveService:
             title=title,
             source_pdf_file_name=pdf_path.name,
             slots_count=len(result.slots),
+            doc_id=doc_id,
             page_number=page_number,
             created_at=now_iso,
         )
@@ -174,3 +179,10 @@ class ScaffoldArchiveService:
     def get_asset_file(self, scaffold_id: str, asset_subpath: str) -> Optional[Path]:
         """에셋 파일 경로 해석 위임."""
         return self.repository.get_asset_file(scaffold_id, asset_subpath)
+
+    def delete_for_document(self, doc_id: str) -> int:
+        """문서 삭제 연쇄. documents 도메인이 이 계약으로만 호출한다."""
+        return self.repository.delete_for_document(doc_id)
+
+    def list_for_document(self, doc_id: str) -> list[ScaffoldArchiveMeta]:
+        return [self._to_meta(record) for record in self.repository.list_for_document(doc_id)]

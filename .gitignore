@@ -15,16 +15,23 @@ scratch/*
 *.py[cod]
 *$py.class
 .pytest_cache/
+apps/api/.pytest-tmp/
+apps/api/.import_linter_cache/
+apps/api/.ruff_cache/
 .env
 .env.*
 !.env.example
 
-# Runtime data (백엔드 로컬 저장소 / 사용자 업로드 산출물)
-apps/api/uploads/*
-!apps/api/uploads/.gitkeep
-apps/api/storage/*
-!apps/api/storage/.gitkeep
-apps/api/workspaces_db.json
+# 런타임 데이터. 수명주기 등급이 곧 취급 방식이다.
+#   data/   원본·산출물·실행상태 — 지우면 복구 불가. 커밋하지 않고 백업 대상.
+#   cache/  결정적 파생        — 지워도 재계산으로 복구된다.
+#   state/  운영 상태·로그      — 지워도 무해.
+#   config/ 사용자 설정        — 사용자 선택이므로 커밋하지 않는다.
+apps/api/data/
+apps/api/cache/
+apps/api/state/
+apps/api/config/
+apps/api/.backup-pre-v2/
 
 # IDE / OS
 .DS_Store
@@ -36,5 +43,8 @@ Thumbs.db
 # Vite
 *.local
 
-# 런타임 로그 / LLM 트레이스 산출물 (*.log 만으로는 jsonl/json 트레이스가 안 걸린다)
+# 구 레이아웃 잔여물 (v2 마이그레이션 이전 경로)
 apps/api/logs/
+apps/api/uploads/
+apps/api/storage/
+apps/api/workspaces_db.json

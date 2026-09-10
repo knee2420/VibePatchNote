@@ -49,16 +49,29 @@ description: "프론트엔드 아키텍처, FSD, AHA 및 코딩 스타일 컨벤
 - **규칙:** 내부적으로 여러 features나 entities를 묶어서 하나의 완전한 기능을 수행하는 덩어리로 만듭니다.
 
 ### 5.4 src/features
-- **역할:** 사용자 상호작용(User Interaction)이 발생하는 구체적인 비즈니스 로직 및 상태 제어 (예: canvas-file-drop, canvas-toolbar, workspace).
+- **역할:** 사용자 상호작용(User Interaction)이 발생하는 구체적인 비즈니스 로직 및 상태 제어
+  (agent-run-panel, api-health, canvas-file-drop, canvas-node-actions, canvas-settings,
+  canvas-toolbar, llm-settings, scaffold-focus, workspace).
 - **규칙:** 단순히 보여주는 UI가 아니라 '동작(Action)'을 포함합니다.
 
 ### 5.5 src/entities
-- **역할:** 시스템의 핵심 도메인 비즈니스 객체 및 기본 뷰 (예: resource-card, segment, canvas-board).
+- **역할:** 시스템의 핵심 도메인 비즈니스 객체 및 기본 뷰
+  (agent-run, canvas-board, llm-configuration, reference-document, resource-card,
+  scaffold-document, segment, workspace-session).
 - **규칙:** 외부 상태에 의존하지 않으며(순수함 지향), 가장 멍청한(Dumb) 형태의 데이터 모델과 UI 스켈레톤을 제공합니다.
+- **⛔ 다른 애그리거트를 값으로 복사하지 않습니다.** 캔버스 노드 `data` 에는 `docId`·`scaffoldId`
+  **포인터와 실행 상태만** 둡니다. 분석 결과·본문을 넣으면 재분석 시 정본과 갈라지고 세션 파일이
+  부풉니다(실제로 349KB 까지 자랐습니다).
+  정본: [`60-data/rule.md` §4-1](../../../60-data/rule.md) · 사례: [V-11](../../../00-core/examples/violation-catalog.md)
 
 ### 5.6 src/shared
-- **역할:** 프로젝트 전반에서 쓰이는 순수 유틸리티, 공통 UI 컴포넌트(버튼, 모달), API 클라이언트, React Flow 캔버스 코어 설정 등.
+- **역할:** 프로젝트 전반에서 쓰이는 순수 유틸리티, 공통 UI 컴포넌트(버튼, 모달), API 클라이언트,
+  React Flow 캔버스 코어 설정, 영속화 화이트리스트(`lib/canvasPersistence.ts`) 등.
 - **규칙:** 도메인 비즈니스 로직을 절대 포함해서는 안 됩니다. (AHA 원칙에 따라 섣부른 추상화 경계)
+- **전송 프로토콜은 예외입니다.** `api/agentRunClient.ts` 는 Agent Runtime 실행 프로토콜을
+  담습니다. 백엔드에서 `core/agent_runtime` 이 도메인이 아닌 것과 같은 이유이며, 여러 엔티티가
+  같은 프로토콜을 쓰는데 한 엔티티가 소유하면 슬라이스 횡단이 생기기 때문입니다.
+  **판단(상태 표현·재개 UI)은 `entities/agent-run` 이 갖습니다.**
 
 ---
 

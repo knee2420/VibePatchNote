@@ -30,6 +30,8 @@ interface DocumentOutlinePanelProps {
   onSelectElement?: (element: DocumentElementItem) => void;
   onClose: () => void;
   onRefresh?: () => void;
+  error?: { code: string; message: string; retryable?: boolean; requiresAction?: string };
+  onConfigureLlm?: () => void;
 }
 
 const ELEMENT_ICON_MAP: Record<
@@ -54,6 +56,8 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
   onSelectElement,
   onClose,
   onRefresh,
+  error,
+  onConfigureLlm,
 }: DocumentOutlinePanelProps) {
   const [filterText, setFilterText] = useState('');
 
@@ -190,6 +194,16 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
                 width: progressStep === 1 ? '30%' : progressStep === 2 ? '65%' : '95%',
               }}
             />
+          </div>
+        </div>
+      )}
+      {error && !isExtracting && (
+        <div className="m-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="font-semibold">분석을 완료하지 못했습니다</p>
+          <p className="mt-1 leading-4">{error.message}</p>
+          <div className="mt-2 flex gap-2">
+            {error.retryable && onRefresh && <button onClick={onRefresh} className="rounded bg-amber-700 px-2 py-1 text-white">다시 시도</button>}
+            {error.requiresAction === 'configure_google_api' && onConfigureLlm && <button onClick={onConfigureLlm} className="rounded bg-amber-700 px-2 py-1 text-white">Google API 설정</button>}
           </div>
         </div>
       )}

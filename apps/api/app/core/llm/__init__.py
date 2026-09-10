@@ -5,7 +5,7 @@
 
 1. 설정 주입 — `settings.agent_cli_bin` / `agent_cli_model` / `agent_cli_timeout_seconds`
 2. 프로바이더 확장 — 로컬 서빙 / SDK 직결 어댑터를 팩토리에 등록
-3. 감사 로그 — 문서 단위 실행 기록(`record_llm_run`)
+3. 관측 — 원장(`data/ledger/`)과 디버그 트레이스(`state/log/traces/`)
 
 의존 방향은 `apps/api → packages/scaffold-engine` 한쪽뿐이다(P1). 엔진이 이 패키지를
 import 하는 일은 없어야 한다.
@@ -24,15 +24,19 @@ from scaffold_engine.harness import (
     resolve_effort,
 )
 
+from app.core.llm.agy_status_snapshot import AgyStatusSnapshot
 from app.core.llm.manager import LlmManager, llm_manager
-from app.core.llm.telemetry import record_llm_run
+from app.core.llm.ports import ExecutionRecorder, ModelExecutor
+from app.core.llm.telemetry import LedgerExecutionRecorder, cost_of
 from app.core.llm.tracer import (
     LlmSpan,
     LlmTrace,
+    delete_traces_for_document,
     get_current_span,
     get_current_trace,
     get_trace,
     list_traces,
+    purge_expired_traces,
     span_context,
     trace_session,
 )
@@ -53,8 +57,13 @@ __all__ = [
     # 호스트 고유
     "LlmManager",
     "llm_manager",
-    "record_llm_run",
-    # LangSmith 트레이서
+    "AgyStatusSnapshot",
+    # 계약
+    "ModelExecutor",
+    "ExecutionRecorder",
+    # 관측
+    "LedgerExecutionRecorder",
+    "cost_of",
     "LlmTrace",
     "LlmSpan",
     "trace_session",
@@ -63,4 +72,6 @@ __all__ = [
     "get_current_span",
     "list_traces",
     "get_trace",
+    "purge_expired_traces",
+    "delete_traces_for_document",
 ]

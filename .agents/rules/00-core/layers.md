@@ -205,18 +205,40 @@ import type { NodeTheme } from '@/shared/model';
 export const REFERENCE_DOCUMENT_NODE_TYPE = 'referenceDocument';
 
 export interface ReferenceDocumentData extends Record<string, unknown> {
+  /** 문서 식별자. 모든 파생 데이터는 이 포인터로 조회한다. */
+  docId?: string;
   title: string;
   url: string;
   fileType?: string;
   theme?: NodeTheme;
+  /** 마지막 성공과 방금 실패를 구분할 수 있는 상태만 보존한다. */
+  outlineStatus?: DocumentAnalysisStatus;
+  outlineError?: AnalysisError;
+  lastSuccessfulOutlineAt?: string;
 }
 ```
 
 ```ts
+// ❌ 다른 애그리거트의 내용을 값으로 복사 (V-11 의 실제 원인)
+export interface ReferenceDocumentData extends Record<string, unknown> {
+  outlines?: DocumentOutlineNode[];   // ❌ 정본은 백엔드 아티팩트
+  elements?: DocumentElementItem[];   // ❌ 재분석하면 갈라진다
+  segments?: DocumentSegmentItem[];   // ❌ 세션 파일이 349KB 까지 자랐다
+}
+```
+
+> ⚠️ `extends Record<string, unknown>` 은 React Flow 의 노드 데이터 제약입니다.
+> **인덱스 시그니처 때문에 타입 시스템이 이 규칙을 잡아 주지 못합니다.**
+> 강제 수단은 영속화 경계의 화이트리스트(`shared/lib/canvasPersistence.ts`)입니다.
+> 정본: [`60-data/rule.md` §4-1](../60-data/rule.md)
+
+```ts
 // ✅ entities/reference-document/index.ts — Public API
 export { ReferenceDocumentCard } from './ui/ReferenceDocumentCard';
-export { REFERENCE_DOCUMENT_NODE_TYPE } from './model/types';
-export type { ReferenceDocumentData } from './model/types';
+export { REFERENCE_DOCUMENT_NODE_TYPE, REFERENCE_CARD_SIZE } from './model/types';
+export type { ReferenceDocumentData, DocumentOutlineNode } from './model/types';
+export { referenceDocumentApi } from './api/referenceDocumentApi';
+export { useDocumentOutline } from './model/useDocumentOutline';
 ```
 
 ```ts
@@ -225,7 +247,10 @@ export { ReferenceDocumentCard as ReferenceDocumentNode } from '@/widgets/refere
 ```
 
 > **entity ↔ entity 참조도 금지입니다.** 두 엔티티가 얽히면 그 관계를 다루는 `feature`를 만드십시오.
-> 실제 사례: 세션과 캔버스를 함께 바꿔야 하는 로직 → `features/workspace/model/useSessionActions.ts`
+> 실제 사례 1: 세션과 캔버스를 함께 바꿔야 하는 로직 → `features/workspace/model/useSessionActions.ts`
+> 실제 사례 2: `reference-document` 가 실행 상태를 따라가야 했지만 `entities/agent-run` 을
+> 참조할 수 없으므로, **프로토콜을 `shared/api` 로 내리고 양쪽이 각자 쓰게** 했습니다.
+> (도메인 판단이 아니라 전송 계층이었기에 가능한 선택입니다.)
 
 ---
 
@@ -236,11 +261,18 @@ export { ReferenceDocumentCard as ReferenceDocumentNode } from '@/widgets/refere
 
 | 세그먼트 | 실제 내용 |
 | --- | --- |
-| `shared/api` | `httpClient`, `HttpError` — **모든 백엔드 통신의 유일한 출구** |
+| `shared/api` | `httpClient`, `HttpError` — **모든 백엔드 통신의 유일한 출구**<br>`agentRunClient`, `followAgentRun` — Agent Runtime 실행 프로토콜 |
 | `shared/config` | `env.apiBaseUrl` — **모든 환경 의존 값의 유일한 출처** |
 | `shared/ui` | ShadCN 프리미티브, `InfiniteCanvas`, `RichTextEditor` |
-| `shared/lib` | `cn` 등 순수 유틸 |
+| `shared/lib` | `cn` 등 순수 유틸, `canvasPersistence`(영속화 화이트리스트) |
 | `shared/model` | `NodeTheme` 등 도메인 무관 타입 토큰 |
+
+> **`agentRunClient` 가 `shared/api` 에 있는 이유** — 백엔드에서 `core/agent_runtime` 이
+> 특정 도메인에 속하지 않는 것과 같은 이유입니다. 실행 프로토콜(run 조회·재개·승인)은
+> 문서·스캐폴드 등 여러 엔티티가 공유하는데, 그중 한 엔티티가 이것을 소유하면
+> 다른 엔티티가 그 슬라이스를 참조해야 하고 레이어 규칙이 깨집니다.
+> **여기에는 프로토콜만 둡니다.** 상태 표현·재개 UI 같은 판단은 `entities/agent-run` 이 갖습니다.
+> 이 예외를 "여러 곳에서 쓰니까 shared" 의 구실로 삼지 마십시오 — 판단 기준은 아래 그대로입니다.
 
 ```ts
 // ✅ 통신은 반드시 이 경로로

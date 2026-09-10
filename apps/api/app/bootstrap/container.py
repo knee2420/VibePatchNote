@@ -2,66 +2,196 @@
 
 도메인 서비스와 어댑터는 여기서만 실제 구현체를 선택한다. 서비스 모듈 안에서
 전역 싱글턴을 만들거나 ``SomeAdapter()``를 직접 호출하지 않도록 한다.
+
+**저장 위치가 정해지는 곳도 여기 한 군데다.** 어댑터는 자기가 어느 등급 루트
+아래 있는지 모른 채 받은 경로만 쓴다. 그래야 "이건 지워도 되는가"의 답이
+`core/storage/paths.py` 와 이 파일 두 곳에만 존재하게 된다.
 """
+from pathlib import Path
+
 from dependency_injector import containers, providers
 from scaffold_engine import JsonPromptRunner
 
-from app.core.config import settings
-from app.core.llm import llm_manager
-from app.core.storage.document_storage import document_storage
-from app.documents.adapters.local_document_analysis_repository import (
-    LocalDocumentAnalysisRepository,
+from app.core.agent_runtime import (
+    AgentRuntime,
+    ApprovalService,
+    LocalAgentRunRepository,
+    LocalAgreementRepository,
+    LocalLedger,
 )
-from app.documents.adapters.local_document_source_repository import (
+from app.core.config import settings
+from app.core.llm import AgyStatusSnapshot, LedgerExecutionRecorder, llm_manager
+from app.core.llm.credentials import OsCredentialStore
+from app.core.llm.provider_state import ProviderStateStore
+from app.documents.adapters import (
+    EngineSegmentScanAdapter,
+    LocalDocumentArtifactRepository,
+    LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
 )
-from app.documents.adapters.local_outline_storage import OutlineStorageRepository
-from app.documents.adapters.native_segment_scan_adapter import EngineSegmentScanAdapter
-from app.documents.service import ExtractionService
+from app.documents.agents import OutlineAnalysisAgent, ScaffoldGenerationAgent
+from app.documents.service import DocumentService
+from app.documents.use_cases import (
+    DeleteDocumentUseCase,
+    ExtractOutlineUseCase,
+    GenerateScaffoldUseCase,
+    GetDocumentFileUseCase,
+    ListDocumentArtifactsUseCase,
+    RegisterDocumentUseCase,
+    ScanDocumentSegmentsUseCase,
+)
+from app.llm_settings.adapters import (
+    AgyUsageReader,
+    GoogleModelCatalog,
+    LocalAgyStatusLineSettings,
+    LocalRuntimePolicyRepository,
+)
+from app.llm_settings.service import LlmSettingsService
 from app.scaffolds.adapters.local_scaffold_repository import LocalScaffoldRepository
 from app.scaffolds.service import ScaffoldArchiveService
 from app.workspaces.adapters.local_workspace_repository import LocalWorkspaceRepository
 from app.workspaces.service import WorkspaceService
 
+_storage = settings.storage
+
 
 class Container(containers.DeclarativeContainer):
     """API 프로세스의 장기 객체와 요청별 유스케이스를 정의한다."""
 
+    # --- 비밀 · 공급자 상태 ------------------------------------------------
+    credential_store = providers.Singleton(OsCredentialStore)
+    provider_state = providers.Singleton(
+        ProviderStateStore, state_file=providers.Object(_storage.provider_state_file)
+    )
+    agy_status_snapshot = providers.Singleton(
+        AgyStatusSnapshot, path=providers.Object(_storage.agy_status_file)
+    )
+    runtime_policy_repository = providers.Singleton(
+        LocalRuntimePolicyRepository, path=providers.Object(_storage.llm_runtime_policy_file)
+    )
+    agy_status_line_settings = providers.Singleton(
+        LocalAgyStatusLineSettings,
+        settings_file=providers.Object(Path.home() / ".gemini" / "antigravity-cli" / "settings.json"),
+        bridge_command=providers.Object(f'python "{settings.base_dir / "scripts" / "agy_status_bridge.py"}"'),
+    )
+    agy_usage_reader = providers.Singleton(AgyUsageReader, executable=providers.Object(settings.agent_cli_bin))
+    google_model_catalog = providers.Singleton(GoogleModelCatalog, credentials=credential_store)
     llm_harness = providers.Singleton(llm_manager.get_harness)
-    json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
-    segment_scanner = providers.Factory(
-        EngineSegmentScanAdapter,
-        runner=json_prompt_runner,
-    )
-    document_analysis_repository = providers.Singleton(
-        LocalDocumentAnalysisRepository,
-        outline_repository=providers.Singleton(OutlineStorageRepository),
-        document_store=providers.Object(document_storage),
-    )
-    document_source_repository = providers.Singleton(
-        LocalDocumentSourceRepository,
-        upload_dir=providers.Object(settings.upload_dir),
-        legacy_source_dir=providers.Object(settings.legacy_document_source_dir),
-    )
-    scaffold_repository = providers.Singleton(LocalScaffoldRepository)
-    scaffold_archive_service = providers.Singleton(
-        ScaffoldArchiveService,
-        repository=scaffold_repository,
-    )
-    workspace_repository = providers.Singleton(
-        LocalWorkspaceRepository,
-        database_file=providers.Object(settings.db_file),
-    )
-    workspace_service = providers.Factory(
-        WorkspaceService,
-        repository=workspace_repository,
+    llm_settings_service = providers.Factory(
+        LlmSettingsService,
+        credentials=credential_store,
+        provider_state=provider_state,
+        agy_status=agy_status_snapshot,
+        runtime_policy=runtime_policy_repository,
+        agy_status_line=agy_status_line_settings,
+        agy_usage=agy_usage_reader,
+        google_models=google_model_catalog,
     )
 
-    extraction_service = providers.Factory(
-        ExtractionService,
-        segment_scanner=segment_scanner,
-        document_analysis=document_analysis_repository,
-        document_source=document_source_repository,
-        llm_harness=llm_harness,
-        scaffold_archives=scaffold_archive_service,
+    # --- [2 Runtime] · [B Agreement] · [A Observation] ---------------------
+    agent_run_repository = providers.Singleton(
+        LocalAgentRunRepository, base_dir=providers.Object(_storage.runs)
     )
+    agreement_repository = providers.Singleton(
+        LocalAgreementRepository, base_dir=providers.Object(_storage.agreements)
+    )
+    ledger = providers.Singleton(LocalLedger, base_dir=providers.Object(_storage.ledger))
+    approval_service = providers.Singleton(ApprovalService, repository=agreement_repository)
+    agent_runtime = providers.Singleton(
+        AgentRuntime,
+        runs=agent_run_repository,
+        approvals=approval_service,
+        ledger=ledger,
+    )
+    execution_recorder = providers.Singleton(LedgerExecutionRecorder, ledger=ledger)
+
+    # --- [4 Knowledge] 저장소 ----------------------------------------------
+    document_source_repository = providers.Singleton(
+        LocalDocumentSourceRepository,
+        root_dir=providers.Object(_storage.knowledge_of("documents")),
+    )
+    document_artifact_repository = providers.Singleton(
+        LocalDocumentArtifactRepository,
+        root_dir=providers.Object(_storage.knowledge_of("documents")),
+    )
+    document_cache_repository = providers.Singleton(
+        LocalDocumentCacheRepository,
+        root_dir=providers.Object(_storage.cache_of("documents")),
+    )
+    scaffold_repository = providers.Singleton(
+        LocalScaffoldRepository,
+        root_dir=providers.Object(_storage.knowledge_of("scaffolds")),
+    )
+    scaffold_archive_service = providers.Singleton(
+        ScaffoldArchiveService, repository=scaffold_repository
+    )
+
+    # --- [6 Models] · Agent 정의 -------------------------------------------
+    outline_analysis_agent = providers.Factory(OutlineAnalysisAgent, harness=llm_harness)
+    scaffold_generation_agent = providers.Factory(ScaffoldGenerationAgent, harness=llm_harness)
+    json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
+    segment_scanner = providers.Factory(EngineSegmentScanAdapter, runner=json_prompt_runner)
+
+    # --- documents 유스케이스 ----------------------------------------------
+    register_document = providers.Factory(
+        RegisterDocumentUseCase, source=document_source_repository
+    )
+    get_document_file = providers.Factory(
+        GetDocumentFileUseCase, source=document_source_repository
+    )
+    delete_document = providers.Factory(
+        DeleteDocumentUseCase,
+        source=document_source_repository,
+        artifacts=document_artifact_repository,
+        cache=document_cache_repository,
+        scaffolds=scaffold_archive_service,
+    )
+    list_document_artifacts = providers.Factory(
+        ListDocumentArtifactsUseCase,
+        source=document_source_repository,
+        artifacts=document_artifact_repository,
+    )
+    extract_outline = providers.Factory(
+        ExtractOutlineUseCase,
+        source=document_source_repository,
+        artifacts=document_artifact_repository,
+        cache=document_cache_repository,
+        agent_runtime=agent_runtime,
+        outline_agent=outline_analysis_agent,
+        recorder=execution_recorder,
+        llm_harness=llm_harness,
+    )
+    scan_document_segments = providers.Factory(
+        ScanDocumentSegmentsUseCase,
+        source=document_source_repository,
+        artifacts=document_artifact_repository,
+        scanner=segment_scanner,
+        agent_runtime=agent_runtime,
+    )
+    generate_scaffold = providers.Factory(
+        GenerateScaffoldUseCase,
+        source=document_source_repository,
+        scaffolds=scaffold_archive_service,
+        agent=scaffold_generation_agent,
+        agent_runtime=agent_runtime,
+    )
+
+    # 재개 핸들러를 Agent Runtime 에 등록하는 지점이므로 요청마다 새로 만들지 않는다.
+    document_service = providers.Singleton(
+        DocumentService,
+        register=register_document,
+        get_file=get_document_file,
+        delete=delete_document,
+        artifacts=list_document_artifacts,
+        extract_outline=extract_outline,
+        scan_segments=scan_document_segments,
+        generate_scaffold=generate_scaffold,
+        agent_runtime=agent_runtime,
+        approvals=approval_service,
+    )
+
+    # --- [3 Memory] --------------------------------------------------------
+    workspace_repository = providers.Singleton(
+        LocalWorkspaceRepository, base_dir=providers.Object(_storage.sessions)
+    )
+    workspace_service = providers.Factory(WorkspaceService, repository=workspace_repository)

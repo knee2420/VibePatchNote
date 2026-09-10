@@ -2,15 +2,24 @@
 LangSmith 사상을 벤치마킹한 LLM 및 도메인 엔진 정밀 관제 트레이서(Tracer).
 모든 파이프라인의 실행 과정(I/O, CLI 명령어, 서브프로세스, 세부 단계별 지연 시간, 토큰)을
 계층적 Trace / Span 구조로 기록하고 파일에 영속화합니다.
+
+트레이스는 **디버그 자료**다. 프롬프트에 문서 본문이 실리므로 크고 민감하며,
+같은 실행의 비용·토큰 집계는 원장(`data/ledger/`)이 따로 갖는다. 그래서 트레이스는
+`state/` 에 두고 보존기간이 지나면 정리한다. 앱이 스스로 파일을 회전시키지 않고,
+보존정책 한 곳에서 일괄 정리한다.
+
+문서를 삭제하면 그 문서의 트레이스도 함께 지워야 한다. 그러려면 트레이스가
+`doc_id` 를 알아야 한다 — 파일명 문자열로는 역추적할 수 없다.
 """
 from __future__ import annotations
 
 import contextvars
 import json
 import logging
+import shutil
 import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
 
@@ -27,25 +36,19 @@ _active_span: contextvars.ContextVar[Optional[LlmSpan]] = contextvars.ContextVar
 )
 
 
-# index.jsonl 이 이 크기를 넘으면 .1 로 밀어내고 새로 시작한다 (무한 증가 방지).
-MAX_INDEX_BYTES = 5 * 1024 * 1024
+INDEX_FILE = "index.jsonl"
+RUNS_DIR = "runs"
 
 
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _rotate_index_if_needed(index_path: Path) -> None:
-    """요약 인덱스가 상한을 넘으면 한 세대만 보관하고 회전시킨다."""
-    try:
-        if index_path.exists() and index_path.stat().st_size >= MAX_INDEX_BYTES:
-            backup = index_path.with_suffix(index_path.suffix + ".1")
-            if backup.exists():
-                backup.unlink()
-            index_path.rename(backup)
-            logger.info("[LlmTracer] index.jsonl 회전: %s", backup.name)
-    except OSError as e:
-        logger.warning("[LlmTracer] index.jsonl 회전 실패: %s", e)
+def _default_traces_dir() -> Path:
+    """트레이스 루트. 경로를 아는 것은 저장 게이트뿐이다."""
+    from app.core.config import settings
+
+    return settings.storage.traces
 
 
 class LlmSpan(BaseModel):
@@ -83,6 +86,9 @@ class LlmTrace(BaseModel):
     name: str
     run_type: str = "chain"
     document_name: Optional[str] = None
+    # 문서 삭제가 트레이스까지 연쇄되려면 사람이 읽는 이름이 아니라 식별자가 필요하다.
+    doc_id: Optional[str] = None
+    run_id: Optional[str] = None
     status: str = "RUNNING"  # RUNNING | SUCCESS | FAILED | TIMEOUT
     start_time: str = Field(default_factory=_iso_now)
     end_time: Optional[str] = None
@@ -210,7 +216,7 @@ class LlmTrace(BaseModel):
         outputs: Optional[Dict[str, Any]] = None,
         status: str = "SUCCESS",
         error: Optional[str] = None,
-        base_logs_dir: Optional[Path] = None,
+        traces_dir: Optional[Path] = None,
     ) -> None:
         """Trace 전체를 종료하고 디스크에 영속화합니다."""
         self.end_time = _iso_now()
@@ -227,43 +233,44 @@ class LlmTrace(BaseModel):
         except Exception:
             pass
 
-        self.save(base_logs_dir)
+        self.save(traces_dir)
 
-    def save(self, base_logs_dir: Optional[Path] = None) -> Optional[Path]:
+    def save(self, traces_dir: Optional[Path] = None) -> Optional[Path]:
         """LangSmith 스타일 Trace JSON 및 index.jsonl 파일을 기록합니다."""
         try:
-            if base_logs_dir is None:
-                base_logs_dir = Path(__file__).resolve().parents[3] / "logs"
+            if traces_dir is None:
+                traces_dir = _default_traces_dir()
 
-            traces_dir = base_logs_dir / "traces"
             # start_time 이 UTC 이므로 폴더 날짜도 UTC 로 맞춘다. 로컬시각을 쓰면
             # 자정 근처에서 파일의 타임스탬프와 폴더 날짜가 어긋난다.
             today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-            runs_dir = traces_dir / "runs" / today_str
+            runs_dir = traces_dir / RUNS_DIR / today_str
             runs_dir.mkdir(parents=True, exist_ok=True)
 
-            doc_slug = (self.document_name or "general").replace(" ", "_").replace(".", "_")
-            file_name = f"{self.trace_id}_{doc_slug}.json"
+            # 파일명은 식별자만으로 짓는다. 문서 이름을 파일명에 넣으면 원문 조각이
+            # 파일 목록에 그대로 노출되고, 삭제 연쇄도 문자열 매칭에 기대게 된다.
+            file_name = f"{self.trace_id}.json"
             trace_path = runs_dir / file_name
 
             with open(trace_path, "w", encoding="utf-8") as f:
                 json.dump(self.model_dump(), f, ensure_ascii=False, indent=2)
 
             # 2. 빠른 조회를 위한 index.jsonl 요약 인덱스 기록
-            index_path = traces_dir / "index.jsonl"
-            _rotate_index_if_needed(index_path)
+            index_path = traces_dir / INDEX_FILE
             summary_entry = {
                 "trace_id": self.trace_id,
                 "name": self.name,
                 "status": self.status,
                 "document_name": self.document_name,
+                "doc_id": self.doc_id,
+                "run_id": self.run_id,
                 "start_time": self.start_time,
                 "duration_seconds": self.duration_seconds,
                 "total_spans": len(self.spans),
                 "total_tokens": sum(s.tokens.get("total", 0) for s in self.spans),
                 "cache_read_tokens": sum(s.tokens.get("cache_read", 0) for s in self.spans),
                 "error": bool(self.error),
-                "relative_path": f"runs/{today_str}/{file_name}",
+                "relative_path": f"{RUNS_DIR}/{today_str}/{file_name}",
             }
             with open(index_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(summary_entry, ensure_ascii=False) + "\n")
@@ -298,7 +305,9 @@ def trace_session(
     inputs: Optional[Dict[str, Any]] = None,
     document_name: Optional[str] = None,
     metadata: Optional[Dict[str, Any]] = None,
-    base_logs_dir: Optional[Path] = None,
+    doc_id: Optional[str] = None,
+    run_id: Optional[str] = None,
+    traces_dir: Optional[Path] = None,
 ) -> Generator[LlmTrace, None, None]:
     """
     LangSmith Trace 세션을 시작하는 컨텍스트 매니저.
@@ -308,15 +317,17 @@ def trace_session(
         name=name,
         inputs=inputs or {},
         document_name=document_name,
+        doc_id=doc_id,
+        run_id=run_id,
         metadata=metadata or {},
     )
     token = _active_trace.set(trace)
     try:
         yield trace
         if trace.status == "RUNNING":
-            trace.finish(status="SUCCESS", base_logs_dir=base_logs_dir)
+            trace.finish(status="SUCCESS", traces_dir=traces_dir)
     except Exception as e:
-        trace.finish(status="FAILED", error=str(e), base_logs_dir=base_logs_dir)
+        trace.finish(status="FAILED", error=str(e), traces_dir=traces_dir)
         raise
     finally:
         _active_trace.reset(token)
@@ -359,12 +370,12 @@ def span_context(
             _active_span.reset(span_token)
 
 
-def list_traces(limit: int = 50, base_logs_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
+def list_traces(limit: int = 50, traces_dir: Optional[Path] = None) -> List[Dict[str, Any]]:
     """index.jsonl 로부터 최근 실행 Trace 요약 목록을 역순으로 반환합니다."""
-    if base_logs_dir is None:
-        base_logs_dir = Path(__file__).resolve().parents[3] / "logs"
+    if traces_dir is None:
+        traces_dir = _default_traces_dir()
 
-    index_path = base_logs_dir / "traces" / "index.jsonl"
+    index_path = traces_dir / INDEX_FILE
     if not index_path.exists():
         return []
 
@@ -386,12 +397,12 @@ def list_traces(limit: int = 50, base_logs_dir: Optional[Path] = None) -> List[D
     return results[:limit]
 
 
-def get_trace(trace_id: str, base_logs_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
+def get_trace(trace_id: str, traces_dir: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """지정된 trace_id 에 해당하는 Full Trace JSON 데이터를 검색하여 반환합니다."""
-    if base_logs_dir is None:
-        base_logs_dir = Path(__file__).resolve().parents[3] / "logs"
+    if traces_dir is None:
+        traces_dir = _default_traces_dir()
 
-    runs_dir = base_logs_dir / "traces" / "runs"
+    runs_dir = traces_dir / RUNS_DIR
     if not runs_dir.exists():
         return None
 
@@ -403,3 +414,69 @@ def get_trace(trace_id: str, base_logs_dir: Optional[Path] = None) -> Optional[D
             logger.error("[LlmTracer] Trace 파일 읽기 실패 (%s): %s", json_file, e)
 
     return None
+
+
+def purge_expired_traces(retention_days: int, traces_dir: Optional[Path] = None) -> int:
+    """보존기간이 지난 트레이스를 정리한다.
+
+    앱이 요청마다 파일을 회전시키는 대신, 보존정책이 한 곳에서 일괄 정리한다.
+    트레이스는 재생성할 수 없지만 재생성할 필요도 없다 — 집계는 원장이 갖고 있다.
+    """
+    if traces_dir is None:
+        traces_dir = _default_traces_dir()
+
+    runs_dir = traces_dir / RUNS_DIR
+    if not runs_dir.exists():
+        return 0
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=retention_days)).strftime("%Y-%m-%d")
+    removed = 0
+    for day_dir in runs_dir.iterdir():
+        if not day_dir.is_dir() or day_dir.name >= cutoff:
+            continue
+        try:
+            shutil.rmtree(day_dir)
+            removed += 1
+        except OSError as exc:
+            logger.warning("[LlmTracer] 만료 트레이스 정리 실패 (%s): %s", day_dir.name, exc)
+    if removed:
+        logger.info("[LlmTracer] 만료 트레이스 %d일치를 정리했습니다.", removed)
+    return removed
+
+
+def delete_traces_for_document(doc_id: str, traces_dir: Optional[Path] = None) -> int:
+    """문서 삭제에 트레이스를 연쇄시킨다.
+
+    프롬프트에 문서 본문이 실리므로, 문서를 지우면 그 흔적도 함께 지워야 한다.
+    문서 이름이 아니라 `doc_id` 로 찾는 이유가 이것이다.
+    """
+    if traces_dir is None:
+        traces_dir = _default_traces_dir()
+
+    index_path = traces_dir / INDEX_FILE
+    if not index_path.exists():
+        return 0
+
+    kept: List[str] = []
+    removed = 0
+    for line in index_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            entry = json.loads(line)
+        except ValueError:
+            continue
+        if entry.get("doc_id") != doc_id:
+            kept.append(line)
+            continue
+        relative = entry.get("relative_path")
+        if relative:
+            target = traces_dir / relative
+            try:
+                target.unlink(missing_ok=True)
+                removed += 1
+            except OSError as exc:
+                logger.warning("[LlmTracer] 트레이스 삭제 실패 (%s): %s", relative, exc)
+
+    index_path.write_text("\n".join(kept) + ("\n" if kept else ""), encoding="utf-8")
+    return removed

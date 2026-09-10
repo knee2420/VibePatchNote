@@ -18,6 +18,7 @@ from scaffold_engine.harness import (
     HarnessFactory,
     LlmExecutionResult,
 )
+from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
 from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
 from scaffold_engine.outline.schemas.models import (
@@ -48,7 +49,12 @@ class OutlinePipeline:
         default_model: str = DEFAULT_MODEL,
         default_effort: Optional[str] = None,
         timeout_seconds: int = 180,
+        context_dir: Optional[Path] = None,
     ) -> None:
+        # 파생물을 어디에 둘지는 호스트가 정한다. 엔진이 입력 파일 옆에 쓰면
+        # 호스트의 업로드 디렉터리를 오염시키고, 호스트 비의존 계약이 깨진다.
+        # 기본값은 "아무 데도 쓰지 않는다" 다.
+        self.context_dir = Path(context_dir) if context_dir else None
         self.default_model = default_model
         self.default_effort = default_effort
         self.harness = harness or HarnessFactory.create(
@@ -63,9 +69,12 @@ class OutlinePipeline:
         pdf_path: Union[str, Path],
         model: Optional[str] = None,
         effort: Optional[str] = None,
+        context_dir: Optional[Path] = None,
     ) -> OutlineDocument:
         """본 프로젝트 서비스 레이어용 표준 진입점 (OutlineDocument 반환)."""
-        res = self.execute(pdf_path=pdf_path, model=model, effort=effort)
+        res = self.execute(
+            pdf_path=pdf_path, model=model, effort=effort, context_dir=context_dir
+        )
         if res.get("document") and isinstance(res["document"], OutlineDocument):
             return res["document"]
         return res["fallback_document"]
@@ -75,6 +84,7 @@ class OutlinePipeline:
         pdf_path: Union[str, Path],
         model: Optional[str] = None,
         effort: Optional[str] = None,
+        context_dir: Optional[Path] = None,
     ) -> Dict[str, Any]:
         """실험실(V2 벤치마크) 및 CLI 호환 진입점."""
         pdf_path = Path(pdf_path).resolve()
@@ -94,8 +104,8 @@ class OutlinePipeline:
         # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화 (.context.md / .elements.json)
         ctx_started_at = _utc_now_iso()
         t0 = time.time()
-        context_dir = pdf_path.parent / ".context"
-        doc_ctx = self.context_builder.build_context(pdf_path, output_dir=context_dir)
+        target_context_dir = Path(context_dir) if context_dir else self.context_dir
+        doc_ctx = self.context_builder.build_context(pdf_path, output_dir=target_context_dir)
         ctx_duration = round(time.time() - t0, 3)
         ctx_ended_at = _utc_now_iso()
 
@@ -189,6 +199,14 @@ class OutlinePipeline:
             "prompt_snippet": prompt[:300],
             "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
             "steps": steps,
+            # 산출물을 재현·비교하려면 "무엇이 만들었는가"가 결과와 함께 남아야 한다.
+            "provenance": EngineProvenance(
+                pipeline="outline",
+                model=target_model,
+                effort=target_effort,
+                prompt_hash=hash_text(instructions) if instructions else None,
+                schema_hash=hash_file(self.schema_path),
+            ).to_dict(),
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:

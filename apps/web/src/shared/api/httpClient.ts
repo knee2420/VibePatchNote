@@ -1,10 +1,12 @@
 import { env } from '../config';
 
-import { HttpError } from './HttpError';
+import { type ApiErrorPayload, HttpError } from './HttpError';
 
 async function toHttpError(response: Response): Promise<HttpError> {
-  const detail = await response.text().catch(() => response.statusText);
-  return new HttpError(response.status, detail || response.statusText);
+  const raw = await response.text().catch(() => response.statusText);
+  let payload: ApiErrorPayload | undefined;
+  try { payload = JSON.parse(raw) as ApiErrorPayload; } catch { /* plain-text fallback */ }
+  return new HttpError(response.status, payload?.error?.message || raw || response.statusText, payload);
 }
 
 async function request<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {

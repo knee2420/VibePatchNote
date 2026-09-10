@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
-import { stripArchivedNodeBody } from '@/shared/lib';
+import { pickPersistedNodeData } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 import { useSessionActions } from './useSessionActions';
@@ -60,7 +60,7 @@ export function useSessionSync() {
       workspaceApi
         .update(activeSessionId, {
           title: activeSessionTitle,
-          nodes: stripArchivedNodeBody(nodes),
+          nodes: pickPersistedNodeData(nodes),
           edges,
         })
         .catch((error: unknown) => {

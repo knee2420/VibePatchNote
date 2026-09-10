@@ -14,6 +14,8 @@
 │   ├── architecture/rule.md
 │   ├── front/rule.md
 │   └── back/rule.md
+├── construct/              # 장기 구조를 실제 코드로 이행하는 구현 가이드
+│   └── rule.md
 └── [주제별_카테고리]/      # 예: agy-cli/
     └── [가이드_이름]/      # 예: 01_scripting_guide/
         ├── rule.md         # 가이드 본문 (해결책, 원칙, 규칙 설명)

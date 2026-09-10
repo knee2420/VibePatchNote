@@ -5,8 +5,10 @@
   "description": "FastAPI 백엔드 (Turborepo 워크스페이스 엔트리)",
   "scripts": {
     "dev": "venv\\Scripts\\python.exe -m uvicorn main:app --reload --port 8000",
-    "build": "venv\\Scripts\\python.exe -m compileall -q app main.py",
-    "lint": "venv\\Scripts\\python.exe -m compileall -q app main.py && venv\\Scripts\\python.exe -m ruff check app main.py && venv\\Scripts\\lint-imports.exe",
-    "test": "venv\\Scripts\\python.exe -m pytest"
+    "build": "venv\\Scripts\\python.exe -m compileall -q app migrations main.py",
+    "lint": "venv\\Scripts\\python.exe -m compileall -q app migrations main.py && venv\\Scripts\\python.exe -m ruff check app migrations main.py tests && venv\\Scripts\\lint-imports.exe",
+    "test": "venv\\Scripts\\python.exe -m pytest --basetemp .pytest-tmp",
+    "migrate": "venv\\Scripts\\python.exe -m migrations migrate",
+    "migrate:status": "venv\\Scripts\\python.exe -m migrations status"
   }
 }

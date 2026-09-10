@@ -13,6 +13,8 @@ export const textHandler: FileDropHandler = {
     type: REFERENCE_DOCUMENT_NODE_TYPE,
     position,
     data: {
+      // 노드는 포인터만 갖는다. 분석 결과는 docId 로 조회한다.
+      docId: uploadResult.docId,
       title: file.name,
       url: uploadResult.file_url,
       fileType: 'text',

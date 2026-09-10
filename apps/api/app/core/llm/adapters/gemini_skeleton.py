@@ -1,4 +1,4 @@
-"""Google GenAI / Vertex AI SDK 직결 어댑터 — **미연결 스켈레톤**.
+"""Google Generative Language API 직결 어댑터.
 
 CLI 를 거치지 않고 `google-genai` 파이썬 SDK 를 직접 호출하기 위한 자리.
 CLI 대비 이점은 프로세스 기동 비용 제거와 스트리밍 제어이고, 대신 인증·쿼터를
@@ -14,17 +14,30 @@ CLI 대비 이점은 프로세스 기동 비용 제거와 스트리밍 제어이
 """
 from __future__ import annotations
 
+import json
 import logging
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from scaffold_engine.harness import STATUS_FAILED, BaseLlmHarness, LlmExecutionResult
+import requests
+from scaffold_engine.harness import (
+    STATUS_ERROR,
+    STATUS_SUCCESS,
+    STATUS_TIMEOUT,
+    BaseLlmHarness,
+    LlmExecutionResult,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class GoogleGenAiHarness(BaseLlmHarness):
-    """Google GenAI Direct SDK 인터페이스 스켈레톤."""
+    """API key를 이용하는 Google Generative Language REST 어댑터.
+
+    SDK 의존성을 추가하지 않아도 되도록 기존 `requests`로 구현한다. 키는 절대 로그나
+    결과 텔레메트리에 기록하지 않는다.
+    """
 
     name = "google-genai"
 
@@ -49,10 +62,59 @@ class GoogleGenAiHarness(BaseLlmHarness):
         timeout: Optional[int] = None,
     ) -> LlmExecutionResult:
         target_model = model or self.model
-        logger.warning("[GoogleGenAiHarness] 미연결 스켈레톤 호출 (model=%s)", target_model)
+        if not self.api_key:
+            return LlmExecutionResult(
+                status=STATUS_ERROR,
+                model=target_model,
+                error="Google API key is not configured.",
+                telemetry_metadata={"provider": "google_api", "failure_code": "FALLBACK_NOT_CONFIGURED"},
+            )
+
+        generation_config: Dict[str, Any] = {"responseMimeType": "application/json"}
+        if json_schema:
+            generation_config["responseJsonSchema"] = json_schema
+        request_body = {
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            "generationConfig": generation_config,
+        }
+        started = time.monotonic()
+        try:
+            response = requests.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent",
+                params={"key": self.api_key},
+                json=request_body,
+                timeout=timeout or self.timeout_seconds,
+            )
+        except requests.Timeout:
+            return LlmExecutionResult(status=STATUS_TIMEOUT, model=target_model, error="Google API request timed out.", telemetry_metadata={"provider": "google_api", "failure_code": "PROVIDER_TIMEOUT"})
+        except requests.RequestException as exc:
+            return LlmExecutionResult(status=STATUS_ERROR, model=target_model, error=f"Google API network error: {exc}", telemetry_metadata={"provider": "google_api", "failure_code": "PROVIDER_UNAVAILABLE"})
+
+        duration = round(time.monotonic() - started, 3)
+        if not response.ok:
+            try:
+                message = response.json().get("error", {}).get("message", response.text)
+            except ValueError:
+                message = response.text
+            return LlmExecutionResult(status=STATUS_ERROR, model=target_model, duration_seconds=duration, error=f"Google API error ({response.status_code}): {message}", telemetry_metadata={"provider": "google_api", "http_status": response.status_code})
+
+        payload = response.json()
+        candidates = payload.get("candidates") or []
+        parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
+        text = "".join(str(part.get("text", "")) for part in parts)
+        try:
+            structured_output = json.loads(text) if json_schema and text else None
+        except json.JSONDecodeError:
+            structured_output = None
+        usage = payload.get("usageMetadata") or {}
         return LlmExecutionResult(
-            status=STATUS_FAILED,
+            status=STATUS_SUCCESS,
             model=target_model,
-            error="GoogleGenAiHarness is a skeleton adapter — direct SDK connection is not configured.",
-            telemetry_metadata={"provider": "google_api", "attached": False},
+            structured_output=structured_output,
+            raw_response=text,
+            duration_seconds=duration,
+            input_tokens=usage.get("promptTokenCount", 0),
+            output_tokens=usage.get("candidatesTokenCount", 0),
+            total_tokens=usage.get("totalTokenCount", 0),
+            telemetry_metadata={"provider": "google_api", "fallback_used": False},
         )
