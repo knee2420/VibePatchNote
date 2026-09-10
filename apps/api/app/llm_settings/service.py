@@ -16,8 +16,10 @@ from .ports import (
     AgyStatusLineSettings,
     AgyUsagePort,
     GoogleModelCatalogPort,
+    GoogleQuotaPort,
     RuntimePolicyRepository,
 )
+from .use_cases import ReadGoogleProjectUsageUseCase
 
 
 class LlmSettingsService:
@@ -30,6 +32,8 @@ class LlmSettingsService:
         agy_status_line: Optional[AgyStatusLineSettings] = None,
         agy_usage: Optional[AgyUsagePort] = None,
         google_models: Optional[GoogleModelCatalogPort] = None,
+        google_quotas: Optional[GoogleQuotaPort] = None,
+        google_usage: Optional[ReadGoogleProjectUsageUseCase] = None,
     ) -> None:
         self._credentials = credentials
         self._state = provider_state
@@ -38,6 +42,8 @@ class LlmSettingsService:
         self._agy_status_line = agy_status_line
         self._agy_usage = agy_usage
         self._google_models = google_models
+        self._google_quotas = google_quotas
+        self._google_usage = google_usage
         self._restore_runtime_policy()
 
     def list_providers(self) -> dict[str, object]:
@@ -97,6 +103,33 @@ class LlmSettingsService:
         if not self._google_models:
             raise RuntimeError("Google API 모델 조회를 사용할 수 없습니다.")
         return {"models": self._google_models.list_models()}
+
+    def google_quota_authorization_url(self) -> dict[str, object]:
+        if not self._google_quotas:
+            raise RuntimeError("Google 한도 연결을 사용할 수 없습니다.")
+        return {"authorizationUrl": self._google_quotas.authorization_url()}
+
+    def complete_google_quota_authorization(self, code: str, state: str) -> None:
+        if not self._google_quotas:
+            raise RuntimeError("Google 한도 연결을 사용할 수 없습니다.")
+        self._google_quotas.complete(code, state)
+
+    def google_quota_status(self) -> dict[str, object]:
+        if not self._google_quotas:
+            raise RuntimeError("Google 한도 연결을 사용할 수 없습니다.")
+        return self._google_quotas.status()
+
+    def google_project_usage(self) -> dict[str, object]:
+        """이 API 키로 쓸 수 있고 지금 제공 중인 모델의 프로젝트 한도."""
+        if not self._google_usage:
+            raise RuntimeError("Google 한도 연결을 사용할 수 없습니다.")
+        return self._google_usage.execute()
+
+    def configure_google_oauth_client_secret(self, client_secret: str) -> dict[str, object]:
+        if not self._google_quotas:
+            raise RuntimeError("Google 한도 연결을 사용할 수 없습니다.")
+        self._google_quotas.set_client_secret(client_secret)
+        return self._google_quotas.status()
 
     def configure_google_api(self, api_key: str) -> dict[str, object]:
         self._credentials.set_google_api_key(api_key)

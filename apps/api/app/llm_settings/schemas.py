@@ -92,6 +92,44 @@ class GoogleApiModelResponse(BaseModel):
     models: list[GoogleApiModel]
 
 
+class GoogleQuotaAuthorizationResponse(BaseModel):
+    authorization_url: str = Field(alias="authorizationUrl")
+
+
+class GoogleQuotaStatusResponse(BaseModel):
+    connected: bool
+    client_secret_configured: bool = Field(alias="clientSecretConfigured")
+    project_id: str = Field(alias="projectId")
+    project_number: str = Field(alias="projectNumber")
+    scope: str
+
+
+class GoogleModelUsage(BaseModel):
+    """이 API 키로 쓸 수 있고 프로젝트 tier 에서 제공 중인 모델 하나. 한도 -1 은 무제한."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str
+    label: str
+    category: str
+    rpm: int | None = None
+    tpm: int | None = None
+    rpd: int | None = None
+    recent_tokens: int = Field(default=0, alias="recentTokens")
+
+
+class GoogleProjectUsageResponse(BaseModel):
+    project_id: str = Field(alias="projectId")
+    checked_at: int = Field(alias="checkedAt")
+    tier: str
+    billing_enabled: bool | None = Field(default=None, alias="billingEnabled")
+    models: list[GoogleModelUsage]
+
+
+class GoogleOAuthClientSecretRequest(BaseModel):
+    client_secret: str = Field(alias="clientSecret", min_length=8)
+
+
 class RuntimePolicyUpdateRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     primary_model: str = Field(alias="primaryModel", min_length=1)

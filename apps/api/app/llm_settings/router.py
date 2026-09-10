@@ -2,14 +2,20 @@ from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import HTMLResponse
 
 from app.bootstrap.container import Container
 
+from .adapters import GoogleOAuthError
 from .schemas import (
     AgyStatusLineInstallResponse,
     AgyUsageResponse,
     GoogleApiKeyRequest,
     GoogleApiModelResponse,
+    GoogleOAuthClientSecretRequest,
+    GoogleProjectUsageResponse,
+    GoogleQuotaAuthorizationResponse,
+    GoogleQuotaStatusResponse,
     ProviderStatus,
     ProviderStatusResponse,
     RuntimeDashboardResponse,
@@ -57,6 +63,60 @@ async def get_agy_usage(service: LlmSettingsServiceDep):
 async def get_google_api_models(service: LlmSettingsServiceDep):
     try:
         return GoogleApiModelResponse(**service.google_api_models())
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post("/google-usage/oauth/authorization", response_model=GoogleQuotaAuthorizationResponse)
+@inject
+async def start_google_quota_authorization(service: LlmSettingsServiceDep):
+    try:
+        return GoogleQuotaAuthorizationResponse(**service.google_quota_authorization_url())
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.get("/google-usage/oauth/callback", response_class=HTMLResponse)
+@inject
+async def complete_google_quota_authorization(code: str, state: str, service: LlmSettingsServiceDep):
+    try:
+        service.complete_google_quota_authorization(code, state)
+    except GoogleOAuthError as exc:
+        return HTMLResponse(
+            f"<p>연결하지 못했습니다: {exc}</p><p>오류 코드: {exc.code}</p>",
+            status_code=400,
+        )
+    except RuntimeError:
+        return HTMLResponse("<p>연결하지 못했습니다. 앱에서 다시 연결해 주세요.</p>", status_code=400)
+    return HTMLResponse("<p>Google 연결이 완료되었습니다. 이 창을 닫고 앱으로 돌아가세요.</p><script>window.close()</script>")
+
+
+@router.get("/google-usage/status", response_model=GoogleQuotaStatusResponse)
+@inject
+async def get_google_quota_status(service: LlmSettingsServiceDep):
+    try:
+        return GoogleQuotaStatusResponse(**service.google_quota_status())
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.put("/google-usage/oauth/client-secret", response_model=GoogleQuotaStatusResponse)
+@inject
+async def configure_google_oauth_client_secret(
+    request: GoogleOAuthClientSecretRequest, service: LlmSettingsServiceDep
+):
+    try:
+        return GoogleQuotaStatusResponse(**service.configure_google_oauth_client_secret(request.client_secret))
+    except (RuntimeError, ValueError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/google-usage", response_model=GoogleProjectUsageResponse)
+@inject
+def get_google_project_usage(service: LlmSettingsServiceDep):
+    # Google API 여러 곳을 동기로 부른다(2~3초). 이벤트 루프를 막지 않도록 스레드풀에서 돈다.
+    try:
+        return GoogleProjectUsageResponse(**service.google_project_usage())
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 

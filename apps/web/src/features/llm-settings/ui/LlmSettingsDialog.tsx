@@ -4,7 +4,7 @@ import { Activity, CheckCircle2, Clock3, KeyRound, RefreshCw, XCircle } from 'lu
 import { llmConfigurationApi, type RuntimeDashboard } from '@/entities/llm-configuration';
 import { notifyLlmSettingsChanged, OPEN_LLM_SETTINGS_EVENT } from '@/shared/lib/llmSettingsEvent';
 
-import { AgyUsageDialog } from './AgyUsageDialog';
+import { ModelsUsageDialog } from './ModelsUsageDialog';
 
 /** 헤더 설정 진입점은 현재 계정의 실시간 모델 사용량만 보여준다. */
 export function LlmSettingsDialog() {
@@ -16,7 +16,7 @@ export function LlmSettingsDialog() {
     return () => window.removeEventListener(OPEN_LLM_SETTINGS_EVENT, openDialog);
   }, []);
 
-  return open ? <AgyUsageDialog onClose={() => setOpen(false)} /> : null;
+  return open ? <ModelsUsageDialog onClose={() => setOpen(false)} /> : null;
 }
 
 /** 상세 provider 정책 UI. 별도 설정 진입점으로 재배치하기 전까지 보존한다. */

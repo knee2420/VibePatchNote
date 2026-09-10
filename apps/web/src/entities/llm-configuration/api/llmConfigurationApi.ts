@@ -100,11 +100,48 @@ export interface GoogleApiModel {
   supportsGenerateContent: boolean;
 }
 
+export interface GoogleQuotaStatus {
+  connected: boolean;
+  clientSecretConfigured: boolean;
+  projectId: string;
+  projectNumber: string;
+  scope: string;
+}
+
+/** Google 프로젝트 한도 표의 모델 분류. 표시 문구는 화면이 정합니다. */
+export type GoogleModelCategory = 'text' | 'agent' | 'image' | 'speech' | 'live' | 'music' | 'transcription';
+
+/** 이 API 키로 쓸 수 있고, 프로젝트 tier 에서 제공 중인 모델 하나의 한도. -1 은 무제한. */
+export interface GoogleModelUsage {
+  id: string;
+  label: string;
+  category: GoogleModelCategory;
+  rpm: number | null;
+  tpm: number | null;
+  rpd: number | null;
+  /** 최근 24시간 토큰. 결제가 연결된 프로젝트에서만 채워지며 정렬에만 씁니다. */
+  recentTokens: number;
+}
+
+export interface GoogleProjectUsage {
+  projectId: string;
+  checkedAt: number;
+  /** 한도 값의 기준 tier. 결제가 연결되지 않은 프로젝트는 free 입니다. */
+  tier: 'free' | 'paid_tier_1';
+  /** Google 이 결제 연결 여부를 알려 주지 않으면 null. */
+  billingEnabled: boolean | null;
+  models: GoogleModelUsage[];
+}
+
 export const llmConfigurationApi = {
   list: () => httpClient.get<{ providers: LlmProvider[] }>('/api/v1/llm-settings/providers'),
   runtime: () => httpClient.get<RuntimeDashboard>('/api/v1/llm-settings/runtime'),
   usage: () => httpClient.get<AgyUsage>('/api/v1/llm-settings/runtime/usage'),
   googleModels: () => httpClient.get<{ models: GoogleApiModel[] }>('/api/v1/llm-settings/providers/google-api/models'),
+  googleQuotaStatus: () => httpClient.get<GoogleQuotaStatus>('/api/v1/llm-settings/google-usage/status'),
+  startGoogleQuotaAuthorization: () => httpClient.post<{ authorizationUrl: string }>('/api/v1/llm-settings/google-usage/oauth/authorization', {}),
+  saveGoogleOAuthClientSecret: (clientSecret: string) => httpClient.put<GoogleQuotaStatus>('/api/v1/llm-settings/google-usage/oauth/client-secret', { clientSecret }),
+  googleProjectUsage: () => httpClient.get<GoogleProjectUsage>('/api/v1/llm-settings/google-usage'),
   updatePolicy: (policy: RuntimeDashboard['policy']) => httpClient.put<RuntimeDashboard['policy']>('/api/v1/llm-settings/runtime/policy', policy),
   installAgyStatusLine: () => httpClient.post<{ settingsFile: string; installed: boolean }>('/api/v1/llm-settings/runtime/agy-statusline/install', {}),
   saveGoogleApiKey: (apiKey: string) =>

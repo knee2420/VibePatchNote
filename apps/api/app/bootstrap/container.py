@@ -20,7 +20,12 @@ from app.core.agent_runtime import (
     LocalLedger,
 )
 from app.core.config import settings
-from app.core.llm import AgyStatusSnapshot, LedgerExecutionRecorder, llm_manager
+from app.core.llm import (
+    AgyStatusSnapshot,
+    LedgerExecutionRecorder,
+    LlmManager,
+    RuntimePolicyHarness,
+)
 from app.core.llm.credentials import OsCredentialStore
 from app.core.llm.provider_state import ProviderStateStore
 from app.documents.adapters import (
@@ -43,10 +48,12 @@ from app.documents.use_cases import (
 from app.llm_settings.adapters import (
     AgyUsageReader,
     GoogleModelCatalog,
+    GoogleQuotaReader,
     LocalAgyStatusLineSettings,
     LocalRuntimePolicyRepository,
 )
 from app.llm_settings.service import LlmSettingsService
+from app.llm_settings.use_cases import ReadGoogleProjectUsageUseCase
 from app.scaffolds.adapters.local_scaffold_repository import LocalScaffoldRepository
 from app.scaffolds.service import ScaffoldArchiveService
 from app.workspaces.adapters.local_workspace_repository import LocalWorkspaceRepository
@@ -76,7 +83,25 @@ class Container(containers.DeclarativeContainer):
     )
     agy_usage_reader = providers.Singleton(AgyUsageReader, executable=providers.Object(settings.agent_cli_bin))
     google_model_catalog = providers.Singleton(GoogleModelCatalog, credentials=credential_store)
-    llm_harness = providers.Singleton(llm_manager.get_harness)
+    google_quota_reader = providers.Singleton(
+        GoogleQuotaReader,
+        client_id=providers.Object(settings.google_oauth_client_id),
+        project_id=providers.Object(settings.google_cloud_project_id),
+        project_number=providers.Object(settings.google_cloud_project_number),
+        redirect_uri=providers.Object(f"{settings.public_base_url}/api/v1/llm-settings/google-usage/oauth/callback"),
+    )
+    read_google_project_usage = providers.Factory(
+        ReadGoogleProjectUsageUseCase, quotas=google_quota_reader, models=google_model_catalog
+    )
+    llm_manager = providers.Singleton(
+        LlmManager, credentials=credential_store, provider_state=provider_state
+    )
+    # 에이전트·유스케이스가 모두 이 하네스 하나를 공유한다. 싱글턴 DocumentService 가
+    # 유스케이스를 붙들고 있으므로 구체 하네스를 넣으면 첫 해석 시점의 정책이 굳는다.
+    # 그래서 매 호출마다 LlmManager 에게서 현재 정책의 하네스를 받아 쓰는 하네스를 넣는다.
+    llm_harness = providers.Singleton(
+        RuntimePolicyHarness, resolve=llm_manager.provided.get_harness
+    )
     llm_settings_service = providers.Factory(
         LlmSettingsService,
         credentials=credential_store,
@@ -86,6 +111,8 @@ class Container(containers.DeclarativeContainer):
         agy_status_line=agy_status_line_settings,
         agy_usage=agy_usage_reader,
         google_models=google_model_catalog,
+        google_quotas=google_quota_reader,
+        google_usage=read_google_project_usage,
     )
 
     # --- [2 Runtime] · [B Agreement] · [A Observation] ---------------------

@@ -7,6 +7,8 @@
 3. 모델명만 받아 적합한 하네스를 돌려준다.
 
 프롬프트 내용이나 도메인 규칙은 이 계층이 알지 못하며, 알아서도 안 된다.
+
+인스턴스는 `bootstrap/container.py` 가 하나만 조립한다. 모듈 전역 인스턴스를 두지 않는다.
 """
 from __future__ import annotations
 
@@ -24,7 +26,7 @@ from scaffold_engine.harness import (
 
 from app.core.config import settings
 from app.core.llm.adapters import GoogleGenAiHarness, LocalGemmaHarness
-from app.core.llm.credentials import CredentialStore, OsCredentialStore
+from app.core.llm.credentials import CredentialStore
 from app.core.llm.fallback import FallbackLlmHarness
 from app.core.llm.provider_state import ProviderStateStore
 
@@ -34,12 +36,13 @@ logger = logging.getLogger(__name__)
 class LlmManager:
     """백엔드 중앙 LLM 진입점."""
 
-    def __init__(self, credentials: CredentialStore | None = None) -> None:
-        self._default_model: str = settings.agent_cli_model
-        self._default_timeout: int = settings.agent_cli_timeout_seconds
+    def __init__(self, credentials: CredentialStore, provider_state: ProviderStateStore) -> None:
+        # 자격 증명과 차단 상태는 설정 화면(LlmSettingsService)과 같은 인스턴스여야 한다.
+        # ProviderStateStore 는 파일 내용을 메모리에 캐시하므로, 따로 만들면 두 캐시가
+        # 갈라져 한쪽의 차단 기록을 다른 쪽이 보지 못하고 서로의 쓰기를 덮어쓴다.
         self._executable: str = settings.agent_cli_bin
-        self._credentials = credentials or OsCredentialStore()
-        self._provider_state = ProviderStateStore(settings.storage.provider_state_file)
+        self._credentials = credentials
+        self._provider_state = provider_state
         self._register_providers()
 
     # --- 프로바이더 등록 -------------------------------------------------
@@ -84,7 +87,9 @@ class LlmManager:
         executable: Optional[str] = None,
     ) -> BaseLlmHarness:
         """모델 프로필에 맞는 하네스를 돌려준다."""
-        # 설정 UI가 갱신한 프로세스 런타임 정책을 다음 실행부터 즉시 사용한다.
+        # 인자를 비우면 호출 시점의 런타임 정책(설정 UI 가 갱신한 settings)을 읽는다.
+        # 돌려준 하네스는 그 시점의 정책으로 굳어 있으므로 오래 붙들고 쓰면 안 된다.
+        # 장기 주입용은 매 호출마다 여기를 다시 부르는 `RuntimePolicyHarness` 다.
         target_model = model or settings.agent_cli_model
         timeout_seconds = timeout or settings.agent_cli_timeout_seconds
 
@@ -148,7 +153,3 @@ class LlmManager:
         """텍스트 실행 단일 창구."""
         harness = self.get_harness(model=model, effort=effort, timeout=timeout)
         return harness.run_text(prompt, conversation_id=conversation_id)
-
-
-# 싱글톤 전역 인스턴스
-llm_manager = LlmManager()

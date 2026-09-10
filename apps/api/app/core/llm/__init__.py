@@ -25,7 +25,8 @@ from scaffold_engine.harness import (
 )
 
 from app.core.llm.agy_status_snapshot import AgyStatusSnapshot
-from app.core.llm.manager import LlmManager, llm_manager
+from app.core.llm.manager import LlmManager
+from app.core.llm.policy_harness import RuntimePolicyHarness
 from app.core.llm.ports import ExecutionRecorder, ModelExecutor
 from app.core.llm.telemetry import LedgerExecutionRecorder, cost_of
 from app.core.llm.tracer import (
@@ -56,7 +57,7 @@ __all__ = [
     "parse_json_payload",
     # 호스트 고유
     "LlmManager",
-    "llm_manager",
+    "RuntimePolicyHarness",
     "AgyStatusSnapshot",
     # 계약
     "ModelExecutor",

@@ -95,7 +95,12 @@ class FakeWorkspaceService:
 
 
 def test_use_cases_share_one_harness_with_engine_runner() -> None:
-    """아웃라인 유스케이스와 엔진 JSON 실행기는 같은 주입 하네스를 사용해야 한다."""
+    """아웃라인 유스케이스와 엔진 JSON 실행기는 같은 주입 하네스를 사용해야 한다.
+
+    공유는 의도된 것이다. 공유되는 하네스(RuntimePolicyHarness)는 매 호출마다 현재
+    런타임 정책을 읽으므로, 공유해도 모델이 굳지 않고 정책 변경이 모든 소비자에게
+    한 번에 닿는다. 그 동작은 test_llm_runtime_policy.py 가 확인한다.
+    """
     fake_harness = FakeHarness()
     fake_source = FakeDocumentSourceRepository()
     fake_scanner = FakeSegmentScanner()

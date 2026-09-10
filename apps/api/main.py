@@ -102,7 +102,8 @@ async def logging_middleware(request: Request, call_next):
     import time
     start_time = time.time()
     method = request.method
-    url = str(request.url)
+    # OAuth code, reset token 등 쿼리 문자열에는 비밀이 들어갈 수 있으므로 기록하지 않는다.
+    url = request.url.path
     logger.info("[HTTP IN] %s %s", method, url)
     try:
         response = await call_next(request)
