@@ -59,6 +59,9 @@ export function useDocumentOutline({
   const [outlineProgressMessage, setOutlineProgressMessage] = useState<string>('');
   const [isOutlineOpen, setIsOutlineOpen] = useState(initialIsOpen);
   const [outlines, setOutlines] = useState<DocumentOutlineNode[]>([]);
+  // 캔버스 노드의 완료 상태는 실행 중 표시를 위한 보조 정보다. 아웃라인 존재
+  // 여부의 정본은 문서 아티팩트의 HEAD이며, 아래 목록 조회가 이를 채운다.
+  const [hasAdoptedOutline, setHasAdoptedOutline] = useState(false);
   const [elements, setElements] = useState<DocumentElementItem[]>([]);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [outlineError, setOutlineError] = useState<AnalysisError | undefined>(initialError);
@@ -93,11 +96,32 @@ export function useDocumentOutline({
       const adopted = await referenceDocumentApi.getOutline(docId);
       setOutlines(adopted.outlines || []);
       setElements(adopted.elements || []);
+      setHasAdoptedOutline((adopted.outlines || []).length > 0);
     } catch (err) {
       // 404 는 "아직 분석하지 않았다"는 정상 상태다. 에러로 표시하지 않는다.
       if (err instanceof HttpError && err.status === 404) return;
       console.error('[useDocumentOutline] 채택본 조회 실패:', err);
     }
+  }, [docId]);
+
+  // 본문을 매 카드마다 미리 가져오면 캔버스 초기 렌더링이 무거워진다. 대신
+  // 가벼운 아티팩트 목록으로 패널을 열 수 있는지만 먼저 판단한다.
+  useEffect(() => {
+    if (!docId) return;
+
+    let isCancelled = false;
+    void referenceDocumentApi
+      .getArtifacts(docId)
+      .then(({ artifacts }) => {
+        if (!isCancelled) setHasAdoptedOutline(Boolean(artifacts.outline?.head));
+      })
+      .catch((err: unknown) => {
+        if (!isCancelled) console.error('[useDocumentOutline] 아티팩트 목록 조회 실패:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [docId]);
 
   // 패널이 열려 있는 채로 복원됐다면 본문이 없으므로 한 번 읽어 온다.
@@ -112,6 +136,7 @@ export function useDocumentOutline({
     (response: ExtractOutlineResponse) => {
       setOutlines(response.outlines || []);
       setElements(response.elements || []);
+      setHasAdoptedOutline((response.outlines || []).length > 0);
       setOutlineError(undefined);
       setRunStatus('completed');
       patchNode({
@@ -239,7 +264,7 @@ export function useDocumentOutline({
     isOutlineOpen,
     outlines,
     elements,
-    hasOutline: outlines.length > 0,
+    hasOutline: hasAdoptedOutline || outlines.length > 0,
     selectedElementId,
     outlineError,
     runStatus,

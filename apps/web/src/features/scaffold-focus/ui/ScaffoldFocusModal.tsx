@@ -13,7 +13,7 @@ import { ScaffoldCanvasEditor } from '@vibe/tiptap-scaffold';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { type ScaffoldDocumentData } from '@/entities/scaffold-document';
-import { useScaffoldFocusStore } from '@/shared/model';
+import { useScaffoldFocusStore } from '@/entities/scaffold-document';
 
 /**
  * ScaffoldFocusModal (FSD Feature / Modal UI)

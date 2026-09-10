@@ -41,7 +41,8 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
         const adopted = await referenceDocumentApi.getSegments(docId);
         setSegments(adopted.segments || []);
       } catch (err) {
-        // 404 는 "아직 스캔하지 않았다"는 정상 상태다.
+        // 현재 API는 미생성 세그먼트를 빈 목록으로 돌려준다. 404는 문서가
+        // 삭제되는 등의 경쟁 상태에서만 가능하므로 조용히 무시한다.
         if (err instanceof HttpError && err.status === 404) return;
         console.error('[useDocumentScan] 채택본 조회 실패:', err);
       }

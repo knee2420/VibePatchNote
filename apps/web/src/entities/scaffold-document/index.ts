@@ -16,3 +16,4 @@ export {
   scaffoldArchiveApi,
   type ScaffoldArchiveDetail,
 } from './api/scaffoldArchiveApi';
+export { useScaffoldFocusStore } from './model/useScaffoldFocusStore';

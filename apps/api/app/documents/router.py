@@ -117,13 +117,11 @@ async def get_adopted_outline(doc_id: str, service: DocumentServiceDep):
 @router.get("/{doc_id}/segments", response_model=ScanDocumentResponse)
 @inject
 async def get_adopted_segments(doc_id: str, service: DocumentServiceDep):
-    """채택된 세그먼트를 읽습니다. LLM 을 호출하지 않습니다."""
+    """채택된 세그먼트를 읽습니다. 아직 없으면 빈 목록을 돌려줍니다."""
     try:
         result = service.load_adopted_segments(doc_id)
     except (ValueError, FileNotFoundError, OSError) as exc:
         raise _document_http_error(exc) from exc
-    if result is None:
-        raise HTTPException(status_code=404, detail="No adopted segment artifact")
     return ScanDocumentResponse(**result)
 
 

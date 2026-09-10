@@ -1,2 +1,2 @@
 export { ScaffoldFocusModal } from './ui/ScaffoldFocusModal';
-export { useScaffoldFocusStore } from '@/shared/model';
+export { useScaffoldFocusStore } from '@/entities/scaffold-document';

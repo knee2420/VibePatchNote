@@ -78,8 +78,6 @@ export function useWorkspaceSessions({ enabled }: UseWorkspaceSessionsOptions) {
       try {
         await workspaceApi.update(session.id, {
           title: nextTitle,
-          nodes: session.nodes,
-          edges: session.edges,
         });
         setSessions((prev) =>
           prev.map((s) => (s.id === session.id ? { ...s, title: nextTitle } : s))

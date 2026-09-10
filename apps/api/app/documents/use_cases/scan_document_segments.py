@@ -88,7 +88,16 @@ class ScanDocumentSegmentsUseCase:
             raise FileNotFoundError(f"Document not found: {doc_id}")
         adopted = self._artifacts.load_head(doc_id, KIND)
         if adopted is None:
-            return None
+            # 세그먼트는 문서의 선택적 파생물이다. 문서가 존재하는 한 "아직
+            # 분석하지 않음"은 오류가 아니라 빈 컬렉션이며, 클라이언트가 404를
+            # 예외 흐름으로 처리할 이유가 없다.
+            return {
+                "status": "completed",
+                "docId": doc_id,
+                "document_title": meta.original_name,
+                "total_segments": 0,
+                "segments": [],
+            }
         segments = adopted.get(SEGMENTS_FILE) or []
         return {
             "status": "completed",

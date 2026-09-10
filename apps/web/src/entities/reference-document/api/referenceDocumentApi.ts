@@ -118,7 +118,7 @@ export const referenceDocumentApi = {
   getOutline: (docId: string) =>
     httpClient.get<ExtractOutlineResponse>(`${BASE_PATH}/${docId}/outline`),
 
-  /** 채택된 세그먼트를 읽습니다. 없으면 404. */
+  /** 채택된 세그먼트를 읽습니다. 아직 없으면 빈 목록을 받습니다. */
   getSegments: (docId: string) =>
     httpClient.get<ScanDocumentResponse>(`${BASE_PATH}/${docId}/segments`),
 

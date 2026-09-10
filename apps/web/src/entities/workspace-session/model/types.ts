@@ -17,7 +17,9 @@ export interface WorkspaceSessionCreatePayload {
 }
 
 export interface WorkspaceSessionUpdatePayload {
-  title: string;
-  nodes: Node[];
-  edges: Edge[];
+  /** API 는 부분 갱신을 지원한다. 그래프와 제목을 같은 요청에 묶지 않는다. */
+  title?: string;
+  description?: string;
+  nodes?: Node[];
+  edges?: Edge[];
 }

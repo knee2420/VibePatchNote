@@ -8,8 +8,10 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 이 스킬은 사용자가 프론트엔드(`apps/web`) 기능 구현이나 코드 작성을 지시할 때 자동으로 발동하거나 명시적으로 호출(`develop_50_front_generator`)됩니다. 
 에이전트는 코드를 작성하기 전과 후에 반드시 아래의 **체크리스트**를 스스로 점검하고, 준수되었음을 사용자에게 보고해야 합니다.
 
-> ⛔ **선행 조건:** 이 체크리스트는 [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md)의 요약 점검표입니다.
-> 코드를 쓰기 전 해당 문서의 **§3 배치 결정표**를 먼저 확인하십시오. 충돌 시 `00-core`가 우선합니다.
+> ⛔ **선행 조건:** 이 체크리스트는 요약 점검표입니다. 충돌 시 아래 정본이 우선합니다.
+> 1. [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md) — 헌법 (**§3.1 배치 결정표**를 먼저 확인)
+> 2. [`.agents/rules/00-core/layers.md`](../../rules/00-core/layers.md) — 레이어별 ✅/❌ 코드 대조
+> 3. [`.agents/rules/60-data/rule.md`](../../rules/60-data/rule.md) — **노드에 무엇을 저장할 수 있는가**
 
 ## 📋 [Frontend Development Checklist]
 
@@ -22,6 +24,38 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 - [ ] **공용 패키지(packages/*) 참조:** 여러 앱에서 재사용되는 모듈은 `@vibe/*` 워크스페이스 패키지로 추출되어 FSD 계층에서 라이브러리처럼 참조되고 있는가?
 - [ ] **통신 경로 단일화:** 백엔드 호출을 `shared/api`의 `httpClient`로만 했는가? `fetch()` 직접 호출이나 `http://localhost:8000` 하드코딩이 없는가? (환경 값은 `shared/config`의 `env`)
 - [ ] **로직/뷰 분리:** 통신·상태 로직을 JSX가 아니라 `features/*/model/use*.ts` 훅에 두었는가? 훅 안에서 `alert`/`confirm`/`prompt`를 직접 호출하지 않고 콜백으로 UI에 위임했는가?
+
+### 1-2. 노드·세션 데이터 — 포인터만 저장 ⛔
+
+> 캔버스 노드는 다른 애그리거트(문서·아티팩트·스캐폴드)를 **식별자로만** 참조합니다.
+> 이 규칙을 어겨 세션 파일이 노드 9개에 349KB 까지 자란 적이 있습니다
+> ([V-11](../../rules/00-core/examples/violation-catalog.md)).
+
+- [ ] **파생물 사본 금지:** 노드 `data` 에 `outlines` / `elements` / `segments` /
+      `htmlContent` / `markdownContent` / `slots` / `archive` 를 넣지 않았는가?
+      정본은 백엔드 아티팩트 저장소이고, 노드는 `docId` · `scaffoldId` 포인터만 갖습니다.
+- [ ] **상태는 보존:** 대신 `outlineStatus` · `outlineError` · `outlineTraceId` ·
+      `lastSuccessfulOutlineAt` 처럼 **마지막 성공과 방금 실패를 구분할 수 있는 상태**는 남겼는가?
+- [ ] **화이트리스트 갱신:** 새 노드 타입을 만들었다면 `shared/lib/canvasPersistence.ts` 의
+      `PERSISTED_NODE_DATA_FIELDS` 에 **남길 필드 목록**을 추가했는가?
+      (블랙리스트로 두면 필드가 늘 때마다 샙니다)
+- [ ] **읽기와 실행 분리:** 패널을 여는 것만으로 LLM 분석이 다시 돌지 않는가?
+      채택본 조회는 `GET /documents/{docId}/outline`(LLM 미개입)이고,
+      분석 실행은 `POST /documents/outline/runs` 입니다.
+
+> ⚠️ React Flow 의 `Node<T extends Record<string, unknown>>` 제약 때문에 **타입 시스템이
+> 이 규칙을 잡아 주지 못합니다.** 인덱스 시그니처가 모든 필드를 통과시킵니다.
+> 직접 확인하십시오.
+
+### 1-3. Agent 실행 상태를 다룬다면
+
+- [ ] **보류를 실패로 그리지 않았는가:** `waiting_for_configuration` /
+      `waiting_for_approval` 은 실패가 아니라 보류입니다. 같게 그리면 사용자는
+      풀리지 않는 재시도만 반복합니다.
+- [ ] **폴링 종료 조건:** `shared/api` 의 `isSettled` 를 썼는가?
+      "종료"가 아니라 **"더 이상 저절로 바뀌지 않는 상태"** 에서 멈춰야 합니다.
+- [ ] **프로토콜은 `shared/api`:** 실행 조회·재개·승인은 `agentRunClient` / `followAgentRun`
+      을 쓰고, `entities/agent-run` 을 다른 엔티티에서 import 하지 않았는가?
 
 ### 2. AHA (Avoid Hasty Abstractions) 원칙 준수
 - [ ] **복제(Duplication) 허용:** 코드가 비슷해 보인다고 섣불리 `shared/`나 공통 Hook으로 추출하지 않았는가?
@@ -56,10 +90,12 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 - [ ] **기설치 사양 최우선 고려:** 완전히 새로운 코드를 밑바닥부터 작성하기 전에, 최대한 이미 설치된 사양과 기존 환경을 우선적으로 고려했는가?
 
 ### 10. 무결성 검증 (완료 게이트)
-- [ ] **게이트 실행:** 루트에서 `pnpm lint && pnpm typecheck && pnpm build`를 **실제로 실행**하여 통과를 확인했는가?
+- [ ] **게이트 실행:** 루트에서 `pnpm lint && pnpm typecheck && pnpm build && pnpm --filter @vibe/api test`를 **실제로 실행**하여 통과를 확인했는가?
 - [ ] **린트 에러 0:** `pnpm lint`의 에러가 0인가? (FSD 레이어 위반이 여기서 에러로 잡힙니다. 경고는 허용하되 새로 늘리지 않는다)
 - [ ] **우회 금지:** 경계 규칙을 `oxlint-disable` / `eslint-disable` 주석으로 끄지 않았는가? (린트 에러는 설계가 틀렸다는 신호입니다)
 - [ ] **동작 확인:** 동작을 바꿨다면 실제로 실행해서 확인했는가? (빌드 통과 ≠ 동작 확인)
+      화면 렌더링처럼 터미널로 확인이 불가능한 변경에 한해 브라우저를 씁니다 —
+      조건은 [`30-workflow/workflow-principles.md`](../../rules/30-workflow/workflow-principles.md) §2.
 
 ---
 
@@ -68,6 +104,7 @@ description: "사용자가 프론트엔드(React/Vite) 기능 개발이나 리�
 
 > "지시하신 프론트엔드 구현을 완료했습니다. `develop_50_front_generator` 체크리스트 점검 결과:
 > 1. FSD 레이어 (통과/위반 사유)
+> 1-2. 노드 데이터 포인터 규칙 (통과/위반 사유)
 > 2. AHA 원칙 (통과/위반 사유)
 > 3. Tech Stack (통과/위반 사유)
 > 4. 코드 컨벤션 (통과/위반 사유)

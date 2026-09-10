@@ -16,7 +16,7 @@ const AUTO_SAVE_DEBOUNCE_MS = 2000;
  * 2. 복원 완료 이후의 변경분을 디바운스 자동 저장
  */
 export function useSessionSync() {
-  const [isRestored, setIsRestored] = useState(false);
+  const [restoredSessionId, setRestoredSessionId] = useState<string | null>(null);
 
   const nodes = useCanvasBoardStore((s) => s.nodes);
   const edges = useCanvasBoardStore((s) => s.edges);
@@ -30,19 +30,17 @@ export function useSessionSync() {
 
     async function restoreSession() {
       if (!activeSessionId) {
-        setIsRestored(true);
         return;
       }
 
       try {
         const session = await workspaceApi.get(activeSessionId);
-        if (!isCancelled && session.nodes?.length) {
+        if (!isCancelled) {
           loadSession(session.id, session.title, session.nodes, session.edges ?? []);
+          setRestoredSessionId(activeSessionId);
         }
       } catch (error) {
         console.error('Failed to restore session from backend:', error);
-      } finally {
-        if (!isCancelled) setIsRestored(true);
       }
     }
 
@@ -54,7 +52,7 @@ export function useSessionSync() {
   }, [activeSessionId, loadSession]);
 
   useEffect(() => {
-    if (!isRestored || !activeSessionId) return;
+    if (restoredSessionId !== activeSessionId || !activeSessionId) return;
 
     const timeoutId = setTimeout(() => {
       workspaceApi
@@ -69,7 +67,7 @@ export function useSessionSync() {
     }, AUTO_SAVE_DEBOUNCE_MS);
 
     return () => clearTimeout(timeoutId);
-  }, [nodes, edges, activeSessionId, activeSessionTitle, isRestored]);
+  }, [nodes, edges, activeSessionId, activeSessionTitle, restoredSessionId]);
 
-  return { isRestored };
+  return { isRestored: restoredSessionId === activeSessionId };
 }

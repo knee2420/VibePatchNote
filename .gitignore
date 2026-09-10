@@ -1,5 +1,7 @@
 # Dependencies
 node_modules/
+.pnpm-store/
+*.egg-info/
 venv/
 __pycache__/
 

@@ -9,7 +9,13 @@ description: "사용자가 특정 서비스(옵시디언, 헵타베이스, 피�
 
 에이전트는 **절대로 바로 코드 작성에 착수하지 않으며**, 반드시 **[1단계: Reference UI 사전 조사 및 기능 명세서 리스트업]**을 선행하여 채팅창에 보고하고 얼라인한 뒤 개발을 진행해야 합니다.
 
-> ⛔ **선행 조건:** Step 2의 체크리스트는 [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md)의 요약 점검표입니다. 충돌 시 `00-core`가 우선합니다.
+> ⛔ **선행 조건:** Step 2의 체크리스트는 요약 점검표입니다. 충돌 시 아래 정본이 우선합니다.
+> 1. [`.agents/rules/00-core/rule.md`](../../rules/00-core/rule.md) — 헌법
+> 2. [`.agents/rules/00-core/layers.md`](../../rules/00-core/layers.md) — 레이어별 ✅/❌ 코드 대조
+> 3. [`.agents/rules/60-data/rule.md`](../../rules/60-data/rule.md) — 노드에 무엇을 저장할 수 있는가
+>
+> 레퍼런스 UI 를 그대로 옮기더라도 **데이터 배치 규칙은 예외 없이 적용됩니다.**
+> 원본 서비스가 상태를 어디에 두든, 우리 노드는 포인터만 갖습니다.
 
 ---
 
@@ -92,11 +98,21 @@ flowchart TD
 - [ ] **기존 라이브러리 및 스펙 우선 확인:** 기능을 새롭게 처음부터 구현하려고 하지 말고, 기존에 이미 설치된 패키지나 라이브러리, 그리고 기존에 있는 구성으로부터 스펙 명세서와 기준 설명서를 먼저 확인했는가?
 - [ ] **기설치 사양 최우선 고려:** 완전히 새로운 코드를 밑바닥부터 작성하기 전에, 최대한 이미 설치된 사양(React Flow 내장 기능, Lucide 아이콘 등)과 기존 환경을 우선적으로 고려했는가?
 
-### 10. 무결성 검증 (완료 게이트)
-- [ ] **게이트 실행:** 루트에서 `pnpm lint && pnpm typecheck && pnpm build`를 **실제로 실행**하여 통과를 확인했는가?
+### 10. 노드·세션 데이터 — 포인터만 저장 ⛔
+- [ ] **파생물 사본 금지:** 새 노드 타입이나 노드 데이터를 추가했다면, 다른 애그리거트의
+      내용(분석 결과·본문)을 값으로 복사하지 않았는가? 정본은 백엔드이고 노드는
+      `docId` · `scaffoldId` 포인터만 갖습니다.
+      ([V-11](../../rules/00-core/examples/violation-catalog.md) · [`60-data`](../../rules/60-data/rule.md))
+- [ ] **화이트리스트 갱신:** `shared/lib/canvasPersistence.ts` 의
+      `PERSISTED_NODE_DATA_FIELDS` 에 **남길 필드 목록**을 추가했는가?
+      (React Flow 의 인덱스 시그니처 때문에 타입 시스템은 이것을 잡아 주지 못합니다)
+
+### 11. 무결성 검증 (완료 게이트)
+- [ ] **게이트 실행:** 루트에서 `pnpm lint && pnpm typecheck && pnpm build && pnpm --filter @vibe/api test`를 **실제로 실행**하여 통과를 확인했는가?
 - [ ] **린트 에러 0:** `pnpm lint`의 에러가 0인가? (FSD 레이어 위반이 여기서 에러로 잡힙니다)
 - [ ] **우회 금지:** 경계 규칙을 `oxlint-disable` / `eslint-disable` 주석으로 끄지 않았는가?
 - [ ] **동작 확인:** 레퍼런스대로 실제 화면에서 동작하는지 확인했는가? (빌드 통과 ≠ 동작 확인)
+      브라우저 사용 조건은 [`30-workflow/workflow-principles.md`](../../rules/30-workflow/workflow-principles.md) §2 를 따릅니다.
 
 ---
 

@@ -12,24 +12,46 @@ from __future__ import annotations
 import json
 import logging
 import os
+import tempfile
+import threading
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 logger = logging.getLogger(__name__)
 
+_path_locks_guard = threading.Lock()
+_path_locks: dict[Path, threading.Lock] = {}
+
+
+def _lock_for(path: Path) -> threading.Lock:
+    """같은 프로세스에서 같은 파일을 교체하는 작업을 직렬화한다."""
+    key = path.resolve()
+    with _path_locks_guard:
+        return _path_locks.setdefault(key, threading.Lock())
+
 
 def write_json(path: Path, payload: Any) -> None:
     """JSON 을 원자적으로 기록한다 (임시 파일 → 교체)."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f"{path.name}.{os.getpid()}.tmp")
-    try:
-        temporary.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    lock = _lock_for(path)
+
+    # PID만으로 이름을 만들면 같은 프로세스의 두 스레드가 같은 임시 파일을
+    # 덮어쓴다. 대상과 같은 디렉터리에 유일한 파일을 만들어 replace 원자성을
+    # 유지하면서 작성자끼리 충돌하지 않게 한다.
+    with lock:
+        fd, temporary_name = tempfile.mkstemp(
+            prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
         )
-        temporary.replace(path)
-    finally:
-        if temporary.exists():
-            temporary.unlink(missing_ok=True)
+        temporary = Path(temporary_name)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump(payload, handle, ensure_ascii=False, indent=2)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+        finally:
+            if temporary.exists():
+                temporary.unlink(missing_ok=True)
 
 
 def read_json(path: Path, default: Any = None) -> Any:

@@ -1,8 +1,6 @@
 import { useCallback } from 'react';
 
-import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { useWorkspaceSessionStore } from '@/entities/workspace-session';
-import { pickPersistedNodeData } from '@/shared/lib';
 
 import { workspaceApi } from '../api/workspaceApi';
 
@@ -23,12 +21,9 @@ export function useActiveSessionTitle() {
       setActiveSessionTitle(trimmed);
       if (!activeSessionId) return;
 
-      const { nodes, edges } = useCanvasBoardStore.getState();
       try {
         await workspaceApi.update(activeSessionId, {
           title: trimmed,
-          nodes: pickPersistedNodeData(nodes),
-          edges,
         });
       } catch (error) {
         console.error('Failed to update title:', error);

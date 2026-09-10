@@ -14,9 +14,10 @@ import {
 
 import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
 
-import { useScaffoldFocusStore, useSyncMappingStore } from '@/shared/model';
+import { useSyncMappingStore } from '@/shared/model';
 
 import { useScaffoldArchive, type ScaffoldArchiveSyncState } from '../model/useScaffoldArchive';
+import { useScaffoldFocusStore } from '../model/useScaffoldFocusStore';
 import { type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
 
 /**

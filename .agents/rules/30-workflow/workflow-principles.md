@@ -40,19 +40,24 @@ pnpm lint && pnpm typecheck && pnpm build && pnpm --filter @vibe/api test
 
 ### 3. 주력 모델 기준 준수
 
-모델 이름은 **두 네임스페이스**로 갈립니다. 섞지 마십시오.
+모델 이름의 **정본은 `packages/scaffold-engine/scaffold_engine/harness/registry.py`** 입니다.
+이 문서에 목록을 복사해 두면 반드시 어긋나므로, 아래는 "어떤 갈래가 있는가"만 적습니다.
 
-| 네임스페이스 | 정본 | 현재 값 |
+| provider | 무엇 | 현재 등록된 것 |
 | --- | --- | --- |
-| **에이전트 CLI** (`agy`) | `packages/scaffold-engine/scaffold_engine/harness/registry.py` | `gemini-3.8-flash-{low,medium,high}`<br>`gemini-3.7-flash-*` · `gemini-3.6-flash-*`<br>`gemini-3.1-pro-*` · `gemma4-31b` |
-| **Google API 직결** (폴백) | Google 공개 모델명 | `gemini-2.5-flash` |
+| `agy_cli` | Antigravity CLI 로 실행 | `gemini-3.8/3.7/3.6-flash-{low,medium,high}`<br>`gemini-3.1-pro-{low,high}`<br>`claude-opus-4-6-thinking` · `claude-sonnet-4-6`<br>`gpt-oss-120b-medium` |
+| `local_serving` | 로컬 서빙 | `gemma4-31b` |
+| `google_api` | Google 공개 API 직결 (폴백) | 레지스트리 밖. Google 모델명을 그대로 씀 |
 
-- 기본값은 `apps/api/app/core/config.py` 의 `_DEFAULT_AGENT_CLI_MODEL`(현재 `gemini-3.8-flash-low`)과
-  `_DEFAULT_GOOGLE_API_MODEL`(현재 `gemini-2.5-flash`)입니다.
+- 기본값은 `apps/api/app/core/config.py` 에 있습니다 —
+  `_DEFAULT_AGENT_CLI_MODEL`(현재 `gemini-3.8-flash-low`),
+  `_DEFAULT_GOOGLE_API_MODEL`(현재 `gemini-2.5-flash`).
 - **레지스트리에 없는 CLI 모델명을 코드나 문서에 쓰지 마십시오.** 실행 시점에 실패합니다.
   새 모델을 쓰려면 먼저 `registry.py` 에 `ModelSpec` 을 등록합니다.
-- Google API 직결 모델은 CLI 레지스트리와 무관합니다. 두 목록을 한 문장에 섞어 적으면
-  "구형 모델 금지" 같은 규칙이 폴백 경로를 잘못 막습니다.
+  현재 등록된 것을 확인하려면 `MODEL_REGISTRY` 를 읽으십시오.
+- **Google API 직결 모델은 레지스트리와 무관한 별도 네임스페이스입니다.**
+  두 목록을 한 문장으로 묶어 "구형 모델 금지" 같은 규칙을 쓰면 폴백 경로를 잘못 막습니다.
+  (실제로 이전 규칙이 `gemini-2.5` 를 금지하면서 폴백 기본값과 충돌했습니다.)
 
 > 📌 미결: Google 직결 폴백을 `gemini-2.5-flash` 로 유지할지, 상위 모델로 올릴지는
 > 비용·품질 판단이 필요합니다. 바꾸려면 `_DEFAULT_GOOGLE_API_MODEL` 하나만 고치면 됩니다.

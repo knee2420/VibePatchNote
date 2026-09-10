@@ -20,7 +20,7 @@ from scaffold_engine.assemble.html import HtmlAssembler
 from scaffold_engine.classify.agent import SlotClassifier
 from scaffold_engine.core.interfaces import LlmHarness
 from scaffold_engine.extract.geometry import PdfGeometryExtractor
-from scaffold_engine.harness.agy_client import DEFAULT_MODEL, AgyHarness
+from scaffold_engine.harness import DEFAULT_MODEL_NAME, HarnessFactory
 from scaffold_engine.score.fidelity import score_page
 from scaffold_engine.types import ScaffoldExtractResult, ScaffoldMeta
 
@@ -36,11 +36,13 @@ class ScaffoldPipeline:
 
     def __init__(
         self,
-        model: str = DEFAULT_MODEL,
+        model: str = DEFAULT_MODEL_NAME,
         harness: Optional[LlmHarness] = None,
         timeout_seconds: int = 75,
     ) -> None:
-        self.harness = harness or AgyHarness(model=model, timeout_seconds=timeout_seconds)
+        self.harness = harness or HarnessFactory.create(
+            model=model, timeout_seconds=timeout_seconds
+        )
         self.extractor = PdfGeometryExtractor()
         self.classifier = SlotClassifier(self.harness)
         self.assembler = HtmlAssembler()
