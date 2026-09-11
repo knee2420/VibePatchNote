@@ -244,8 +244,17 @@ class ExtractOutlineUseCase:
                     }
 
                     # [사전 스팬 2] 하네스 런타임 정책 및 쿼터 가용성 검사
-                    harness_model = getattr(self._harness, "model", "gemini-3.5-flash-lite")
-                    harness_provider = getattr(self._harness, "_primary_provider", "google_api")
+                    actual_harness = getattr(self._harness, "_resolve", lambda: self._harness)()
+                    harness_model = getattr(actual_harness, "model", getattr(self._harness, "model", "gemini-3.5-flash-lite"))
+                    harness_provider = getattr(
+                        actual_harness,
+                        "provider",
+                        getattr(
+                            actual_harness,
+                            "_primary_provider",
+                            getattr(actual_harness, "name", "agy_cli" if "low" in str(harness_model).lower() else "google_api"),
+                        ),
+                    )
                     route_span = {
                         "span_id": f"span-route-{run_id[-6:]}",
                         "trace_id": run_id,
@@ -259,7 +268,7 @@ class ExtractOutlineUseCase:
                         "description": "CLI 가용성(Quota)과 공급자 차단 상태를 점검하고 최적의 실행 엔진을 배정합니다.",
                         "summary_pill": f"쿼터 정상 · {harness_model} 엔진 배정",
                         "data_in": f"Policy: Primary={harness_provider}",
-                        "data_out": f"Target Engine: {self._harness.__class__.__name__} ({harness_model})",
+                        "data_out": f"Target Engine: {actual_harness.__class__.__name__} ({harness_model})",
                         "data_via": ["fallback.py (FallbackLlmHarness._run_google_primary)", "availability.py (CliQuotaAvailability)"],
                         "start_time": route_dt.isoformat(),
                         "end_time": (route_dt + timedelta(milliseconds=2)).isoformat(),
@@ -330,6 +339,7 @@ class ExtractOutlineUseCase:
                     run_id=run_id,
                     doc_id=doc_id,
                     target_name=meta.original_name,
+                    primary_provider=harness_provider,
                 )
 
             trace.finish(

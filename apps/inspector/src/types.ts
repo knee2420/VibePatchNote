@@ -49,6 +49,7 @@ export interface SpanRecord {
     traceback?: string
   } | null
   metadata?: Record<string, any>
+  usage?: Record<string, any>
   attempts?: ModelAttemptRecord[]
 }
 

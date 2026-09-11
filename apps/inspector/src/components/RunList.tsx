@@ -41,7 +41,7 @@ function getProviderBadge(provider?: string | null) {
   if (p.includes('cli') || p.includes('agy')) {
     return (
       <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase font-semibold">
-        CLI
+        AGY CLI
       </span>
     )
   }

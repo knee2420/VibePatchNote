@@ -34,6 +34,23 @@ class RuntimePolicyHarness(BaseLlmHarness):
     def timeout_seconds(self) -> int:
         return self._resolve().timeout_seconds
 
+    @property
+    def provider(self) -> str:
+        resolved = self._resolve()
+        return getattr(
+            resolved,
+            "provider",
+            getattr(
+                resolved,
+                "_primary_provider",
+                getattr(resolved, "name", "google_api"),
+            ),
+        )
+
+    @property
+    def _primary_provider(self) -> str:
+        return self.provider
+
     def run_structured(
         self,
         prompt: str,

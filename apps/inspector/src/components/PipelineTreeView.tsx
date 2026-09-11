@@ -47,17 +47,209 @@ function isFileName(val?: string | null): boolean {
   )
 }
 
+const KNOWN_FILE_PATHS: Record<string, string> = {
+  'extract_outline.py': 'apps/api/app/documents/use_cases/extract_outline.py',
+  'generate_scaffold.py': 'apps/api/app/documents/use_cases/generate_scaffold.py',
+  'local_artifact_repository.py': 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+  'fallback.py': 'apps/api/app/core/llm/fallback.py',
+  'availability.py': 'apps/api/app/core/llm/availability.py',
+  'policy_harness.py': 'apps/api/app/core/llm/policy_harness.py',
+  'context_builder.py': 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
+  'pipeline.py': 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
+  'schema.py': 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
+  'models.py': 'packages/scaffold-engine/scaffold_engine/outline/models.py',
+  'system_instructions.md': 'packages/scaffold-engine/scaffold_engine/outline/prompts/system_instructions.md',
+  'runtime.py': 'apps/api/app/core/agent_runtime/runtime.py',
+  'tracer.py': 'apps/api/app/core/llm/tracer.py',
+}
+
+interface ParsedVia {
+  raw: string
+  fileName: string
+  filePath: string
+  symbol?: string
+  symbolLabel?: string
+  symbolType: 'class' | 'function' | 'file' | 'prompt'
+  isModelInfo?: boolean
+  modelName?: string
+}
+
+function parseViaItem(item: string): ParsedVia {
+  const trimmed = item.trim()
+
+  // 1. 모델 정보: "Model: gemini-3.8-flash-low"
+  if (trimmed.toLowerCase().startsWith('model:')) {
+    const modelName = trimmed.replace(/^model:\s*/i, '').trim()
+    return {
+      raw: trimmed,
+      fileName: '',
+      filePath: '',
+      symbolType: 'prompt',
+      isModelInfo: true,
+      modelName,
+    }
+  }
+
+  // 2. "RuntimePolicyHarness.run_structured" or "RuntimePolicyHarness"
+  if (trimmed.startsWith('RuntimePolicyHarness')) {
+    const parts = trimmed.split('.')
+    const symbol = parts.length > 1 ? parts[1] : 'RuntimePolicyHarness'
+    return {
+      raw: trimmed,
+      fileName: 'policy_harness.py',
+      filePath: KNOWN_FILE_PATHS['policy_harness.py'],
+      symbol,
+      symbolLabel: parts.length > 1 ? `def ${symbol}(...)` : 'class RuntimePolicyHarness',
+      symbolType: parts.length > 1 ? 'function' : 'class',
+    }
+  }
+
+  // 3. 표준 포맷: "fileName.py (SymbolOrFunction)" or "path/fileName.py (Symbol)"
+  const parenMatch = trimmed.match(/^([^\s(]+)(?:\s*\(([^)]+)\))?/)
+  if (parenMatch) {
+    const rawFile = parenMatch[1]
+    const rawSymbol = parenMatch[2]?.trim()
+    const baseName = rawFile.split('/').pop() || rawFile
+    const filePath = KNOWN_FILE_PATHS[baseName] || (rawFile.includes('/') ? rawFile : baseName)
+
+    let symbolType: 'class' | 'function' | 'file' = 'file'
+    let symbolLabel = rawSymbol
+    if (rawSymbol) {
+      const lastPart = rawSymbol.split('.').pop() || rawSymbol
+      const isClass = /^[A-Z]/.test(lastPart) && !lastPart.startsWith('_')
+      symbolType = isClass ? 'class' : 'function'
+      symbolLabel = isClass ? `class ${rawSymbol}` : `def ${rawSymbol}(...)`
+    }
+
+    return {
+      raw: trimmed,
+      fileName: baseName,
+      filePath,
+      symbol: rawSymbol,
+      symbolLabel,
+      symbolType,
+    }
+  }
+
+  return {
+    raw: trimmed,
+    fileName: trimmed,
+    filePath: trimmed,
+    symbolType: 'file',
+  }
+}
+
 /**
- * 스팬의 특성과 data_via를 바탕으로 체계적인 계층형 트리를 도출합니다.
+ * 스팬의 data_via를 우선 동적 파싱하여 FLOW와 100% 일치하는 계층형 트리를 생성합니다.
  */
 function buildTreeForSpan(
   span: SpanRecord,
   dataVia: string[]
 ): PipelineTreeNode[] {
-  const name = span.name.toLowerCase()
   const nodes: PipelineTreeNode[] = []
 
-  // 1. 캐시 & HEAD 검사
+  // 1. dataVia 기반 1:1 동적 트리 매핑 (FLOW 바와 정확히 일치)
+  if (dataVia && dataVia.length > 0) {
+    const fileGroupMap = new Map<string, {
+      filePath: string
+      children: PipelineTreeNode[]
+    }>()
+
+    dataVia.forEach((item, idx) => {
+      const parsed = parseViaItem(item)
+
+      // 모델 전용 노드
+      if (parsed.isModelInfo) {
+        nodes.push({
+          id: `${span.span_id}-model-${idx}`,
+          name: `Model: ${parsed.modelName || 'LLM Engine'}`,
+          type: 'prompt',
+          directContent: `[LLM Engine Specification]\nModel: ${parsed.modelName}\nSpan: ${span.name}\nDuration: ${(span.duration_ms || 0).toFixed(1)} ms\nTokens: Total ${span.usage?.total_tokens || 0} (Prompt: ${span.usage?.prompt_tokens || 0}, Completion: ${span.usage?.completion_tokens || 0})`,
+        })
+        return
+      }
+
+      if (!parsed.filePath) return
+
+      let group = fileGroupMap.get(parsed.filePath)
+      if (!group) {
+        group = {
+          filePath: parsed.filePath,
+          children: [],
+        }
+        fileGroupMap.set(parsed.filePath, group)
+      }
+
+      if (parsed.symbol) {
+        group.children.push({
+          id: `${span.span_id}-fn-${idx}`,
+          name: parsed.symbolLabel || parsed.symbol,
+          type: parsed.symbolType,
+          filePath: parsed.filePath,
+          symbol: parsed.symbol,
+        })
+      }
+    })
+
+    // 파일 노드들을 트리에 순서대로 추가
+    fileGroupMap.forEach((group, filePath) => {
+      if (group.children.length === 0) {
+        nodes.push({
+          id: `${span.span_id}-file-${filePath}`,
+          name: filePath,
+          type: 'file',
+          filePath,
+        })
+      } else {
+        nodes.push({
+          id: `${span.span_id}-file-${filePath}`,
+          name: filePath,
+          type: 'file',
+          filePath,
+          children: group.children,
+        })
+      }
+    })
+
+    // LLM 추론 또는 프롬프트 조립 스팬인 경우, 프롬프트 노드 바인딩 보강
+    const name = (span.name || '').toLowerCase()
+    if (span.span_type === 'llm' || name.startsWith('llm:')) {
+      const promptText =
+        (span.inputs && (span.inputs.prompt || span.inputs.prompt_snippet || span.inputs.system_prompt || span.inputs.instructions)) ||
+        null
+
+      if (promptText) {
+        nodes.push({
+          id: `${span.span_id}-executed-prompt`,
+          name: `실제 모델 전송 Prompt (${String(promptText).length.toLocaleString()} 자)`,
+          type: 'prompt',
+          directContent: String(promptText),
+        })
+      } else {
+        nodes.push({
+          id: `${span.span_id}-prompt-ref`,
+          name: 'system_instructions.md (추론 지시문 프롬프트 원본)',
+          type: 'prompt',
+          filePath: KNOWN_FILE_PATHS['system_instructions.md'],
+        })
+      }
+    } else if (name.includes('prompt') || name.includes('promptassembly')) {
+      nodes.push({
+        id: `${span.span_id}-prompt-sys`,
+        name: 'system_instructions.md (한국형 공문서 표/목차 1-Stage 추출 지침 프롬프트)',
+        type: 'prompt',
+        filePath: KNOWN_FILE_PATHS['system_instructions.md'],
+      })
+    }
+
+    if (nodes.length > 0) {
+      return nodes
+    }
+  }
+
+  // 2. dataVia가 없을 경우를 위한 안전 폴백
+  const name = span.name.toLowerCase()
+
   if (name.includes('cache') || name.includes('head')) {
     nodes.push({
       id: `${span.span_id}-cache-file`,
@@ -74,329 +266,29 @@ function buildTreeForSpan(
         },
       ],
     })
+    nodes.push({
+      id: `${span.span_id}-repo-file`,
+      name: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+      type: 'file',
+      filePath: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+    })
     return nodes
   }
 
-  // 2. 하네스 정책 & 라우팅 검사
   if (name.includes('policy') || name.includes('routing')) {
     nodes.push({
       id: `${span.span_id}-fallback-file`,
       name: 'apps/api/app/core/llm/fallback.py',
       type: 'file',
       filePath: 'apps/api/app/core/llm/fallback.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-harness`,
-          name: 'class FallbackLlmHarness',
-          type: 'class',
-          filePath: 'apps/api/app/core/llm/fallback.py',
-          symbol: 'FallbackLlmHarness',
-          children: [
-            {
-              id: `${span.span_id}-fn-resolve`,
-              name: 'def _resolve_chain(...)',
-              type: 'function',
-              filePath: 'apps/api/app/core/llm/fallback.py',
-              symbol: 'FallbackLlmHarness._resolve_chain',
-            },
-            {
-              id: `${span.span_id}-fn-select`,
-              name: 'def select_provider(...)',
-              type: 'function',
-              filePath: 'apps/api/app/core/llm/fallback.py',
-              symbol: 'FallbackLlmHarness.select_provider',
-            },
-          ],
-        },
-      ],
     })
     nodes.push({
-      id: `${span.span_id}-policy-file`,
-      name: 'apps/api/app/core/llm/runtime_policy.py',
+      id: `${span.span_id}-avail-file`,
+      name: 'apps/api/app/core/llm/availability.py',
       type: 'file',
-      filePath: 'apps/api/app/core/llm/runtime_policy.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-policy`,
-          name: 'class EngineRoutingSettings',
-          type: 'class',
-          filePath: 'apps/api/app/core/llm/runtime_policy.py',
-          symbol: 'EngineRoutingSettings',
-        },
-      ],
+      filePath: 'apps/api/app/core/llm/availability.py',
     })
     return nodes
-  }
-
-  // 3. DocumentContextBuilder (문서 컨텍스트 추출)
-  if (name.includes('context') || name.includes('documentcontextbuilder')) {
-    nodes.push({
-      id: `${span.span_id}-ctx-file`,
-      name: 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
-      type: 'file',
-      filePath: 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-builder`,
-          name: 'class DocumentContextBuilder',
-          type: 'class',
-          filePath: 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
-          symbol: 'DocumentContextBuilder',
-          children: [
-            {
-              id: `${span.span_id}-fn-build`,
-              name: 'def build_context(pdf_path: Path, output_dir: Optional[Path]) -> Dict',
-              type: 'function',
-              filePath: 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
-              symbol: 'DocumentContextBuilder.build_context',
-            },
-          ],
-        },
-      ],
-    })
-    return nodes
-  }
-
-  // 4. PromptAssembly (프롬프트 조립 & 지시문 템플릿)
-  if (name.includes('promptassembly') || name.includes('prompt')) {
-    nodes.push({
-      id: `${span.span_id}-pipe-file`,
-      name: 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
-      type: 'file',
-      filePath: 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-pipeline`,
-          name: 'class OutlinePipeline',
-          type: 'class',
-          filePath: 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
-          symbol: 'OutlinePipeline',
-          children: [
-            {
-              id: `${span.span_id}-fn-pipe-exec`,
-              name: 'def execute(context: OutlinePipelineContext) -> OutlinePipelineResult',
-              type: 'function',
-              filePath: 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
-              symbol: 'OutlinePipeline.execute',
-            },
-          ],
-        },
-      ],
-    })
-    nodes.push({
-      id: `${span.span_id}-prompt-sys`,
-      name: 'system_instructions.md (한국형 공문서 표/목차 1-Stage 추출 지침 프롬프트)',
-      type: 'prompt',
-      filePath: 'packages/scaffold-engine/scaffold_engine/outline/prompts/system_instructions.md',
-    })
-    return nodes
-  }
-
-  // 5. LLM Inference (모델 핵심 추론)
-  if (span.span_type === 'llm' || name.startsWith('llm:')) {
-    nodes.push({
-      id: `${span.span_id}-llm-harness`,
-      name: 'apps/api/app/core/llm/fallback.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/llm/fallback.py',
-      children: [
-        {
-          id: `${span.span_id}-fn-harness-run`,
-          name: 'def run_structured(prompt: str, schema: Type[BaseModel])',
-          type: 'function',
-          filePath: 'apps/api/app/core/llm/fallback.py',
-          symbol: 'FallbackLlmHarness.run_structured',
-        },
-      ],
-    })
-    nodes.push({
-      id: `${span.span_id}-llm-adapter`,
-      name: 'apps/api/app/core/llm/adapters/google_adapter.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/llm/adapters/google_adapter.py',
-      children: [
-        {
-          id: `${span.span_id}-fn-adapter-gen`,
-          name: 'def generate_structured(prompt, schema, model_name)',
-          type: 'function',
-          filePath: 'apps/api/app/core/llm/adapters/google_adapter.py',
-          symbol: 'GoogleLlmAdapter.generate_structured',
-        },
-      ],
-    })
-
-    // 스팬의 입력 프롬프트가 존재하면 프롬프트 노드 바인딩
-    const promptText =
-      (span.inputs && (span.inputs.prompt || span.inputs.system_prompt || span.inputs.instructions)) ||
-      null
-
-    if (promptText) {
-      nodes.push({
-        id: `${span.span_id}-executed-prompt`,
-        name: `실제 모델 전송 Prompt (${String(promptText).length.toLocaleString()} 자)`,
-        type: 'prompt',
-        directContent: String(promptText),
-      })
-    } else {
-      nodes.push({
-        id: `${span.span_id}-prompt-ref`,
-        name: 'system_instructions.md (추론 지시문 프롬프트 원본)',
-        type: 'prompt',
-        filePath: 'packages/scaffold-engine/scaffold_engine/outline/prompts/system_instructions.md',
-      })
-    }
-    return nodes
-  }
-
-  // 6. 스키마 검증
-  if (name.includes('validation') || name.includes('schema')) {
-    nodes.push({
-      id: `${span.span_id}-schema-file`,
-      name: 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
-      type: 'file',
-      filePath: 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-outlineoutput`,
-          name: 'class OutlineOutput(BaseModel)',
-          type: 'class',
-          filePath: 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
-          symbol: 'OutlineOutput',
-        },
-        {
-          id: `${span.span_id}-cls-outlineitem`,
-          name: 'class OutlineItem(BaseModel)',
-          type: 'class',
-          filePath: 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
-          symbol: 'OutlineItem',
-        },
-      ],
-    })
-    nodes.push({
-      id: `${span.span_id}-models-file`,
-      name: 'packages/scaffold-engine/scaffold_engine/outline/models.py',
-      type: 'file',
-      filePath: 'packages/scaffold-engine/scaffold_engine/outline/models.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-outlinedoc`,
-          name: 'class OutlineDocument',
-          type: 'class',
-          filePath: 'packages/scaffold-engine/scaffold_engine/outline/models.py',
-          symbol: 'OutlineDocument',
-          children: [
-            {
-              id: `${span.span_id}-fn-from-output`,
-              name: 'def from_outline_output(output: OutlineOutput) -> OutlineDocument',
-              type: 'function',
-              filePath: 'packages/scaffold-engine/scaffold_engine/outline/models.py',
-              symbol: 'OutlineDocument.from_outline_output',
-            },
-          ],
-        },
-      ],
-    })
-    return nodes
-  }
-
-  // 7. 아티팩트 커밋
-  if (name.includes('commit') || name.includes('artifact')) {
-    nodes.push({
-      id: `${span.span_id}-commit-case`,
-      name: 'apps/api/app/documents/use_cases/extract_outline.py',
-      type: 'file',
-      filePath: 'apps/api/app/documents/use_cases/extract_outline.py',
-      children: [
-        {
-          id: `${span.span_id}-fn-commit`,
-          name: 'def extract_outline (Artifact Persistence)',
-          type: 'function',
-          filePath: 'apps/api/app/documents/use_cases/extract_outline.py',
-          symbol: 'extract_outline',
-        },
-      ],
-    })
-    nodes.push({
-      id: `${span.span_id}-repo-file`,
-      name: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
-      type: 'file',
-      filePath: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-repo`,
-          name: 'class LocalArtifactRepository',
-          type: 'class',
-          filePath: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
-          symbol: 'LocalArtifactRepository',
-          children: [
-            {
-              id: `${span.span_id}-fn-save-art`,
-              name: 'def save_artifact(self, artifact_id, data)',
-              type: 'function',
-              filePath: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
-              symbol: 'LocalArtifactRepository.save_artifact',
-            },
-          ],
-        },
-      ],
-    })
-    return nodes
-  }
-
-  // 8. 정산 및 마감
-  if (name.includes('settlement') || name.includes('cost')) {
-    nodes.push({
-      id: `${span.span_id}-runtime-file`,
-      name: 'apps/api/app/core/agent_runtime/runtime.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/agent_runtime/runtime.py',
-      children: [
-        {
-          id: `${span.span_id}-cls-runtime`,
-          name: 'class AgentRuntime',
-          type: 'class',
-          filePath: 'apps/api/app/core/agent_runtime/runtime.py',
-          symbol: 'AgentRuntime',
-          children: [
-            {
-              id: `${span.span_id}-fn-settle`,
-              name: 'def settle_run(self, run_id: str, ...)',
-              type: 'function',
-              filePath: 'apps/api/app/core/agent_runtime/runtime.py',
-              symbol: 'AgentRuntime.settle_run',
-            },
-          ],
-        },
-      ],
-    })
-    nodes.push({
-      id: `${span.span_id}-tracer-file`,
-      name: 'apps/api/app/core/llm/tracer.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/llm/tracer.py',
-      children: [
-        {
-          id: `${span.span_id}-fn-tracer-ingest`,
-          name: 'def ingest_pipeline_telemetry(run_id, steps)',
-          type: 'function',
-          filePath: 'apps/api/app/core/llm/tracer.py',
-          symbol: 'ingest_pipeline_telemetry',
-        },
-      ],
-    })
-    return nodes
-  }
-
-  // 9. data_via 기반 동적 트리 폴백
-  if (dataVia && dataVia.length > 0) {
-    dataVia.forEach((viaItem, idx) => {
-      nodes.push({
-        id: `${span.span_id}-dynamic-via-${idx}`,
-        name: viaItem,
-        type: 'function',
-        filePath: viaItem.split(' ')[0],
-      })
-    })
   }
 
   return nodes

@@ -92,18 +92,31 @@ class InspectorService:
                         try:
                             for l_line in ledger_file.read_text(encoding="utf-8").splitlines():
                                 if '"provider"' in l_line:
-                                    l_data = json.loads(l_line).get("data", {})
-                                    if "provider" in l_data:
-                                        prov = l_data["provider"]
-                                        if not mod and "model_name" in l_data:
-                                            mod = l_data["model_name"]
+                                    l_entry = json.loads(l_line)
+                                    l_data = l_entry.get("data", {})
+                                    meta_data = l_data.get("metadata", {}) or {}
+                                    candidate = (
+                                        l_data.get("provider")
+                                        or meta_data.get("extra", {}).get("provider")
+                                        or meta_data.get("provider")
+                                    )
+                                    if candidate and candidate != "unknown":
+                                        prov = candidate
+                                        if not mod:
+                                            mod = l_data.get("model_name") or meta_data.get("model_name") or meta_data.get("extra", {}).get("model")
                                         break
                         except Exception:
                             pass
 
-                # 여전히 provider가 없으나 모델이 명시된 경우
+                # 여전히 provider가 없으나 모델이 명시된 경우 모델명 기반 자동 판정
                 if not prov and mod:
-                    prov = "google_genai"
+                    mod_lower = str(mod).lower()
+                    if "low" in mod_lower or "cli" in mod_lower or "agy" in mod_lower:
+                        prov = "agy_cli"
+                    elif "local" in mod_lower or "gemma" in mod_lower:
+                        prov = "local"
+                    else:
+                        prov = "google_genai"
 
                 # target_name 유효성 검사 및 실제 문서 원본 파일명 매핑
                 t_name = meta.get("target_name")

@@ -295,6 +295,7 @@ def ingest_pipeline_telemetry(
     doc_id: Optional[str] = None,
     base_dir: Optional[Path] = None,
     target_name: Optional[str] = None,
+    primary_provider: Optional[str] = None,
 ) -> Optional[Path]:
     """엔진이 방출한 PipelineTelemetry 객체를 apps/api/data/runs/{run_id}/ 에 영속화합니다 (60-data 헌법 준수)."""
     try:
@@ -342,16 +343,50 @@ def ingest_pipeline_telemetry(
             json.dump(snapshots_payload, f, ensure_ascii=False, indent=2)
 
         # primary_provider 및 primary_model 추출
-        primary_provider = None
         primary_model = None
-        if telemetry.attempts:
-            # 성공한 attempt 우선 탐색
-            succ_att = next((a for a in telemetry.attempts if getattr(a, "status", None) == "success"), telemetry.attempts[0])
-            primary_provider = succ_att.provider
-            primary_model = succ_att.model_name
-        elif telemetry.provenance:
-            primary_provider = telemetry.provenance.get("provider")
+        if primary_provider is None:
+            if telemetry.attempts:
+                succ_att = next((a for a in telemetry.attempts if getattr(a, "status", None) == "success"), telemetry.attempts[0])
+                primary_provider = succ_att.provider
+                primary_model = succ_att.model_name
+            elif telemetry.provenance:
+                primary_provider = telemetry.provenance.get("provider")
+                primary_model = telemetry.provenance.get("model")
+
+        if not primary_model and telemetry.provenance:
             primary_model = telemetry.provenance.get("model")
+
+        # 스팬 목록에서 llm 스팬의 provider 및 model_name 탐색 (스팬 메타데이터 파싱)
+        if not primary_provider or not primary_model:
+            for sp in telemetry.spans:
+                sp_type = getattr(sp, "span_type", "")
+                if sp_type == "llm" or "LLM" in getattr(sp, "name", ""):
+                    sp_meta = getattr(sp, "metadata", {}) or {}
+                    if not primary_provider:
+                        p_candidate = (
+                            sp_meta.get("provider")
+                            or sp_meta.get("extra", {}).get("provider")
+                        )
+                        if p_candidate and p_candidate != "unknown":
+                            primary_provider = p_candidate
+                    if not primary_model:
+                        m_candidate = (
+                            sp_meta.get("model_name")
+                            or getattr(sp, "model_name", None)
+                            or sp_meta.get("extra", {}).get("model")
+                        )
+                        if m_candidate and m_candidate != "unknown":
+                            primary_model = m_candidate
+
+        # 모델명 기반 폴백 공급자 판정
+        if not primary_provider and primary_model:
+            mod_l = str(primary_model).lower()
+            if "low" in mod_l or "cli" in mod_l or "agy" in mod_l:
+                primary_provider = "agy_cli"
+            elif "local" in mod_l or "gemma" in mod_l:
+                primary_provider = "local"
+            else:
+                primary_provider = "google_genai"
 
         raw_target = getattr(telemetry, "target_name", None)
         resolved_target = (

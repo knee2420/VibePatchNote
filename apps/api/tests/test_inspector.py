@@ -162,3 +162,35 @@ def test_ingest_pipeline_telemetry_resolves_target_name(tmp_path: Path):
         if run_dir.exists():
             import shutil
             shutil.rmtree(run_dir, ignore_errors=True)
+
+
+def test_inspector_provider_resolution_for_cli_model(tmp_path: Path):
+    """primary_provider가 비어 있어도 3.8-flash-low 같은 CLI 모델은 agy_cli로 매핑되는지 검증."""
+    runs_dir = settings.storage.runs
+    test_run_id = "test-run-cli-model-003"
+    run_dir = runs_dir / test_run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        meta_data = {
+            "run_id": test_run_id,
+            "task_name": "outline_extraction",
+            "doc_id": "doc_test_cli",
+            "status": "SUCCESS",
+            "duration_ms": 1000.0,
+            "primary_provider": None,
+            "primary_model": "gemini-3.8-flash-low",
+            "total_tokens": 500,
+        }
+        (run_dir / "meta.json").write_text(json.dumps(meta_data), encoding="utf-8")
+
+        resp = client.get("/api/v1/inspector/runs")
+        assert resp.status_code == 200
+        found = next((r for r in resp.json() if r.get("run_id") == test_run_id), None)
+        assert found is not None
+        assert found["primary_provider"] == "agy_cli"
+
+    finally:
+        if run_dir.exists():
+            import shutil
+            shutil.rmtree(run_dir, ignore_errors=True)
