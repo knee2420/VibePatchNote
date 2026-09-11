@@ -18,12 +18,11 @@ from ..ports import GoogleModelCatalogPort, GoogleQuotaPort
 
 # 사용 기록이 없을 때의 정렬 순서. 개인 사용 기록이 아니라 일반적인 인지도 기준이다.
 POPULAR_MODEL_ORDER = (
-    "gemini-3.5-flash-lite",
     "gemini-3.5-flash",
-    "gemini-3.8-flash",
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
+    "gemini-3.1-pro",
     "gemini-3.1-flash-lite",
+    "gemma4-31b",
+    "gemini-3.8-flash",
     "gemini-3.7-flash",
     "gemini-3.6-flash",
 )

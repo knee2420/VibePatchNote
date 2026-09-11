@@ -31,7 +31,7 @@ from pathlib import Path
 from .ids import safe_segment
 
 # 저장 레이아웃 버전. 마이그레이션이 끝난 저장소만 이 값을 갖는다.
-STORAGE_VERSION = 2
+STORAGE_VERSION = 3
 
 
 class StorageRoots:

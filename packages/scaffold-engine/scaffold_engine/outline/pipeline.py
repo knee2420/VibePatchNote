@@ -108,18 +108,25 @@ class OutlinePipeline:
 
         # 3. 통합 프롬프트 빌드 (파일 참조 및 최적화 지침)
         ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
+        resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
         prompt = (
             f"{instructions}\n\n"
             f"======================================================================\n"
-            f"[분석 대상 문서 정보]\n"
-            f"- 대상 파일: {doc_ctx['filename']}\n"
+            f"[분석 대상 원본 문서]\n"
+            f"- 파일명: {doc_ctx['filename']}\n"
+            f"- 원본 파일 경로: {resolved_file_path}\n"
             f"- 총 페이지: {doc_ctx['total_pages']}페이지\n"
             f"{ctx_file_info}\n"
+            f"[중요 지침: 3중 멀티모달 컨텍스트 활용]\n"
+            f"1. [시각적 비전 (PDF 직접 열람)]: 반드시 위 원본 파일 경로('{resolved_file_path}')의 문서를 직접 열람(view/inspect)하여, 전반적인 시각 레이아웃(여백, 밑줄, 박스 테두리, 심미적 위계, 표 내부 구획 및 차수 구분)을 확인하세요.\n"
+            f"2. [실측 표(Table) 구조 메타 & 타이포그래피]: 아래 제공된 각 페이지별 실측 표 규격(행x열, 위치)과 폰트 크기 블록을 바탕으로 상위 대주제와 부모 표 구획의 경계를 파악하세요.\n"
+            f"3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.\n\n"
             f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
             f"{doc_ctx['context_text']}\n"
             f"======================================================================\n\n"
             f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
-            f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오."
+            f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오.\n"
+            f"좌표(box_2d) 지정 시, 목차 노드는 해당 라벨/헤더 텍스트 영역을, elements는 내용/본문 리스트/입력값/영수증 부착란 전체 사각 영역을 정확히 감싸도록 역할에 맞게 정밀 지정하십시오."
         )
 
         # 4. CLI / LLM 네이티브 구조화 실행
@@ -130,6 +137,7 @@ class OutlinePipeline:
             schema_path=self.schema_path,
             model=target_model,
             effort=target_effort,
+            file_path=pdf_path,
         )
         llm_duration = round(time.time() - llm_t0, 3)
         llm_ended_at = _utc_now_iso()

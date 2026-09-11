@@ -31,7 +31,9 @@ _DEFAULT_CORS_ORIGINS = [
 _DEFAULT_AGENT_CLI_BIN = "agy"
 _DEFAULT_AGENT_CLI_MODEL = "gemini-3.8-flash-low"
 _DEFAULT_AGENT_CLI_TIMEOUT_SECONDS = 180
-_DEFAULT_GOOGLE_API_MODEL = "gemini-2.5-flash"
+_DEFAULT_GOOGLE_API_MODEL = "gemini-3.5-flash-lite"
+_DEFAULT_PRIMARY_PROVIDER = "agy_cli"
+_DEFAULT_FALLBACK_PROVIDER = "google_api"
 
 
 def _optional_path(key: str) -> Path | None:
@@ -69,6 +71,9 @@ class Settings:
         self.google_api_timeout_seconds: int = self._read_int(
             "VIBE_GOOGLE_API_TIMEOUT_SECONDS", self.agent_cli_timeout_seconds
         )
+        # 실행 엔진 라우팅 정책 (기본 실행 경로 vs 보조 fallback 경로)
+        self.primary_provider: str = os.getenv("VIBE_PRIMARY_PROVIDER", _DEFAULT_PRIMARY_PROVIDER)
+        self.fallback_provider: str = os.getenv("VIBE_FALLBACK_PROVIDER", _DEFAULT_FALLBACK_PROVIDER)
         # 개발 PC의 비밀이 아닌 OAuth 식별자. 사용자 토큰/시크릿은 이 파일에 두지 않는다.
         oauth_defaults = dotenv_values(BASE_DIR / ".env.oauth.local")
         self.google_oauth_client_id: str = os.getenv(

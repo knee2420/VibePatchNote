@@ -22,6 +22,8 @@ from __future__ import annotations
 import logging
 import re
 import shutil
+import unicodedata
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -61,8 +63,23 @@ class LocalScaffoldRepository:
         self._root = root_dir
 
     def resolve_dir(self, scaffold_id: str) -> Path:
-        """id 하나로 곧바로 위치가 정해진다. 탐색이 필요 없다."""
-        return (self._root / safe_segment(scaffold_id)).resolve()
+        """식별자로 아카이브 위치를 찾는다.
+
+        폴더 이름은 탐색기에서 바로 읽을 수 있게 생성 시각·제목·식별자를 함께
+        담는다. 외부 계약은 여전히 ``scaffold_id`` 하나이므로, 구 v2 레이아웃과
+        새 레이아웃 모두 이 경계에서만 해석한다.
+        """
+        safe_id = safe_segment(scaffold_id)
+        legacy_dir = self._root / safe_id
+        if legacy_dir.exists():
+            return legacy_dir.resolve()
+
+        matches = sorted(self._root.glob(f"*__{safe_id}")) if self._root.exists() else []
+        if len(matches) == 1:
+            return matches[0].resolve()
+        if len(matches) > 1:
+            raise RuntimeError(f"Duplicate scaffold archive directories: {scaffold_id}")
+        return legacy_dir.resolve()
 
     # --- 쓰기 -----------------------------------------------------------
 
@@ -77,7 +94,7 @@ class LocalScaffoldRepository:
         overlay_png: Optional[bytes] = None,
         render_png: Optional[bytes] = None,
     ) -> Path:
-        archive_dir = self.resolve_dir(record.scaffold_id)
+        archive_dir = self._new_archive_dir(record)
         created_now = not archive_dir.exists()
         archive_dir.mkdir(parents=True, exist_ok=True)
 
@@ -114,6 +131,7 @@ class LocalScaffoldRepository:
             raise
 
         logger.info("[LocalScaffoldRepository] Saved %s to %s", record.scaffold_id, archive_dir)
+        self._write_catalog()
         return archive_dir
 
     @staticmethod
@@ -144,6 +162,8 @@ class LocalScaffoldRepository:
         record.revision += 1
         record.updated_at = updated_at
         self._write_manifest(archive_dir, record)
+        self._write_catalog()
+        self._write_catalog()
 
         logger.info(
             "[LocalScaffoldRepository] Saved render r%d for %s", record.revision, record.scaffold_id
@@ -170,6 +190,7 @@ class LocalScaffoldRepository:
         if not archive_dir.exists():
             return False
         shutil.rmtree(archive_dir, ignore_errors=True)
+        self._write_catalog()
         return True
 
     def delete_for_document(self, doc_id: str) -> int:
@@ -223,6 +244,66 @@ class LocalScaffoldRepository:
                 "[LocalScaffoldRepository] Corrupted manifest in %s: %s", archive_dir.name, exc
             )
             return None
+
+    def _new_archive_dir(self, record: ScaffoldArchiveRecord) -> Path:
+        """새 아카이브의 사람 친화적인 폴더명을 만든다.
+
+        ID는 끝에 그대로 남겨 API 포인터와 충돌하지 않고, 앞부분만 탐색기용
+        라벨이다. 제목이 바뀌어도 저장된 ID는 변하지 않는다.
+        """
+        return self._root / self._archive_dir_name(record)
+
+    @staticmethod
+    def _archive_dir_name(record: ScaffoldArchiveRecord) -> str:
+        timestamp = LocalScaffoldRepository._folder_timestamp(record.created_at)
+        label = LocalScaffoldRepository._folder_label(record.title)
+        return f"{timestamp}__{label}__{safe_segment(record.scaffold_id)}"
+
+    @staticmethod
+    def _folder_timestamp(value: str) -> str:
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).strftime("%Y%m%d-%H%M%S")
+        except ValueError:
+            return "unknown-time"
+
+    @staticmethod
+    def _folder_label(value: str) -> str:
+        normalized = unicodedata.normalize("NFC", value or "untitled")
+        cleaned = re.sub(r'[<>:"/\\\\|?*\x00-\x1f]', "-", normalized)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip(" .-")
+        return (cleaned or "untitled")[:48]
+
+    def _write_catalog(self) -> None:
+        """루트에서 바로 최신본과 문서별 이력을 볼 수 있는 안내서를 갱신한다."""
+        records = self.list_all()
+        latest_by_doc: dict[str, ScaffoldArchiveRecord] = {}
+        for record in records:
+            changed = record.updated_at or record.created_at
+            current = latest_by_doc.get(record.doc_id)
+            if current is None or changed > (current.updated_at or current.created_at):
+                latest_by_doc[record.doc_id] = record
+
+        lines = [
+            "# 스캐폴드 보관함",
+            "",
+            "각 폴더는 `생성시각__제목__scaffold-ID` 형식입니다. ID는 API와 캔버스가 참조하는 고정 식별자이며, 제목·시각은 탐색기에서 빠르게 구분하기 위한 표시값입니다.",
+            "",
+            "## 문서별 최신 작업본",
+            "",
+            "| 원본 문서 ID | 최신 스캐폴드 | 마지막 변경 | 폴더 |",
+            "| --- | --- | --- | --- |",
+        ]
+        for doc_id, record in sorted(latest_by_doc.items(), key=lambda item: item[1].updated_at or item[1].created_at, reverse=True):
+            lines.append(
+                f"| {doc_id} | {record.title} | {record.updated_at or record.created_at} | {self._archive_dir_name(record)} |"
+            )
+
+        lines.extend(["", "## 전체 생성 이력", "", "| 생성 시각 | 원본 문서 ID | 제목 | 작업본 수정 | 폴더 |", "| --- | --- | --- | --- | --- |"])
+        for record in sorted(records, key=lambda item: item.created_at, reverse=True):
+            lines.append(
+                f"| {record.created_at} | {record.doc_id} | {record.title} | {record.updated_at or '-'} | {self._archive_dir_name(record)} |"
+            )
+        (self._root / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     def _read_slots(self, archive_dir: Path) -> List[SlotMappingItem]:
         """슬롯 JSON 을 엔진 모델로 복원. 별칭/필드명 표기 모두 수용한다."""

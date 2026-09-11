@@ -78,7 +78,7 @@
             }
           ],
           "default": null,
-          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표",
+          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표 (내용/본문/입력값/부착란 전체 사각 영역)",
           "title": "Box 2D"
         },
         "content_summary": {
@@ -160,7 +160,7 @@
             }
           ],
           "default": null,
-          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표",
+          "description": "[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표 (제목/헤더/라벨 텍스트 영역 또는 표 외곽)",
           "title": "Box 2D"
         },
         "purpose": {

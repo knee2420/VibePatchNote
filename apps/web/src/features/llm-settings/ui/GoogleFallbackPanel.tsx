@@ -91,11 +91,17 @@ export function GoogleFallbackPanel() {
       )}
 
       <section className={`rounded-xl border p-4 ${google?.configured ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
-        <p className="font-semibold text-slate-900">Google API fallback</p>
+        <p className="font-semibold text-slate-900">
+          {runtime?.policy.primaryProvider === 'google-api' || runtime?.policy.primaryProvider === 'google_api'
+            ? 'Google Direct API (기본 실행 엔진)'
+            : 'Google API (보조 Fallback 엔진)'}
+        </p>
         <p className="mt-1 text-sm text-slate-700">
           {google?.configured
-            ? '설정됨 — AGY 한도가 소진되거나 CLI가 실패하면 이 경로로 분석을 이어갑니다.'
-            : '미설정 — AGY 한도가 소진되면 분석을 이어갈 수 없습니다.'}
+            ? (runtime?.policy.primaryProvider === 'google-api' || runtime?.policy.primaryProvider === 'google_api'
+                ? '설정됨 — 모든 문서 분석 작업이 Google Direct API를 1순위로 즉각 호출합니다.'
+                : '설정됨 — AGY 한도가 소진되거나 CLI가 실패하면 이 경로로 분석을 이어갑니다.')
+            : '미설정 — Google API 키가 등록되지 않았습니다.'}
         </p>
         {runtime?.nextExecution && (
           <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-current/10 pt-3">

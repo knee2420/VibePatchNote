@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 from typing import Callable, NamedTuple
 
-from . import v0001_xdg_layout, v0002_document_id
+from . import v0001_xdg_layout, v0002_document_id, v0003_readable_scaffold_archives
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class Migration(NamedTuple):
 MIGRATIONS: tuple[Migration, ...] = (
     Migration(1, "xdg_layout", v0001_xdg_layout.run),
     Migration(2, "document_id", v0002_document_id.run),
+    Migration(3, "readable_scaffold_archives", v0003_readable_scaffold_archives.run),
 )
 
 TARGET_VERSION = MIGRATIONS[-1].version

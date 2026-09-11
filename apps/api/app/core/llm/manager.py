@@ -97,8 +97,12 @@ class LlmManager:
         # 인자를 비우면 호출 시점의 런타임 정책(설정 UI 가 갱신한 settings)을 읽는다.
         # 돌려준 하네스는 그 시점의 정책으로 굳어 있으므로 오래 붙들고 쓰면 안 된다.
         # 장기 주입용은 매 호출마다 여기를 다시 부르는 `RuntimePolicyHarness` 다.
-        target_model = model or settings.agent_cli_model
-        timeout_seconds = timeout or settings.agent_cli_timeout_seconds
+        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        default_model = settings.google_api_model if is_google_primary else settings.agent_cli_model
+        default_timeout = settings.google_api_timeout_seconds if is_google_primary else settings.agent_cli_timeout_seconds
+
+        target_model = model or default_model
+        timeout_seconds = timeout or default_timeout
 
         # 호출부가 실행 파일을 직접 지정한 경우에만 팩토리를 우회한다.
         if executable:
@@ -115,10 +119,13 @@ class LlmManager:
                 target_model, spec.provider,
             )
 
+        spec = get_model_spec(target_model)
         harness = HarnessFactory.create(
             model=target_model, effort=effort, timeout_seconds=timeout_seconds
         )
-        if get_model_spec(target_model).provider == "agy_cli":
+        primary_provider = spec.provider
+        if primary_provider in ("agy_cli", "google_api"):
+            fallback_provider = "google_api" if primary_provider == "agy_cli" else "agy_cli"
             return FallbackLlmHarness(
                 primary=harness,
                 credentials=self._credentials,
@@ -126,6 +133,11 @@ class LlmManager:
                 google_timeout_seconds=settings.google_api_timeout_seconds,
                 provider_state=self._provider_state,
                 cli_availability=self._cli_availability,
+                primary_provider=primary_provider,
+                fallback_provider=fallback_provider,
+                cli_model=settings.agent_cli_model,
+                cli_timeout_seconds=settings.agent_cli_timeout_seconds,
+                cli_executable=self._executable,
             )
         return harness
 

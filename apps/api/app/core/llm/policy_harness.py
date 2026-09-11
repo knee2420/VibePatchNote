@@ -44,6 +44,8 @@ class RuntimePolicyHarness(BaseLlmHarness):
         effort: Optional[str] = None,
         conversation_id: Optional[str] = None,
         timeout: Optional[int] = None,
+        file_path: Optional[Union[str, Path]] = None,
+        **kwargs: Any,
     ) -> LlmExecutionResult:
         return self._resolve().run_structured(
             prompt,
@@ -53,4 +55,6 @@ class RuntimePolicyHarness(BaseLlmHarness):
             effort=effort,
             conversation_id=conversation_id,
             timeout=timeout,
+            file_path=file_path,
+            **kwargs,
         )

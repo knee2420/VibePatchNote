@@ -34,7 +34,7 @@ class QuotaFailureHarness(BaseLlmHarness):
 
 
 def test_quota_failure_without_google_key_is_explicitly_actionable() -> None:
-    harness = FallbackLlmHarness(QuotaFailureHarness(model="cli"), EmptyCredentialStore(), "gemini-2.5-flash", 30)
+    harness = FallbackLlmHarness(QuotaFailureHarness(model="cli"), EmptyCredentialStore(), "gemini-3.5-flash", 30)
 
     result = harness.run_structured("test", json_schema={"type": "object"})
 
@@ -56,7 +56,7 @@ def test_known_empty_cli_quota_skips_primary(monkeypatch) -> None:
     harness = FallbackLlmHarness(
         primary,
         GoogleCredentialStore(),
-        "gemini-2.5-flash",
+        "gemini-3.5-flash",
         30,
         cli_availability=ExhaustedAvailability(),  # type: ignore[arg-type]
     )
@@ -74,3 +74,60 @@ def test_known_empty_cli_quota_skips_primary(monkeypatch) -> None:
     assert result.telemetry_metadata["provider"] == "google_api"
     assert result.telemetry_metadata["skipped_primary"] is True
     assert result.telemetry_metadata["route_reason"] == "cli_quota_exhausted"
+
+
+def test_google_primary_success(monkeypatch) -> None:
+    from app.core.llm.adapters import GoogleGenAiHarness
+
+    harness = FallbackLlmHarness(
+        GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-key"),
+        GoogleCredentialStore(),
+        "gemini-3.5-flash",
+        30,
+        primary_provider="google_api",
+        fallback_provider="agy_cli",
+        cli_model="gemini-3.8-flash-low",
+    )
+    monkeypatch.setattr(
+        "app.core.llm.adapters.gemini_adapter.GoogleGenAiHarness.run_structured",
+        lambda self, prompt, **kwargs: LlmExecutionResult(
+            status="SUCCESS", model=self.model, structured_output={"direct": True}
+        ),
+    )
+
+    result = harness.run_structured("analyze", json_schema={"type": "object"})
+    assert result.ok
+    assert result.telemetry_metadata["provider"] == "google_api"
+    assert result.telemetry_metadata["fallback_used"] is False
+
+
+def test_google_primary_failure_falls_back_to_cli(monkeypatch) -> None:
+    from app.core.llm.adapters import GoogleGenAiHarness
+
+    harness = FallbackLlmHarness(
+        GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-key"),
+        GoogleCredentialStore(),
+        "gemini-3.5-flash",
+        30,
+        primary_provider="google_api",
+        fallback_provider="agy_cli",
+        cli_model="gemini-3.8-flash-low",
+    )
+    monkeypatch.setattr(
+        "app.core.llm.adapters.gemini_adapter.GoogleGenAiHarness.run_structured",
+        lambda self, prompt, **kwargs: LlmExecutionResult(
+            status="ERROR", model=self.model, error="ResourceExhausted: 429 Quota exceeded"
+        ),
+    )
+    monkeypatch.setattr(
+        "scaffold_engine.harness.AgyCliHarness.run_structured",
+        lambda self, prompt, **kwargs: LlmExecutionResult(
+            status="SUCCESS", model=self.model, structured_output={"cli_fallback": True}
+        ),
+    )
+
+    result = harness.run_structured("analyze", json_schema={"type": "object"})
+    assert result.ok
+    assert result.telemetry_metadata["provider"] == "agy_cli"
+    assert result.telemetry_metadata["fallback_used"] is True
+    assert result.telemetry_metadata["primary_provider"] == "google_api"

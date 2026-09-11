@@ -133,7 +133,9 @@ class GoogleOAuthClientSecretRequest(BaseModel):
 
 class RuntimePolicyUpdateRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
+    primary_provider: str | None = Field(default=None, alias="primaryProvider")
     primary_model: str = Field(alias="primaryModel", min_length=1)
     primary_timeout_seconds: int = Field(alias="primaryTimeoutSeconds", ge=15, le=600)
+    fallback_provider: str | None = Field(default=None, alias="fallbackProvider")
     fallback_model: str = Field(alias="fallbackModel", min_length=1)
     fallback_timeout_seconds: int = Field(alias="fallbackTimeoutSeconds", ge=15, le=600)

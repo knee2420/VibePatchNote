@@ -127,25 +127,64 @@ MODEL_REGISTRY.update({
         display_name="Gemma 4 31B (Local)",
         description="로컬 환경(vLLM/Ollama) 호스팅 예정 — 어댑터 미연결",
     ),
+    # --- Google Generative Language Direct API 정규 시나리오 모델 ---
+    "gemini-3.5-flash": ModelSpec(
+        name="gemini-3.5-flash",
+        family="gemini",
+        provider="google_api",
+        max_input_tokens=1_000_000,
+        max_output_tokens=8_192,
+        display_name="Gemini 3.5 Flash (Direct API)",
+        description="Google Direct API 정규 고속 멀티모달 비전 및 구조화 모델",
+    ),
+    "gemini-3.1-pro": ModelSpec(
+        name="gemini-3.1-pro",
+        family="gemini",
+        provider="google_api",
+        max_input_tokens=1_000_000,
+        max_output_tokens=8_192,
+        display_name="Gemini 3.1 Pro (Direct API)",
+        description="Google Direct API 정규 심층 추론 및 복잡 서식 분석 Pro 모델",
+    ),
+    "gemini-3.1-flash-lite": ModelSpec(
+        name="gemini-3.1-flash-lite",
+        family="gemini",
+        provider="google_api",
+        max_input_tokens=1_000_000,
+        max_output_tokens=8_192,
+        display_name="Gemini 3.1 Flash Lite (Direct API)",
+        description="Google Direct API 정규 경량 고속 구조화 모델",
+    ),
 })
 
 
 def get_model_spec(model_name: Optional[str] = None) -> ModelSpec:
-    """모델 스펙을 조회한다. 미등록 모델은 이름 휴리스틱으로 보수적 프로필을 만든다."""
+    """모델 스펙을 조회한다. 미등록 모델은 이름 휴리스틱으로 프로필을 만든다."""
     target = (model_name or DEFAULT_MODEL_NAME).strip()
     if target in MODEL_REGISTRY:
         return MODEL_REGISTRY[target]
 
     lowered = target.lower()
     is_gemma = "gemma" in lowered
+    is_gemini = "gemini" in lowered
+    has_cli_suffix = any(target.endswith(f"-{s}") for s in EFFORT_SUFFIXES)
+
+    # gemini 모델 중 CLI 접미사(-low, -medium, -high)가 없는 순수 모델명은 google_api 정규 프로바이더로 판정
+    if is_gemma:
+        provider = "local_serving"
+    elif is_gemini and not has_cli_suffix:
+        provider = "google_api"
+    else:
+        provider = "agy_cli"
+
     return ModelSpec(
         name=target,
-        family="gemma" if is_gemma else "gemini" if "gemini" in lowered else "unknown",
-        provider="local_serving" if is_gemma else "agy_cli",
-        max_input_tokens=128_000,
-        max_output_tokens=4_096,
+        family="gemma" if is_gemma else "gemini" if is_gemini else "unknown",
+        provider=provider,
+        max_input_tokens=1_000_000 if is_gemini else 128_000,
+        max_output_tokens=8_192 if is_gemini else 4_096,
         display_name=target,
-        description=f"미등록 모델 — 보수적 폴백 프로필: {target}",
+        description=f"미등록 모델 — 유도 프로필 (provider={provider}): {target}",
     )
 
 

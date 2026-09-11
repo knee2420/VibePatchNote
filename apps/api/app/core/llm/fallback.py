@@ -1,17 +1,18 @@
-"""CLI 우선, 설정된 Google API 보조 경로를 가진 하네스.
-
-쿼터 소진처럼 한동안 회복되지 않는 실패는 기억해 둔다. 그래야 다음 요청이
-CLI 타임아웃(기본 180초)을 다시 기다리지 않는다.
-"""
 from __future__ import annotations
 
+import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from scaffold_engine.harness import BaseLlmHarness, LlmExecutionResult
+from scaffold_engine.harness import (
+    AgyCliHarness,
+    BaseLlmHarness,
+    LlmExecutionResult,
+)
 
 from app.core.agent_runtime import report_progress
+from app.core.config import settings
 
 from .adapters import GoogleGenAiHarness
 from .availability import CliQuotaAvailability
@@ -23,10 +24,6 @@ PRIMARY_PROVIDER_ID = "agy-cli"
 _ELIGIBLE_FAILURE_MARKERS = ("quota", "rate limit", "auth", "unauthorized", "unavailable", "timeout")
 
 # 곧바로 다시 부르면 안 되는 실패와, 그때 건너뛸 기간.
-#
-# 타임아웃도 포함한다. 쿼터가 소진된 CLI 는 사유를 한 번만 알려주고 그 뒤로는
-# 응답 없이 멈추기 때문에, 실제로는 타임아웃 얼굴을 하고 나타난다.
-# 180초를 다시 기다리게 두느니 잠깐 건너뛰고 사용자에게 선택지를 주는 편이 낫다.
 _BLOCKING_FAILURE_CODES: dict[str, timedelta | None] = {
     "QUOTA_EXHAUSTED": None,  # 응답에 적힌 회복 시각을 그대로 쓴다
     "AUTH_EXPIRED": None,
@@ -45,10 +42,27 @@ def failure_code(result: LlmExecutionResult) -> str:
     return "PROVIDER_UNAVAILABLE"
 
 
-class FallbackLlmHarness(BaseLlmHarness):
-    """첫 실행 실패 시에만, 안전하게 설정된 Google API로 한 번 재시도한다."""
+def _invoke_harness(
+    harness: BaseLlmHarness, prompt: str, *, model: Optional[str] = None, **call: Any
+) -> LlmExecutionResult:
+    """하네스가 file_path 등 신규 인자를 지원하지 않는 구형 어댑터인 경우 유연하게 제외 후 호출한다."""
+    try:
+        return harness.run_structured(prompt, model=model, **call)
+    except TypeError as exc:
+        if "file_path" in str(exc) or "unexpected keyword" in str(exc):
+            safe_call = {
+                k: v
+                for k, v in call.items()
+                if k in ("schema_path", "json_schema", "effort", "conversation_id", "timeout")
+            }
+            return harness.run_structured(prompt, model=model, **safe_call)
+        raise
 
-    name = "cli-with-google-fallback"
+
+class FallbackLlmHarness(BaseLlmHarness):
+    """첫 실행 실패 시에만, 안전하게 설정된 보조 경로로 한 번 재시도하는 대칭형 라우팅 하네스."""
+
+    name = "adaptive-routing-fallback"
 
     def __init__(
         self,
@@ -58,6 +72,12 @@ class FallbackLlmHarness(BaseLlmHarness):
         google_timeout_seconds: int,
         provider_state: Optional[ProviderStateStore] = None,
         cli_availability: Optional[CliQuotaAvailability] = None,
+        *,
+        primary_provider: str = "agy-cli",
+        fallback_provider: str = "google-api",
+        cli_model: Optional[str] = None,
+        cli_timeout_seconds: Optional[int] = None,
+        cli_executable: Optional[str] = None,
     ) -> None:
         super().__init__(model=primary.model, timeout_seconds=primary.timeout_seconds)
         self._primary = primary
@@ -66,6 +86,11 @@ class FallbackLlmHarness(BaseLlmHarness):
         self._google_timeout_seconds = google_timeout_seconds
         self._state = provider_state
         self._cli_availability = cli_availability
+        self._primary_provider = primary_provider
+        self._fallback_provider = fallback_provider
+        self._cli_model = cli_model or primary.model
+        self._cli_timeout_seconds = cli_timeout_seconds or primary.timeout_seconds
+        self._cli_executable = cli_executable
 
     def run_structured(
         self,
@@ -77,6 +102,8 @@ class FallbackLlmHarness(BaseLlmHarness):
         effort: Optional[str] = None,
         conversation_id: Optional[str] = None,
         timeout: Optional[int] = None,
+        file_path: Optional[Union[str, Path]] = None,
+        **kwargs: Any,
     ) -> LlmExecutionResult:
         call = dict(
             schema_path=schema_path,
@@ -84,10 +111,18 @@ class FallbackLlmHarness(BaseLlmHarness):
             effort=effort,
             conversation_id=conversation_id,
             timeout=timeout,
+            file_path=file_path,
+            **kwargs,
         )
 
         report_progress({"execution": {"phase": "routing", "provider": None, "model": None}})
 
+        is_google_primary = self._primary_provider in ("google_api", "google-api")
+        if is_google_primary:
+            return self._run_google_primary(prompt, model=model, **call)
+        return self._run_cli_primary(prompt, model=model, **call)
+
+    def _run_cli_primary(self, prompt: str, *, model: Optional[str] = None, **call: Any) -> LlmExecutionResult:
         # 1. 이미 못 쓰는 것으로 확인된 공급자는 부르지 않는다.
         blocked_until = self._state.blocked_until(PRIMARY_PROVIDER_ID) if self._state else None
         if blocked_until is not None:
@@ -133,7 +168,7 @@ class FallbackLlmHarness(BaseLlmHarness):
                 }
             }
         )
-        primary = self._primary.run_structured(prompt, model=model, **call)
+        primary = _invoke_harness(self._primary, prompt, model=model, **call)
         if self._cli_availability:
             self._cli_availability.invalidate()
         primary.telemetry_metadata.setdefault("provider", "agy_cli")
@@ -168,6 +203,143 @@ class FallbackLlmHarness(BaseLlmHarness):
             route_reason="cli_failed",
             **call,
         )
+
+    def _run_google_primary(self, prompt: str, *, model: Optional[str] = None, **call: Any) -> LlmExecutionResult:
+        target_model = model or self._google_model
+        api_key = self._credentials.get_google_api_key()
+
+        blocked_until = self._state.blocked_until("google-api") if self._state else None
+        if not api_key:
+            return self._fallback_to_cli_or_report(
+                prompt,
+                "AUTH_EXPIRED",
+                blocked_until=None,
+                model=model,
+                route_reason="google_api_key_missing",
+                skipped_primary=True,
+                **call,
+            )
+        if blocked_until is not None:
+            code = self._state.block_reason("google-api") if self._state else "PROVIDER_UNAVAILABLE"
+            return self._fallback_to_cli_or_report(
+                prompt,
+                code,
+                blocked_until=blocked_until,
+                model=model,
+                route_reason="google_api_blocked",
+                skipped_primary=True,
+                **call,
+            )
+
+        report_progress(
+            {
+                "execution": {
+                    "phase": "running",
+                    "provider": "google-api",
+                    "model": target_model,
+                    "routeReason": "google_api_primary",
+                }
+            }
+        )
+        primary = _invoke_harness(self._primary, prompt, model=target_model, **call)
+        primary.telemetry_metadata.setdefault("provider", "google_api")
+        if primary.ok:
+            primary.telemetry_metadata.setdefault("fallback_used", False)
+            if self._state:
+                self._state.clear("google-api")
+            return primary
+
+        code = failure_code(primary)
+        if self._state and code in _BLOCKING_FAILURE_CODES:
+            blocked_until = self._state.block(
+                "google-api",
+                reason=code,
+                message=primary.error,
+                reset_after=_BLOCKING_FAILURE_CODES[code],
+            )
+
+        return self._fallback_to_cli_or_report(
+            prompt,
+            code,
+            blocked_until=blocked_until,
+            model=model,
+            primary_result=primary,
+            route_reason="google_api_failed",
+            **call,
+        )
+
+    def _fallback_to_cli_or_report(
+        self,
+        prompt: str,
+        primary_code: str,
+        blocked_until: Optional[datetime],
+        *,
+        model: Optional[str] = None,
+        primary_result: Optional[LlmExecutionResult] = None,
+        route_reason: str = "google_api_failed",
+        skipped_primary: bool = False,
+        **call: Any,
+    ) -> LlmExecutionResult:
+        """Google API 실패 시 CLI 보조 경로로 시도한다."""
+        cli_bin = self._cli_executable or settings.agent_cli_bin
+        cli_available = bool(shutil.which(cli_bin))
+        if self._state and self._state.blocked_until(PRIMARY_PROVIDER_ID):
+            cli_available = False
+
+        if cli_available:
+            cli_model = self._cli_model or settings.agent_cli_model
+            report_progress(
+                {
+                    "execution": {
+                        "phase": "switched" if not skipped_primary else "running",
+                        "provider": PRIMARY_PROVIDER_ID,
+                        "model": cli_model,
+                        "routeReason": route_reason,
+                        "fallbackFrom": None if skipped_primary else "google-api",
+                    }
+                }
+            )
+            cli = AgyCliHarness(
+                model=cli_model,
+                timeout_seconds=self._cli_timeout_seconds or settings.agent_cli_timeout_seconds,
+                executable=cli_bin,
+            )
+            result = _invoke_harness(cli, prompt, model=cli_model, **call)
+            result.telemetry_metadata.update(
+                {
+                    "provider": "agy_cli",
+                    "fallback_used": True,
+                    "primary_provider": "google_api",
+                    "primary_failure_code": primary_code,
+                    "route_reason": route_reason,
+                    "skipped_primary": skipped_primary,
+                }
+            )
+            return result
+
+        report_progress(
+            {
+                "execution": {
+                    "phase": "running",
+                    "provider": None,
+                    "model": None,
+                    "routeReason": route_reason,
+                }
+            }
+        )
+        res = primary_result or LlmExecutionResult(
+            status="ERROR",
+            model=model or self._google_model,
+            error=f"{primary_code}: Google API 및 CLI 보조 경로를 사용할 수 없습니다.",
+            telemetry_metadata={"provider": "google_api", "skipped_primary": True},
+        )
+        res.telemetry_metadata.update({
+            "failure_code": "PRIMARY_AND_FALLBACK_UNAVAILABLE",
+            "primary_failure_code": primary_code,
+            "route_reason": route_reason,
+            "skipped_primary": skipped_primary,
+        })
+        return res
 
     # --- 내부 ---------------------------------------------------------
 
@@ -204,7 +376,7 @@ class FallbackLlmHarness(BaseLlmHarness):
                 api_key=api_key,
                 timeout_seconds=self._google_timeout_seconds,
             )
-            result = fallback.run_structured(prompt, model=None, **call)
+            result = _invoke_harness(fallback, prompt, model=None, **call)
             result.telemetry_metadata.update(
                 {
                     "provider": "google_api",

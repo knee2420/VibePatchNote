@@ -27,7 +27,7 @@ class ElementItem(BaseModel):
     items: Optional[List[str]] = Field(default=None, description="list 타입인 경우 세부 불릿/항목 목록")
     page: int = Field(1, description="페이지 번호 (1-based)")
     box_2d: Optional[List[int]] = Field(
-        default=None, description="[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표"
+        default=None, description="[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표 (내용/본문/입력값/부착란 전체 사각 영역)"
     )
     content_summary: Optional[str] = Field(None, description="내용 요약")
     structured_data: Optional[Dict[str, Any]] = Field(
@@ -49,7 +49,7 @@ class OutlineItem(BaseModel):
     )
     page: int = Field(1, description="페이지 번호 (1부터 시작)")
     box_2d: Optional[List[int]] = Field(
-        default=None, description="[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표"
+        default=None, description="[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표 (제목/헤더/라벨 텍스트 영역 또는 표 외곽)"
     )
     purpose: Optional[str] = Field(None, description="해당 섹션의 비즈니스/도메인 목적 및 역할 요약")
     elements: List[ElementItem] = Field(

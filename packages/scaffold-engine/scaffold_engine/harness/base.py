@@ -83,6 +83,8 @@ class BaseLlmHarness(ABC):
         effort: Optional[str] = None,
         conversation_id: Optional[str] = None,
         timeout: Optional[int] = None,
+        file_path: Optional[Union[str, Path]] = None,
+        **kwargs: Any,
     ) -> LlmExecutionResult:
         """JSON Schema 를 걸어 정형 데이터를 1-Stage 로 회수한다. 어댑터의 유일한 필수 구현."""
         raise NotImplementedError

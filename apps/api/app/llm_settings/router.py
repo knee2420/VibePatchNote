@@ -128,6 +128,8 @@ async def update_runtime_policy(request: RuntimePolicyUpdateRequest, service: Ll
         return RuntimePolicy(**service.update_runtime_policy(
             request.primary_model, request.primary_timeout_seconds,
             request.fallback_model, request.fallback_timeout_seconds,
+            primary_provider=request.primary_provider,
+            fallback_provider=request.fallback_provider,
         ))
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

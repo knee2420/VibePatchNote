@@ -23,9 +23,9 @@ from app.core.llm.fallback import PRIMARY_PROVIDER_ID
 from app.core.llm.provider_state import ProviderStateStore
 
 OLD_PRIMARY, OLD_PRIMARY_TIMEOUT = "claude-sonnet-4-6", 120
-OLD_FALLBACK, OLD_FALLBACK_TIMEOUT = "gemini-2.5-flash", 90
+OLD_FALLBACK, OLD_FALLBACK_TIMEOUT = "gemini-3.5-flash", 90
 NEW_PRIMARY, NEW_PRIMARY_TIMEOUT = "gpt-oss-120b-medium", 240
-NEW_FALLBACK, NEW_FALLBACK_TIMEOUT = "gemini-2.5-pro", 45
+NEW_FALLBACK, NEW_FALLBACK_TIMEOUT = "gemini-3.1-pro", 45
 
 
 class FakeCredentialStore:

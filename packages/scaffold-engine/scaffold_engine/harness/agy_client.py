@@ -115,6 +115,8 @@ class AgyCliHarness(BaseLlmHarness):
         effort: Optional[str] = None,
         conversation_id: Optional[str] = None,
         timeout: Optional[int] = None,
+        file_path: Optional[Union[str, Path]] = None,
+        **kwargs: Any,
     ) -> LlmExecutionResult:
         target_model = model or self.model
         spec = get_model_spec(target_model)

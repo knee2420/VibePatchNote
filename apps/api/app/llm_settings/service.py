@@ -75,16 +75,24 @@ class LlmSettingsService:
             "outputTokenLimit": None,
             "supportsStructuredOutput": True,
         })
+        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        primary_provider_id = "google-api" if is_google_primary else PRIMARY_PROVIDER_ID
+        fallback_provider_id = PRIMARY_PROVIDER_ID if is_google_primary else "google-api"
+        primary_model = settings.google_api_model if is_google_primary else settings.agent_cli_model
+        primary_timeout = settings.google_api_timeout_seconds if is_google_primary else settings.agent_cli_timeout_seconds
+        fallback_model = settings.agent_cli_model if is_google_primary else settings.google_api_model
+        fallback_timeout = settings.agent_cli_timeout_seconds if is_google_primary else settings.google_api_timeout_seconds
+
         return {
             "providers": [self._primary(), self._fallback()],
             "models": models,
             "policy": {
-                "primaryProvider": PRIMARY_PROVIDER_ID,
-                "primaryModel": settings.agent_cli_model,
-                "primaryTimeoutSeconds": settings.agent_cli_timeout_seconds,
-                "fallbackProvider": "google-api",
-                "fallbackModel": settings.google_api_model,
-                "fallbackTimeoutSeconds": settings.google_api_timeout_seconds,
+                "primaryProvider": primary_provider_id,
+                "primaryModel": primary_model,
+                "primaryTimeoutSeconds": primary_timeout,
+                "fallbackProvider": fallback_provider_id,
+                "fallbackModel": fallback_model,
+                "fallbackTimeoutSeconds": fallback_timeout,
             },
             "quotaNotice": "정확한 잔여 호출 수는 API 키에서 제공되지 않습니다. 프로젝트별 한도와 상세 사용량은 Google AI Studio에서 확인하며, 여기서는 실제 차단 상태와 복구 예정 시각을 표시합니다.",
             "agyStatus": self._agy_status.read() if self._agy_status else None,
@@ -140,15 +148,45 @@ class LlmSettingsService:
         return {"id": "google-api", "label": "Google API", "configured": True, "role": "fallback"}
 
     def update_runtime_policy(
-        self, primary_model: str, primary_timeout_seconds: int, fallback_model: str, fallback_timeout_seconds: int
+        self,
+        primary_model: str,
+        primary_timeout_seconds: int,
+        fallback_model: str,
+        fallback_timeout_seconds: int,
+        primary_provider: Optional[str] = None,
+        fallback_provider: Optional[str] = None,
     ) -> dict[str, object]:
         """현재 API 프로세스의 실행 정책을 갱신한다. 비밀 값은 취급하지 않는다."""
-        if primary_model not in MODEL_REGISTRY:
-            raise ValueError(f"Unknown primary model: {primary_model}")
-        settings.agent_cli_model = primary_model
-        settings.agent_cli_timeout_seconds = primary_timeout_seconds
-        settings.google_api_model = fallback_model
-        settings.google_api_timeout_seconds = fallback_timeout_seconds
+        if primary_provider:
+            cleaned_p = primary_provider.strip().lower().replace("-", "_")
+            if cleaned_p in ("google_api", "googleapi", "google"):
+                if not self._credentials.get_google_api_key():
+                    raise ValueError("Google API를 기본 실행 엔진으로 지정하려면 먼저 Google API 키를 등록해야 합니다.")
+                settings.primary_provider = "google_api"
+            elif cleaned_p in ("agy_cli", "cli", "agycli", "agy"):
+                settings.primary_provider = "agy_cli"
+
+        if fallback_provider:
+            cleaned_f = fallback_provider.strip().lower().replace("-", "_")
+            if cleaned_f in ("google_api", "googleapi", "google"):
+                settings.fallback_provider = "google_api"
+            elif cleaned_f in ("agy_cli", "cli", "agycli", "agy"):
+                settings.fallback_provider = "agy_cli"
+
+        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        if is_google_primary:
+            settings.google_api_model = primary_model
+            settings.google_api_timeout_seconds = primary_timeout_seconds
+            settings.agent_cli_model = fallback_model
+            settings.agent_cli_timeout_seconds = fallback_timeout_seconds
+        else:
+            if primary_model not in MODEL_REGISTRY:
+                raise ValueError(f"Unknown primary model: {primary_model}")
+            settings.agent_cli_model = primary_model
+            settings.agent_cli_timeout_seconds = primary_timeout_seconds
+            settings.google_api_model = fallback_model
+            settings.google_api_timeout_seconds = fallback_timeout_seconds
+
         if self._runtime_policy:
             self._runtime_policy.save(self.runtime_dashboard()["policy"])
         return self.runtime_dashboard()["policy"]
@@ -164,27 +202,56 @@ class LlmSettingsService:
         saved = self._runtime_policy.load()
         if not saved:
             return
-        primary_model = saved.get("primaryModel")
-        if isinstance(primary_model, str) and primary_model in MODEL_REGISTRY:
-            settings.agent_cli_model = primary_model
-        for attribute, key in (
-            ("agent_cli_timeout_seconds", "primaryTimeoutSeconds"),
-            ("google_api_timeout_seconds", "fallbackTimeoutSeconds"),
-        ):
-            value = saved.get(key)
-            if isinstance(value, int) and 15 <= value <= 600:
-                setattr(settings, attribute, value)
-        fallback_model = saved.get("fallbackModel")
-        if isinstance(fallback_model, str) and fallback_model:
-            settings.google_api_model = fallback_model
+
+        primary_provider = saved.get("primaryProvider")
+        if isinstance(primary_provider, str):
+            p_clean = primary_provider.strip().lower().replace("-", "_")
+            if p_clean in ("google_api", "agy_cli"):
+                settings.primary_provider = p_clean
+        fallback_provider = saved.get("fallbackProvider")
+        if isinstance(fallback_provider, str):
+            f_clean = fallback_provider.strip().lower().replace("-", "_")
+            if f_clean in ("google_api", "agy_cli"):
+                settings.fallback_provider = f_clean
+
+        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        if is_google_primary:
+            primary_model = saved.get("primaryModel")
+            if isinstance(primary_model, str) and primary_model:
+                settings.google_api_model = primary_model
+            fallback_model = saved.get("fallbackModel")
+            if isinstance(fallback_model, str) and fallback_model:
+                settings.agent_cli_model = fallback_model
+            for attribute, key in (
+                ("google_api_timeout_seconds", "primaryTimeoutSeconds"),
+                ("agent_cli_timeout_seconds", "fallbackTimeoutSeconds"),
+            ):
+                value = saved.get(key)
+                if isinstance(value, int) and 15 <= value <= 600:
+                    setattr(settings, attribute, value)
+        else:
+            primary_model = saved.get("primaryModel")
+            if isinstance(primary_model, str) and primary_model in MODEL_REGISTRY:
+                settings.agent_cli_model = primary_model
+            fallback_model = saved.get("fallbackModel")
+            if isinstance(fallback_model, str) and fallback_model:
+                settings.google_api_model = fallback_model
+            for attribute, key in (
+                ("agent_cli_timeout_seconds", "primaryTimeoutSeconds"),
+                ("google_api_timeout_seconds", "fallbackTimeoutSeconds"),
+            ):
+                value = saved.get(key)
+                if isinstance(value, int) and 15 <= value <= 600:
+                    setattr(settings, attribute, value)
 
     def _primary(self) -> dict[str, Any]:
         """CLI 는 설치돼 있으면 설정된 것으로 본다. 다만 지금 쓸 수 있는지는 별개다."""
+        is_primary = settings.primary_provider not in ("google_api", "google-api")
         status: dict[str, Any] = {
             "id": PRIMARY_PROVIDER_ID,
             "label": "Antigravity CLI",
             "configured": True,
-            "role": "primary",
+            "role": "primary" if is_primary else "fallback",
             "available": bool(shutil.which(settings.agent_cli_bin)),
         }
         if not status["available"]:
@@ -210,41 +277,66 @@ class LlmSettingsService:
     def _fallback(self) -> dict[str, Any]:
         api_key = self._credentials.get_google_api_key()
         configured = bool(api_key)
-        return {
+        is_primary = settings.primary_provider in ("google_api", "google-api")
+        until = self._state.blocked_until("google-api") if self._state else None
+        available = configured and until is None
+        status: dict[str, Any] = {
             "id": "google-api",
             "label": "Google API",
             "configured": configured,
             "masked_key": self._masked_key(api_key) if api_key else None,
-            "role": "fallback",
-            "available": configured,
+            "role": "primary" if is_primary else "fallback",
+            "available": available,
         }
+        if until is not None:
+            status.update({
+                "blocked_reason": self._state.block_reason("google-api") if self._state else "RATE_LIMIT",
+                "blocked_until": until.isoformat(),
+                "recovers_in": remaining_text(until) if until else None,
+            })
+        return status
 
     def _next_execution(self) -> dict[str, Any]:
         """현재 스냅샷 기준 다음 AI 작업의 예상 경로. 실행 이력은 만들지 않는다."""
-        primary = self._primary()
-        fallback = self._fallback()
-        if not primary.get("available"):
+        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        primary = self._fallback() if is_google_primary else self._primary()
+        secondary = self._primary() if is_google_primary else self._fallback()
+
+        if is_google_primary:
+            if primary.get("available"):
+                return {
+                    "provider": "google-api",
+                    "model": settings.google_api_model,
+                    "routeReason": "api_configured",
+                }
             return {
-                "provider": "google-api" if fallback["available"] else None,
-                "model": settings.google_api_model if fallback["available"] else None,
-                "routeReason": "cli_blocked",
+                "provider": PRIMARY_PROVIDER_ID if secondary["available"] else None,
+                "model": settings.agent_cli_model if secondary["available"] else None,
+                "routeReason": "api_unavailable_fallback_to_cli",
             }
-        availability = (
-            self._cli_availability.check(settings.agent_cli_model)
-            if self._cli_availability
-            else None
-        )
-        if availability and availability.exhausted:
+        else:
+            if not primary.get("available"):
+                return {
+                    "provider": "google-api" if secondary["available"] else None,
+                    "model": settings.google_api_model if secondary["available"] else None,
+                    "routeReason": "cli_blocked",
+                }
+            availability = (
+                self._cli_availability.check(settings.agent_cli_model)
+                if self._cli_availability
+                else None
+            )
+            if availability and availability.exhausted:
+                return {
+                    "provider": "google-api" if secondary["available"] else None,
+                    "model": settings.google_api_model if secondary["available"] else None,
+                    "routeReason": "cli_quota_exhausted",
+                }
             return {
-                "provider": "google-api" if fallback["available"] else None,
-                "model": settings.google_api_model if fallback["available"] else None,
-                "routeReason": "cli_quota_exhausted",
+                "provider": PRIMARY_PROVIDER_ID,
+                "model": settings.agent_cli_model,
+                "routeReason": "cli_available" if availability and availability.state == "available" else "cli_quota_unknown",
             }
-        return {
-            "provider": PRIMARY_PROVIDER_ID,
-            "model": settings.agent_cli_model,
-            "routeReason": "cli_available" if availability and availability.state == "available" else "cli_quota_unknown",
-        }
 
     @staticmethod
     def _masked_key(api_key: str) -> str:
