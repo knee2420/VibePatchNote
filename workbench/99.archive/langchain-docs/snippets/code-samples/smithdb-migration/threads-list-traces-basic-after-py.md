@@ -1,0 +1,22 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/threads-list-traces-basic-after-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python After
+import asyncio
+
+from langsmith import Client
+
+
+async def main():
+    client = Client()
+    project = await client.aread_project(project_name="default")
+    thread_id = "<thread-id>"
+    async for trace in client.threads.list_traces(
+        thread_id, project_id=str(project.id), selects=["TRACE_ID", "START_TIME"]
+    ):
+        print(trace.trace_id, trace.start_time)
+
+
+asyncio.run(main())
+```

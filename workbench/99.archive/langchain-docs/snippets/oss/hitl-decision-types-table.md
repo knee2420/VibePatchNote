@@ -1,0 +1,10 @@
+<!-- source: langchain-ai/docs  src/snippets/oss/hitl-decision-types-table.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+| Decision Type | Description                                                               | Example Use Case                                    |
+|---------------|---------------------------------------------------------------------------|-----------------------------------------------------|
+| ✅ `approve`   | Execute the tool with the original arguments as proposed by the agent.    | Send an email draft exactly as written              |
+| ✏️ `edit`     | Modify the tool arguments before execution.                               | Change the recipient before sending an email        |
+| ❌ `reject`    | Skip executing this tool call entirely and return rejection feedback to the agent. | Deny file deletion and explain why         |
+| 💬 `respond`  | Return the human's message directly as a synthetic tool result, skipping execution, for "ask user" style tools. | Answer an `"ask_user"` prompt with a direct reply |

@@ -1,0 +1,33 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/event-streaming-nested-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```ts
+const stream = await agent.streamEvents(input, { version: "v3" });
+
+const subagentNames: string[] = [];
+for await (const subagent of stream.subagents) {
+  console.log(`subagent ${subagent.name}: started`);
+
+  for await (const toolCall of subagent.toolCalls) {
+    console.log(`${toolCall.name}(${JSON.stringify(toolCall.input)})`);
+
+    const status = await toolCall.status;
+    if (status === "finished") {
+      console.log(await toolCall.output);
+    } else if (status === "error") {
+      console.error(await toolCall.error);
+    }
+  }
+
+  for await (const nested of subagent.subagents) {
+    console.log(`nested subagent ${nested.name}: started`);
+  }
+
+  subagentNames.push(subagent.name);
+}
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/0b947581-de0c-491e-96c1-ba37cc862b0e/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

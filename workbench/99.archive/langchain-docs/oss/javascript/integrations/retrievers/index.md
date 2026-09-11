@@ -1,0 +1,31 @@
+<!-- source: langchain-ai/docs  src/oss/javascript/integrations/retrievers/index.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Retriever integrations"
+sidebarTitle: "Retrievers"
+description: "Integrate with retrievers using LangChain JavaScript."
+---
+
+import IntegrationDownloads from '/snippets/oss/javascript-retrievers-downloads.mdx';
+
+A [retriever](/oss/deepagents/retrieval) is an interface that returns documents given an unstructured query.
+It is more general than a vector store.
+A retriever does not need to be able to store documents, only to return (or retrieve) them.
+
+Retrievers accept a string query as input and return a list of `Document` objects.
+
+For specifics on how to use retrievers, see the [relevant how-to guides here](/oss/deepagents/retrieval).
+
+Note that all [vector stores](/oss/integrations/vectorstores) can be [cast to retrievers](/oss/deepagents/retrieval).
+Refer to the vector store [integration docs](/oss/integrations/vectorstores/) for available vector store retrievers.
+
+## All retrievers
+
+<IntegrationDownloads />
+
+
+<Info>
+    If you'd like to contribute an integration, see [Contributing integrations](/oss/contributing#add-a-new-integration).
+</Info>

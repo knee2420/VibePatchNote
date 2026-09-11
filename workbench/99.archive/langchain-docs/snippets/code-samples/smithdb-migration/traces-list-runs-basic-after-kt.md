@@ -1,0 +1,35 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/traces-list-runs-basic-after-kt.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```kotlin After
+import java.time.OffsetDateTime
+
+import com.langchain.smith.client.LangsmithClient
+import com.langchain.smith.client.okhttp.LangsmithOkHttpClient
+import com.langchain.smith.models.sessions.SessionListParams
+import com.langchain.smith.models.traces.TraceListRunsParams
+import com.langchain.smith.models.traces.TraceQueryParams
+import kotlin.jvm.optionals.getOrNull
+
+val client: LangsmithClient = LangsmithOkHttpClient.fromEnv()
+
+val project = client.sessions().list(
+    SessionListParams.builder().name("default").limit(1L).build()
+).items().first()
+
+var traceId = "<trace-id>"
+
+val response = client.traces().listRuns(
+    traceId,
+    TraceListRunsParams.builder()
+        .projectId(project.id())
+        .addSelect(TraceListRunsParams.Select.NAME)
+        .addSelect(TraceListRunsParams.Select.RUN_TYPE)
+        .addSelect(TraceListRunsParams.Select.STATUS)
+        .build()
+)
+for (run in response.items().getOrNull() ?: emptyList()) {
+    println("${run.name().getOrNull()} ${run.runType().getOrNull()} ${run.status().getOrNull()}")
+}
+```

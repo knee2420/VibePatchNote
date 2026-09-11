@@ -1,0 +1,33 @@
+<!-- source: langchain-ai/docs  src/oss/python/integrations/providers/konlpy.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Konlpy integrations"
+description: "Integrate with Konlpy using LangChain Python."
+---
+
+>[KoNLPy](https://konlpy.org/) is a Python package for natural language processing (NLP)
+> of the Korean language.
+
+
+## Installation and setup
+
+You need to install the `konlpy` python package.
+
+<CodeGroup>
+```bash pip
+pip install konlpy
+```
+
+```bash uv
+uv add konlpy
+```
+</CodeGroup>
+
+## Text splitter
+
+
+```python
+from langchain_text_splitters import KonlpyTextSplitter
+```

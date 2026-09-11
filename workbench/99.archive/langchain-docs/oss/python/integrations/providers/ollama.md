@@ -1,0 +1,34 @@
+<!-- source: langchain-ai/docs  src/oss/python/integrations/providers/ollama.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Ollama integrations"
+description: "Integrate with Ollama using LangChain Python."
+sidebarTitle: "Ollama"
+---
+
+This page covers all LangChain integrations with [Ollama](https://ollama.com/).
+
+Ollama allows you to run open-source models (like [`gpt-oss`](https://ollama.com/library/gpt-oss)) locally.
+
+For a complete list of supported models and variants, see the [Ollama model library](https://ollama.ai/library).
+
+## Model interfaces
+
+<Columns cols={2}>
+    <Card title="ChatOllama" href="/oss/integrations/chat/ollama" cta="Get started" icon="message" arrow>
+        Ollama chat models.
+    </Card>
+    <Card title="OllamaEmbeddings" href="/oss/integrations/embeddings/ollama" cta="Get started" icon="message" arrow>
+        Ollama embedding models.
+    </Card>
+</Columns>
+
+## Other
+
+<Columns cols={2}>
+    <Card title="OllamaLLM" href="/oss/integrations/llms/ollama" cta="Get started" icon="cursor-text" arrow>
+        (Legacy) Ollama text completion models.
+    </Card>
+</Columns>

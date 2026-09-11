@@ -1,0 +1,28 @@
+<!-- source: langchain-ai/docs  src/oss/python/integrations/providers/privy.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Privy integrations"
+description: "Integrate with Privy using LangChain Python."
+---
+
+[Privy](https://privy.io) is powerful wallet infrastructure for AI agents, built for scale.
+
+Give agents a tool to:
+
+- Automatically create and manage wallets
+- Make payments in a variety of digital assets, including stablecoins
+- Sign messages and transactions
+- Query wallet balances and addresses
+
+### How it works
+Privy provides wallet infrastructure that removes the complexity of blockchain interactions:
+
+1. Give your agent a powerful modular wallet
+2. Secure your agent's assets with transaction policies
+3. Make payments with speed
+
+## Installation and setup
+
+Check out the [tool documentation](/oss/integrations/tools/privy) to see how to set up and install Privy.

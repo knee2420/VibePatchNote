@@ -1,0 +1,26 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/mcp-client-group-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+from fastmcp.client import Client
+from fastmcp.client.group import ClientGroup
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+
+
+async def agent_from_group(legacy_url: str, modern_url: str):
+    # One connection per server: a `ClientGroup` keeps each server on its own
+    # negotiated protocol era, so a legacy and a modern server run side by side.
+    # It also namespaces every tool as `{server}_{tool}`, so two servers exposing
+    # the same tool name stay distinct.
+    group = ClientGroup(
+        {
+            "weather": Client(legacy_url, mode="legacy"),
+            "calc": Client(modern_url, mode="auto"),
+        }
+    )
+    async with MCPAdapter(group) as adapter:
+        tools = await adapter.list_tools()
+        return create_agent("claude-sonnet-5", tools)
+```

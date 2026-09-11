@@ -1,0 +1,117 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/deep-agent-from-scratch-skills-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+<CodeGroup>
+    ```python Google
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "google_genai:gemini-3.6-flash"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python OpenAI
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "openai:gpt-5.5"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python Anthropic
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "anthropic:claude-sonnet-4-6"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python OpenRouter
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "openrouter:z-ai/glm-5.2"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python Fireworks
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "fireworks:accounts/fireworks/models/glm-5p2"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python Baseten
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "baseten:zai-org/GLM-5.2"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+
+    ```python Ollama
+    from deepagents.middleware import FilesystemMiddleware, SkillsMiddleware, SummarizationMiddleware
+    
+    model = "ollama:north-mini-code-1.0"
+    
+    agent = create_agent(
+        model=model,
+        tools=[],
+        middleware=[
+            FilesystemMiddleware(backend=backend),
+            SummarizationMiddleware(model=model, backend=backend),
+            SkillsMiddleware(backend=backend, sources=["/skills/"]),
+        ],
+    )
+    ```
+</CodeGroup>

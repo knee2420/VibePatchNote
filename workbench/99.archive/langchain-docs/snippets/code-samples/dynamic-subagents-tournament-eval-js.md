@@ -1,0 +1,27 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/dynamic-subagents-tournament-eval-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```ts
+// Generate variants, then judge pairwise until a single winner remains.
+let bracket = await Promise.all(
+  [1, 2, 3, 4, 5].map((n) =>
+    task({ description: `Rewrite processOrder for readability (variant ${n}).`, subagentType: "writer" }),
+  ),
+);
+
+while (bracket.length > 1) {
+  const winners = [];
+  for (let i = 0; i < bracket.length; i += 2) {
+    if (bracket[i + 1] === undefined) { winners.push(bracket[i]); break; }
+    const { winner } = await task({
+      description: `Pick the more readable:\n\nA:\n${bracket[i]}\n\nB:\n${bracket[i + 1]}`,
+      subagentType: "judge",
+      responseSchema: pickSchema, // -> { winner: "A" | "B" }
+    });
+    winners.push(winner === "A" ? bracket[i] : bracket[i + 1]);
+  }
+  bracket = winners;
+}
+bracket[0]; // the winning rewrite
+```

@@ -1,0 +1,29 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/runs-retrieve-not-found-after-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python After
+import asyncio
+
+from langsmith import Client
+from langsmith import NotFoundError
+
+
+async def main():
+    client = Client()
+    project = await client.aread_project(project_name="default")
+    run_id = "<run-id>"
+    start_time = "2026-06-01T12:00:00Z"
+
+    try:
+        run = await client.runs.retrieve(
+            run_id=run_id,
+            project_id=str(project.id),
+            start_time=start_time,
+        )
+    except NotFoundError:
+        print(f"Run {run_id} not found")
+
+
+asyncio.run(main())
+```

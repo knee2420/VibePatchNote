@@ -1,0 +1,26 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/agentic-rag-preprocess-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+import bs4
+import requests
+from langchain_core.documents import Document
+
+
+# Below is a minimal helper for demonstration purposes.
+def load_web_page(url: str, bs_kwargs: dict | None = None) -> list[Document]:
+    response = requests.get(url, timeout=20)
+    response.raise_for_status()
+    soup = bs4.BeautifulSoup(response.text, "html.parser", **(bs_kwargs or {}))
+    return [Document(page_content=soup.get_text(), metadata={"source": url})]
+
+
+urls = [
+    "https://lilianweng.github.io/posts/2024-11-28-reward-hacking/",
+    "https://lilianweng.github.io/posts/2024-07-07-hallucination/",
+    "https://lilianweng.github.io/posts/2024-04-12-diffusion-video/",
+]
+
+docs = [load_web_page(url) for url in urls]
+```

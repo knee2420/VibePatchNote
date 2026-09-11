@@ -1,0 +1,27 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/ls-metadata-parameters-configured-kt.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```kotlin Kotlin
+val myConfiguredLlm =
+    traceable(
+        { messages: List<Map<String, String>> -> callLlm(messages) },
+        TraceConfig.builder()
+            .runType(RunType.LLM)
+            .metadata(
+                mapOf(
+                    "ls_provider" to "openai",
+                    "ls_model_name" to "gpt-5.5",
+                    "ls_temperature" to 0.7,
+                    "ls_max_tokens" to 4096,
+                    "ls_stop" to listOf("END"),
+                    "ls_invocation_params" to
+                        mapOf(
+                            "top_p" to 0.9,
+                            "frequency_penalty" to 0.5,
+                        ),
+                ),
+            )
+            .build(),
+    )
+```

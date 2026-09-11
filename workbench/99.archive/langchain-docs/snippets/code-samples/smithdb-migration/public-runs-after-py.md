@@ -1,0 +1,43 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/public-runs-after-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+PUBLIC_RUN_SELECTS = ["ID", "NAME", "RUN_TYPE", "STATUS", "START_TIME"]
+
+# Share a trace.
+share = await client.runs.share.create(
+    run_id,
+    session_id=project_id,
+    trace_id=trace_id,
+)
+if not share.share_token:
+    raise RuntimeError("The server did not return a share token")
+share_token = share.share_token
+
+# Query the public trace and use its stored start time for a point read.
+response = await client.public.runs.query(
+    share_token,
+    selects=PUBLIC_RUN_SELECTS,
+)
+runs = response.items
+item = next(run for run in runs if str(run.id) == run_id)
+run = await client.public.runs.retrieve(
+    run_id,
+    share_token=share_token,
+    selects=PUBLIC_RUN_SELECTS,
+    start_time=item.start_time,
+)
+
+# Retrieve the deployment-aware public URL for an authenticated run.
+authenticated_run = await client.runs.retrieve(
+    run_id,
+    project_id=project_id,
+    start_time=item.start_time,
+    selects=["SHARE_URL"],
+)
+share_url = authenticated_run.share_url
+
+# Remove public access by root trace ID.
+await client.runs.share.delete(trace_id, session_id=project_id)
+```

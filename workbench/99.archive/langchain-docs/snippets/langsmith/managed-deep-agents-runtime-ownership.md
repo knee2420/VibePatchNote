@@ -1,0 +1,29 @@
+<!-- source: langchain-ai/docs  src/snippets/langsmith/managed-deep-agents-runtime-ownership.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+The managed runtime owns `backend`, `store`, `checkpointer`, `skills`, and the system prompt. Do not set those fields in the agent definition.
+
+:::python
+| Concern | Owner | Where you configure it |
+| --- | --- | --- |
+| `name` | You | Required in the agent definition; used as the assistant ID and default deployment name. |
+| `backend`, `store`, `checkpointer` | Managed runtime | Not configurable. |
+| Durable memory | Managed runtime when enabled | Optional through a project-root `memory.py` declaration and shared across the deployment. See [Memory](/langsmith/managed-deep-agents-memory). |
+| `skills` | Managed runtime, backed by Context Hub | `skills/**` in the project. |
+| System prompt | Managed runtime, backed by Context Hub | `instructions.md` in the project. |
+| Model, tools, middleware, subagents, interrupts | You | The agent definition and imported modules. |
+:::
+
+:::js
+| Concern | Owner | Where you configure it |
+| --- | --- | --- |
+| `name` | You | Required in the agent definition; used as the assistant ID and default deployment name. |
+| `backend`, `store`, `checkpointer` | Managed runtime | Not configurable. |
+| Durable memory | Managed runtime when enabled | Optional through a project-root `memory.ts` declaration and shared across the deployment. See [Memory](/langsmith/managed-deep-agents-memory). |
+| `skills` | Managed runtime, backed by Context Hub | `skills/**` in the project. |
+| System prompt | Managed runtime, backed by Context Hub | `instructions.md` in the project. |
+| Model, tools, middleware, subagents, interrupts | You | The agent definition and imported modules. |
+:::
+
+For author-configured fields, see [Agent definition](/langsmith/managed-deep-agents-agent-definition).

@@ -1,0 +1,32 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/evaluate-rag-generation-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python Python
+from langchain_openai import ChatOpenAI
+from langsmith import traceable
+
+llm = ChatOpenAI(model="gpt-5.5", temperature=1)
+
+# Add decorator so this function is traced in LangSmith
+@traceable()
+def rag_bot(question: str) -> dict:
+    # LangChain retriever will be automatically traced
+    docs = retriever.invoke(question)
+    docs_string = "".join(doc.page_content for doc in docs)
+    instructions = f"""You are a helpful assistant who is good at analyzing source information and answering questions.
+       Use the following source documents to answer the user's questions.
+       If you don't know the answer, just say that you don't know.
+       Use three sentences maximum and keep the answer concise.
+
+<context>
+{docs_string}
+</context>"""
+    # langchain ChatModel will be automatically traced
+    ai_msg = llm.invoke([
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": question},
+        ],
+    )
+    return {"answer": ai_msg.content, "documents": docs}
+```
