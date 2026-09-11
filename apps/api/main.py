@@ -157,6 +157,6 @@ def health_check():
 if __name__ == "__main__":
     import uvicorn
 
-    # Reload trigger for inspector schemas
+    # Reload trigger for inspector schemas and source endpoint
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 

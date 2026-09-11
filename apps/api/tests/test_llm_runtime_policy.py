@@ -150,16 +150,16 @@ def _one_page_pdf(tmp_path: Path) -> Path:
 
 
 def test_policy_update_reaches_agents_resolved_before_it(container: Container) -> None:
-    outline_agent = container.outline_analysis_agent()
+    extract_outline = container.extract_outline()
     json_runner = container.json_prompt_runner()
-    assert outline_agent._harness.model == OLD_PRIMARY
+    assert extract_outline._harness.model == OLD_PRIMARY
 
     _update_policy(container)
 
     for harness in (
-        outline_agent._harness,
+        extract_outline._harness,
         json_runner._harness,
-        container.outline_analysis_agent()._harness,
+        container.extract_outline()._harness,
     ):
         assert harness.model == NEW_PRIMARY
         assert harness.timeout_seconds == NEW_PRIMARY_TIMEOUT
@@ -169,11 +169,11 @@ def test_outline_run_executes_with_updated_policy(
     container: Container, executions: ExecutionLog, tmp_path: Path
 ) -> None:
     """모델 속성만이 아니라 실제 CLI 호출이 새 모델·타임아웃을 받는지 본다."""
-    outline_agent = container.outline_analysis_agent()
+    extract_outline = container.extract_outline()
 
     _update_policy(container)
     document = asyncio.run(
-        outline_agent.analyze(_one_page_pdf(tmp_path), context_dir=tmp_path / "context")
+        extract_outline._run_pipeline(_one_page_pdf(tmp_path), context_dir=tmp_path / "context")
     )
 
     assert executions.calls == [("agy_cli", NEW_PRIMARY, NEW_PRIMARY_TIMEOUT)]

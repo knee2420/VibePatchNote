@@ -104,6 +104,16 @@ def test_inspector_runs_and_detail(tmp_path: Path):
         not_found_resp = client.get("/api/v1/inspector/runs/non-existent-run-id")
         assert not_found_resp.status_code == 404
 
+        # 4. Run 삭제 검증
+        del_resp = client.delete(f"/api/v1/inspector/runs/{test_run_id}")
+        assert del_resp.status_code == 200
+        assert del_resp.json()["status"] == "DELETED"
+        assert not run_path.exists()
+
+        # 5. 삭제된 후 재삭제시 404
+        del_again = client.delete(f"/api/v1/inspector/runs/{test_run_id}")
+        assert del_again.status_code == 404
+
     finally:
         # 테스트 후 정리
         if run_path.exists():

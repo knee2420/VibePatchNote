@@ -1,4 +1,5 @@
 export type SpanType = 'workflow' | 'pipeline' | 'chain' | 'llm' | 'tool' | 'parser' | 'custom'
+export type SpanPhase = 'pre_llm' | 'llm' | 'post_llm'
 export type SpanStatus = 'SUCCESS' | 'FAILED' | 'FALLBACK_TRIGGERED' | 'CANCELLED' | 'RUNNING'
 
 export interface ModelAttemptRecord {
@@ -25,6 +26,15 @@ export interface SpanRecord {
   parent_span_id?: string | null
   dotted_order: string
   span_type: SpanType
+  phase?: SpanPhase | null
+  display_label?: string | null
+  description?: string | null
+  summary_pill?: string | null
+  node_id?: string | null
+  node_title?: string | null
+  data_in?: string | null
+  data_out?: string | null
+  data_via?: string[] | null
   name: string
   start_time: string
   end_time?: string
@@ -88,3 +98,14 @@ export interface MatrixResponse {
   fallback_provider: string
   models: MatrixModelInfo[]
 }
+
+export interface SourceCodeResponse {
+  file_path: string
+  symbol?: string | null
+  content: string
+  start_line: number
+  end_line: number
+  total_lines: number
+  language: string
+}
+

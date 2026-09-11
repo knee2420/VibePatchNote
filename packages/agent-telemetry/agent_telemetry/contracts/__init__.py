@@ -2,6 +2,7 @@ from agent_telemetry.contracts.attempt import FallbackChainSummary, ModelAttempt
 from agent_telemetry.contracts.enums import (
     ExecutionProtocol,
     FailureReason,
+    SpanPhase,
     SpanStatus,
     SpanType,
 )
@@ -13,6 +14,7 @@ from agent_telemetry.contracts.usage import SpanUsage
 
 __all__ = [
     "SpanType",
+    "SpanPhase",
     "SpanStatus",
     "ExecutionProtocol",
     "FailureReason",

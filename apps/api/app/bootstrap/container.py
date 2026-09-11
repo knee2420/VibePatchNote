@@ -35,7 +35,6 @@ from app.documents.adapters import (
     LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
 )
-from app.documents.agents import OutlineAnalysisAgent, ScaffoldGenerationAgent
 from app.documents.service import DocumentService
 from app.documents.use_cases import (
     DeleteDocumentUseCase,
@@ -161,9 +160,7 @@ class Container(containers.DeclarativeContainer):
         ScaffoldArchiveService, repository=scaffold_repository
     )
 
-    # --- [6 Models] · Agent 정의 -------------------------------------------
-    outline_analysis_agent = providers.Factory(OutlineAnalysisAgent, harness=llm_harness)
-    scaffold_generation_agent = providers.Factory(ScaffoldGenerationAgent, harness=llm_harness)
+    # --- [6 Models] · Runner 정의 ------------------------------------------
     json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
     segment_scanner = providers.Factory(EngineSegmentScanAdapter, runner=json_prompt_runner)
 
@@ -192,7 +189,6 @@ class Container(containers.DeclarativeContainer):
         artifacts=document_artifact_repository,
         cache=document_cache_repository,
         agent_runtime=agent_runtime,
-        outline_agent=outline_analysis_agent,
         recorder=execution_recorder,
         llm_harness=llm_harness,
     )
@@ -207,8 +203,8 @@ class Container(containers.DeclarativeContainer):
         GenerateScaffoldUseCase,
         source=document_source_repository,
         scaffolds=scaffold_archive_service,
-        agent=scaffold_generation_agent,
         agent_runtime=agent_runtime,
+        llm_harness=llm_harness,
     )
 
     # 재개 핸들러를 Agent Runtime 에 등록하는 지점이므로 요청마다 새로 만들지 않는다.

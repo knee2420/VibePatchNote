@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, computed_field
-from agent_telemetry.contracts.enums import SpanStatus, SpanType
+from agent_telemetry.contracts.enums import SpanPhase, SpanStatus, SpanType
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.usage import SpanUsage
 
@@ -19,6 +19,17 @@ class SpanRecord(BaseModel):
     name: str = Field(..., description="작업 논리명")
     span_type: SpanType = Field(SpanType.CHAIN, description="스팬 유형")
     status: SpanStatus = Field(SpanStatus.PENDING, description="스팬 상태")
+
+    phase: Optional[SpanPhase] = Field(None, description="실행 페이즈 (pre_llm, llm, post_llm)")
+    display_label: Optional[str] = Field(None, description="이용자 친화적 한글 라벨")
+    description: Optional[str] = Field(None, description="이용자 관점 상세 설명")
+    summary_pill: Optional[str] = Field(None, description="성과 한 줄 요약 뱃지")
+    node_id: Optional[str] = Field(None, description="다중 노드 식별자")
+    node_title: Optional[str] = Field(None, description="다중 노드 명칭")
+
+    data_in: Optional[str] = Field(None, description="입력 파일명 또는 입력 데이터/객체/리스트명")
+    data_out: Optional[str] = Field(None, description="출력 파일명 또는 출력 데이터/객체/리스트명")
+    data_via: List[str] = Field(default_factory=list, description="관여 파일/클래스/함수 체인 목록")
 
     start_time: datetime = Field(default_factory=_utc_now, description="시작 시각 (UTC)")
     end_time: Optional[datetime] = Field(None, description="종료 시각 (UTC)")

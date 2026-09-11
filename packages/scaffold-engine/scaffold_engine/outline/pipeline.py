@@ -25,7 +25,7 @@ from scaffold_engine.outline.schemas.models import (
     OutlineItem,
     OutlineOutput,
 )
-from agent_telemetry import SpanStatus, SpanType, StepCollector
+from agent_telemetry import SpanPhase, SpanStatus, SpanType, StepCollector
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +121,15 @@ class OutlinePipeline:
 
         # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화
         target_context_dir = Path(context_dir) if context_dir else self.context_dir
-        with collector.step("DocumentContextBuilder", span_type=SpanType.TOOL) as s_ctx:
+        with collector.step(
+            "DocumentContextBuilder",
+            span_type=SpanType.TOOL,
+            phase=SpanPhase.PRE_LLM,
+            display_label="문서 기하 및 원문 텍스트 실측",
+            description="PDF 원본에서 표 구조, 폰트 크기 및 본문 텍스트 전문을 추출합니다.",
+            data_in=target_display_name,
+            data_via=["context_builder.py (DocumentContextBuilder.build_context)"],
+        ) as s_ctx:
             try:
                 doc_ctx = self.context_builder.build_context(
                     pdf_path, output_dir=target_context_dir, display_name=target_display_name
@@ -131,14 +139,19 @@ class OutlinePipeline:
                     pdf_path, output_dir=target_context_dir
                 )
             context_chars = len(doc_ctx.get("context_text", ""))
-            s_ctx.set_inputs({"filename": target_display_name, "total_pages": doc_ctx.get("total_pages", 1)})
+            pages_cnt = doc_ctx.get("total_pages", 1)
+            s_ctx.set_inputs({"filename": target_display_name, "total_pages": pages_cnt})
             s_ctx.set_outputs({"context_chars": context_chars})
+            s_ctx.set_label(
+                summary_pill=f"{pages_cnt}페이지 · 텍스트 {context_chars:,}자 실측",
+                data_out=f"DocumentContext ({context_chars:,}자)",
+            )
             s_ctx.snapshot(
                 stage_id="context_build",
                 stage_name="문서 컨텍스트 빌드",
                 payload={
                     "filename": target_display_name,
-                    "total_pages": doc_ctx.get("total_pages", 1),
+                    "total_pages": pages_cnt,
                     "context_chars": context_chars,
                     "context_file_path": doc_ctx.get("context_file_path"),
                 },
@@ -147,7 +160,15 @@ class OutlinePipeline:
         # 3. 통합 프롬프트 빌드
         ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
         resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
-        with collector.step("PromptAssembly", span_type=SpanType.CHAIN) as s_prompt:
+        with collector.step(
+            "PromptAssembly",
+            span_type=SpanType.CHAIN,
+            phase=SpanPhase.PRE_LLM,
+            display_label="맞춤 프롬프트 및 메타데이터 조립",
+            description="시스템 지침, 실측 컨텍스트, 대상 문서 메타데이터를 결합합니다.",
+            data_in="DocumentContext + Instructions",
+            data_via=["pipeline.py (OutlinePipeline.execute)"],
+        ) as s_prompt:
             prompt = (
                 f"{instructions}\n\n"
                 f"======================================================================\n"
@@ -169,6 +190,10 @@ class OutlinePipeline:
             )
             s_prompt.set_inputs({"instructions_chars": len(instructions), "dynamic_context_chars": context_chars})
             s_prompt.set_outputs({"total_prompt_chars": len(prompt)})
+            s_prompt.set_label(
+                summary_pill=f"프롬프트 {len(prompt):,}자 구성",
+                data_out=f"Prompt String ({len(prompt):,}자)",
+            )
             s_prompt.snapshot(
                 stage_id="prompt_assembly",
                 stage_name="프롬프트 역분해 조립",
@@ -181,7 +206,15 @@ class OutlinePipeline:
 
         # 4. CLI / LLM 네이티브 구조화 실행
         actual_model = target_model
-        with collector.step(f"LLM:{target_model}", span_type=SpanType.LLM) as s_llm:
+        with collector.step(
+            f"LLM:{target_model}",
+            span_type=SpanType.LLM,
+            phase=SpanPhase.LLM,
+            display_label=f"{target_model} 목차 구조 추론",
+            description="실제 LLM 모델에 프롬프트를 전송하고 구조화된 목차 JSON 응답을 수신합니다.",
+            data_in=f"Prompt String ({len(prompt):,}자)",
+            data_via=[f"{self.harness.__class__.__name__}.run_structured", f"Engine: {target_model}"],
+        ) as s_llm:
             exec_res: LlmExecutionResult = self.harness.run_structured(
                 prompt=prompt,
                 schema_path=self.schema_path,
@@ -196,6 +229,16 @@ class OutlinePipeline:
                 "has_structured_output": bool(exec_res.structured_output),
                 "raw_response_snippet": (exec_res.raw_response or "")[:300],
             })
+            harness_chain = [f"{self.harness.__class__.__name__}.run_structured"]
+            if getattr(exec_res, "provider", None):
+                harness_chain.append(f"Adapter: {exec_res.provider}")
+            harness_chain.append(f"Model: {actual_model}")
+            s_llm.set_label(
+                display_label=f"{actual_model} 목차 구조 추론",
+                summary_pill=f"입력 {exec_res.input_tokens:,}tok ➔ 출력 {exec_res.output_tokens:,}tok",
+                data_out="Structured JSON (Raw Response)",
+                data_via=harness_chain,
+            )
 
         provenance_dict = EngineProvenance(
             pipeline="outline",
@@ -215,6 +258,9 @@ class OutlinePipeline:
                 "duration_seconds": round(sp.usage.latency_ms / 1000, 3),
                 "inputs": sp.inputs,
                 "outputs": sp.outputs or {},
+                "data_in": sp.data_in,
+                "data_out": sp.data_out,
+                "data_via": sp.data_via,
                 "status": sp.status.value.upper(),
                 "error": sp.error.message if sp.error else None,
                 "tokens": {
@@ -265,11 +311,24 @@ class OutlinePipeline:
 
         # 5. 스키마 유효성 검증 및 표준화
         raw_output = exec_res.structured_output
-        with collector.step("OutlineSchemaValidation", span_type=SpanType.PARSER) as s_val:
+        with collector.step(
+            "OutlineSchemaValidation",
+            span_type=SpanType.PARSER,
+            phase=SpanPhase.POST_LLM,
+            display_label="AI 응답 스키마 및 무결성 검증",
+            description="모델이 생성한 구조화 출력을 Pydantic 스키마 및 목차 계층 트리로 파싱하고 검증합니다.",
+            data_in="Structured JSON (Raw Response)",
+            data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
+        ) as s_val:
             try:
                 validated = OutlineOutput.model_validate(raw_output)
                 val_error = None
                 s_val.set_outputs({"outlines_count": len(validated.outlines)})
+                s_val.set_label(
+                    summary_pill=f"목차 노드 {len(validated.outlines)}건 무결성 통과",
+                    data_out=f"OutlineDocument (outlines: {len(validated.outlines)}건)",
+                    data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
+                )
                 s_val.snapshot(
                     stage_id="structured_parsing",
                     stage_name="아웃라인 파싱 및 보정",
@@ -331,6 +390,7 @@ class OutlinePipeline:
                 round(telemetry["ctx_duration"] + exec_res.duration_seconds, 2),
             )
             telemetry["pipeline_telemetry"] = collector.export_telemetry(provenance=provenance_dict).model_dump(mode="json")
+            document.telemetry = telemetry
             return {
                 "success": True,
                 "document_title": target_display_name,

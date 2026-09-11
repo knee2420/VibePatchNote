@@ -45,7 +45,6 @@ allow_indirect_imports = true
 source_modules = [
     "app.documents.use_cases",
     "app.documents.service",
-    "app.documents.agents",
     "app.scaffolds.service",
     "app.workspaces.service",
 ]

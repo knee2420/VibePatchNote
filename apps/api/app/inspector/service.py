@@ -1,17 +1,21 @@
 """Inspector 조회 서비스 (Data 수명주기 헌법 준수)."""
 from __future__ import annotations
 
+import ast
 import json
 import logging
+import shutil
 from pathlib import Path
 from typing import Any, Optional
 
 from app.core.config import settings
+from app.core.storage.paths import safe_segment
 from app.inspector.schemas import (
     MatrixModelInfo,
     MatrixResponse,
     RunDetailResponse,
     RunSummaryResponse,
+    SourceCodeResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -243,3 +247,175 @@ class InspectorService:
             fallback_provider=settings.fallback_provider,
             models=models,
         )
+
+    def delete_run(self, run_id: str) -> bool:
+        """지정된 run_id의 런 디렉터리를 안전하게 삭제합니다."""
+        if not run_id:
+            return False
+
+        try:
+            safe_id = safe_segment(run_id)
+        except Exception:
+            return False
+
+        run_path = self.runs_dir / safe_id
+        if not run_path.exists() or not run_path.is_dir():
+            return False
+
+        try:
+            shutil.rmtree(run_path)
+            logger.info("[InspectorService] Run 삭제 완료: %s", safe_id)
+            return True
+        except Exception as e:
+            logger.error("[InspectorService] Run 삭제 실패 (%s): %s", safe_id, e)
+            return False
+
+    def get_source_code(
+        self,
+        file_path: str,
+        symbol: Optional[str] = None,
+    ) -> Optional[SourceCodeResponse]:
+        """지정된 파일 경로 및 심볼의 원본 소스 코드/프롬프트를 안전하게 추출합니다."""
+        if not file_path:
+            return None
+
+        repo_root = settings.base_dir.parents[1].resolve()
+        clean_path = file_path.strip().replace("\\", "/")
+
+        # 1. 경로 후보군 수집
+        raw_candidates = [
+            repo_root / clean_path,
+            repo_root / "apps" / clean_path,
+            repo_root / "packages" / clean_path,
+            repo_root / "apps" / "api" / clean_path,
+            repo_root / "packages" / "scaffold-engine" / clean_path,
+            repo_root / "packages" / "agent-telemetry" / clean_path,
+        ]
+
+        file_candidates: list[Path] = []
+        for cand in raw_candidates:
+            if cand.is_file() and cand not in file_candidates:
+                file_candidates.append(cand)
+
+        fname = Path(clean_path).name
+        if fname:
+            for sub in ("packages", "apps"):
+                for m in (repo_root / sub).glob(f"**/{fname}"):
+                    if m.is_file() and m not in file_candidates:
+                        file_candidates.append(m)
+
+        if not file_candidates:
+            return None
+
+        # 서브패스 매칭 및 파일 크기(구현체 우선) 역순 정렬
+        file_candidates.sort(
+            key=lambda p: (
+                1 if clean_path in str(p).replace("\\", "/") else 0,
+                p.stat().st_size,
+            ),
+            reverse=True,
+        )
+
+        target_file: Optional[Path] = None
+        extracted_content: Optional[str] = None
+        start_line = 1
+        end_line = 1
+        total_lines = 1
+        language = "text"
+
+        for cand in file_candidates:
+            resolved = cand.resolve()
+            if not resolved.is_relative_to(repo_root):
+                continue
+
+            try:
+                raw_text = resolved.read_text(encoding="utf-8")
+            except Exception:
+                continue
+
+            lines = raw_text.splitlines()
+            c_total = len(lines)
+            ext = resolved.suffix.lower()
+
+            lang_map = {
+                ".py": "python",
+                ".md": "markdown",
+                ".json": "json",
+                ".toml": "toml",
+                ".ts": "typescript",
+                ".tsx": "typescript",
+                ".js": "javascript",
+                ".jsx": "javascript",
+            }
+            c_lang = lang_map.get(ext, "text")
+
+            if ext == ".py" and symbol:
+                clean_sym = symbol.strip()
+                sym_parts = clean_sym.split(".")
+                found_node = None
+                try:
+                    tree = ast.parse(raw_text)
+                    if len(sym_parts) == 1:
+                        target_name = sym_parts[0]
+                        for node in ast.walk(tree):
+                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                                if node.name == target_name:
+                                    found_node = node
+                                    break
+                    elif len(sym_parts) >= 2:
+                        cls_name, method_name = sym_parts[0], sym_parts[1]
+                        for node in ast.walk(tree):
+                            if isinstance(node, ast.ClassDef) and node.name == cls_name:
+                                for sub_node in node.body:
+                                    if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                                        if sub_node.name == method_name:
+                                            found_node = sub_node
+                                            break
+                                if not found_node:
+                                    found_node = node
+                                break
+                except Exception:
+                    pass
+
+                if found_node:
+                    target_file = resolved
+                    start_line = found_node.lineno
+                    end_line = getattr(found_node, "end_lineno", c_total)
+                    extracted_content = "\n".join(lines[start_line - 1:end_line])
+                    total_lines = c_total
+                    language = c_lang
+                    break
+            else:
+                if not target_file:
+                    target_file = resolved
+                    start_line = 1
+                    end_line = c_total
+                    total_lines = c_total
+                    extracted_content = raw_text
+                    language = c_lang
+                    if not symbol:
+                        break
+
+        if not target_file or extracted_content is None:
+            # fallback to first readable candidate
+            target_file = file_candidates[0].resolve()
+            raw_text = target_file.read_text(encoding="utf-8")
+            lines = raw_text.splitlines()
+            start_line = 1
+            end_line = len(lines)
+            total_lines = len(lines)
+            extracted_content = raw_text
+            language = "python" if target_file.suffix == ".py" else "text"
+
+        rel_path = str(target_file.relative_to(repo_root)).replace("\\", "/")
+
+        return SourceCodeResponse(
+            file_path=rel_path,
+            symbol=symbol,
+            content=extracted_content,
+            start_line=start_line,
+            end_line=end_line,
+            total_lines=total_lines,
+            language=language,
+        )
+

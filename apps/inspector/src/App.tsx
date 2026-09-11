@@ -6,7 +6,7 @@ import {
   Radio,
   Sparkles,
 } from 'lucide-react'
-import { fetchRunDetail, fetchRuns } from './api'
+import { deleteRun, fetchRunDetail, fetchRuns } from './api'
 import { DomainInspector } from './components/DomainInspector'
 import { MatrixViewer } from './components/MatrixViewer'
 import { RunList } from './components/RunList'
@@ -24,7 +24,7 @@ export const App: React.FC = () => {
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const loadRuns = async () => {
+  const loadRuns = async (retries = 2) => {
     setLoading(true)
     try {
       const data = await fetchRuns()
@@ -33,9 +33,29 @@ export const App: React.FC = () => {
         setSelectedRunId(data[0].run_id)
       }
     } catch (err) {
+      if (retries > 0) {
+        setTimeout(() => {
+          void loadRuns(retries - 1)
+        }, 1200)
+        return
+      }
       console.error('Failed to load runs:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteRun = async (runId: string) => {
+    try {
+      await deleteRun(runId)
+      const remaining = runs.filter((r) => r.run_id !== runId)
+      setRuns(remaining)
+      if (selectedRunId === runId) {
+        setSelectedRunId(remaining.length > 0 ? remaining[0].run_id : null)
+      }
+    } catch (err) {
+      console.error('Failed to delete run:', err)
+      alert('실행 기록 삭제에 실패했습니다.')
     }
   }
 
@@ -143,6 +163,7 @@ export const App: React.FC = () => {
               selectedRunId={selectedRunId}
               onSelectRun={(id) => setSelectedRunId(id)}
               onRefresh={loadRuns}
+              onDeleteRun={handleDeleteRun}
               loading={loading}
             />
 

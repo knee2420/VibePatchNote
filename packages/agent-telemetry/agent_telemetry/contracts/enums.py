@@ -9,6 +9,12 @@ class SpanType(str, Enum):
     PARSER = "parser"
 
 
+class SpanPhase(str, Enum):
+    PRE_LLM = "pre_llm"
+    LLM = "llm"
+    POST_LLM = "post_llm"
+
+
 class SpanStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"

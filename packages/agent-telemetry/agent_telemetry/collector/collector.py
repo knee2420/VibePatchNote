@@ -8,7 +8,7 @@ from typing import Any, Dict, Generator, List, Optional
 
 from agent_telemetry.collector.scope import StepScope
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
-from agent_telemetry.contracts.enums import FailureReason, SpanStatus, SpanType
+from agent_telemetry.contracts.enums import FailureReason, SpanPhase, SpanStatus, SpanType
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
 from agent_telemetry.contracts.span import SpanRecord
@@ -63,6 +63,15 @@ class StepCollector:
         name: str,
         span_type: SpanType = SpanType.CHAIN,
         metadata: Optional[SpanMetadata] = None,
+        phase: Optional[SpanPhase] = None,
+        display_label: Optional[str] = None,
+        description: Optional[str] = None,
+        summary_pill: Optional[str] = None,
+        node_id: Optional[str] = None,
+        node_title: Optional[str] = None,
+        data_in: Optional[str] = None,
+        data_out: Optional[str] = None,
+        data_via: Optional[List[str]] = None,
     ) -> Generator[StepScope, None, None]:
         """단일 작업을 계측하는 컨텍스트 매니저."""
         span_id = _gen_id("span")
@@ -85,6 +94,15 @@ class StepCollector:
             name=name,
             span_type=span_type,
             status=SpanStatus.RUNNING,
+            phase=phase,
+            display_label=display_label,
+            description=description,
+            summary_pill=summary_pill,
+            node_id=node_id,
+            node_title=node_title,
+            data_in=data_in,
+            data_out=data_out,
+            data_via=data_via or [],
             start_time=now,
             metadata=metadata or SpanMetadata(),
         )

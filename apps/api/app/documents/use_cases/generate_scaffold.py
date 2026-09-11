@@ -5,12 +5,15 @@
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
+from scaffold_engine import ScaffoldExtractResult, ScaffoldPipeline
 
-from ..agents import ScaffoldGenerationAgent
+from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
+from app.core.llm import BaseLlmHarness
+
 from ..ports import DocumentSourceRepository, ScaffoldArchivePort
 
 logger = logging.getLogger(__name__)
@@ -25,13 +28,20 @@ class GenerateScaffoldUseCase:
         self,
         source: DocumentSourceRepository,
         scaffolds: ScaffoldArchivePort,
-        agent: ScaffoldGenerationAgent,
         agent_runtime: AgentRuntime,
+        llm_harness: BaseLlmHarness,
     ) -> None:
         self._source = source
         self._scaffolds = scaffolds
-        self._agent = agent
         self._runtime = agent_runtime
+        self._harness = llm_harness
+
+    async def _run_pipeline(
+        self, file_path: Any, display_name: str | None = None
+    ) -> ScaffoldExtractResult:
+        """독립 문서 엔진(scaffold_engine)의 ScaffoldPipeline을 스레드 풀에서 직접 실행합니다."""
+        pipeline = ScaffoldPipeline(harness=self._harness)
+        return await asyncio.to_thread(pipeline.run, file_path, display_name=display_name)
 
     async def execute(self, doc_id: str) -> dict[str, Any]:
         meta = self._source.get(doc_id)
@@ -41,11 +51,11 @@ class GenerateScaffoldUseCase:
         file_path = self._source.resolve_file(doc_id)
         run_id = current_run_id()
         if run_id:
-            result = await self._agent.generate(file_path, display_name=meta.original_name)
+            result = await self._run_pipeline(file_path, display_name=meta.original_name)
         else:
             agent_run, result = await self._runtime.execute(
-                self._agent.name,
-                lambda: self._agent.generate(file_path, display_name=meta.original_name),
+                self.name,
+                lambda: self._run_pipeline(file_path, display_name=meta.original_name),
                 doc_id=doc_id,
                 run_input=AgentRunInput(
                     use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}

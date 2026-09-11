@@ -53,3 +53,15 @@ class MatrixResponse(BaseModel):
     primary_provider: str
     fallback_provider: str
     models: list[MatrixModelInfo]
+
+
+class SourceCodeResponse(BaseModel):
+    """지정된 파일 및 심볼의 원본 소스 코드/프롬프트 응답."""
+    file_path: str
+    symbol: Optional[str] = None
+    content: str
+    start_line: int = 1
+    end_line: int = 1
+    total_lines: int = 1
+    language: str = "python"
+

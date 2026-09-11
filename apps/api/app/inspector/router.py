@@ -9,6 +9,7 @@ from app.inspector.schemas import (
     MatrixResponse,
     RunDetailResponse,
     RunSummaryResponse,
+    SourceCodeResponse,
 )
 from app.inspector.service import InspectorService
 
@@ -41,9 +42,38 @@ def get_run(
     return run_detail
 
 
+@router.delete("/runs/{run_id}")
+def delete_run(
+    run_id: str,
+    service: InspectorService = Depends(get_inspector_service),
+):
+    """특정 Run의 이력을 영구 삭제합니다."""
+    success = service.delete_run(run_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found or cannot be deleted.")
+    return {"status": "DELETED", "run_id": run_id}
+
+
 @router.get("/matrix", response_model=MatrixResponse)
 def get_matrix(
     service: InspectorService = Depends(get_inspector_service),
 ):
     """모델 지원 레지스트리 및 라우팅 상태를 반환합니다."""
     return service.get_matrix()
+
+
+@router.get("/source", response_model=SourceCodeResponse)
+def get_source_code(
+    file_path: str = Query(..., description="조회할 파일 경로 또는 파일명"),
+    symbol: Optional[str] = Query(None, description="특정 클래스명 또는 함수명"),
+    service: InspectorService = Depends(get_inspector_service),
+):
+    """지정된 파일의 실제 구현 코드 또는 프롬프트 전문을 반환합니다."""
+    res = service.get_source_code(file_path=file_path, symbol=symbol)
+    if not res:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Source not found for file '{file_path}' (symbol: {symbol})",
+        )
+    return res
+

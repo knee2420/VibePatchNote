@@ -7,6 +7,7 @@ import {
   Clock,
   Coins,
   RefreshCw,
+  Trash2,
 } from 'lucide-react'
 import type { RunSummary } from '../types'
 
@@ -15,6 +16,7 @@ interface RunListProps {
   selectedRunId: string | null
   onSelectRun: (runId: string) => void
   onRefresh: () => void
+  onDeleteRun?: (runId: string) => Promise<void> | void
   loading: boolean
 }
 
@@ -119,8 +121,26 @@ export const RunList: React.FC<RunListProps> = ({
   selectedRunId,
   onSelectRun,
   onRefresh,
+  onDeleteRun,
   loading,
 }) => {
+  const [deletingId, setDeletingId] = React.useState<string | null>(null)
+
+  const handleDelete = async (e: React.MouseEvent, run: RunSummary) => {
+    e.stopPropagation()
+    if (!onDeleteRun) return
+    const targetLabel = run.target_name || run.workflow_label || run.task_name || run.run_id
+    if (!window.confirm(`'${targetLabel}' 실행 기록을 삭제하시겠습니까?`)) {
+      return
+    }
+    setDeletingId(run.run_id)
+    try {
+      await onDeleteRun(run.run_id)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className="flex flex-col h-full bg-[#0d1322] border-r border-slate-800/80 w-84 lg:w-92 shrink-0">
       {/* Header */}
@@ -153,18 +173,21 @@ export const RunList: React.FC<RunListProps> = ({
             const isSuccess = run.status?.toUpperCase() === 'SUCCESS'
             const displayLabel = getDisplayLabel(run)
             const targetName = getTargetName(run)
+            const isDeleting = deletingId === run.run_id
 
             return (
-              <button
+              <div
                 key={run.run_id}
+                role="button"
+                tabIndex={0}
                 onClick={() => onSelectRun(run.run_id)}
-                className={`w-full text-left p-3.5 transition-colors border-l-2 ${
+                className={`w-full text-left p-3.5 transition-colors border-l-2 cursor-pointer select-none group ${
                   isSelected
                     ? 'bg-cyan-950/25 border-cyan-500 text-slate-100'
                     : 'border-transparent hover:bg-slate-800/30 text-slate-400'
                 }`}
               >
-                {/* 1열: 도메인 뱃지 + 환경(CLI/API) 뱃지 + 실행 날짜/시각 */}
+                {/* 1열: 도메인 뱃지 + 환경(CLI/API) 뱃지 + 실행 날짜/시각 + 상태 & 휴지통 */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {getDomainBadge(run.domain)}
@@ -177,17 +200,35 @@ export const RunList: React.FC<RunListProps> = ({
                     )}
                   </div>
 
-                  {isSuccess ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">
-                      <CheckCircle2 className="w-3 h-3" />
-                      OK
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-medium">
-                      <AlertCircle className="w-3 h-3" />
-                      FAIL
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {isSuccess ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">
+                        <CheckCircle2 className="w-3 h-3" />
+                        OK
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-medium">
+                        <AlertCircle className="w-3 h-3" />
+                        FAIL
+                      </span>
+                    )}
+
+                    {onDeleteRun && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleDelete(e, run)}
+                        disabled={isDeleting}
+                        className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/15 transition-all opacity-40 group-hover:opacity-100 focus:opacity-100 disabled:opacity-30"
+                        title="이 실행 기록 삭제"
+                      >
+                        {isDeleting ? (
+                          <RefreshCw className="w-3 h-3 animate-spin text-rose-400" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* 2열: [Workflow 명칭] + 작업 대상 엔티티 (문서/챕터 등) */}
@@ -222,7 +263,7 @@ export const RunList: React.FC<RunListProps> = ({
                     </span>
                   )}
                 </div>
-              </button>
+              </div>
             )
           })
         )}
