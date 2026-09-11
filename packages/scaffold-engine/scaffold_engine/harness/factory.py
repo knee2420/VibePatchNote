@@ -19,6 +19,8 @@ from typing import Callable, Dict, Optional
 
 from .agy_client import DEFAULT_TIMEOUT_SECONDS, AgyCliHarness
 from .base import BaseLlmHarness
+from .gemini_client import GoogleGenAiHarness
+from .gemma_client import LocalGemmaHarness
 from .registry import DEFAULT_MODEL_NAME, ModelSpec, get_model_spec
 
 logger = logging.getLogger(__name__)
@@ -35,10 +37,22 @@ def _build_agy_cli(spec: ModelSpec, effort: Optional[str], timeout_seconds: int)
     return AgyCliHarness(model=spec.name, effort=effort, timeout_seconds=timeout_seconds)
 
 
+def _build_google_api(spec: ModelSpec, effort: Optional[str], timeout_seconds: int) -> BaseLlmHarness:
+    return GoogleGenAiHarness(model=spec.name, timeout_seconds=timeout_seconds)
+
+
+def _build_local_gemma(spec: ModelSpec, effort: Optional[str], timeout_seconds: int) -> BaseLlmHarness:
+    return LocalGemmaHarness(model=spec.name, timeout_seconds=timeout_seconds)
+
+
 class HarnessFactory:
     """프로바이더별 어댑터 빌더 레지스트리."""
 
-    _builders: Dict[str, HarnessBuilder] = {"agy_cli": _build_agy_cli}
+    _builders: Dict[str, HarnessBuilder] = {
+        "agy_cli": _build_agy_cli,
+        "google_api": _build_google_api,
+        "local_serving": _build_local_gemma,
+    }
 
     @classmethod
     def register(cls, provider: str, builder: HarnessBuilder) -> None:

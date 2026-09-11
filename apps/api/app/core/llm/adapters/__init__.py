@@ -1,9 +1,13 @@
-"""호스트 전용 LLM 어댑터.
+"""호스트 LLM 어댑터 (Host Re-exports).
 
-- `agy_cli`: `scaffold_engine.harness.agy_client`가 정본이며 `LlmManager`가 설정 주입
-- `google_api`: `gemini_adapter.py` (Google Gemini Direct API 정규 어댑터)
-- `local_serving`: `gemma_skeleton.py` (로컬 Gemma 서빙 어댑터)
+정본 구현체는 호스트 비의존 공통 패키지(`scaffold_engine.harness`)에 위치합니다:
+- `agy_cli`: `scaffold_engine.harness.AgyCliHarness`
+- `google_api`: `scaffold_engine.harness.GoogleGenAiHarness`
+- `local_serving`: `scaffold_engine.harness.LocalGemmaHarness`
+
+이 모듈은 호스트 계층에서의 일관된 어댑터 디렉터리 접근 및 하위 호환성을 제공합니다.
 """
+from app.core.llm.adapters.cli_adapter import AgyCliHarness, AgyHarness
 from app.core.llm.adapters.gemini_adapter import (
     GeminiAdapter,
     GeminiApiHarness,
@@ -11,4 +15,11 @@ from app.core.llm.adapters.gemini_adapter import (
 )
 from app.core.llm.adapters.gemma_skeleton import LocalGemmaHarness
 
-__all__ = ["GoogleGenAiHarness", "GeminiAdapter", "GeminiApiHarness", "LocalGemmaHarness"]
+__all__ = [
+    "AgyCliHarness",
+    "AgyHarness",
+    "GeminiAdapter",
+    "GeminiApiHarness",
+    "GoogleGenAiHarness",
+    "LocalGemmaHarness",
+]

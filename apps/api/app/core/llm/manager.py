@@ -18,14 +18,15 @@ from typing import Any, Dict, Optional
 from scaffold_engine.harness import (
     AgyCliHarness,
     BaseLlmHarness,
+    GoogleGenAiHarness,
     HarnessFactory,
     LlmExecutionResult,
+    LocalGemmaHarness,
     ModelSpec,
     get_model_spec,
 )
 
 from app.core.config import settings
-from app.core.llm.adapters import GoogleGenAiHarness, LocalGemmaHarness
 from app.core.llm.availability import CliQuotaAvailability
 from app.core.llm.credentials import CredentialStore
 from app.core.llm.fallback import FallbackLlmHarness

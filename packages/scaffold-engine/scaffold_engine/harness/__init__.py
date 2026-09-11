@@ -21,6 +21,8 @@ from .base import (
     LlmExecutionResult,
 )
 from .factory import HarnessFactory, UnsupportedProviderError
+from .gemini_client import GeminiAdapter, GeminiApiHarness, GoogleGenAiHarness
+from .gemma_client import LocalGemmaHarness
 from .parsing import parse_json_payload
 from .registry import (
     DEFAULT_MODEL_NAME,
@@ -41,8 +43,12 @@ __all__ = [
     "DEFAULT_MODEL_NAME",
     "DEFAULT_TIMEOUT_SECONDS",
     "EFFORT_SUFFIXES",
+    "GeminiAdapter",
+    "GeminiApiHarness",
+    "GoogleGenAiHarness",
     "HarnessFactory",
     "LlmExecutionResult",
+    "LocalGemmaHarness",
     "MODEL_REGISTRY",
     "ModelSpec",
     "STATUS_ERROR",
