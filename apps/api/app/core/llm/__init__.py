@@ -36,6 +36,7 @@ from app.core.llm.tracer import (
     get_current_span,
     get_current_trace,
     get_trace,
+    ingest_pipeline_telemetry,
     list_traces,
     purge_expired_traces,
     span_context,
@@ -73,6 +74,7 @@ __all__ = [
     "get_current_span",
     "list_traces",
     "get_trace",
+    "ingest_pipeline_telemetry",
     "purge_expired_traces",
     "delete_traces_for_document",
 ]

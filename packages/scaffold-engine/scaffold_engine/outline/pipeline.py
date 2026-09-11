@@ -25,6 +25,7 @@ from scaffold_engine.outline.schemas.models import (
     OutlineItem,
     OutlineOutput,
 )
+from agent_telemetry import SpanStatus, SpanType, StepCollector
 
 logger = logging.getLogger(__name__)
 
@@ -67,10 +68,15 @@ class OutlinePipeline:
         model: Optional[str] = None,
         effort: Optional[str] = None,
         context_dir: Optional[Path] = None,
+        display_name: Optional[str] = None,
     ) -> OutlineDocument:
         """본 프로젝트 서비스 레이어용 표준 진입점 (OutlineDocument 반환)."""
         res = self.execute(
-            pdf_path=pdf_path, model=model, effort=effort, context_dir=context_dir
+            pdf_path=pdf_path,
+            model=model,
+            effort=effort,
+            context_dir=context_dir,
+            display_name=display_name,
         )
         if res.get("document") and isinstance(res["document"], OutlineDocument):
             return res["document"]
@@ -82,6 +88,7 @@ class OutlinePipeline:
         model: Optional[str] = None,
         effort: Optional[str] = None,
         context_dir: Optional[Path] = None,
+        display_name: Optional[str] = None,
     ) -> Dict[str, Any]:
         """실험실(V2 벤치마크) 및 CLI 호환 진입점."""
         pdf_path = Path(pdf_path).resolve()
@@ -90,106 +97,140 @@ class OutlinePipeline:
 
         target_model = model or self.default_model
         target_effort = effort or self.default_effort
+        target_display_name = display_name or pdf_path.name
 
-        logger.info("[OutlinePipeline] V2 실행 시작: %s (model: %s, effort: %s)", pdf_path.name, target_model, target_effort)
+        logger.info(
+            "[OutlinePipeline] V2 실행 시작: %s (model: %s, effort: %s)",
+            target_display_name,
+            target_model,
+            target_effort,
+        )
+
+        collector = StepCollector(
+            pipeline_name="OutlinePipeline",
+            domain="documents",
+            workflow_name="documents.extract_outline",
+            workflow_label="문서 목차 추출",
+            target_name=target_display_name,
+        )
 
         # 1. 시스템 프롬프트 지침 로드
         instructions = ""
         if self.system_instructions_path.exists():
             instructions = self.system_instructions_path.read_text(encoding="utf-8")
 
-        # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화 (.context.md / .elements.json)
-        ctx_started_at = _utc_now_iso()
-        t0 = time.time()
+        # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화
         target_context_dir = Path(context_dir) if context_dir else self.context_dir
-        doc_ctx = self.context_builder.build_context(pdf_path, output_dir=target_context_dir)
-        ctx_duration = round(time.time() - t0, 3)
-        ctx_ended_at = _utc_now_iso()
+        with collector.step("DocumentContextBuilder", span_type=SpanType.TOOL) as s_ctx:
+            try:
+                doc_ctx = self.context_builder.build_context(
+                    pdf_path, output_dir=target_context_dir, display_name=target_display_name
+                )
+            except TypeError:
+                doc_ctx = self.context_builder.build_context(
+                    pdf_path, output_dir=target_context_dir
+                )
+            context_chars = len(doc_ctx.get("context_text", ""))
+            s_ctx.set_inputs({"filename": target_display_name, "total_pages": doc_ctx.get("total_pages", 1)})
+            s_ctx.set_outputs({"context_chars": context_chars})
+            s_ctx.snapshot(
+                stage_id="context_build",
+                stage_name="문서 컨텍스트 빌드",
+                payload={
+                    "filename": target_display_name,
+                    "total_pages": doc_ctx.get("total_pages", 1),
+                    "context_chars": context_chars,
+                    "context_file_path": doc_ctx.get("context_file_path"),
+                },
+            )
 
-        # 3. 통합 프롬프트 빌드 (파일 참조 및 최적화 지침)
+        # 3. 통합 프롬프트 빌드
         ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
         resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
-        prompt = (
-            f"{instructions}\n\n"
-            f"======================================================================\n"
-            f"[분석 대상 원본 문서]\n"
-            f"- 파일명: {doc_ctx['filename']}\n"
-            f"- 원본 파일 경로: {resolved_file_path}\n"
-            f"- 총 페이지: {doc_ctx['total_pages']}페이지\n"
-            f"{ctx_file_info}\n"
-            f"[중요 지침: 3중 멀티모달 컨텍스트 활용]\n"
-            f"1. [시각적 비전 (PDF 직접 열람)]: 반드시 위 원본 파일 경로('{resolved_file_path}')의 문서를 직접 열람(view/inspect)하여, 전반적인 시각 레이아웃(여백, 밑줄, 박스 테두리, 심미적 위계, 표 내부 구획 및 차수 구분)을 확인하세요.\n"
-            f"2. [실측 표(Table) 구조 메타 & 타이포그래피]: 아래 제공된 각 페이지별 실측 표 규격(행x열, 위치)과 폰트 크기 블록을 바탕으로 상위 대주제와 부모 표 구획의 경계를 파악하세요.\n"
-            f"3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.\n\n"
-            f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
-            f"{doc_ctx['context_text']}\n"
-            f"======================================================================\n\n"
-            f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
-            f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오.\n"
-            f"좌표(box_2d) 지정 시, 목차 노드는 해당 라벨/헤더 텍스트 영역을, elements는 내용/본문 리스트/입력값/영수증 부착란 전체 사각 영역을 정확히 감싸도록 역할에 맞게 정밀 지정하십시오."
-        )
+        with collector.step("PromptAssembly", span_type=SpanType.CHAIN) as s_prompt:
+            prompt = (
+                f"{instructions}\n\n"
+                f"======================================================================\n"
+                f"[분석 대상 원본 문서]\n"
+                f"- 파일명: {doc_ctx['filename']}\n"
+                f"- 원본 파일 경로: {resolved_file_path}\n"
+                f"- 총 페이지: {doc_ctx['total_pages']}페이지\n"
+                f"{ctx_file_info}\n"
+                f"[중요 지침: 3중 멀티모달 컨텍스트 활용]\n"
+                f"1. [시각적 비전 (PDF 직접 열람)]: 반드시 위 원본 파일 경로('{resolved_file_path}')의 문서를 직접 열람(view/inspect)하여, 전반적인 시각 레이아웃(여백, 밑줄, 박스 테두리, 심미적 위계, 표 내부 구획 및 차수 구분)을 확인하세요.\n"
+                f"2. [실측 표(Table) 구조 메타 & 타이포그래피]: 아래 제공된 각 페이지별 실측 표 규격(행x열, 위치)과 폰트 크기 블록을 바탕으로 상위 대주제와 부모 표 구획의 경계를 파악하세요.\n"
+                f"3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.\n\n"
+                f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
+                f"{doc_ctx['context_text']}\n"
+                f"======================================================================\n\n"
+                f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
+                f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오.\n"
+                f"좌표(box_2d) 지정 시, 목차 노드는 해당 라벨/헤더 텍스트 영역을, elements는 내용/본문 리스트/입력값/영수증 부착란 전체 사각 영역을 정확히 감싸도록 역할에 맞게 정밀 지정하십시오."
+            )
+            s_prompt.set_inputs({"instructions_chars": len(instructions), "dynamic_context_chars": context_chars})
+            s_prompt.set_outputs({"total_prompt_chars": len(prompt)})
+            s_prompt.snapshot(
+                stage_id="prompt_assembly",
+                stage_name="프롬프트 역분해 조립",
+                payload={
+                    "constitution_chars": len(instructions),
+                    "dynamic_context_chars": context_chars,
+                    "total_prompt_chars": len(prompt),
+                },
+            )
 
         # 4. CLI / LLM 네이티브 구조화 실행
-        llm_started_at = _utc_now_iso()
-        llm_t0 = time.time()
-        exec_res: LlmExecutionResult = self.harness.run_structured(
-            prompt=prompt,
-            schema_path=self.schema_path,
-            model=target_model,
+        actual_model = target_model
+        with collector.step(f"LLM:{target_model}", span_type=SpanType.LLM) as s_llm:
+            exec_res: LlmExecutionResult = self.harness.run_structured(
+                prompt=prompt,
+                schema_path=self.schema_path,
+                model=target_model,
+                effort=target_effort,
+                file_path=pdf_path,
+            )
+            actual_model = exec_res.model or target_model
+            s_llm.attach_harness_result(exec_res)
+            s_llm.set_inputs({"prompt_chars": len(prompt), "prompt_snippet": prompt[:300]})
+            s_llm.set_outputs({
+                "has_structured_output": bool(exec_res.structured_output),
+                "raw_response_snippet": (exec_res.raw_response or "")[:300],
+            })
+
+        provenance_dict = EngineProvenance(
+            pipeline="outline",
+            model=actual_model,
             effort=target_effort,
-            file_path=pdf_path,
-        )
-        llm_duration = round(time.time() - llm_t0, 3)
-        llm_ended_at = _utc_now_iso()
-        actual_model = exec_res.model or target_model
+            prompt_hash=hash_text(instructions) if instructions else None,
+            schema_hash=hash_file(self.schema_path),
+        ).to_dict()
 
-        context_chars = len(doc_ctx.get("context_text", ""))
-
-        # `steps` 는 호스트 트레이서가 Span 으로 그대로 복원하는 실측 구간 목록이다.
-        # 엔진은 tracer 를 import 하지 않고 순수 dict 만 방출한다(P1 유지).
-        # 사후에 Span 을 만들면 start==end 가 되어 duration 이 0 이 되므로,
-        # 잰 시각을 여기서 반드시 함께 실어 보낸다.
-        steps: List[Dict[str, Any]] = [
+        # 기존 레거시 steps 호환 리스트 구성
+        legacy_steps: List[Dict[str, Any]] = [
             {
-                "name": "DocumentContextBuilder",
-                "run_type": "tool",
-                "start_time": ctx_started_at,
-                "end_time": ctx_ended_at,
-                "duration_seconds": ctx_duration,
-                "inputs": {"filename": pdf_path.name, "total_pages": doc_ctx.get("total_pages", 1)},
-                "outputs": {"context_chars": context_chars},
-                "status": "SUCCESS",
-            },
-            {
-                "name": f"LLM:{actual_model}",
-                "run_type": "llm",
-                "start_time": llm_started_at,
-                "end_time": llm_ended_at,
-                # 프로세스 기동까지 포함한 실제 벽시계 시간. CLI 가 자기 기준으로 보고한
-                # 값은 metadata 에 따로 남겨 둔다(둘의 차이가 곧 기동 오버헤드다).
-                "duration_seconds": llm_duration,
-                "inputs": {"prompt_chars": len(prompt), "prompt_snippet": prompt[:300]},
-                "metadata": {
-                    **(getattr(exec_res, "telemetry_metadata", None) or {}),
-                    "cli_reported_duration": exec_res.duration_seconds,
-                },
+                "name": sp.name,
+                "run_type": sp.span_type.value,
+                "start_time": sp.start_time.isoformat(),
+                "end_time": sp.end_time.isoformat() if sp.end_time else None,
+                "duration_seconds": round(sp.usage.latency_ms / 1000, 3),
+                "inputs": sp.inputs,
+                "outputs": sp.outputs or {},
+                "status": sp.status.value.upper(),
+                "error": sp.error.message if sp.error else None,
                 "tokens": {
-                    "input": exec_res.input_tokens,
-                    "output": exec_res.output_tokens,
-                    "thinking": exec_res.thinking_tokens,
-                    "cache_read": exec_res.cache_read_tokens,
-                    "total": exec_res.total_tokens,
+                    "input": sp.usage.prompt_tokens,
+                    "output": sp.usage.completion_tokens,
+                    "thinking": sp.usage.reasoning_tokens or 0,
+                    "total": sp.usage.total_tokens,
                 },
-                "status": exec_res.status,
-                "error": exec_res.error,
-            },
+                "metadata": sp.metadata.extra,
+            }
+            for sp in collector.spans
         ]
 
-        # 이 dict 형태가 호스트 감사 로그(`app.core.llm.telemetry`)의 입력 규격이다.
-        # 키를 바꾸면 `documents/service.py` 의 매핑도 함께 고쳐야 한다.
         telemetry = {
             "model": actual_model,
-            "ctx_duration": ctx_duration,
+            "ctx_duration": round(collector.spans[0].usage.latency_ms / 1000, 3) if collector.spans else 0.0,
             "cli_duration": exec_res.duration_seconds,
             "tokens": {
                 "input": exec_res.input_tokens,
@@ -204,20 +245,16 @@ class OutlinePipeline:
             "context_chars": context_chars,
             "prompt_snippet": prompt[:300],
             "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
-            "steps": steps,
-            # 산출물을 재현·비교하려면 "무엇이 만들었는가"가 결과와 함께 남아야 한다.
-            "provenance": EngineProvenance(
-                pipeline="outline",
-                model=actual_model,
-                effort=target_effort,
-                prompt_hash=hash_text(instructions) if instructions else None,
-                schema_hash=hash_file(self.schema_path),
-            ).to_dict(),
+            "steps": legacy_steps,
+            "provenance": provenance_dict,
+            "pipeline_telemetry": collector.export_telemetry(provenance=provenance_dict).model_dump(mode="json"),
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
             logger.error("[OutlinePipeline] LLM 실행 실패 (%s): %s", exec_res.status, exec_res.error)
-            fallback_doc = self._create_fallback_document(pdf_path, doc_ctx["total_pages"], telemetry)
+            fallback_doc = self._create_fallback_document(
+                pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
+            )
             return {
                 "success": False,
                 "status": exec_res.status,
@@ -228,22 +265,22 @@ class OutlinePipeline:
 
         # 5. 스키마 유효성 검증 및 표준화
         raw_output = exec_res.structured_output
-        val_started_at = _utc_now_iso()
-        val_t0 = time.time()
-        try:
-            validated = OutlineOutput.model_validate(raw_output)
-            val_error = None
-        except Exception as ve:
-            validated, val_error = None, str(ve)
-        steps.append({
-            "name": "OutlineSchemaValidation",
-            "run_type": "parser",
-            "start_time": val_started_at,
-            "end_time": _utc_now_iso(),
-            "duration_seconds": round(time.time() - val_t0, 3),
-            "status": "SUCCESS" if val_error is None else "FAILED",
-            "error": val_error,
-        })
+        with collector.step("OutlineSchemaValidation", span_type=SpanType.PARSER) as s_val:
+            try:
+                validated = OutlineOutput.model_validate(raw_output)
+                val_error = None
+                s_val.set_outputs({"outlines_count": len(validated.outlines)})
+                s_val.snapshot(
+                    stage_id="structured_parsing",
+                    stage_name="아웃라인 파싱 및 보정",
+                    payload={
+                        "outlines_count": len(validated.outlines),
+                        "is_valid": True,
+                    },
+                )
+            except Exception as ve:
+                validated, val_error = None, str(ve)
+                s_val.status = SpanStatus.FAILED
 
         if validated is None:
             logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s)", val_error)
@@ -255,18 +292,21 @@ class OutlinePipeline:
                 "status": "ERROR",
                 "error": telemetry["error"],
                 "fallback_document": self._create_fallback_document(
-                    pdf_path, doc_ctx["total_pages"], telemetry
+                    pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                 ),
                 "telemetry": telemetry,
             }
 
         try:
             document = OutlineDocument.from_outline_output(validated, telemetry=telemetry)
+            if (not document.document_title or document.document_title == "source.pdf") and target_display_name:
+                document.document_title = target_display_name
+
             if not document.flat_elements:
                 telemetry["status"] = "ERROR"
                 telemetry["error"] = "OUTLINE_CONTENT_EMPTY: 문서 구성요소가 하나도 추출되지 않았습니다."
                 telemetry["telemetry_metadata"]["failure_code"] = "INVALID_MODEL_OUTPUT"
-                steps.append({
+                legacy_steps.append({
                     "name": "OutlineSemanticValidation",
                     "run_type": "parser",
                     "start_time": _utc_now_iso(),
@@ -280,7 +320,7 @@ class OutlinePipeline:
                     "status": "ERROR",
                     "error": telemetry["error"],
                     "fallback_document": self._create_fallback_document(
-                        pdf_path, doc_ctx["total_pages"], telemetry
+                        pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                     ),
                     "telemetry": telemetry,
                 }
@@ -288,11 +328,12 @@ class OutlinePipeline:
                 "[OutlinePipeline] 성공: 루트 노드 %d건, 엘리먼트 %d건 (시간: %ss)",
                 len(document.outlines),
                 len(document.flat_elements),
-                round(ctx_duration + exec_res.duration_seconds, 2),
+                round(telemetry["ctx_duration"] + exec_res.duration_seconds, 2),
             )
+            telemetry["pipeline_telemetry"] = collector.export_telemetry(provenance=provenance_dict).model_dump(mode="json")
             return {
                 "success": True,
-                "document_title": pdf_path.name,
+                "document_title": target_display_name,
                 "data": validated.model_dump(by_alias=True),
                 "document": document,
                 "telemetry": telemetry,
@@ -307,18 +348,23 @@ class OutlinePipeline:
                 "status": "ERROR",
                 "error": telemetry["error"],
                 "fallback_document": self._create_fallback_document(
-                    pdf_path, doc_ctx["total_pages"], telemetry
+                    pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                 ),
                 "telemetry": telemetry,
             }
 
     def _create_fallback_document(
-        self, pdf_path: Path, total_pages: int, telemetry: Dict[str, Any]
+        self,
+        pdf_path: Path,
+        total_pages: int,
+        telemetry: Dict[str, Any],
+        display_name: Optional[str] = None,
     ) -> OutlineDocument:
+        title_name = display_name or pdf_path.name
         root = OutlineItem(
             id="out-root",
             level=1,
-            title=pdf_path.name,
+            title=title_name,
             page=1,
             box_2d=[50, 50, 950, 950],
             purpose="문서 전체 (폴백)",
@@ -326,10 +372,10 @@ class OutlinePipeline:
             children=[],
         )
         return OutlineDocument(
-            document_title=pdf_path.name,
+            document_title=title_name,
             total_pages=total_pages,
             outlines=[root],
-            markdown_outline=f"- **{pdf_path.name}** (p.1)",
+            markdown_outline=f"- **{title_name}** (p.1)",
             flat_elements=[],
             telemetry=telemetry,
         )
@@ -358,7 +404,9 @@ class OutlinePipeline:
                     )
                 )
         if not items:
-            return self._create_fallback_document(Path(filename), total_pages, telemetry)
+            return self._create_fallback_document(
+                Path(filename), total_pages, telemetry, display_name=filename
+            )
 
         output = OutlineOutput(
             document_title=raw_json.get("document_title") or filename,

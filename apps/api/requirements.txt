@@ -8,5 +8,6 @@ python-multipart
 dependency-injector>=4.49.1
 keyring>=25.0.0
 
-# Local document-scaffold engine. Its transitive dependencies are installed here.
+# Local document-scaffold engine & agent-telemetry.
+-e ../../packages/agent-telemetry
 -e ../../packages/scaffold-engine

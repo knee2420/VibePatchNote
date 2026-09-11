@@ -41,11 +41,11 @@ class GenerateScaffoldUseCase:
         file_path = self._source.resolve_file(doc_id)
         run_id = current_run_id()
         if run_id:
-            result = await self._agent.generate(file_path)
+            result = await self._agent.generate(file_path, display_name=meta.original_name)
         else:
             agent_run, result = await self._runtime.execute(
                 self._agent.name,
-                lambda: self._agent.generate(file_path),
+                lambda: self._agent.generate(file_path, display_name=meta.original_name),
                 doc_id=doc_id,
                 run_input=AgentRunInput(
                     use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}

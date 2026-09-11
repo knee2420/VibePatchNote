@@ -49,6 +49,7 @@ class LlmExecutionResult:
     total_tokens: int = 0
     error: Optional[str] = None
     telemetry_metadata: Dict[str, Any] = field(default_factory=dict)
+    attempts: list[Any] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:

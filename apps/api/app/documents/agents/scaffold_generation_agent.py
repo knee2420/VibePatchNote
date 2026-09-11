@@ -17,6 +17,8 @@ class ScaffoldGenerationAgent:
     def __init__(self, harness: BaseLlmHarness) -> None:
         self._harness = harness
 
-    async def generate(self, file_path: Path) -> ScaffoldExtractResult:
+    async def generate(
+        self, file_path: Path, display_name: str | None = None
+    ) -> ScaffoldExtractResult:
         pipeline = ScaffoldPipeline(harness=self._harness)
-        return await asyncio.to_thread(pipeline.run, file_path)
+        return await asyncio.to_thread(pipeline.run, file_path, display_name=display_name)

@@ -20,6 +20,7 @@ from app.core.llm import (
     BaseLlmHarness,
     ExecutionRecorder,
     LlmExecutionResult,
+    ingest_pipeline_telemetry,
     span_context,
     trace_session,
 )
@@ -142,13 +143,17 @@ class ExtractOutlineUseCase:
                 run_id = current_run_id()
                 if run_id:
                     document = await self._agent.analyze(
-                        file_path, context_dir=self._cache.context_dir(doc_id)
+                        file_path,
+                        context_dir=self._cache.context_dir(doc_id),
+                        display_name=meta.original_name,
                     )
                 else:
                     agent_run, document = await self._runtime.execute(
                         self._agent.name,
                         lambda: self._agent.analyze(
-                            file_path, context_dir=self._cache.context_dir(doc_id)
+                            file_path,
+                            context_dir=self._cache.context_dir(doc_id),
+                            display_name=meta.original_name,
                         ),
                         trace_id=trace.trace_id,
                         doc_id=doc_id,
@@ -161,6 +166,15 @@ class ExtractOutlineUseCase:
                     run_id = agent_run.run_id
                 trace.run_id = run_id
                 trace.replay_steps((document.telemetry or {}).get("steps"))
+
+                pipeline_tel = (document.telemetry or {}).get("pipeline_telemetry")
+                if pipeline_tel and run_id:
+                    ingest_pipeline_telemetry(
+                        pipeline_tel,
+                        run_id=run_id,
+                        doc_id=doc_id,
+                        target_name=meta.original_name,
+                    )
 
             telemetry = document.telemetry or {}
             status_val = telemetry.get("status", "SUCCESS")

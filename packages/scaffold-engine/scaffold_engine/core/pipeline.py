@@ -47,29 +47,36 @@ class ScaffoldPipeline:
         self.classifier = SlotClassifier(self.harness)
         self.assembler = HtmlAssembler()
 
-    def run(self, pdf_path: Union[str, Path], page_number: int = 1) -> ScaffoldExtractResult:
+    def run(
+        self,
+        pdf_path: Union[str, Path],
+        page_number: int = 1,
+        display_name: Optional[str] = None,
+    ) -> ScaffoldExtractResult:
         started = time.time()
         pdf_path = Path(pdf_path).resolve()
-        logger.info("[pipeline] 시작: %s (p%d)", pdf_path.name, page_number)
+        target_display_name = display_name or pdf_path.name
+        display_stem = Path(target_display_name).stem
+        logger.info("[pipeline] 시작: %s (p%d)", target_display_name, page_number)
 
         # A. 측정
         step = time.time()
         pages = self.extractor.extract(pdf_path)
         if not pages:
-            raise ValueError(f"페이지를 읽을 수 없습니다: {pdf_path.name}")
+            raise ValueError(f"페이지를 읽을 수 없습니다: {target_display_name}")
         page = pages[min(max(page_number, 1), len(pages)) - 1]
         logger.info("[pipeline] A 측정 %.2fs — %s, 블록 %d, 표 %d",
                     time.time() - step, page.doc_type, len(page.classifiable()), len(page.tables))
 
         if not page.has_text_layer:
             raise ScannedDocumentError(
-                f"'{pdf_path.name}' 에는 텍스트 레이어가 없습니다(스캔 이미지 PDF). "
+                f"'{target_display_name}' 에는 텍스트 레이어가 없습니다(스캔 이미지 PDF). "
                 "이 파이프라인은 텍스트 기반 추출만 지원합니다."
             )
 
         # B. 판정
         step = time.time()
-        decisions = self.classifier.classify(pdf_path.name, page)
+        decisions = self.classifier.classify(target_display_name, page)
         logger.info("[pipeline] B 판정 %.2fs — %d개 분류",
                     time.time() - step, len(decisions.get("blocks", [])))
 
@@ -86,10 +93,10 @@ class ScaffoldPipeline:
             logger.info("[pipeline] D 채점 — %s", report.summary())
 
         meta = ScaffoldMeta(
-            id=f"scaffold-{pdf_path.stem.lower().replace(' ', '-')}",
-            title=decisions.get("doc_title") or f"{pdf_path.stem} 서식 틀",
-            targetDoc=pdf_path.stem,
-            sourcePdfFileName=pdf_path.name,
+            id=f"scaffold-{display_stem.lower().replace(' ', '-')}",
+            title=decisions.get("doc_title") or f"{display_stem} 서식 틀",
+            targetDoc=display_stem,
+            sourcePdfFileName=target_display_name,
             description=(
                 f"원본 실측 기하 기반 와이어프레임 · {page.doc_type} · 슬롯 {len(slots)}개"
             ),

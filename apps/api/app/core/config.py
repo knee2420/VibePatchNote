@@ -24,6 +24,8 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 _DEFAULT_CORS_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
     "http://localhost:4173",
     "http://127.0.0.1:4173",
 ]

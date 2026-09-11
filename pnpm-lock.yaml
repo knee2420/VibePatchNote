@@ -14,11 +14,11 @@ importers:
 
   apps/api: {}
 
-  apps/playground:
+  apps/inspector:
     dependencies:
-      '@vibe/tiptap-scaffold':
-        specifier: workspace:*
-        version: link:../../packages/tiptap-scaffold
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       lucide-react:
         specifier: ^1.38.0
         version: 1.39.0(react@19.2.8)
@@ -28,6 +28,9 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3
@@ -44,9 +47,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.1.0
         version: 6.1.1(vite@8.2.2(@types/node@24.13.3)(jiti@2.7.0))
-      oxlint:
-        specifier: ^1.79.0
-        version: 1.81.0
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3

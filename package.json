@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
+    "dev:inspector": "turbo run dev --filter=@vibe/inspector",
     "dev:tuning": "python workbench/05.llm_tuning/studio/app.py",
     "build": "turbo run build",
     "lint": "turbo run lint",

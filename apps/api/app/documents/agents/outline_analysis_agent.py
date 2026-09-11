@@ -14,7 +14,12 @@ class OutlineAnalysisAgent:
     def __init__(self, harness: BaseLlmHarness) -> None:
         self._harness = harness
 
-    async def analyze(self, file_path: Path, context_dir: Path | None = None) -> OutlineDocument:
+    async def analyze(
+        self,
+        file_path: Path,
+        context_dir: Path | None = None,
+        display_name: str | None = None,
+    ) -> OutlineDocument:
         """아웃라인을 추출한다.
 
         `context_dir` 은 엔진이 만들어 낼 결정적 파생(컨텍스트 마크다운)의 위치다.
@@ -25,4 +30,6 @@ class OutlineAnalysisAgent:
         # 실어 보내 하네스의 모델을 덮어쓴다. 실행마다 한 번만 읽으므로 한 실행 안에서는
         # 실제 호출 모델과 출처(provenance)의 모델이 어긋나지 않는다.
         pipeline = OutlinePipeline(harness=self._harness, default_model=self._harness.model)
-        return await asyncio.to_thread(pipeline.run, file_path, context_dir=context_dir)
+        return await asyncio.to_thread(
+            pipeline.run, file_path, context_dir=context_dir, display_name=display_name
+        )

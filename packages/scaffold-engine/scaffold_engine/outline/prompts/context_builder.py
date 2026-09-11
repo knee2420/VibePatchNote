@@ -14,11 +14,17 @@ class DocumentContextBuilder:
     def __init__(self, max_text_blocks_per_page: int = 5) -> None:
         self.max_text_blocks_per_page = max_text_blocks_per_page
 
-    def build_context(self, pdf_path: Path, output_dir: Optional[Path] = None) -> Dict[str, Any]:
+    def build_context(
+        self,
+        pdf_path: Path,
+        output_dir: Optional[Path] = None,
+        display_name: Optional[str] = None,
+    ) -> Dict[str, Any]:
         pdf_path = Path(pdf_path).resolve()
         if not pdf_path.exists():
             raise FileNotFoundError(f"PDF 파일을 찾을 수 없습니다: {pdf_path}")
 
+        target_filename = display_name or pdf_path.name
         doc = fitz.open(pdf_path)
         total_pages = len(doc)
         pages_data: List[Dict[str, Any]] = []
@@ -139,7 +145,7 @@ class DocumentContextBuilder:
             context_file_path.write_text(context_md_text, encoding="utf-8")
 
         return {
-            "filename": pdf_path.name,
+            "filename": target_filename,
             "resolved_path": str(pdf_path),
             "total_pages": total_pages,
             "context_text": context_md_text,

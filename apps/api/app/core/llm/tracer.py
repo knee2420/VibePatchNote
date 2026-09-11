@@ -289,6 +289,111 @@ class LlmTrace(BaseModel):
             return None
 
 
+def ingest_pipeline_telemetry(
+    telemetry_data: Any,
+    run_id: Optional[str] = None,
+    doc_id: Optional[str] = None,
+    base_dir: Optional[Path] = None,
+    target_name: Optional[str] = None,
+) -> Optional[Path]:
+    """엔진이 방출한 PipelineTelemetry 객체를 apps/api/data/runs/{run_id}/ 에 영속화합니다 (60-data 헌법 준수)."""
+    try:
+        from agent_telemetry.contracts import PipelineTelemetry
+
+        if isinstance(telemetry_data, dict):
+            telemetry = PipelineTelemetry.model_validate(telemetry_data)
+        elif isinstance(telemetry_data, PipelineTelemetry):
+            telemetry = telemetry_data
+        else:
+            return None
+
+        actual_run_id = run_id or telemetry.trace_id
+        if base_dir is None:
+            from app.core.config import settings
+            # data/runs/ 에 원본 보존
+            run_dir = settings.storage.data / RUNS_DIR / actual_run_id
+        else:
+            run_dir = base_dir / actual_run_id
+
+        run_dir.mkdir(parents=True, exist_ok=True)
+
+        # 1. ledger.jsonl (Append-Only 불변 원장)
+        ledger_path = run_dir / "ledger.jsonl"
+        with open(ledger_path, "w", encoding="utf-8") as f:
+            for sp in telemetry.spans:
+                entry = {
+                    "event_type": "span",
+                    "timestamp": sp.start_time.isoformat(),
+                    "data": sp.model_dump(mode="json"),
+                }
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+            for att in telemetry.attempts:
+                entry = {
+                    "event_type": "attempt",
+                    "data": att.model_dump(mode="json"),
+                }
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+        # 2. snapshots.json (단계별 중간 상태 덤프)
+        snapshots_path = run_dir / "snapshots.json"
+        snapshots_payload = [snap.model_dump(mode="json") for snap in telemetry.snapshots]
+        with open(snapshots_path, "w", encoding="utf-8") as f:
+            json.dump(snapshots_payload, f, ensure_ascii=False, indent=2)
+
+        # primary_provider 및 primary_model 추출
+        primary_provider = None
+        primary_model = None
+        if telemetry.attempts:
+            # 성공한 attempt 우선 탐색
+            succ_att = next((a for a in telemetry.attempts if getattr(a, "status", None) == "success"), telemetry.attempts[0])
+            primary_provider = succ_att.provider
+            primary_model = succ_att.model_name
+        elif telemetry.provenance:
+            primary_provider = telemetry.provenance.get("provider")
+            primary_model = telemetry.provenance.get("model")
+
+        raw_target = getattr(telemetry, "target_name", None)
+        resolved_target = (
+            target_name
+            if (raw_target in (None, "", "source.pdf") and target_name)
+            else (raw_target or target_name)
+        )
+
+        meta_path = run_dir / "meta.json"
+        meta_payload = {
+            "run_id": actual_run_id,
+            "doc_id": doc_id,
+            "domain": getattr(telemetry, "domain", "documents"),
+            "workflow_name": getattr(telemetry, "workflow_name", "pipeline"),
+            "workflow_label": getattr(telemetry, "workflow_label", "") or ("\ubb38\uc11c \ubaa9\ucc28 \ucd94\ucd9c" if "outline" in (telemetry.pipeline_name or "").lower() else ""),
+            "target_name": resolved_target,
+            "primary_provider": primary_provider,
+            "primary_model": primary_model,
+            "pipeline_name": telemetry.pipeline_name,
+            "status": telemetry.status.value,
+            "start_time": telemetry.start_time.isoformat(),
+            "end_time": telemetry.end_time.isoformat() if telemetry.end_time else None,
+            "total_latency_ms": telemetry.total_latency_ms,
+            "total_tokens": telemetry.total_usage.total_tokens,
+            "prompt_tokens": telemetry.total_usage.prompt_tokens,
+            "completion_tokens": telemetry.total_usage.completion_tokens,
+            "spans_count": len(telemetry.spans),
+            "snapshots_count": len(telemetry.snapshots),
+            "attempts_count": len(telemetry.attempts),
+            "provenance": telemetry.provenance,
+        }
+        with open(meta_path, "w", encoding="utf-8") as f:
+            json.dump(meta_payload, f, ensure_ascii=False, indent=2)
+
+        logger.info("[LlmTracer] PipelineTelemetry 저장 완료: %s (status=%s, spans=%d, snapshots=%d)", actual_run_id, telemetry.status.value, len(telemetry.spans), len(telemetry.snapshots))
+        return run_dir
+
+    except Exception as exc:
+        logger.error("[LlmTracer] PipelineTelemetry 저장 실패: %s", exc)
+        return None
+
+
 def get_current_trace() -> Optional[LlmTrace]:
     """현재 활성화된 상위 Trace 객체를 반환합니다."""
     return _active_trace.get()

@@ -78,9 +78,9 @@ class _EmptyOutlineHarness:
 
 
 class _ContextBuilder:
-    def build_context(self, pdf_path: Path, output_dir=None) -> dict[str, Any]:
+    def build_context(self, pdf_path: Path, output_dir=None, display_name=None) -> dict[str, Any]:
         return {
-            "filename": pdf_path.name,
+            "filename": display_name or pdf_path.name,
             "total_pages": 1,
             "context_file_path": None,
             "context_text": "제목과 본문이 있는 문서",
