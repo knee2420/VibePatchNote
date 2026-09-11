@@ -17,6 +17,11 @@ from app.core.agent_runtime import RunCost
 # LLM 이 만들어 낸 산출물의 종류. 결정적 파생(cache/)은 여기에 오지 않는다.
 ArtifactKind = Literal["outline", "segments"]
 
+# outline 아티팩트 내부 파일명의 도메인 정본. 유스케이스마다 문자열을 복제하면
+# 과거 채택본 판정과 새 아티팩트 기록 형식이 서로 어긋날 수 있다.
+OUTLINE_TREE_FILE = "tree.json"
+OUTLINE_ELEMENTS_FILE = "elements.json"
+
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)

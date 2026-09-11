@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime
+from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
 from app.core.storage import ARTIFACT_PREFIX, new_id
 
 from ..experimental import build_segment_scan_prompt
@@ -52,23 +52,28 @@ class ScanDocumentSegmentsUseCase:
         file_path = self._source.resolve_file(doc_id)
         prompt = build_segment_scan_prompt(file_path)
 
-        agent_run, raw = await self._runtime.execute(
-            AGENT_NAME,
-            lambda: self._scanner.scan(prompt),
-            doc_id=doc_id,
-            run_input=AgentRunInput(
-                use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
-            ),
-        )
+        run_id = current_run_id()
+        if run_id:
+            raw = await self._scanner.scan(prompt)
+        else:
+            agent_run, raw = await self._runtime.execute(
+                AGENT_NAME,
+                lambda: self._scanner.scan(prompt),
+                doc_id=doc_id,
+                run_input=AgentRunInput(
+                    use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
+                ),
+            )
+            run_id = agent_run.run_id
 
         segments = (raw or {}).get("segments")
         if not isinstance(segments, list) or not segments:
             self._runtime.mark_failed(
-                agent_run.run_id,
+                run_id,
                 error_code="SEGMENT_SCAN_EMPTY",
                 detail="세그먼트를 하나도 추출하지 못했습니다.",
             )
-            return self._fallback(meta, agent_run.run_id)
+            return self._fallback(meta, run_id)
 
         response = {
             "status": "completed",
@@ -76,9 +81,9 @@ class ScanDocumentSegmentsUseCase:
             "document_title": (raw or {}).get("document_title") or meta.original_name,
             "total_segments": len(segments),
             "segments": segments,
-            "agentRunId": agent_run.run_id,
+            "agentRunId": run_id,
         }
-        self._commit(doc_id, segments, agent_run.run_id)
+        self._commit(doc_id, segments, run_id)
         return response
 
     def load_adopted(self, doc_id: str) -> dict[str, Any] | None:

@@ -5,27 +5,24 @@ PyMuPDF 기반 3중 멀티모달 컨텍스트와 보편적 인지 분해 원칙�
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
-import json
 import logging
-from pathlib import Path
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
 from scaffold_engine.harness import (
     DEFAULT_MODEL,
     BaseLlmHarness,
     HarnessFactory,
     LlmExecutionResult,
 )
-from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
-from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
+from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.schemas.models import (
-    ElementItem,
     OutlineDocument,
     OutlineItem,
-    OutlineNode,
     OutlineOutput,
 )
 
@@ -136,6 +133,7 @@ class OutlinePipeline:
         )
         llm_duration = round(time.time() - llm_t0, 3)
         llm_ended_at = _utc_now_iso()
+        actual_model = exec_res.model or target_model
 
         context_chars = len(doc_ctx.get("context_text", ""))
 
@@ -155,7 +153,7 @@ class OutlinePipeline:
                 "status": "SUCCESS",
             },
             {
-                "name": f"LLM:{target_model}",
+                "name": f"LLM:{actual_model}",
                 "run_type": "llm",
                 "start_time": llm_started_at,
                 "end_time": llm_ended_at,
@@ -182,7 +180,7 @@ class OutlinePipeline:
         # 이 dict 형태가 호스트 감사 로그(`app.core.llm.telemetry`)의 입력 규격이다.
         # 키를 바꾸면 `documents/service.py` 의 매핑도 함께 고쳐야 한다.
         telemetry = {
-            "model": target_model,
+            "model": actual_model,
             "ctx_duration": ctx_duration,
             "cli_duration": exec_res.duration_seconds,
             "tokens": {
@@ -202,7 +200,7 @@ class OutlinePipeline:
             # 산출물을 재현·비교하려면 "무엇이 만들었는가"가 결과와 함께 남아야 한다.
             "provenance": EngineProvenance(
                 pipeline="outline",
-                model=target_model,
+                model=actual_model,
                 effort=target_effort,
                 prompt_hash=hash_text(instructions) if instructions else None,
                 schema_hash=hash_file(self.schema_path),
@@ -240,18 +238,44 @@ class OutlinePipeline:
         })
 
         if validated is None:
-            logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s) — 관대 복구 시도", val_error)
-            recovered_doc = self._lenient_recover(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+            logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s)", val_error)
+            telemetry["status"] = "ERROR"
+            telemetry["error"] = f"OUTLINE_SCHEMA_INVALID: {val_error}"
+            telemetry["telemetry_metadata"]["failure_code"] = "INVALID_MODEL_OUTPUT"
             return {
-                "success": True,
-                "document_title": pdf_path.name,
-                "data": raw_output,
-                "document": recovered_doc,
+                "success": False,
+                "status": "ERROR",
+                "error": telemetry["error"],
+                "fallback_document": self._create_fallback_document(
+                    pdf_path, doc_ctx["total_pages"], telemetry
+                ),
                 "telemetry": telemetry,
             }
 
         try:
             document = OutlineDocument.from_outline_output(validated, telemetry=telemetry)
+            if not document.flat_elements:
+                telemetry["status"] = "ERROR"
+                telemetry["error"] = "OUTLINE_CONTENT_EMPTY: 문서 구성요소가 하나도 추출되지 않았습니다."
+                telemetry["telemetry_metadata"]["failure_code"] = "INVALID_MODEL_OUTPUT"
+                steps.append({
+                    "name": "OutlineSemanticValidation",
+                    "run_type": "parser",
+                    "start_time": _utc_now_iso(),
+                    "end_time": _utc_now_iso(),
+                    "duration_seconds": 0,
+                    "status": "FAILED",
+                    "error": telemetry["error"],
+                })
+                return {
+                    "success": False,
+                    "status": "ERROR",
+                    "error": telemetry["error"],
+                    "fallback_document": self._create_fallback_document(
+                        pdf_path, doc_ctx["total_pages"], telemetry
+                    ),
+                    "telemetry": telemetry,
+                }
             logger.info(
                 "[OutlinePipeline] 성공: 루트 노드 %d건, 엘리먼트 %d건 (시간: %ss)",
                 len(document.outlines),
@@ -266,13 +290,17 @@ class OutlinePipeline:
                 "telemetry": telemetry,
             }
         except Exception as ve:
-            logger.warning("[OutlinePipeline] 문서 표준화 실패 (%s) — 관대 복구 시도", ve)
-            recovered_doc = self._lenient_recover(raw_output, pdf_path.name, doc_ctx["total_pages"], telemetry)
+            logger.warning("[OutlinePipeline] 문서 표준화 실패 (%s)", ve)
+            telemetry["status"] = "ERROR"
+            telemetry["error"] = f"OUTLINE_NORMALIZATION_FAILED: {ve}"
+            telemetry["telemetry_metadata"]["failure_code"] = "INVALID_MODEL_OUTPUT"
             return {
-                "success": True,
-                "document_title": pdf_path.name,
-                "data": raw_output,
-                "document": recovered_doc,
+                "success": False,
+                "status": "ERROR",
+                "error": telemetry["error"],
+                "fallback_document": self._create_fallback_document(
+                    pdf_path, doc_ctx["total_pages"], telemetry
+                ),
                 "telemetry": telemetry,
             }
 

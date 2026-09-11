@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime
+from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
 
 from ..agents import ScaffoldGenerationAgent
 from ..ports import DocumentSourceRepository, ScaffoldArchivePort
@@ -39,14 +39,19 @@ class GenerateScaffoldUseCase:
             raise FileNotFoundError(f"Document not found: {doc_id}")
 
         file_path = self._source.resolve_file(doc_id)
-        agent_run, result = await self._runtime.execute(
-            self._agent.name,
-            lambda: self._agent.generate(file_path),
-            doc_id=doc_id,
-            run_input=AgentRunInput(
-                use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
-            ),
-        )
+        run_id = current_run_id()
+        if run_id:
+            result = await self._agent.generate(file_path)
+        else:
+            agent_run, result = await self._runtime.execute(
+                self._agent.name,
+                lambda: self._agent.generate(file_path),
+                doc_id=doc_id,
+                run_input=AgentRunInput(
+                    use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
+                ),
+            )
+            run_id = agent_run.run_id
         logger.info(
             "[GenerateScaffold] 완료: %s (slots=%d, html=%d자)",
             doc_id, len(result.slots), len(result.html_content),
@@ -67,5 +72,5 @@ class GenerateScaffoldUseCase:
             "markdownContent": result.markdown_content,
             "slots": [slot.model_dump(by_alias=True) for slot in result.slots],
             "archive": archive_meta.model_dump(by_alias=True) if archive_meta else None,
-            "agentRunId": agent_run.run_id,
+            "agentRunId": run_id,
         }

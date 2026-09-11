@@ -131,6 +131,32 @@ class DocumentService:
         )
         return {"runId": run.run_id, "status": run.status}
 
+    async def start_document_scan(self, doc_id: str) -> dict[str, Any]:
+        run = await self._runtime.submit(
+            self._scan_segments.name,
+            lambda: self._scan_segments.execute(doc_id),
+            doc_id=doc_id,
+            run_input=AgentRunInput(
+                use_case=self._scan_segments.name,
+                doc_id=doc_id,
+                payload={"docId": doc_id},
+            ),
+        )
+        return {"runId": run.run_id, "status": run.status}
+
+    async def start_scaffold(self, doc_id: str) -> dict[str, Any]:
+        run = await self._runtime.submit(
+            self._generate_scaffold.name,
+            lambda: self._generate_scaffold.execute(doc_id),
+            doc_id=doc_id,
+            run_input=AgentRunInput(
+                use_case=self._generate_scaffold.name,
+                doc_id=doc_id,
+                payload={"docId": doc_id},
+            ),
+        )
+        return {"runId": run.run_id, "status": run.status}
+
     async def extract_scaffold(self, doc_id: str) -> dict[str, Any]:
         return await self._generate_scaffold.execute(doc_id)
 
@@ -150,6 +176,7 @@ class DocumentService:
             "cost": run.cost.model_dump(),
             "result": run.result,
             "errorCode": run.error_code,
+            "execution": run.metadata.get("execution"),
         }
 
     async def resume_run(self, run_id: str) -> dict[str, Any] | None:

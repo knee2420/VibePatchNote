@@ -219,12 +219,14 @@
       "items": {
         "$ref": "#/$defs/OutlineItem"
       },
+      "minItems": 1,
       "title": "Outlines",
       "type": "array"
     }
   },
   "required": [
-    "document_title"
+    "document_title",
+    "outlines"
   ],
   "title": "OutlineOutput",
   "type": "object"

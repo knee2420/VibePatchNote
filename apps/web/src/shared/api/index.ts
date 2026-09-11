@@ -12,3 +12,4 @@ export {
   type AgentRunStatus,
   type Agreement,
 } from './agentRunClient';
+export type { AgentRunExecution } from './agentRunClient';

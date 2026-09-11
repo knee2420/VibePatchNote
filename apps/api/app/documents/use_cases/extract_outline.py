@@ -14,6 +14,7 @@ from app.core.agent_runtime import (
     AgentRunInput,
     AgentRuntime,
     RunCost,
+    current_run_id,
 )
 from app.core.llm import (
     BaseLlmHarness,
@@ -26,7 +27,12 @@ from app.core.storage import ARTIFACT_PREFIX, new_id
 
 from ..agents import OutlineAnalysisAgent
 from ..errors import analysis_error, failure_code_of
-from ..models import ArtifactProvenance, DocumentMeta
+from ..models import (
+    OUTLINE_ELEMENTS_FILE,
+    OUTLINE_TREE_FILE,
+    ArtifactProvenance,
+    DocumentMeta,
+)
 from ..ports import (
     DocumentArtifactRepository,
     DocumentCacheRepository,
@@ -36,8 +42,8 @@ from ..ports import (
 logger = logging.getLogger(__name__)
 
 KIND = "outline"
-TREE_FILE = "tree.json"
-ELEMENTS_FILE = "elements.json"
+TREE_FILE = OUTLINE_TREE_FILE
+ELEMENTS_FILE = OUTLINE_ELEMENTS_FILE
 MARKDOWN_FILE = "outline.md"
 
 
@@ -103,7 +109,11 @@ class ExtractOutlineUseCase:
         adopted = self._artifacts.load_head(doc_id, KIND)
         if adopted is None:
             return None
-        return self._response_from_artifact(meta, adopted)
+        response = self._response_from_artifact(meta, adopted)
+        if not self._is_usable_response(response):
+            logger.warning("[ExtractOutline] 내용 없는 채택본 무시: %s", doc_id)
+            return None
+        return response
 
     async def execute(self, doc_id: str, force_refresh: bool = False) -> dict[str, Any]:
         meta = self._require(doc_id)
@@ -111,8 +121,11 @@ class ExtractOutlineUseCase:
         if not force_refresh:
             adopted = self._artifacts.load_head(doc_id, KIND)
             if adopted is not None:
-                logger.info("[ExtractOutline] 채택본 재사용: %s", doc_id)
-                return self._response_from_artifact(meta, adopted)
+                response = self._response_from_artifact(meta, adopted)
+                if self._is_usable_response(response):
+                    logger.info("[ExtractOutline] 채택본 재사용: %s", doc_id)
+                    return response
+                logger.warning("[ExtractOutline] 내용 없는 채택본 재분석: %s", doc_id)
 
         file_path = self._source.resolve_file(doc_id)
         with trace_session(
@@ -126,20 +139,27 @@ class ExtractOutlineUseCase:
             with span_context(
                 "OutlinePipeline.run", run_type="chain", inputs={"docId": doc_id}
             ):
-                agent_run, document = await self._runtime.execute(
-                    self._agent.name,
-                    lambda: self._agent.analyze(
+                run_id = current_run_id()
+                if run_id:
+                    document = await self._agent.analyze(
                         file_path, context_dir=self._cache.context_dir(doc_id)
-                    ),
-                    trace_id=trace.trace_id,
-                    doc_id=doc_id,
-                    run_input=AgentRunInput(
-                        use_case=self.name,
+                    )
+                else:
+                    agent_run, document = await self._runtime.execute(
+                        self._agent.name,
+                        lambda: self._agent.analyze(
+                            file_path, context_dir=self._cache.context_dir(doc_id)
+                        ),
+                        trace_id=trace.trace_id,
                         doc_id=doc_id,
-                        payload={"docId": doc_id, "forceRefresh": True},
-                    ),
-                )
-                trace.run_id = agent_run.run_id
+                        run_input=AgentRunInput(
+                            use_case=self.name,
+                            doc_id=doc_id,
+                            payload={"docId": doc_id, "forceRefresh": True},
+                        ),
+                    )
+                    run_id = agent_run.run_id
+                trace.run_id = run_id
                 trace.replay_steps((document.telemetry or {}).get("steps"))
 
             telemetry = document.telemetry or {}
@@ -154,16 +174,16 @@ class ExtractOutlineUseCase:
                 cache_read_tokens=execution.cache_read_tokens,
                 total_tokens=execution.total_tokens,
             )
-            self._runtime.record_cost(agent_run.run_id, cost)
+            self._runtime.record_cost(run_id, cost)
 
             provenance = None
             if status_val == "SUCCESS":
                 with span_context("ArtifactCommit", run_type="tool", inputs={"docId": doc_id}):
-                    provenance = self._commit(doc_id, document, telemetry, agent_run.run_id, trace.trace_id, cost)
+                    provenance = self._commit(doc_id, document, telemetry, run_id, trace.trace_id, cost)
             else:
                 # 실패 결과를 아티팩트로 커밋하지 않는다. 폴백 문서를 채택본으로 두면
                 # 다음 요청이 그것을 정상 결과로 오인한다.
-                self._settle_failure(agent_run.run_id, doc_id, telemetry)
+                self._settle_failure(run_id, doc_id, telemetry)
 
             trace.finish(
                 outputs={
@@ -178,7 +198,7 @@ class ExtractOutlineUseCase:
                 task_name="outline_extraction",
                 result=execution,
                 doc_id=doc_id,
-                run_id=agent_run.run_id,
+                run_id=run_id,
                 trace_id=trace.trace_id,
                 metadata={
                     "total_outlines": len(document.outlines),
@@ -200,7 +220,7 @@ class ExtractOutlineUseCase:
             "manifest": telemetry,
             "artifactId": provenance.artifact_id if provenance else None,
             "traceId": trace.trace_id,
-            "agentRunId": agent_run.run_id,
+            "agentRunId": run_id,
             "error": None if status_val == "SUCCESS" else analysis_error(telemetry),
         }
 
@@ -291,3 +311,8 @@ class ExtractOutlineUseCase:
             "agentRunId": provenance.get("runId") or provenance.get("run_id"),
             "error": None,
         }
+
+    @staticmethod
+    def _is_usable_response(response: dict[str, Any]) -> bool:
+        """제목 한 줄뿐인 과거 오검출을 채택된 아웃라인으로 취급하지 않는다."""
+        return bool(response.get("outlines")) and bool(response.get("elements"))

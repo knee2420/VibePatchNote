@@ -31,6 +31,33 @@ from scaffold_engine.harness import (
 
 logger = logging.getLogger(__name__)
 
+# Gemini structured output가 지원하지 않는 JSON Schema 주석/제약이다. Pydantic이
+# 생성한 스키마의 `default` 등을 그대로 보내면 모델 호출 전에 400으로 거절될 수 있다.
+_UNSUPPORTED_SCHEMA_KEYS = {
+    "$schema",
+    "const",
+    "default",
+    "deprecated",
+    "examples",
+    "maxLength",
+    "minLength",
+    "pattern",
+    "readOnly",
+    "writeOnly",
+}
+
+
+def _gemini_schema(value: Any) -> Any:
+    if isinstance(value, list):
+        return [_gemini_schema(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    return {
+        key: _gemini_schema(item)
+        for key, item in value.items()
+        if key not in _UNSUPPORTED_SCHEMA_KEYS
+    }
+
 
 class GoogleGenAiHarness(BaseLlmHarness):
     """API key를 이용하는 Google Generative Language REST 어댑터.
@@ -70,9 +97,24 @@ class GoogleGenAiHarness(BaseLlmHarness):
                 telemetry_metadata={"provider": "google_api", "failure_code": "FALLBACK_NOT_CONFIGURED"},
             )
 
+        resolved_schema = json_schema
+        if resolved_schema is None and schema_path is not None:
+            try:
+                resolved_schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))
+            except (OSError, ValueError, TypeError) as exc:
+                return LlmExecutionResult(
+                    status=STATUS_ERROR,
+                    model=target_model,
+                    error=f"Google API output schema could not be loaded: {exc}",
+                    telemetry_metadata={
+                        "provider": "google_api",
+                        "failure_code": "OUTPUT_SCHEMA_INVALID",
+                    },
+                )
+
         generation_config: Dict[str, Any] = {"responseMimeType": "application/json"}
-        if json_schema:
-            generation_config["responseJsonSchema"] = json_schema
+        if resolved_schema:
+            generation_config["responseJsonSchema"] = _gemini_schema(resolved_schema)
         request_body = {
             "contents": [{"role": "user", "parts": [{"text": prompt}]}],
             "generationConfig": generation_config,
@@ -103,7 +145,7 @@ class GoogleGenAiHarness(BaseLlmHarness):
         parts = ((candidates[0].get("content") or {}).get("parts") or []) if candidates else []
         text = "".join(str(part.get("text", "")) for part in parts)
         try:
-            structured_output = json.loads(text) if json_schema and text else None
+            structured_output = json.loads(text) if resolved_schema and text else None
         except json.JSONDecodeError:
             structured_output = None
         usage = payload.get("usageMetadata") or {}

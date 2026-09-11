@@ -17,6 +17,9 @@ import {
   X,
 } from 'lucide-react';
 
+import type { AgentRunExecution } from '@/shared/api';
+import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
+
 import type { DocumentElementItem, DocumentOutlineNode } from '../model/types';
 
 interface DocumentOutlinePanelProps {
@@ -27,6 +30,7 @@ interface DocumentOutlinePanelProps {
   isExtracting?: boolean;
   progressStep?: number;
   progressMessage?: string;
+  execution?: AgentRunExecution | null;
   onSelectElement?: (element: DocumentElementItem) => void;
   onClose: () => void;
   onRefresh?: () => void;
@@ -51,8 +55,8 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
   selectedElementId,
   isRefreshing = false,
   isExtracting = false,
-  progressStep = 1,
   progressMessage = '',
+  execution,
   onSelectElement,
   onClose,
   onRefresh,
@@ -181,19 +185,14 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
       {/* 2. [진행 상태 바] 실시간 파이프라인 진행 상태 브로드캐스팅 (T 버튼 연계) */}
       {isExtracting && (
         <div className="px-3 py-2 bg-indigo-50/90 dark:bg-indigo-950/60 border-b border-indigo-100 dark:border-indigo-900/60 flex flex-col gap-1.5 shrink-0 transition-all">
-          <div className="flex items-center justify-between text-[11px] font-medium text-indigo-700 dark:text-indigo-300">
-            <span className="truncate">{progressMessage || '문서 분석 준비 중...'}</span>
-            <span className="font-mono text-[10px] text-indigo-500 dark:text-indigo-400 shrink-0 ml-1">
-              {progressStep === 1 ? '30%' : progressStep === 2 ? '65%' : '95%'}
+          <ProviderExecutionBadge execution={execution} />
+          <div className="flex items-center text-[11px] font-medium text-indigo-700 dark:text-indigo-300">
+            <span className="truncate">
+              {execution ? providerExecutionMessage(execution) : progressMessage || '문서 분석 준비 중...'}
             </span>
           </div>
           <div className="w-full h-1.5 bg-indigo-200/50 dark:bg-indigo-900/50 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full"
-              style={{
-                width: progressStep === 1 ? '30%' : progressStep === 2 ? '65%' : '95%',
-              }}
-            />
+            <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
           </div>
         </div>
       )}

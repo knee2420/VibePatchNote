@@ -36,7 +36,7 @@ async def list_providers(service: LlmSettingsServiceDep):
 
 @router.get("/runtime", response_model=RuntimeDashboardResponse)
 @inject
-async def get_runtime_dashboard(service: LlmSettingsServiceDep):
+def get_runtime_dashboard(service: LlmSettingsServiceDep):
     return RuntimeDashboardResponse(**service.runtime_dashboard())
 
 

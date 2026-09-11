@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Dict, List, Literal, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -72,7 +73,8 @@ class OutlineOutput(BaseModel):
     document_title: str = Field(..., description="분석 대상 문서 파일명")
     total_pages: int = Field(1, description="실제 분석한 총 페이지 수")
     outlines: List[OutlineItem] = Field(
-        default_factory=list,
+        ...,
+        min_length=1,
         description="계층적 목차 트리 (L1~L4 아웃라인 및 5대 컴포넌트 요소 전수 바인딩)",
     )
 

@@ -26,6 +26,7 @@ from scaffold_engine.harness import (
 
 from app.core.config import settings
 from app.core.llm.adapters import GoogleGenAiHarness, LocalGemmaHarness
+from app.core.llm.availability import CliQuotaAvailability
 from app.core.llm.credentials import CredentialStore
 from app.core.llm.fallback import FallbackLlmHarness
 from app.core.llm.provider_state import ProviderStateStore
@@ -36,13 +37,19 @@ logger = logging.getLogger(__name__)
 class LlmManager:
     """백엔드 중앙 LLM 진입점."""
 
-    def __init__(self, credentials: CredentialStore, provider_state: ProviderStateStore) -> None:
+    def __init__(
+        self,
+        credentials: CredentialStore,
+        provider_state: ProviderStateStore,
+        cli_availability: CliQuotaAvailability,
+    ) -> None:
         # 자격 증명과 차단 상태는 설정 화면(LlmSettingsService)과 같은 인스턴스여야 한다.
         # ProviderStateStore 는 파일 내용을 메모리에 캐시하므로, 따로 만들면 두 캐시가
         # 갈라져 한쪽의 차단 기록을 다른 쪽이 보지 못하고 서로의 쓰기를 덮어쓴다.
         self._executable: str = settings.agent_cli_bin
         self._credentials = credentials
         self._provider_state = provider_state
+        self._cli_availability = cli_availability
         self._register_providers()
 
     # --- 프로바이더 등록 -------------------------------------------------
@@ -118,6 +125,7 @@ class LlmManager:
                 google_model=settings.google_api_model,
                 google_timeout_seconds=settings.google_api_timeout_seconds,
                 provider_state=self._provider_state,
+                cli_availability=self._cli_availability,
             )
         return harness
 

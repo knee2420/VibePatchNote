@@ -19,6 +19,7 @@ from .events import AgentRunEvent
 from .models import AgentRun, AgentRunInput, RunCost
 from .policy import DEFAULT_RETRY_POLICY, RetryPolicy
 from .ports import AgentRunRepository, LedgerPort
+from .progress import bind_progress
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,13 @@ class AgentRuntime:
         )
 
         try:
-            result = await operation()
+            with bind_progress(
+                lambda detail: self._runs.append(
+                    run_id, AgentRunEvent(type="progressed", detail=detail)
+                ),
+                run_id,
+            ):
+                result = await operation()
         except Exception as exc:
             self._runs.append(
                 run_id,
@@ -94,6 +101,9 @@ class AgentRuntime:
             )
             raise
 
+        current = self._runs.get(run_id)
+        if current is not None and (current.is_waiting or current.status == "failed"):
+            return current, result
         run = self._runs.append(run_id, AgentRunEvent(type="succeeded"))
         return run, result
 
@@ -228,7 +238,13 @@ class AgentRuntime:
         async def run_operation() -> None:
             self._runs.append(run_id, AgentRunEvent(type="started", agent_name=agent_name))
             try:
-                result = await operation()
+                with bind_progress(
+                    lambda detail: self._runs.append(
+                        run_id, AgentRunEvent(type="progressed", detail=detail)
+                    ),
+                    run_id,
+                ):
+                    result = await operation()
             except Exception as exc:
                 self._runs.append(
                     run_id,
@@ -239,6 +255,9 @@ class AgentRuntime:
                     ),
                 )
                 logger.exception("[AgentRuntime] 실행 실패 (%s): %s", run_id, exc)
+                return
+            current = self._runs.get(run_id)
+            if current is not None and (current.is_waiting or current.status == "failed"):
                 return
             self._runs.append(run_id, AgentRunEvent(type="succeeded", result=result))
 

@@ -18,6 +18,7 @@ from .models import (
 )
 from .policy import DEFAULT_RETRY_POLICY, RetryPolicy
 from .ports import AgentRunRepository, AgreementRepository, LedgerPort
+from .progress import bind_progress, current_run_id, report_progress
 from .repository import LocalAgentRunRepository, LocalAgreementRepository, LocalLedger
 from .runtime import INTERRUPTED_CODE, AgentRuntime
 
@@ -37,6 +38,9 @@ __all__ = [
     "AgreementRepository",
     "LedgerPort",
     "LocalAgentRunRepository",
+    "bind_progress",
+    "current_run_id",
+    "report_progress",
     "LocalAgreementRepository",
     "LocalLedger",
     "INTERRUPTED_CODE",

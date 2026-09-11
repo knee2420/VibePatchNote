@@ -26,6 +26,7 @@ from app.core.llm import (
     LlmManager,
     RuntimePolicyHarness,
 )
+from app.core.llm.availability import CliQuotaAvailability
 from app.core.llm.credentials import OsCredentialStore
 from app.core.llm.provider_state import ProviderStateStore
 from app.documents.adapters import (
@@ -82,6 +83,9 @@ class Container(containers.DeclarativeContainer):
         bridge_command=providers.Object(f'python "{settings.base_dir / "scripts" / "agy_status_bridge.py"}"'),
     )
     agy_usage_reader = providers.Singleton(AgyUsageReader, executable=providers.Object(settings.agent_cli_bin))
+    cli_quota_availability = providers.Singleton(
+        CliQuotaAvailability, reader=agy_usage_reader
+    )
     google_model_catalog = providers.Singleton(GoogleModelCatalog, credentials=credential_store)
     google_quota_reader = providers.Singleton(
         GoogleQuotaReader,
@@ -94,7 +98,10 @@ class Container(containers.DeclarativeContainer):
         ReadGoogleProjectUsageUseCase, quotas=google_quota_reader, models=google_model_catalog
     )
     llm_manager = providers.Singleton(
-        LlmManager, credentials=credential_store, provider_state=provider_state
+        LlmManager,
+        credentials=credential_store,
+        provider_state=provider_state,
+        cli_availability=cli_quota_availability,
     )
     # 에이전트·유스케이스가 모두 이 하네스 하나를 공유한다. 싱글턴 DocumentService 가
     # 유스케이스를 붙들고 있으므로 구체 하네스를 넣으면 첫 해석 시점의 정책이 굳는다.
@@ -113,6 +120,7 @@ class Container(containers.DeclarativeContainer):
         google_models=google_model_catalog,
         google_quotas=google_quota_reader,
         google_usage=read_google_project_usage,
+        cli_availability=cli_quota_availability,
     )
 
     # --- [2 Runtime] · [B Agreement] · [A Observation] ---------------------

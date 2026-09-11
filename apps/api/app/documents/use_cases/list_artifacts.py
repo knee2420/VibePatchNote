@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..models import ArtifactKind
+from ..models import OUTLINE_ELEMENTS_FILE, OUTLINE_TREE_FILE, ArtifactKind
 from ..ports import DocumentArtifactRepository, DocumentSourceRepository
 
 KINDS: tuple[ArtifactKind, ...] = ("outline", "segments")
@@ -33,7 +33,7 @@ class ListDocumentArtifactsUseCase:
         kinds: dict[str, Any] = {}
         for kind in KINDS:
             kinds[kind] = {
-                "head": self._artifacts.head_id(doc_id, kind),
+                "head": self._usable_head_id(doc_id, kind),
                 "versions": [
                     provenance.model_dump(mode="json", by_alias=True)
                     for provenance in self._artifacts.list_versions(doc_id, kind)
@@ -53,7 +53,20 @@ class ListDocumentArtifactsUseCase:
                 "mime": meta.mime,
                 "size": meta.size,
                 "uploadedAt": meta.uploaded_at.isoformat(),
-                "outlineArtifactId": self._artifacts.head_id(meta.doc_id, "outline"),
+                "outlineArtifactId": self._usable_head_id(meta.doc_id, "outline"),
             }
             for meta in self._source.list_all()
         ]
+
+    def _usable_head_id(self, doc_id: str, kind: ArtifactKind) -> str | None:
+        head_id = self._artifacts.head_id(doc_id, kind)
+        if head_id is None or kind != "outline":
+            return head_id
+
+        adopted = self._artifacts.load_head(doc_id, kind)
+        if adopted is None:
+            return None
+        tree = adopted.get(OUTLINE_TREE_FILE) or {}
+        if not tree.get("outlines") or not adopted.get(OUTLINE_ELEMENTS_FILE):
+            return None
+        return head_id

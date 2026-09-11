@@ -1,5 +1,6 @@
 import type { Node } from '@xyflow/react';
 import type { NodeTheme } from '@/shared/model';
+import type { AgentRunExecution } from '@/shared/api';
 
 /**
  * 스캐폴딩 문서 노드 타입 상수 (SSOT).
@@ -86,6 +87,8 @@ export interface ScaffoldDocumentData extends Record<string, unknown> {
   status?: ScaffoldStatus;
   progressStep?: number;
   progressMessage?: string;
+  execution?: AgentRunExecution | null;
+  runId?: string;
   errorMessage?: string;
   slots?: ScaffoldSlot[];
   archive?: ScaffoldArchiveMeta;

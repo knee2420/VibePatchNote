@@ -11,7 +11,10 @@ from typing import Any, Dict, Optional, Union
 
 from scaffold_engine.harness import BaseLlmHarness, LlmExecutionResult
 
+from app.core.agent_runtime import report_progress
+
 from .adapters import GoogleGenAiHarness
+from .availability import CliQuotaAvailability
 from .credentials import CredentialStore
 from .provider_state import ProviderStateStore, remaining_text
 
@@ -54,6 +57,7 @@ class FallbackLlmHarness(BaseLlmHarness):
         google_model: str,
         google_timeout_seconds: int,
         provider_state: Optional[ProviderStateStore] = None,
+        cli_availability: Optional[CliQuotaAvailability] = None,
     ) -> None:
         super().__init__(model=primary.model, timeout_seconds=primary.timeout_seconds)
         self._primary = primary
@@ -61,6 +65,7 @@ class FallbackLlmHarness(BaseLlmHarness):
         self._google_model = google_model
         self._google_timeout_seconds = google_timeout_seconds
         self._state = provider_state
+        self._cli_availability = cli_availability
 
     def run_structured(
         self,
@@ -81,14 +86,56 @@ class FallbackLlmHarness(BaseLlmHarness):
             timeout=timeout,
         )
 
+        report_progress({"execution": {"phase": "routing", "provider": None, "model": None}})
+
         # 1. 이미 못 쓰는 것으로 확인된 공급자는 부르지 않는다.
         blocked_until = self._state.blocked_until(PRIMARY_PROVIDER_ID) if self._state else None
         if blocked_until is not None:
             code = self._state.block_reason(PRIMARY_PROVIDER_ID) or "PROVIDER_UNAVAILABLE"
-            return self._fallback_or_report(prompt, code, blocked_until, model=model, **call)
+            return self._fallback_or_report(
+                prompt,
+                code,
+                blocked_until,
+                model=model,
+                route_reason="cli_blocked",
+                **call,
+            )
 
-        # 2. 평소 경로: CLI 먼저.
+        # 2. 실행 직전 quota가 0이면 실패할 CLI 프로세스를 띄우지 않는다.
+        availability = (
+            self._cli_availability.check(model or self._primary.model)
+            if self._cli_availability
+            else None
+        )
+        if availability and availability.exhausted:
+            return self._fallback_or_report(
+                prompt,
+                "QUOTA_EXHAUSTED",
+                None,
+                model=model,
+                route_reason="cli_quota_exhausted",
+                skipped_primary=True,
+                **call,
+            )
+
+        # 3. quota가 남았거나 확인할 수 없으면 CLI를 먼저 쓴다.
+        report_progress(
+            {
+                "execution": {
+                    "phase": "running",
+                    "provider": PRIMARY_PROVIDER_ID,
+                    "model": model or self._primary.model,
+                    "routeReason": (
+                        "cli_available"
+                        if availability and availability.state == "available"
+                        else "cli_quota_unknown"
+                    ),
+                }
+            }
+        )
         primary = self._primary.run_structured(prompt, model=model, **call)
+        if self._cli_availability:
+            self._cli_availability.invalidate()
         primary.telemetry_metadata.setdefault("provider", "agy_cli")
         if primary.ok:
             primary.telemetry_metadata.setdefault("fallback_used", False)
@@ -98,7 +145,7 @@ class FallbackLlmHarness(BaseLlmHarness):
 
         code = failure_code(primary)
 
-        # 3. 한동안 회복되지 않을 실패는 기억해 둔다.
+        # 4. 한동안 회복되지 않을 실패는 기억해 둔다.
         blocked_until = None
         if self._state and code in _BLOCKING_FAILURE_CODES:
             blocked_until = self._state.block(
@@ -113,7 +160,13 @@ class FallbackLlmHarness(BaseLlmHarness):
             return primary
 
         return self._fallback_or_report(
-            prompt, code, blocked_until, model=model, primary_result=primary, **call
+            prompt,
+            code,
+            blocked_until,
+            model=model,
+            primary_result=primary,
+            route_reason="cli_failed",
+            **call,
         )
 
     # --- 내부 ---------------------------------------------------------
@@ -126,12 +179,25 @@ class FallbackLlmHarness(BaseLlmHarness):
         *,
         model: Optional[str] = None,
         primary_result: Optional[LlmExecutionResult] = None,
+        route_reason: str = "cli_failed",
+        skipped_primary: bool = False,
         **call: Any,
     ) -> LlmExecutionResult:
         """보조 공급자가 설정돼 있으면 그쪽으로, 아니면 설정이 필요하다고 알린다."""
         api_key = self._credentials.get_google_api_key()
 
         if api_key:
+            report_progress(
+                {
+                    "execution": {
+                        "phase": "switched" if not skipped_primary else "running",
+                        "provider": "google-api",
+                        "model": self._google_model,
+                        "routeReason": route_reason,
+                        "fallbackFrom": None if skipped_primary else PRIMARY_PROVIDER_ID,
+                    }
+                }
+            )
             call.pop("model", None)
             fallback = GoogleGenAiHarness(
                 model=self._google_model,
@@ -145,6 +211,8 @@ class FallbackLlmHarness(BaseLlmHarness):
                     "fallback_used": True,
                     "primary_provider": "agy_cli",
                     "primary_failure_code": primary_code,
+                    "route_reason": route_reason,
+                    "skipped_primary": skipped_primary,
                 }
             )
             if not result.ok:
@@ -152,12 +220,24 @@ class FallbackLlmHarness(BaseLlmHarness):
             return result
 
         # 보조 경로가 없다 — 설정이 필요하다는 것을 그대로 드러낸다.
+        report_progress(
+            {
+                "execution": {
+                    "phase": "running",
+                    "provider": None,
+                    "model": None,
+                    "routeReason": route_reason,
+                }
+            }
+        )
         result = primary_result or self._blocked_result(primary_code, blocked_until)
         metadata = {
             "failure_code": "FALLBACK_NOT_CONFIGURED",
             "primary_failure_code": primary_code,
             "requires_action": "configure_google_api",
             "retryable": False,
+            "route_reason": route_reason,
+            "skipped_primary": skipped_primary,
         }
         if blocked_until is not None:
             metadata["primary_blocked_until"] = blocked_until.isoformat()

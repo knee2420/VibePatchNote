@@ -1,3 +1,4 @@
+from app.core.llm.availability import CliAvailability
 from app.llm_settings.service import LlmSettingsService
 
 
@@ -19,3 +20,22 @@ def test_provider_status_exposes_only_a_masked_google_api_key():
     assert google["configured"] is True
     assert google["masked_key"] == "AIza••••••••efgh"
     assert "AIza0123456789abcdefgh" not in str(google)
+
+
+class _ExhaustedCli:
+    def check(self, model: str) -> CliAvailability:
+        return CliAvailability("exhausted", 0.0)
+
+
+def test_runtime_preview_selects_api_when_cli_quota_is_empty(monkeypatch):
+    monkeypatch.setattr("app.llm_settings.service.shutil.which", lambda executable: executable)
+    dashboard = LlmSettingsService(
+        credentials=_CredentialStore(),
+        cli_availability=_ExhaustedCli(),  # type: ignore[arg-type]
+    ).runtime_dashboard()
+
+    assert dashboard["nextExecution"] == {
+        "provider": "google-api",
+        "model": dashboard["policy"]["fallbackModel"],
+        "routeReason": "cli_quota_exhausted",
+    }

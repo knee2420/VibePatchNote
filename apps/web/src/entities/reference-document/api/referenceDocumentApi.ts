@@ -132,9 +132,17 @@ export const referenceDocumentApi = {
   scanSegments: (docId: string) =>
     httpClient.post<ScanDocumentResponse>(`${BASE_PATH}/scan`, { docId }),
 
+  /** 세그먼트 분석을 백그라운드 실행으로 접수합니다. */
+  startSegmentScan: (docId: string) =>
+    httpClient.post<{ runId: string; status: string }>(`${BASE_PATH}/scan/runs`, { docId }),
+
   /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. */
   extractScaffold: (docId: string) =>
     httpClient.post<ScaffoldExtractResponse>(`${BASE_PATH}/scaffold`, { docId }),
+
+  /** 스캐폴드 생성을 백그라운드 실행으로 접수합니다. */
+  startScaffold: (docId: string) =>
+    httpClient.post<{ runId: string; status: string }>(`${BASE_PATH}/scaffold/runs`, { docId }),
 
   /** 아웃라인 분석을 동기로 실행합니다(채택본이 있으면 그대로 반환). */
   extractOutline: (docId: string, forceRefresh = false) =>

@@ -18,6 +18,7 @@ from app.core.agent_runtime import (
     LocalAgentRunRepository,
     LocalAgreementRepository,
     LocalLedger,
+    report_progress,
 )
 from app.core.agent_runtime.models import LedgerEntry, RunCost
 from app.core.storage import StorageRoots
@@ -136,3 +137,48 @@ def test_ledger_is_append_only(roots: StorageRoots) -> None:
     entries = list(ledger.entries())
     assert len(entries) == 2
     assert {entry.model for entry in entries} == {"m1", "m2"}
+
+
+def test_submitted_run_keeps_provider_progress(runtime: AgentRuntime) -> None:
+    async def operation() -> dict:
+        report_progress({
+            "execution": {
+                "phase": "running",
+                "provider": "google-api",
+                "model": "gemini-test",
+                "routeReason": "cli_quota_exhausted",
+            }
+        })
+        return {"ok": True}
+
+    async def scenario() -> None:
+        accepted = await runtime.submit("documents.scan", operation)
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        completed = runtime.get(accepted.run_id)
+        assert completed is not None
+        assert completed.status == "completed"
+        assert completed.metadata["execution"]["provider"] == "google-api"
+        assert completed.metadata["execution"]["model"] == "gemini-test"
+
+    asyncio.run(scenario())
+
+
+def test_operation_failure_is_not_overwritten_by_submit_success(runtime: AgentRuntime) -> None:
+    async def scenario() -> None:
+        run_id = ""
+
+        async def operation() -> dict:
+            runtime.mark_failed(run_id, error_code="PIPELINE_FAILED")
+            return {"status": "failed"}
+
+        accepted = await runtime.submit("documents.scan", operation)
+        run_id = accepted.run_id
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        failed = runtime.get(run_id)
+        assert failed is not None
+        assert failed.status == "failed"
+        assert failed.error_code == "PIPELINE_FAILED"
+
+    asyncio.run(scenario())

@@ -7,6 +7,7 @@ import {
   HttpError,
   isWaiting,
   type AgentRunStatus,
+  type AgentRunExecution,
 } from '@/shared/api';
 import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 
@@ -67,6 +68,7 @@ export function useDocumentOutline({
   const [outlineError, setOutlineError] = useState<AnalysisError | undefined>(initialError);
   const [runStatus, setRunStatus] = useState<DocumentAnalysisStatus>(initialStatus);
   const [runId, setRunId] = useState<string | undefined>();
+  const [outlineExecution, setOutlineExecution] = useState<AgentRunExecution | null>(null);
 
   const { setNodes } = useReactFlow();
 
@@ -93,13 +95,28 @@ export function useDocumentOutline({
   const loadAdopted = useCallback(async () => {
     if (!docId) return;
     try {
+      // 채택본이 없는 상태는 정상이다. 먼저 가벼운 HEAD 목록을 확인해 불필요한
+      // 아웃라인 GET과 브라우저 콘솔의 예상 가능한 404를 만들지 않는다.
+      const { artifacts } = await referenceDocumentApi.getArtifacts(docId);
+      if (!artifacts.outline?.head) {
+        setOutlines([]);
+        setElements([]);
+        setHasAdoptedOutline(false);
+        return;
+      }
+
       const adopted = await referenceDocumentApi.getOutline(docId);
       setOutlines(adopted.outlines || []);
       setElements(adopted.elements || []);
       setHasAdoptedOutline((adopted.outlines || []).length > 0);
     } catch (err) {
       // 404 는 "아직 분석하지 않았다"는 정상 상태다. 에러로 표시하지 않는다.
-      if (err instanceof HttpError && err.status === 404) return;
+      if (err instanceof HttpError && err.status === 404) {
+        setOutlines([]);
+        setElements([]);
+        setHasAdoptedOutline(false);
+        return;
+      }
       console.error('[useDocumentOutline] 채택본 조회 실패:', err);
     }
   }, [docId]);
@@ -138,6 +155,7 @@ export function useDocumentOutline({
       setElements(response.elements || []);
       setHasAdoptedOutline((response.outlines || []).length > 0);
       setOutlineError(undefined);
+      setOutlineExecution(null);
       setRunStatus('completed');
       patchNode({
         isOutlineOpen: true,
@@ -185,6 +203,7 @@ export function useDocumentOutline({
           accepted.runId,
           (current) => {
             setRunStatus(current.status);
+            setOutlineExecution(current.execution ?? null);
             setOutlineProgressStep(current.status === 'queued' ? 1 : 2);
             setOutlineProgressMessage(PROGRESS_MESSAGE[current.status] ?? '');
           }
@@ -239,7 +258,10 @@ export function useDocumentOutline({
     try {
       await agentRunClient.resume(runId);
       const settled = await followAgentRun<ExtractOutlineResponse>(runId, (current) =>
-        setRunStatus(current.status)
+        {
+          setRunStatus(current.status);
+          setOutlineExecution(current.execution ?? null);
+        }
       );
       if (settled.status === 'completed' && settled.result) applyResult(settled.result);
     } finally {
@@ -261,6 +283,7 @@ export function useDocumentOutline({
     isExtractingOutline,
     outlineProgressStep,
     outlineProgressMessage,
+    outlineExecution,
     isOutlineOpen,
     outlines,
     elements,

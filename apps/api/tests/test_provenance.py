@@ -11,7 +11,8 @@ import pytest
 
 from app.core.storage import StorageRoots
 from app.documents.adapters import LocalDocumentArtifactRepository
-from app.documents.models import ArtifactProvenance
+from app.documents.models import ArtifactProvenance, DocumentMeta
+from app.documents.use_cases.list_artifacts import ListDocumentArtifactsUseCase
 
 
 @pytest.fixture()
@@ -79,3 +80,31 @@ def test_head_can_be_left_alone(artifacts: LocalDocumentArtifactRepository) -> N
         "doc-1", "outline", {"tree.json": {}}, _provenance("art-2"), set_head=False
     )
     assert artifacts.head_id("doc-1", "outline") == "art-1"
+
+
+def test_semantically_empty_outline_head_is_not_advertised(
+    artifacts: LocalDocumentArtifactRepository,
+) -> None:
+    """과거에 잘못 채택된 제목 한 줄 결과는 이력만 남기고 현재본으로 노출하지 않는다."""
+    artifacts.commit(
+        "doc-1",
+        "outline",
+        {"tree.json": {"outlines": [{"title": "source.pdf"}]}, "elements.json": []},
+        _provenance("art-empty"),
+    )
+
+    class Source:
+        def get(self, _doc_id: str) -> DocumentMeta:
+            return DocumentMeta(
+                doc_id="doc-1",
+                original_name="reference.pdf",
+                stored_name="source.pdf",
+                sha256="0" * 64,
+            )
+
+    result = ListDocumentArtifactsUseCase(Source(), artifacts).execute("doc-1")  # type: ignore[arg-type]
+
+    assert result["artifacts"]["outline"]["head"] is None
+    assert [item["artifactId"] for item in result["artifacts"]["outline"]["versions"]] == [
+        "art-empty"
+    ]

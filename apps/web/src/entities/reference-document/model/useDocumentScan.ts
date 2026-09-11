@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-import { HttpError } from '@/shared/api';
+import { followAgentRun, HttpError, type AgentRunExecution } from '@/shared/api';
 
 import { referenceDocumentApi } from '../api/referenceDocumentApi';
 import type { DocumentSegmentItem } from './types';
@@ -22,6 +22,7 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
   const [isScanning, setIsScanning] = useState(false);
   const [segments, setSegments] = useState<DocumentSegmentItem[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [execution, setExecution] = useState<AgentRunExecution | null>(null);
 
   const optionsRef = useRef(options);
   useEffect(() => {
@@ -54,9 +55,18 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
 
     setIsScanning(true);
     setError(null);
+    setExecution(null);
 
     try {
-      const response = await referenceDocumentApi.scanSegments(docId);
+      const accepted = await referenceDocumentApi.startSegmentScan(docId);
+      const settled = await followAgentRun<Awaited<ReturnType<typeof referenceDocumentApi.scanSegments>>>(
+        accepted.runId,
+        (current) => setExecution(current.execution ?? null),
+      );
+      if (settled.status !== 'completed' || !settled.result) {
+        throw new Error(settled.errorCode || '문서 구조 스캔 작업이 완료되지 않았습니다.');
+      }
+      const response = settled.result;
       const loadedSegments = response.segments || [];
       setSegments(loadedSegments);
       optionsRef.current.onSuccess?.(loadedSegments);
@@ -74,6 +84,7 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
     segments,
     setSegments,
     error,
+    execution,
     scanDocument,
   };
 }

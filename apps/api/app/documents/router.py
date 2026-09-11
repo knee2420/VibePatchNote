@@ -177,6 +177,16 @@ async def scan_document_segments(req: ScanDocumentRequest, service: DocumentServ
         raise _document_http_error(exc) from exc
 
 
+@router.post("/scan/runs", response_model=RunAccepted, status_code=202)
+@inject
+async def start_document_scan(req: ScanDocumentRequest, service: DocumentServiceDep):
+    try:
+        doc_id = service.resolve_doc_id(req.doc_id, req.filename)
+        return RunAccepted(**await service.start_document_scan(doc_id))
+    except (ValueError, FileNotFoundError, OSError) as exc:
+        raise _document_http_error(exc) from exc
+
+
 @router.post("/outline", response_model=ExtractOutlineResponse)
 @inject
 async def extract_document_outline(req: ExtractOutlineRequest, service: DocumentServiceDep):
@@ -216,6 +226,18 @@ async def extract_scaffold_wireframe(
     try:
         doc_id = service.resolve_doc_id(req.doc_id, req.filename)
         return ScaffoldDocumentResponse(**await service.extract_scaffold(doc_id))
+    except (ValueError, FileNotFoundError, OSError) as exc:
+        raise _document_http_error(exc) from exc
+
+
+@router.post("/scaffold/runs", response_model=RunAccepted, status_code=202)
+@inject
+async def start_scaffold_wireframe(
+    req: ScaffoldDocumentRequest, service: DocumentServiceDep
+):
+    try:
+        doc_id = service.resolve_doc_id(req.doc_id, req.filename)
+        return RunAccepted(**await service.start_scaffold(doc_id))
     except (ValueError, FileNotFoundError, OSError) as exc:
         raise _document_http_error(exc) from exc
 

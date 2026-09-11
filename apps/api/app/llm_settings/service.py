@@ -8,6 +8,7 @@ from scaffold_engine.harness import MODEL_REGISTRY
 
 from app.core.config import settings
 from app.core.llm import AgyStatusSnapshot
+from app.core.llm.availability import CliQuotaAvailability
 from app.core.llm.credentials import CredentialStore
 from app.core.llm.fallback import PRIMARY_PROVIDER_ID
 from app.core.llm.provider_state import ProviderStateStore, remaining_text
@@ -34,6 +35,7 @@ class LlmSettingsService:
         google_models: Optional[GoogleModelCatalogPort] = None,
         google_quotas: Optional[GoogleQuotaPort] = None,
         google_usage: Optional[ReadGoogleProjectUsageUseCase] = None,
+        cli_availability: Optional[CliQuotaAvailability] = None,
     ) -> None:
         self._credentials = credentials
         self._state = provider_state
@@ -44,6 +46,7 @@ class LlmSettingsService:
         self._google_models = google_models
         self._google_quotas = google_quotas
         self._google_usage = google_usage
+        self._cli_availability = cli_availability
         self._restore_runtime_policy()
 
     def list_providers(self) -> dict[str, object]:
@@ -87,6 +90,7 @@ class LlmSettingsService:
             "agyStatus": self._agy_status.read() if self._agy_status else None,
             "agyStatusBridgeCommand": f'python "{settings.base_dir / "scripts" / "agy_status_bridge.py"}"',
             "agyStatusLineInstalled": self._agy_status_line.is_installed() if self._agy_status_line else False,
+            "nextExecution": self._next_execution(),
         }
 
     def install_agy_status_line(self) -> dict[str, object]:
@@ -213,6 +217,33 @@ class LlmSettingsService:
             "masked_key": self._masked_key(api_key) if api_key else None,
             "role": "fallback",
             "available": configured,
+        }
+
+    def _next_execution(self) -> dict[str, Any]:
+        """현재 스냅샷 기준 다음 AI 작업의 예상 경로. 실행 이력은 만들지 않는다."""
+        primary = self._primary()
+        fallback = self._fallback()
+        if not primary.get("available"):
+            return {
+                "provider": "google-api" if fallback["available"] else None,
+                "model": settings.google_api_model if fallback["available"] else None,
+                "routeReason": "cli_blocked",
+            }
+        availability = (
+            self._cli_availability.check(settings.agent_cli_model)
+            if self._cli_availability
+            else None
+        )
+        if availability and availability.exhausted:
+            return {
+                "provider": "google-api" if fallback["available"] else None,
+                "model": settings.google_api_model if fallback["available"] else None,
+                "routeReason": "cli_quota_exhausted",
+            }
+        return {
+            "provider": PRIMARY_PROVIDER_ID,
+            "model": settings.agent_cli_model,
+            "routeReason": "cli_available" if availability and availability.state == "available" else "cli_quota_unknown",
         }
 
     @staticmethod

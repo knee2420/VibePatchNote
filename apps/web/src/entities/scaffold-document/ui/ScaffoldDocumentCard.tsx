@@ -6,8 +6,6 @@ import {
   Trash2,
   Sparkles,
   Loader2,
-  CheckCircle2,
-  CircleDashed,
   Layers,
   AlertCircle,
 } from 'lucide-react';
@@ -15,6 +13,7 @@ import {
 import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
 
 import { useSyncMappingStore } from '@/shared/model';
+import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
 import { useScaffoldArchive, type ScaffoldArchiveSyncState } from '../model/useScaffoldArchive';
 import { useScaffoldFocusStore } from '../model/useScaffoldFocusStore';
@@ -156,18 +155,6 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
   // 세션에서 복원된 노드는 본문이 비어 있고 포인터만 있다. 그것도 완료 상태다.
   const status = data.status || (data.htmlContent || data.scaffoldId ? 'completed' : 'generating');
-  const step = data.progressStep || 1;
-
-  // AI 분석 단계 정의
-  const progressSteps = [
-    { num: 1, label: 'Geometry Measurement', desc: '표 경계·행 높이·열 너비 실측 (AI 미사용)' },
-    { num: 2, label: 'Block Detection', desc: '셀·텍스트 라인·이미지·구분선 블록화' },
-    { num: 3, label: 'Slot Classification', desc: '고정 서식 vs 채울 값 판정 (좌표 생성 없음)' },
-    { num: 4, label: 'Assembly & Fidelity Score', desc: '실측 좌표로 조립 후 기하 충실도 채점' },
-  ];
-
-  const progressPercent = Math.min(step * 25, 95);
-
   return (
     <div
       style={cardStyle}
@@ -197,7 +184,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                 {status === 'generating' ? 'AI 실시간 분석 중' : 'Tiptap 와이어프레임 서식'}
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
-                {status === 'generating' ? `${progressPercent}%` : 'v1.0'}
+                {status === 'generating' ? '실행 중' : 'v1.0'}
               </span>
               {status === 'completed' && syncState !== 'idle' && (
                 <span
@@ -255,72 +242,22 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                 </div>
               </div>
 
-              {/* 프로그레스 바 */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-[11px] font-semibold text-slate-600">
-                  <span>추출 파이프라인 진행률</span>
-                  <span className="text-indigo-600 font-bold">{progressPercent}%</span>
-                </div>
-                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-600 transition-all duration-700 ease-out rounded-full"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
+              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                <ProviderExecutionBadge execution={data.execution} />
+                <span className="text-[11px] text-slate-600">
+                  {providerExecutionMessage(data.execution)}
+                </span>
               </div>
 
-              {/* 4단계 스텝 목록 시각화 */}
-              <div className="flex flex-col gap-2.5 mt-2">
-                {progressSteps.map((s) => {
-                  const isDone = step > s.num;
-                  const isCurrent = step === s.num;
-
-                  return (
-                    <div
-                      key={s.num}
-                      className={`
-                        p-3 rounded-xl border transition-all duration-300 flex items-start gap-3
-                        ${
-                          isCurrent
-                            ? 'bg-white border-indigo-400 shadow-xs ring-2 ring-indigo-500/10'
-                            : isDone
-                              ? 'bg-white/80 border-slate-200 text-slate-700'
-                              : 'bg-slate-100/60 border-slate-200/60 text-slate-400'
-                        }
-                      `}
-                    >
-                      <div className="mt-0.5">
-                        {isDone ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        ) : isCurrent ? (
-                          <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />
-                        ) : (
-                          <CircleDashed className="w-4 h-4 text-slate-400" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <span
-                            className={`text-xs font-semibold ${
-                              isCurrent ? 'text-indigo-900' : isDone ? 'text-slate-800' : 'text-slate-400'
-                            }`}
-                          >
-                            {s.label}
-                          </span>
-                          {isCurrent && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono font-semibold">
-                              In Progress
-                            </span>
-                          )}
-                          {isDone && (
-                            <span className="text-[10px] text-emerald-600 font-semibold">Done</span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{s.desc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                  <Loader2 className="size-4 animate-spin text-indigo-600" />
+                  문서 구조와 편집 슬롯을 생성하고 있습니다
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full w-1/2 animate-pulse rounded-full bg-indigo-600" />
+                </div>
+                <p className="text-[11px] text-slate-500">공급자가 실제 단계별 진행률을 제공하지 않아 임의의 백분율은 표시하지 않습니다.</p>
               </div>
             </div>
 

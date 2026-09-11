@@ -30,7 +30,7 @@ export function useSegmentEditing({
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { isScanning, segments, setSegments, scanDocument } = useDocumentScan({
+  const { isScanning, segments, setSegments, execution, scanDocument } = useDocumentScan({
     docId,
     onSuccess: (loaded) => onScanSuccess?.(loaded),
     onError: (error) => onScanError?.(error),
@@ -92,6 +92,7 @@ export function useSegmentEditing({
   return {
     segments,
     isScanning,
+    execution,
     isSaving,
     isEditMode,
     scan,

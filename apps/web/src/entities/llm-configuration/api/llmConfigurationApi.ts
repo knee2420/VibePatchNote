@@ -1,4 +1,4 @@
-import { httpClient } from '@/shared/api';
+import { httpClient, type AgentRunExecution } from '@/shared/api';
 
 /** 공급자 하나의 설정 여부와 지금 쓸 수 있는지. 키 값은 절대 내려오지 않습니다. */
 export interface LlmProvider {
@@ -69,6 +69,7 @@ export interface RuntimeDashboard {
   agyStatus: AgyStatusSnapshot | null;
   agyStatusBridgeCommand: string;
   agyStatusLineInstalled: boolean;
+  nextExecution: Omit<AgentRunExecution, 'phase'>;
 }
 
 export interface AgyUsageBucket {

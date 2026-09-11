@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useReactFlow, type Edge, MarkerType } from '@xyflow/react';
 
+import { followAgentRun, type AgentRunExecution } from '@/shared/api';
+import { providerExecutionMessage } from '@/shared/ui';
+
 import { referenceDocumentApi } from '../api/referenceDocumentApi';
 
 /** 백엔드 최악 지연(하네스 75초 x 재시도 3회 = 225초)을 덮는 프런트 가드. */
@@ -79,6 +82,7 @@ export function useDocumentScaffold({
         status: 'generating' as const,
         progressStep: 1,
         progressMessage: '원본 페이지 기하 실측 준비...',
+        execution: null,
         width: nodeWidth,
         height: nodeHeight,
       },
@@ -105,80 +109,47 @@ export function useDocumentScaffold({
     setNodes((nds) => [...nds, initialScaffoldNode]);
     setEdges((eds) => [...eds, newEdge]);
 
-    // AI 진행 상태 시뮬레이션 타이머들 (사용자 체감 향상)
-    const timers: NodeJS.Timeout[] = [];
-    timers.push(
-      setTimeout(() => {
-        setNodes((nds) =>
-          nds.map((n) =>
-            n.id === newScaffoldId && n.data?.status === 'generating'
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    progressStep: 2,
-                    progressMessage: '표 경계·행 높이·열 너비 실측 중...',
-                  },
-                }
-              : n
-          )
-        );
-      }, 3500)
-    );
-
-    timers.push(
-      setTimeout(() => {
-        setNodes((nds) =>
-          nds.map((n) =>
-            n.id === newScaffoldId && n.data?.status === 'generating'
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    progressStep: 3,
-                    progressMessage: '고정 서식과 채울 값을 AI가 판정하는 중...',
-                  },
-                }
-              : n
-          )
-        );
-      }, 8000)
-    );
-
-    timers.push(
-      setTimeout(() => {
-        setNodes((nds) =>
-          nds.map((n) =>
-            n.id === newScaffoldId && n.data?.status === 'generating'
-              ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    progressStep: 4,
-                    progressMessage: '실측 좌표로 서식 조립 및 기하 채점 중...',
-                  },
-                }
-              : n
-          )
-        );
-      }, 30000)
-    );
-
     try {
-      // 4. 백엔드 scaffold-engine 호출.
-      //    가드는 백엔드 최악 지연(하네스 75초 x 재시도 3회)보다 커야 한다.
-      //    그렇지 않으면 백엔드가 아직 일하는 중에 프런트가 먼저 실패로 처리한다.
+      const accepted = await referenceDocumentApi.startScaffold(docId);
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === newScaffoldId
+            ? { ...node, data: { ...node.data, runId: accepted.runId } }
+            : node
+        )
+      );
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('서식 생성 요청 시간 초과 (240초)')), SCAFFOLD_TIMEOUT_MS)
       );
 
-      const res = await Promise.race([
-        referenceDocumentApi.extractScaffold(docId),
+      const settled = await Promise.race([
+        followAgentRun<Awaited<ReturnType<typeof referenceDocumentApi.extractScaffold>>>(
+          accepted.runId,
+          (current) => {
+            const execution = current.execution as AgentRunExecution | null | undefined;
+            setNodes((nds) =>
+              nds.map((node) =>
+                node.id === newScaffoldId
+                  ? {
+                      ...node,
+                      data: {
+                        ...node.data,
+                        execution,
+                        progressStep: 1,
+                        progressMessage: providerExecutionMessage(execution),
+                      },
+                    }
+                  : node
+              )
+            );
+          }
+        ),
         timeoutPromise,
       ]);
-
-      // 타이머 정리
-      timers.forEach((t) => clearTimeout(t));
+      if (settled.status !== 'completed' || !settled.result) {
+        throw new Error(settled.errorCode || '서식 생성 작업이 완료되지 않았습니다.');
+      }
+      const res = settled.result;
 
       // 5. 완료 시 최종본 노드 데이터 반영 (status: 'completed')
       setNodes((nds) =>
@@ -201,6 +172,7 @@ export function useDocumentScaffold({
                 status: 'completed',
                 progressStep: 4,
                 progressMessage: '서식 생성 완료',
+                execution: res.agentRunId ? n.data?.execution : null,
               },
             };
           }
@@ -210,7 +182,6 @@ export function useDocumentScaffold({
 
       onSuccess?.(res.meta.title || title);
     } catch (err) {
-      timers.forEach((t) => clearTimeout(t));
       const errorMsg = err instanceof Error ? err.message : String(err);
       console.error('[useDocumentScaffold] Error extracting scaffold for', docId, ':', err);
 

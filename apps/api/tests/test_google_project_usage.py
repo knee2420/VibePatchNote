@@ -70,15 +70,17 @@ class _Catalog:
         ]
 
 
-def test_only_models_in_service_for_this_key_are_listed():
+def test_catalog_models_are_kept_even_when_rpd_is_missing_or_zero():
     usage = ReadGoogleProjectUsageUseCase(quotas=_Quotas(), models=_Catalog()).execute()
     rows = usage["models"]
 
-    # RPD 가 0·없음이거나 이 API 키로 부를 수 없는 모델은 빠지고, 같은 한도는 한 줄로 합쳐진다.
+    # 모델 카탈로그가 현재 사용 가능 여부의 정본이다. RPD 하나만으로 종료를 추측하지 않는다.
     assert [row["id"] for row in rows] == [
         "gemini-3.5-flash",
         "gemini-3.1-flash-lite",
         "antigravity-preview-05-2026",
+        "gemini-2.0-flash-exp",
+        "gemini-2.5-pro",
         "gemma-4-26b-a4b-it",
     ]
     antigravity = rows[2]

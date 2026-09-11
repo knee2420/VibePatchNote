@@ -52,6 +52,7 @@ class RuntimeDashboardResponse(BaseModel):
     agy_status: dict | None = Field(default=None, alias="agyStatus")
     agy_status_bridge_command: str = Field(alias="agyStatusBridgeCommand")
     agy_status_line_installed: bool = Field(alias="agyStatusLineInstalled")
+    next_execution: dict = Field(alias="nextExecution")
 
 
 class AgyStatusLineInstallResponse(BaseModel):

@@ -5,8 +5,8 @@
 - API 키의 모델 목록: 지금 이 키로 generateContent 를 부를 수 있는 모델
 - 프로젝트 한도(Cloud Quotas): 종료·실험·내부용까지 모든 모델의 tier 별 한도
 
-표에는 **양쪽에 모두 있고, 이 프로젝트 tier 의 일일 요청 한도(RPD)가 0 이 아닌** 모델만
-남긴다. RPD 가 0 이거나 값이 없는 모델은 그 tier 에서 더 이상 제공되지 않는 모델이다.
+표에는 API 키의 모델 목록이 반환한 현재 generateContent 모델을 남긴다. RPM·TPM·RPD는
+각기 독립된 한도라 RPD가 없다는 이유만으로 모델이 종료됐다고 판단하지 않는다.
 조회 결과는 저장하지 않는다.
 """
 from __future__ import annotations
@@ -74,8 +74,14 @@ class ReadGoogleProjectUsageUseCase:
         for model in self._models.list_models():
             model_id = str(model.get("id", ""))
             quota = _match_quota(normalize_model_id(model_id), quotas)
-            if quota is None or not _in_service(quota):
-                continue
+            if quota is None:
+                quota = {
+                    "model": normalize_model_id(model_id),
+                    "rpm": None,
+                    "tpm": None,
+                    "rpd": None,
+                    "recentTokens": 0,
+                }
             base = str(quota.get("model", ""))
             current = chosen.get(base)
             if current is None or _preference(model_id, base) < _preference(str(current[0].get("id", "")), base):
@@ -89,11 +95,6 @@ class ReadGoogleProjectUsageUseCase:
             "billingEnabled": project.get("billingEnabled"),
             "models": [_row(model, quota) for _, (model, quota) in ordered],
         }
-
-
-def _in_service(quota: dict[str, Any]) -> bool:
-    rpd = quota.get("rpd")
-    return isinstance(rpd, int) and rpd != 0
 
 
 def _match_quota(normalized_id: str, quotas: dict[str, dict[str, Any]]) -> dict[str, Any] | None:

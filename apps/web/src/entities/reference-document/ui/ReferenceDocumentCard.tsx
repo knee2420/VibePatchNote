@@ -12,6 +12,7 @@ import { viewerRegistry, type ViewerHighlight } from '@vibe/document-viewer';
 
 import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
 import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
+import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeResize } from '../lib/useNodeResize';
@@ -95,6 +96,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     isExtractingOutline,
     outlineProgressStep,
     outlineProgressMessage,
+    outlineExecution,
     isOutlineOpen,
     outlines,
     hasOutline,
@@ -187,6 +189,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   const {
     segments,
     isScanning,
+    execution: scanExecution,
     isEditMode,
     scan,
     toggleEditMode,
@@ -280,6 +283,13 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         onDelete={handleDelete}
       />
 
+      {isScanning && (
+        <div className="flex items-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+          <ProviderExecutionBadge execution={scanExecution} compact />
+          <span>{providerExecutionMessage(scanExecution)}</span>
+        </div>
+      )}
+
       {/* 본문 컨테이너: 뷰어 본문 + (패널 열림 시) 아웃라인 패널 가로 분할 */}
       <div className="flex-1 w-full h-full overflow-hidden flex flex-row relative nodrag nopan">
         {/* 플러그인 뷰어 본문 + 휠 가로채기 래퍼 */}
@@ -313,6 +323,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
             isExtracting={isExtractingOutline}
             progressStep={outlineProgressStep}
             progressMessage={outlineProgressMessage}
+            execution={outlineExecution}
             onSelectElement={handleSelectElement}
             onClose={toggleOutlinePanel}
             onRefresh={() => extractOutline(true)}

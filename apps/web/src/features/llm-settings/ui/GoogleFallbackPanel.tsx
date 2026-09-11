@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 
 import type { GoogleModelCategory, GoogleProjectUsage } from '@/entities/llm-configuration';
-import { Button, Input } from '@/shared/ui';
+import { Button, Input, ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
 import { type GoogleFallbackSettings, useGoogleFallbackSettings } from '../model/useGoogleFallbackSettings';
 
@@ -97,6 +97,17 @@ export function GoogleFallbackPanel() {
             ? '설정됨 — AGY 한도가 소진되거나 CLI가 실패하면 이 경로로 분석을 이어갑니다.'
             : '미설정 — AGY 한도가 소진되면 분석을 이어갈 수 없습니다.'}
         </p>
+        {runtime?.nextExecution && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-current/10 pt-3">
+            <span className="text-xs font-medium text-slate-600">다음 AI 작업 예상 경로</span>
+            <ProviderExecutionBadge
+              execution={{ ...runtime.nextExecution, phase: 'running' }}
+            />
+            <span className="text-xs text-slate-600">
+              {providerExecutionMessage({ ...runtime.nextExecution, phase: 'running' })}
+            </span>
+          </div>
+        )}
       </section>
 
       <section>
@@ -206,7 +217,7 @@ function ProjectUsageSection({ settings }: { settings: GoogleFallbackSettings })
   }
 
   const emptyMessage = emptyUsageMessage(Boolean(google?.configured), usage, isUsageLoading);
-  const rows = usage?.models ?? [];
+  const rows = usage?.models.filter((model) => model.category === 'text') ?? [];
   const visibleRows = isExpanded ? rows : rows.slice(0, COLLAPSED_ROW_COUNT);
 
   return (
@@ -215,7 +226,7 @@ function ProjectUsageSection({ settings }: { settings: GoogleFallbackSettings })
         <div>
           <h3 className="font-semibold">Google 프로젝트 사용량·한도</h3>
           <p className="mt-1 text-xs text-slate-500">
-            이 API 키로 쓸 수 있고 현재 제공 중인 모델만 표시합니다. 조회 결과는 저장하지 않습니다.
+            이 API 키로 문서 작업에 쓸 수 있는 텍스트 모델만 표시합니다. 조회 결과는 저장하지 않습니다.
           </p>
           <p className="mt-1 text-xs text-emerald-700">
             연결됨 · {status.projectId}

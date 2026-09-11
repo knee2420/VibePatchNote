@@ -187,6 +187,7 @@ class RunResponse(BaseModel):
     cost: RunCostView = Field(default_factory=RunCostView)
     result: Optional[Dict[str, Any]] = None
     error_code: Optional[str] = Field(default=None, alias="errorCode")
+    execution: Optional[Dict[str, Any]] = None
 
     model_config = {"populate_by_name": True}
 

@@ -48,6 +48,14 @@ export interface AgentRunCost {
   total_tokens: number;
 }
 
+export interface AgentRunExecution {
+  phase: 'routing' | 'running' | 'switched' | 'completed';
+  provider?: 'agy-cli' | 'google-api' | null;
+  model?: string | null;
+  routeReason?: 'cli_available' | 'cli_quota_unknown' | 'cli_quota_exhausted' | 'cli_blocked' | 'cli_failed';
+  fallbackFrom?: 'agy-cli' | null;
+}
+
 export interface AgentRun<TResult = Record<string, unknown>> {
   runId: string;
   status: AgentRunStatus;
@@ -59,6 +67,7 @@ export interface AgentRun<TResult = Record<string, unknown>> {
   cost: AgentRunCost;
   result?: TResult | null;
   errorCode?: string | null;
+  execution?: AgentRunExecution | null;
 }
 
 /** 사람이 내려야 하는 결정 한 건. 서버 재시작을 넘어 살아남는다. */
