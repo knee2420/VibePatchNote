@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
+from agent_telemetry.contracts.source import SpanSource, source_of
 from agent_telemetry.contracts.span import SpanRecord
 from agent_telemetry.contracts.usage import usage_from_product_dict
 
@@ -48,6 +49,32 @@ class StepScope:
             self.span.data_out = data_out
         if data_via is not None:
             self.span.data_via = list(data_via)
+
+    def set_sources(self, *targets: Any, replace: bool = False) -> None:
+        """이 단계가 거쳐 간 코드 지점을 기록한다.
+
+        함수·메서드·클래스를 **그대로** 넘긴다. 문자열로 적으면 이름을 바꿨을 때
+        따라오지 않고, 소비자가 되파싱해야 한다.
+
+            scope.set_sources(DocumentContextBuilder.build_context)
+
+        이미 만든 `SpanSource` 도 그대로 받는다 (`model_source(...)` 등).
+        """
+        collected: List[SpanSource] = []
+        for target in targets:
+            if target is None:
+                continue
+            if isinstance(target, SpanSource):
+                collected.append(target)
+                continue
+            found = source_of(target)
+            if found is not None:
+                collected.append(found)
+
+        if replace:
+            self.span.sources = collected
+        else:
+            self.span.sources.extend(collected)
 
     def set_data_flow(
         self,

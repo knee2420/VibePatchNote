@@ -25,7 +25,14 @@ from scaffold_engine.outline.schemas.models import (
     OutlineItem,
     OutlineOutput,
 )
-from agent_telemetry import SpanPhase, SpanStatus, SpanType, StepCollector
+from agent_telemetry import (
+    SpanPhase,
+    SpanStatus,
+    SpanType,
+    StepCollector,
+    model_source,
+    source_of,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -128,7 +135,7 @@ class OutlinePipeline:
             display_label="문서 기하 및 원문 텍스트 실측",
             description="PDF 원본에서 표 구조, 폰트 크기 및 본문 텍스트 전문을 추출합니다.",
             data_in=target_display_name,
-            data_via=["context_builder.py (DocumentContextBuilder.build_context)"],
+            sources=[source_of(DocumentContextBuilder.build_context)],
         ) as s_ctx:
             try:
                 doc_ctx = self.context_builder.build_context(
@@ -171,7 +178,7 @@ class OutlinePipeline:
             display_label="맞춤 프롬프트 및 메타데이터 조립",
             description="시스템 지침, 실측 컨텍스트, 대상 문서 메타데이터를 결합합니다.",
             data_in="DocumentContext + Instructions",
-            data_via=["pipeline.py (OutlinePipeline.execute)"],
+            sources=[source_of(OutlinePipeline.execute)],
         ) as s_prompt:
             prompt = (
                 f"{instructions}\n\n"
@@ -225,7 +232,10 @@ class OutlinePipeline:
             display_label=f"{target_model} 목차 구조 추론",
             description="실제 LLM 모델에 프롬프트를 전송하고 구조화된 목차 JSON 응답을 수신합니다.",
             data_in=f"Prompt String ({len(prompt):,}자)",
-            data_via=[f"{self.harness.__class__.__name__}.run_structured", f"Engine: {target_model}"],
+            sources=[
+                source_of(type(self.harness).run_structured),
+                model_source(target_model),
+            ],
         ) as s_llm:
             exec_res: LlmExecutionResult = self.harness.run_structured(
                 prompt=prompt,
@@ -281,15 +291,16 @@ class OutlinePipeline:
                 "raw_response": exec_res.raw_response or "",
                 "structured_output": exec_res.structured_output,
             })
-            harness_chain = [f"{self.harness.__class__.__name__}.run_structured"]
-            if getattr(exec_res, "provider", None):
-                harness_chain.append(f"Adapter: {exec_res.provider}")
-            harness_chain.append(f"Model: {actual_model}")
+            # 실제 실행된 하네스와 모델로 경유 지점을 확정한다.
+            s_llm.set_sources(
+                type(self.harness).run_structured,
+                model_source(actual_model),
+                replace=True,
+            )
             s_llm.set_label(
                 display_label=f"{actual_model} 목차 구조 추론",
                 summary_pill=f"입력 {exec_res.input_tokens:,}tok ➔ 출력 {exec_res.output_tokens:,}tok",
                 data_out="Structured JSON (Raw Response)",
-                data_via=harness_chain,
             )
 
         provenance_dict = EngineProvenance(
@@ -312,7 +323,7 @@ class OutlinePipeline:
                 "outputs": sp.outputs or {},
                 "data_in": sp.data_in,
                 "data_out": sp.data_out,
-                "data_via": sp.data_via,
+                "sources": [src.model_dump(mode="json") for src in sp.sources],
                 "status": sp.status.value.upper(),
                 "error": sp.error.message if sp.error else None,
                 "tokens": {
@@ -370,7 +381,12 @@ class OutlinePipeline:
             display_label="AI 응답 스키마 및 무결성 검증",
             description="모델이 생성한 구조화 출력을 Pydantic 스키마 및 목차 계층 트리로 파싱하고 검증합니다.",
             data_in="Structured JSON (Raw Response)",
-            data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
+            sources=[
+                # 검증 주체는 스키마 자체다. `model_validate` 는 pydantic 이 상속시킨
+                # 메서드라 우리 코드가 아니며, 가리켜 봐야 의존성 파일이 열린다.
+                source_of(OutlineOutput),
+                source_of(OutlineDocument.from_outline_output),
+            ],
         ) as s_val:
             s_val.set_inputs({
                 "target_model": actual_model,
@@ -399,7 +415,6 @@ class OutlinePipeline:
                 s_val.set_label(
                     summary_pill=f"목차 노드 {len(validated.outlines)}건 · 요소 {total_elems}개 무결성 통과",
                     data_out=f"OutlineDocument (outlines: {len(validated.outlines)}건)",
-                    data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
                 )
                 s_val.snapshot(
                     stage_id="structured_parsing",

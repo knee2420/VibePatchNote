@@ -153,18 +153,39 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
     computedPhase: inferPhase(span, sortedSpans),
   }))
 
-  // 3개 페이즈 그룹핑
-  const preLlmSpans = spansWithPhase.filter((s) => s.computedPhase === 'pre_llm')
-  const llmSpans = spansWithPhase.filter((s) => s.computedPhase === 'llm')
-  const postLlmSpans = spansWithPhase.filter((s) => s.computedPhase === 'post_llm')
+  // 부모 → 자식 색인. `StepCollector` 는 중첩 `with` 를 부모 스택으로 기록한다.
+  const childrenOf = new Map<string, typeof spansWithPhase>()
+  const presentIds = new Set(spansWithPhase.map((s) => s.span_id))
+  for (const span of spansWithPhase) {
+    const parentId = span.parent_span_id
+    // 부모가 이 목록에 없으면(잘린 원장 등) 고아가 아니라 루트로 취급한다.
+    if (!parentId || !presentIds.has(parentId)) continue
+    const bucket = childrenOf.get(parentId) ?? []
+    bucket.push(span)
+    childrenOf.set(parentId, bucket)
+  }
 
-  // 페이즈별 총 소요시간
-  const preDuration = preLlmSpans.reduce((acc, s) => acc + (s.duration_ms || 0), 0)
-  const llmDuration = llmSpans.reduce((acc, s) => acc + (s.duration_ms || 0), 0)
-  const postDuration = postLlmSpans.reduce((acc, s) => acc + (s.duration_ms || 0), 0)
+  // 페이즈 그룹에는 **루트만** 올린다. 자식은 부모 카드 안에서 렌더된다.
+  const roots = spansWithPhase.filter(
+    (s) => !s.parent_span_id || !presentIds.has(s.parent_span_id)
+  )
+  const preLlmSpans = roots.filter((s) => s.computedPhase === 'pre_llm')
+  const llmSpans = roots.filter((s) => s.computedPhase === 'llm')
+  const postLlmSpans = roots.filter((s) => s.computedPhase === 'post_llm')
+
+  // 페이즈별 총 소요시간. 루트만 더한다 — 부모의 duration 은 자식 시간을 이미
+  // 포함하므로, 전체를 더하면 중첩된 만큼 이중 계산된다.
+  const durationOf = (phase: SpanPhase) =>
+    roots
+      .filter((s) => s.computedPhase === phase)
+      .reduce((acc, s) => acc + (s.duration_ms || 0), 0)
+  const preDuration = durationOf('pre_llm')
+  const llmDuration = durationOf('llm')
+  const postDuration = durationOf('post_llm')
   const safeTotal = Math.max(totalDurationMs, preDuration + llmDuration + postDuration, 1)
 
-  const renderSpanCard = (span: (typeof spansWithPhase)[0]) => {
+  const renderSpanCard = (span: (typeof spansWithPhase)[0], depth = 0) => {
+    const childSpans = childrenOf.get(span.span_id) ?? []
     const isSelected = span.span_id === selectedSpanId
     const isTreeExpanded = Boolean(expandedSpanIds[span.span_id])
     const flow = deriveDataFlow(span)
@@ -181,11 +202,14 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
     const isSlotA = compareSlotAId === spanItemId
     const isSlotB = compareSlotBId === spanItemId
 
-    return (
+    const card = (
       <div
         key={span.span_id}
         onClick={() => onSelectSpan(span.span_id)}
+        style={depth > 0 ? { marginLeft: `${depth * 14}px` } : undefined}
         className={`p-3.5 rounded-md border transition-all cursor-pointer ${
+          depth > 0 ? 'border-l-2 border-l-[#30363d]' : ''
+        } ${
           isSelected
             ? 'bg-[#161b22] border-[#58a6ff] shadow-sm'
             : 'bg-[#161b22]/40 border-[#30363d] hover:border-[#848d97]/50 hover:bg-[#161b22]/70'
@@ -406,6 +430,19 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
           </div>
         )}
       </div>
+    )
+
+    if (childSpans.length === 0) return card
+
+    // 중첩 스팬. `StepCollector` 가 부모 스택으로 기록한 계층을 그대로 편다.
+    // 자식이 없으면 카드 하나만 돌려주므로, 평평한 원장은 예전과 같이 보인다.
+    return (
+      <React.Fragment key={span.span_id}>
+        {card}
+        <div className="space-y-2">
+          {childSpans.map((child) => renderSpanCard(child, depth + 1))}
+        </div>
+      </React.Fragment>
     )
   }
 

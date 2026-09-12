@@ -1,7 +1,18 @@
 /**
  * @fileoverview Inspector PipelineTreeView 컴포넌트
- * 실행 스팬에 관여된 파이썬 파일, 클래스, 함수 심볼 및 프롬프트 트리를 파싱하고 소스 코드를 가상화 뷰어로 렌더링합니다.
- * Google TypeScript Style Guide 규칙(readonly 불변성, JSDoc, 명시적 타입)을 준수합니다.
+ *
+ * 스팬이 거쳐 간 코드 지점을 트리로 보여주고, 실제 구현을 가상화 뷰어로 연다.
+ *
+ * ## 하드코딩 표가 사라진 이유
+ *
+ * 예전에는 백엔드가 `data_via` 에 손으로 쓴 문자열을 실었고
+ * (`"context_builder.py (DocumentContextBuilder.build_context)"`), 이 컴포넌트가
+ * 그것을 정규식으로 되파싱한 뒤 `KNOWN_FILE_PATHS` 하드코딩 표에서 실제 경로를
+ * 찾았다. 표가 틀리면 조용히 엉뚱한 파일이 열렸다 — `schema.py` 항목이 틀려서
+ * 모든 run 의 검증 스팬이 venv 의 `pydantic/v1/schema.py` 를 보여주고 있었다.
+ *
+ * 이제 백엔드가 `sources: SpanSource[]` 로 **import 가능한 이름**을 준다.
+ * 프론트는 경로를 모르고, 알 필요도 없다.
  */
 
 import React, { useState } from 'react'
@@ -26,7 +37,8 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 
 import { fetchSourceCode } from '../api'
-import type { CompareItem, SourceCodeResponse, SpanRecordView } from '../types'
+import type { CompareItem, SourceCodeResponse, SpanRecordView, SpanSource } from '../types'
+import { textOf } from '../lib/payload'
 
 interface PipelineTreeViewProps {
   readonly span: SpanRecordView
@@ -39,12 +51,17 @@ interface PipelineTreeViewProps {
   readonly onPickCompareItem?: (item: CompareItem) => void
 }
 
+type NodeKind = 'module' | 'symbol' | 'prompt' | 'model' | 'legacy'
+
 export interface PipelineTreeNode {
   readonly id: string
   readonly name: string
-  readonly type: 'file' | 'class' | 'function' | 'prompt'
-  readonly filePath?: string
-  readonly symbol?: string
+  readonly type: NodeKind
+  /** import 가능한 모듈 이름. 있으면 소스를 열 수 있다. */
+  readonly module?: string
+  /** 모듈 안의 한정 이름. */
+  readonly qualname?: string
+  /** 조회 없이 바로 보여줄 내용 (프롬프트·모델 사양 등). */
   readonly directContent?: string
   readonly children?: readonly PipelineTreeNode[]
 }
@@ -52,262 +69,118 @@ export interface PipelineTreeNode {
 function isFileName(val?: string | null): boolean {
   if (!val) return false
   const lower = val.toLowerCase()
-  return (
-    lower.endsWith('.pdf') ||
-    lower.endsWith('.docx') ||
-    lower.endsWith('.xlsx') ||
-    lower.endsWith('.txt') ||
-    lower.endsWith('.hwp') ||
-    lower.endsWith('.hwpx')
-  )
+  return ['.pdf', '.docx', '.xlsx', '.txt', '.hwp', '.hwpx'].some((ext) => lower.endsWith(ext))
 }
 
-const KNOWN_FILE_PATHS: Record<string, string> = {
-  'extract_outline.py': 'apps/api/app/documents/agents/extract_outline.py',
-  'generate_scaffold.py': 'apps/api/app/documents/agents/generate_scaffold.py',
-  'local_document_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
-  'local_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
-  'fallback.py': 'apps/api/app/core/llm/fallback.py',
-  'availability.py': 'apps/api/app/core/llm/availability.py',
-  'policy_harness.py': 'apps/api/app/core/llm/policy_harness.py',
-  'context_builder.py': 'packages/scaffold-engine/scaffold_engine/outline/prompts/context_builder.py',
-  'pipeline.py': 'packages/scaffold-engine/scaffold_engine/outline/pipeline.py',
-  'schema.py': 'packages/scaffold-engine/scaffold_engine/outline/schema.py',
-  'models.py': 'packages/scaffold-engine/scaffold_engine/outline/models.py',
-  'system_instructions.md': 'packages/scaffold-engine/scaffold_engine/outline/prompts/system_instructions.md',
-  'runtime.py': 'apps/api/app/core/agent_runtime/runtime.py',
-  'tracer.py': 'apps/api/app/core/llm/tracer.py',
+/** `scaffold_engine.outline.pipeline` → `pipeline` */
+function moduleTail(module: string): string {
+  const parts = module.split('.')
+  return parts[parts.length - 1] || module
 }
 
-interface ParsedVia {
-  raw: string
-  fileName: string
-  filePath: string
-  symbol?: string
-  symbolLabel?: string
-  symbolType: 'class' | 'function' | 'file' | 'prompt'
-  isModelInfo?: boolean
-  modelName?: string
-}
-
-function parseViaItem(item: string): ParsedVia {
-  const trimmed = item.trim()
-
-  // 1. 모델 정보: "Model: gemini-3.8-flash-low"
-  if (trimmed.toLowerCase().startsWith('model:')) {
-    const modelName = trimmed.replace(/^model:\s*/i, '').trim()
-    return {
-      raw: trimmed,
-      fileName: '',
-      filePath: '',
-      symbolType: 'prompt',
-      isModelInfo: true,
-      modelName,
-    }
-  }
-
-  // 2. "RuntimePolicyHarness.run_structured" or "RuntimePolicyHarness"
-  if (trimmed.startsWith('RuntimePolicyHarness')) {
-    const parts = trimmed.split('.')
-    const symbol = parts.length > 1 ? parts[1] : 'RuntimePolicyHarness'
-    return {
-      raw: trimmed,
-      fileName: 'policy_harness.py',
-      filePath: KNOWN_FILE_PATHS['policy_harness.py'],
-      symbol,
-      symbolLabel: parts.length > 1 ? `def ${symbol}(...)` : 'class RuntimePolicyHarness',
-      symbolType: parts.length > 1 ? 'function' : 'class',
-    }
-  }
-
-  // 3. 표준 포맷: "fileName.py (SymbolOrFunction)" or "path/fileName.py (Symbol)"
-  const parenMatch = trimmed.match(/^([^\s(]+)(?:\s*\(([^)]+)\))?/)
-  if (parenMatch) {
-    const rawFile = parenMatch[1]
-    const rawSymbol = parenMatch[2]?.trim()
-    const baseName = rawFile.split('/').pop() || rawFile
-    const filePath = KNOWN_FILE_PATHS[baseName] || (rawFile.includes('/') ? rawFile : baseName)
-
-    let symbolType: 'class' | 'function' | 'file' = 'file'
-    let symbolLabel = rawSymbol
-    if (rawSymbol) {
-      const lastPart = rawSymbol.split('.').pop() || rawSymbol
-      const isClass = /^[A-Z]/.test(lastPart) && !lastPart.startsWith('_')
-      symbolType = isClass ? 'class' : 'function'
-      symbolLabel = isClass ? `class ${rawSymbol}` : `def ${rawSymbol}(...)`
-    }
-
-    return {
-      raw: trimmed,
-      fileName: baseName,
-      filePath,
-      symbol: rawSymbol,
-      symbolLabel,
-      symbolType,
-    }
-  }
-
-  return {
-    raw: trimmed,
-    fileName: trimmed,
-    filePath: trimmed,
-    symbolType: 'file',
-  }
+function sourceLabel(source: SpanSource): string {
+  if (source.label) return source.label
+  if (source.kind === 'model') return source.qualname
+  return source.qualname || moduleTail(source.module)
 }
 
 /**
- * 스팬의 data_via를 우선 동적 파싱하여 FLOW와 100% 일치하는 계층형 트리를 생성합니다.
+ * 스팬의 구조화된 `sources` 로 트리를 만든다.
+ *
+ * 같은 모듈의 심볼은 한 모듈 노드 아래로 묶인다. 모델은 코드가 아니므로
+ * 별도 노드로 둔다 — 예전에는 `"Model: ..."` 라는 문자열을 섞어 넣고 소비자가
+ * 접두어로 구분했고, 접두어가 바뀌자 파서가 그걸 파일명으로 오인했다.
  */
 function buildTreeForSpan(
   span: SpanRecordView,
-  dataVia: readonly string[]
+  legacyVia: readonly string[]
 ): PipelineTreeNode[] {
   const nodes: PipelineTreeNode[] = []
+  const sources = span.sources ?? []
 
-  // 1. dataVia 기반 1:1 동적 트리 매핑 (FLOW 바와 정확히 일치)
-  if (dataVia && dataVia.length > 0) {
-    const fileGroupMap = new Map<string, {
-      filePath: string
-      children: PipelineTreeNode[]
-    }>()
+  const byModule = new Map<string, PipelineTreeNode[]>()
 
-    dataVia.forEach((item, idx) => {
-      const parsed = parseViaItem(item)
-
-      // 모델 전용 노드
-      if (parsed.isModelInfo) {
-        nodes.push({
-          id: `${span.span_id}-model-${idx}`,
-          name: `Model: ${parsed.modelName || 'LLM Engine'}`,
-          type: 'prompt',
-          directContent: `[LLM Engine Specification]\nModel: ${parsed.modelName}\nSpan: ${span.name}\nDuration: ${(span.duration_ms || 0).toFixed(1)} ms\nTokens: Total ${span.usage?.total_tokens || 0} (Prompt: ${span.usage?.prompt_tokens || 0}, Completion: ${span.usage?.completion_tokens || 0})`,
-        })
-        return
-      }
-
-      if (!parsed.filePath) return
-
-      let group = fileGroupMap.get(parsed.filePath)
-      if (!group) {
-        group = {
-          filePath: parsed.filePath,
-          children: [],
-        }
-        fileGroupMap.set(parsed.filePath, group)
-      }
-
-      if (parsed.symbol) {
-        group.children.push({
-          id: `${span.span_id}-fn-${idx}`,
-          name: parsed.symbolLabel || parsed.symbol,
-          type: parsed.symbolType,
-          filePath: parsed.filePath,
-          symbol: parsed.symbol,
-        })
-      }
-    })
-
-    // 파일 노드들을 트리에 순서대로 추가
-    fileGroupMap.forEach((group, filePath) => {
-      if (group.children.length === 0) {
-        nodes.push({
-          id: `${span.span_id}-file-${filePath}`,
-          name: filePath,
-          type: 'file',
-          filePath,
-        })
-      } else {
-        nodes.push({
-          id: `${span.span_id}-file-${filePath}`,
-          name: filePath,
-          type: 'file',
-          filePath,
-          children: group.children,
-        })
-      }
-    })
-
-    // LLM 추론 또는 프롬프트 조립 스팬인 경우, 프롬프트 노드 바인딩 보강
-    const name = (span.name || '').toLowerCase()
-    if (span.span_type === 'llm' || name.startsWith('llm:')) {
-      const promptText =
-        (span.inputs && (span.inputs.prompt || span.inputs.prompt_snippet || span.inputs.system_prompt || span.inputs.instructions)) ||
-        null
-
-      if (promptText) {
-        nodes.push({
-          id: `${span.span_id}-executed-prompt`,
-          name: `실제 모델 전송 Prompt (${String(promptText).length.toLocaleString()} 자)`,
-          type: 'prompt',
-          directContent: String(promptText),
-        })
-      } else {
-        nodes.push({
-          id: `${span.span_id}-prompt-ref`,
-          name: 'system_instructions.md (추론 지시문 프롬프트 원본)',
-          type: 'prompt',
-          filePath: KNOWN_FILE_PATHS['system_instructions.md'],
-        })
-      }
-    } else if (name.includes('prompt') || name.includes('promptassembly')) {
+  sources.forEach((source, index) => {
+    if (source.kind === 'model') {
       nodes.push({
-        id: `${span.span_id}-prompt-sys`,
-        name: 'system_instructions.md (한국형 공문서 표/목차 1-Stage 추출 지침 프롬프트)',
-        type: 'prompt',
-        filePath: KNOWN_FILE_PATHS['system_instructions.md'],
+        id: `${span.span_id}-model-${index}`,
+        name: `Model: ${sourceLabel(source)}`,
+        type: 'model',
+        directContent: describeModel(span, source),
+      })
+      return
+    }
+
+    if (!source.module) return
+
+    const children = byModule.get(source.module) ?? []
+    if (source.qualname) {
+      children.push({
+        id: `${span.span_id}-sym-${index}`,
+        name: source.lineno > 0 ? `${source.qualname}  ·  L${source.lineno}` : source.qualname,
+        type: 'symbol',
+        module: source.module,
+        qualname: source.qualname,
       })
     }
+    byModule.set(source.module, children)
+  })
 
-    if (nodes.length > 0) {
-      return nodes
+  byModule.forEach((children, module) => {
+    nodes.push({
+      id: `${span.span_id}-mod-${module}`,
+      name: module,
+      type: 'module',
+      module,
+      children: children.length > 0 ? children : undefined,
+    })
+  })
+
+  // LLM 스팬이면 실제 전송된 프롬프트를 함께 보여준다.
+  const isLlm = span.span_type === 'llm' || span.name.toLowerCase().startsWith('llm:')
+  if (isLlm) {
+    const promptText = textOf(
+      span.inputs,
+      'prompt',
+      'prompt_snippet',
+      'system_prompt',
+      'instructions'
+    )
+    if (promptText) {
+      nodes.push({
+        id: `${span.span_id}-prompt`,
+        name: `실제 모델 전송 Prompt (${promptText.length.toLocaleString()} 자)`,
+        type: 'prompt',
+        directContent: promptText,
+      })
     }
   }
 
-  // 2. dataVia가 없을 경우를 위한 안전 폴백
-  const name = span.name.toLowerCase()
-
-  if (name.includes('cache') || name.includes('head')) {
-    nodes.push({
-      id: `${span.span_id}-cache-file`,
-      name: 'apps/api/app/documents/agents/extract_outline.py',
-      type: 'file',
-      filePath: 'apps/api/app/documents/agents/extract_outline.py',
-      children: [
-        {
-          id: `${span.span_id}-fn-extract`,
-          name: 'extract_outline(doc_id: str, ...)',
-          type: 'function',
-          filePath: 'apps/api/app/documents/agents/extract_outline.py',
-          symbol: 'extract_outline',
-        },
-      ],
+  // 구조화 이전에 기록된 run. 문자열밖에 없으므로 이름만 보여준다.
+  // 경로를 추측해서 열지 않는다 — 그렇게 하다가 남의 파일을 열었다.
+  if (nodes.length === 0 && legacyVia.length > 0) {
+    legacyVia.forEach((item, index) => {
+      nodes.push({
+        id: `${span.span_id}-legacy-${index}`,
+        name: item,
+        type: 'legacy',
+      })
     })
-    nodes.push({
-      id: `${span.span_id}-repo-file`,
-      name: 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
-      type: 'file',
-      filePath: 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
-    })
-    return nodes
-  }
-
-  if (name.includes('policy') || name.includes('routing')) {
-    nodes.push({
-      id: `${span.span_id}-fallback-file`,
-      name: 'apps/api/app/core/llm/fallback.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/llm/fallback.py',
-    })
-    nodes.push({
-      id: `${span.span_id}-avail-file`,
-      name: 'apps/api/app/core/llm/availability.py',
-      type: 'file',
-      filePath: 'apps/api/app/core/llm/availability.py',
-    })
-    return nodes
   }
 
   return nodes
+}
+
+function describeModel(span: SpanRecordView, source: SpanSource): string {
+  const usage = span.usage
+  return [
+    '[LLM Engine]',
+    `Model    : ${sourceLabel(source)}`,
+    `Span     : ${span.name}`,
+    `Duration : ${(span.duration_ms || 0).toFixed(1)} ms`,
+    `Tokens   : prompt ${usage?.prompt_tokens ?? 0} · completion ${usage?.completion_tokens ?? 0}` +
+      ` · cache ${usage?.cache_read_tokens ?? 0} · total ${usage?.total_tokens ?? 0}`,
+  ].join('\n')
 }
 
 export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
@@ -348,11 +221,11 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
       return
     }
 
-    if (node.filePath) {
+    if (node.module) {
       if (!sources[node.id]) {
         try {
           setLoadingNodeId(node.id)
-          const res = await fetchSourceCode(node.filePath, node.symbol)
+          const res = await fetchSourceCode({ module: node.module, symbol: node.qualname })
           setSources((prev) => ({ ...prev, [node.id]: res }))
         } catch (err) {
           console.error(`Failed to load source for ${node.name}:`, err)
@@ -374,7 +247,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
   const renderNode = (node: PipelineTreeNode, depth = 0) => {
     const isExpanded = expandedNodes[node.id]
     const hasChildren = Boolean(node.children && node.children.length > 0)
-    const canLoadSource = Boolean(node.filePath || node.directContent)
+    const canLoadSource = Boolean(node.module || node.directContent)
     const isLeafCode = !hasChildren && canLoadSource
     const isLoading = loadingNodeId === node.id
     const sourceData = sources[node.id]
@@ -382,12 +255,12 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
 
     const getIcon = () => {
       switch (node.type) {
-        case 'file':
+        case 'module':
           return <FileCode className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
-        case 'class':
-          return <Package className="w-3.5 h-3.5 text-[#bc8cff] shrink-0" />
-        case 'function':
+        case 'symbol':
           return <Zap className="w-3.5 h-3.5 text-[#d29922] shrink-0" />
+        case 'model':
+          return <Package className="w-3.5 h-3.5 text-[#bc8cff] shrink-0" />
         case 'prompt':
           return <Sparkles className="w-3.5 h-3.5 text-[#3fb950] shrink-0" />
         default:
@@ -424,12 +297,14 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
 
             <span
               className={`font-mono text-xs truncate ${
-                node.type === 'file'
+                node.type === 'module'
                   ? 'text-[#58a6ff] font-semibold'
-                  : node.type === 'class'
+                  : node.type === 'model'
                   ? 'text-[#bc8cff] font-medium'
                   : node.type === 'prompt'
                   ? 'text-[#3fb950] font-semibold'
+                  : node.type === 'legacy'
+                  ? 'text-[#848d97] italic'
                   : 'text-[#e6edf3]'
               }`}
             >
@@ -473,7 +348,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
               <div className="flex items-center gap-2 min-w-0">
                 <Terminal className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
                 <span className="text-[#e6edf3] font-semibold truncate max-w-[240px]">
-                  {sourceData?.file_path || node.filePath || 'Inline Prompt'}
+                  {sourceData?.file_path || node.module || 'Inline'}
                 </span>
                 {sourceData && (
                   <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#21262d] border border-[#30363d] text-[#848d97]">
@@ -502,7 +377,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                             id: `code:${node.id}`,
                             type: 'code',
                             title: `[Code] ${node.name}`,
-                            subtitle: sourceData?.file_path || node.filePath || 'Inline Prompt',
+                            subtitle: sourceData?.file_path || node.module || 'Inline',
                             content: contentToShow,
                             language:
                               sourceData?.language === 'markdown' || node.type === 'prompt'

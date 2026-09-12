@@ -39,6 +39,7 @@ from agent_telemetry.contracts import (  # noqa: E402
     SpanMetadata,
     SpanPhase,
     SpanRecord,
+    SpanSource,
     SpanStatus,
     SpanType,
     SpanUsage,
@@ -65,6 +66,7 @@ ENUMS: list[type[enum.Enum]] = [
 ]
 
 MODELS: list[type[BaseModel]] = [
+    SpanSource,
     SpanUsage,
     SpanError,
     SpanMetadata,
@@ -124,6 +126,14 @@ def annotation_to_ts(annotation: typing.Any) -> str:
 
     origin = typing.get_origin(annotation)
     args = typing.get_args(annotation)
+
+    if origin is typing.Literal:
+        # Literal["function", "class", ...] 은 TS 의 유니온 리터럴 그대로다.
+        # 처리하지 않으면 `unknown` 이 되어 소비자가 좁히지 못한다.
+        return " | ".join(
+            f"'{a}'" if isinstance(a, str) else ("null" if a is None else str(a).lower())
+            for a in args
+        )
 
     if origin in (typing.Union, _types.UnionType):
         parts = [annotation_to_ts(a) for a in args]

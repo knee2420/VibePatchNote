@@ -195,6 +195,9 @@ USD 비용을 실제로 쓰려면 `ModelSpec` 에 단가 축을 추가하고 **�
 | 목록의 상태 어휘는 하나다 | `::test_run_list_uses_one_status_vocabulary` | ✅ |
 | 텔레메트리 상태는 run 어휘로 옮긴다 | `::test_telemetry_only_run_is_translated_to_run_vocabulary` | ✅ |
 | 공급자는 기록된 것만 쓴다 | `::test_provider_is_recorded_not_guessed` | ✅ |
+| 코드 지점은 구조화된다 | `::test_span_sources_are_structured_not_strings` | ✅ |
+| 계측 지점은 전부 열린다 | `::test_every_declared_source_resolves_to_a_real_file` | ✅ |
+| 소스 조회는 탐색하지 않는다 | `test_inspector.py::test_source_refuses_dependencies_and_traversal` | ✅ |
 
 **TS 타입 수기 작성 금지**가 이 목록에서 가장 중요하다. 예전 `apps/inspector/src/types.ts`
 는 손으로 베낀 것이었고, 그래서 `ModelAttemptRecord` 가 백엔드와 필드 하나도 맞지
@@ -221,8 +224,10 @@ python apps/api/scripts/generate_inspector_types.py --check   # 게이트
 2. 상태·토큰은 §3 의 어휘만 쓴다. 새 열거값을 만들지 않는다
 3. 사람이 읽을 라벨(`display_label` · `description` · `summary_pill`)은
    **기록 시점에** 파이프라인이 정한다. 조회 계층이 이름을 보고 추측하지 않는다 (§4)
-4. `data_via` 에 파일명을 문자열로 쓰지 않는다. 소비자가 정규식으로 되파싱하게 된다 —
-   실제로 `KNOWN_FILE_PATHS` 하드코딩과 경로 오배정을 낳았다.
-   구조화 계획은 로드맵 Phase 2
+4. 코드 지점은 `sources=[source_of(fn)]` 로 **대상 자체**를 넘긴다.
+   문자열(`data_via`)은 하위 호환으로만 남아 있다 — 소비자가 정규식으로
+   되파싱해야 하고, 파일명을 경로로 바꾸려면 하드코딩 표가 필요해진다.
+   실제로 그 표가 틀려서 모든 run 의 검증 스팬이 venv 의 남의 파일을 열고 있었다.
+   엔진은 호스트 경로를 모른다 — `module`·`qualname` 만 주고 경로 해석은 호스트가 한다
 5. LLM 을 호출했으면 원장에 기록한다 (§2-2). 스팬 `usage` 만으로는 정산되지 않는다
 6. §5 의 검증을 추가한다

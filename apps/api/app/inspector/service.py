@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+import importlib.util
 import json
 import logging
 import shutil
@@ -404,165 +405,153 @@ class InspectorService:
             logger.error("[InspectorService] Run 삭제 실패 (%s): %s", safe_id, e)
             return False
 
+    # ── 소스 조회 ────────────────────────────────────────────────
+
+    #: 확장자 → 표시 언어.
+    _LANGUAGES = {
+        ".py": "python",
+        ".md": "markdown",
+        ".json": "json",
+        ".toml": "toml",
+        ".ts": "typescript",
+        ".tsx": "typescript",
+        ".js": "javascript",
+        ".jsx": "javascript",
+    }
+
+    #: 저장소 안이라도 여기 있는 파일은 우리 코드가 아니다.
+    _EXCLUDED_PARTS = frozenset({"venv", "node_modules", ".venv", "site-packages", "dist", ".turbo"})
+
+    @property
+    def _repo_root(self) -> Path:
+        return settings.base_dir.parents[1].resolve()
+
     def get_source_code(
         self,
-        file_path: str,
+        file_path: Optional[str] = None,
         symbol: Optional[str] = None,
+        module: Optional[str] = None,
     ) -> Optional[SourceCodeResponse]:
-        """지정된 파일 경로 및 심볼의 원본 소스 코드/프롬프트를 안전하게 추출합니다."""
-        if not file_path:
+        """지정된 코드 지점의 원본을 반환합니다.
+
+        **탐색하지 않는다.** `module` 은 `importlib` 이 정확히 한 파일로
+        해석하고, `file_path` 는 저장소 루트 기준 정확 경로로만 받는다.
+
+        예전에는 파일명(basename)으로 `apps/**` 와 `packages/**` 를 전수 glob 한 뒤
+        **파일 크기 내림차순**으로 골랐다. 그래서
+
+            요청: packages/scaffold-engine/.../outline/schema.py   (존재하지 않는 경로)
+            반환: apps/api/venv/Lib/site-packages/pydantic/v1/schema.py  (47KB 라서 1등)
+
+        이 되었고, 이 노드는 모든 run 의 검증 스팬에 있었다. 실측 비용도
+        요청당 1.4초였다 — node_modules 와 venv 를 매번 훑었기 때문이다.
+        """
+        target = self._resolve_module(module) if module else self._resolve_path(file_path)
+        if target is None:
             return None
 
-        repo_root = settings.base_dir.parents[1].resolve()
-        clean_path = file_path.strip().replace("\\", "/")
-
-        # 레거시 별칭 및 오타 매핑 보정
-        path_aliases = {
-            "local_artifact_repository.py": "apps/api/app/documents/adapters/local_document_artifact_repository.py",
-            "apps/api/app/scaffolds/adapters/local_artifact_repository.py": "apps/api/app/documents/adapters/local_document_artifact_repository.py",
-        }
-        if clean_path in path_aliases:
-            clean_path = path_aliases[clean_path]
-        elif Path(clean_path).name in path_aliases:
-            clean_path = path_aliases[Path(clean_path).name]
-
-        if symbol and "LocalArtifactRepository" in symbol:
-            symbol = symbol.replace("LocalArtifactRepository", "LocalDocumentArtifactRepository")
-
-        # 1. 경로 후보군 수집
-        raw_candidates = [
-            repo_root / clean_path,
-            repo_root / "apps" / clean_path,
-            repo_root / "packages" / clean_path,
-            repo_root / "apps" / "api" / clean_path,
-            repo_root / "packages" / "scaffold-engine" / clean_path,
-            repo_root / "packages" / "agent-telemetry" / clean_path,
-        ]
-
-        file_candidates: list[Path] = []
-        for cand in raw_candidates:
-            if cand.is_file() and cand not in file_candidates:
-                file_candidates.append(cand)
-
-        fname = Path(clean_path).name
-        if fname:
-            for sub in ("packages", "apps"):
-                for m in (repo_root / sub).glob(f"**/{fname}"):
-                    if m.is_file() and m not in file_candidates:
-                        file_candidates.append(m)
-
-        if not file_candidates:
+        try:
+            raw_text = target.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            logger.warning("[Inspector] 소스를 읽지 못했습니다 (%s): %s", target, exc)
             return None
 
-        # 서브패스 매칭 및 파일 크기(구현체 우선) 역순 정렬
-        file_candidates.sort(
-            key=lambda p: (
-                1 if clean_path in str(p).replace("\\", "/") else 0,
-                p.stat().st_size,
-            ),
-            reverse=True,
-        )
+        lines = raw_text.splitlines()
+        language = self._LANGUAGES.get(target.suffix.lower(), "text")
 
-        target_file: Optional[Path] = None
-        extracted_content: Optional[str] = None
-        start_line = 1
-        end_line = 1
-        total_lines = 1
-        language = "text"
-
-        for cand in file_candidates:
-            resolved = cand.resolve()
-            if not resolved.is_relative_to(repo_root):
-                continue
-
-            try:
-                raw_text = resolved.read_text(encoding="utf-8")
-            except Exception:
-                continue
-
-            lines = raw_text.splitlines()
-            c_total = len(lines)
-            ext = resolved.suffix.lower()
-
-            lang_map = {
-                ".py": "python",
-                ".md": "markdown",
-                ".json": "json",
-                ".toml": "toml",
-                ".ts": "typescript",
-                ".tsx": "typescript",
-                ".js": "javascript",
-                ".jsx": "javascript",
-            }
-            c_lang = lang_map.get(ext, "text")
-
-            if ext == ".py" and symbol:
-                clean_sym = symbol.strip()
-                sym_parts = clean_sym.split(".")
-                found_node = None
-                try:
-                    tree = ast.parse(raw_text)
-                    if len(sym_parts) == 1:
-                        target_name = sym_parts[0]
-                        for node in ast.walk(tree):
-                            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-                                if node.name == target_name:
-                                    found_node = node
-                                    break
-                    elif len(sym_parts) >= 2:
-                        cls_name, method_name = sym_parts[0], sym_parts[1]
-                        for node in ast.walk(tree):
-                            if isinstance(node, ast.ClassDef) and node.name == cls_name:
-                                for sub_node in node.body:
-                                    if isinstance(sub_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                                        if sub_node.name == method_name:
-                                            found_node = sub_node
-                                            break
-                                if not found_node:
-                                    found_node = node
-                                break
-                except Exception:
-                    pass
-
-                if found_node:
-                    target_file = resolved
-                    start_line = found_node.lineno
-                    end_line = getattr(found_node, "end_lineno", c_total)
-                    extracted_content = "\n".join(lines[start_line - 1:end_line])
-                    total_lines = c_total
-                    language = c_lang
-                    break
+        start_line, end_line, content = 1, len(lines), raw_text
+        if symbol and target.suffix.lower() == ".py":
+            extracted = self._extract_symbol(raw_text, symbol)
+            if extracted is None:
+                # 심볼을 못 찾으면 파일 전체를 준다. 다만 조용히 넘어가지 않는다 —
+                # 심볼 이름이 바뀌었다는 신호이기 때문이다.
+                logger.info("[Inspector] 심볼을 찾지 못해 파일 전체를 반환합니다: %s::%s", target.name, symbol)
             else:
-                if not target_file:
-                    target_file = resolved
-                    start_line = 1
-                    end_line = c_total
-                    total_lines = c_total
-                    extracted_content = raw_text
-                    language = c_lang
-                    if not symbol:
-                        break
-
-        if not target_file or extracted_content is None:
-            # fallback to first readable candidate
-            target_file = file_candidates[0].resolve()
-            raw_text = target_file.read_text(encoding="utf-8")
-            lines = raw_text.splitlines()
-            start_line = 1
-            end_line = len(lines)
-            total_lines = len(lines)
-            extracted_content = raw_text
-            language = "python" if target_file.suffix == ".py" else "text"
-
-        rel_path = str(target_file.relative_to(repo_root)).replace("\\", "/")
+                start_line, end_line, content = extracted
 
         return SourceCodeResponse(
-            file_path=rel_path,
+            file_path=target.relative_to(self._repo_root).as_posix(),
             symbol=symbol,
-            content=extracted_content,
+            content=content,
             start_line=start_line,
             end_line=end_line,
-            total_lines=total_lines,
+            total_lines=len(lines),
             language=language,
         )
 
+    def _resolve_module(self, module: str) -> Optional[Path]:
+        """import 가능한 이름을 파일 하나로 해석한다. 추측하지 않는다."""
+        if not module or not all(part.isidentifier() for part in module.split(".")):
+            return None
+        try:
+            spec = importlib.util.find_spec(module)
+        except (ImportError, ValueError, AttributeError) as exc:
+            logger.info("[Inspector] 모듈을 찾지 못했습니다 (%s): %s", module, exc)
+            return None
+        if spec is None or not spec.origin:
+            return None
+        return self._accept(Path(spec.origin))
+
+    def _resolve_path(self, file_path: Optional[str]) -> Optional[Path]:
+        """저장소 루트 기준 **정확 경로**만 받는다."""
+        if not file_path:
+            return None
+        clean = file_path.strip().replace("\\", "/").lstrip("/")
+        if not clean:
+            return None
+        return self._accept(self._repo_root / clean)
+
+    def _accept(self, candidate: Path) -> Optional[Path]:
+        """저장소 안의 우리 코드일 때만 통과시킨다."""
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            return None
+
+        root = self._repo_root
+        if not resolved.is_relative_to(root):
+            # 경로 탈출이거나 site-packages 다. 어느 쪽이든 보여줄 것이 아니다.
+            return None
+        if self._EXCLUDED_PARTS & set(resolved.relative_to(root).parts):
+            return None
+        if not resolved.is_file():
+            return None
+        return resolved
+
+    @staticmethod
+    def _extract_symbol(raw_text: str, symbol: str) -> Optional[tuple[int, int, str]]:
+        """`Class.method` 또는 `name` 을 AST 로 정확히 잘라낸다."""
+        parts = [p for p in symbol.strip().split(".") if p]
+        if not parts:
+            return None
+        try:
+            tree = ast.parse(raw_text)
+        except SyntaxError:
+            return None
+
+        definitions = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+        node: Optional[ast.AST] = None
+
+        if len(parts) == 1:
+            for candidate in ast.walk(tree):
+                if isinstance(candidate, definitions) and candidate.name == parts[0]:
+                    node = candidate
+                    break
+        else:
+            cls_name, member = parts[0], parts[1]
+            for candidate in ast.walk(tree):
+                if isinstance(candidate, ast.ClassDef) and candidate.name == cls_name:
+                    node = candidate  # 멤버를 못 찾으면 클래스 전체가 답이다.
+                    for child in candidate.body:
+                        if isinstance(child, definitions) and child.name == member:
+                            node = child
+                            break
+                    break
+
+        if node is None:
+            return None
+
+        start = getattr(node, "lineno", 1)
+        end = getattr(node, "end_lineno", None) or len(raw_text.splitlines())
+        body = "\n".join(raw_text.splitlines()[start - 1:end])
+        return start, end, body

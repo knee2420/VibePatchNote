@@ -11,6 +11,7 @@ from agent_telemetry.contracts.attempt import ModelAttemptRecord
 from agent_telemetry.contracts.enums import FailureReason, SpanPhase, SpanStatus, SpanType
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
+from agent_telemetry.contracts.source import SpanSource, caller_source
 from agent_telemetry.contracts.span import SpanRecord
 from agent_telemetry.contracts.telemetry import PipelineTelemetry
 from agent_telemetry.contracts.usage import SpanUsage
@@ -72,6 +73,7 @@ class StepCollector:
         data_in: Optional[str] = None,
         data_out: Optional[str] = None,
         data_via: Optional[List[str]] = None,
+        sources: Optional[List[SpanSource]] = None,
     ) -> Generator[StepScope, None, None]:
         """단일 작업을 계측하는 컨텍스트 매니저."""
         span_id = _gen_id("span")
@@ -103,6 +105,9 @@ class StepCollector:
             data_in=data_in,
             data_out=data_out,
             data_via=data_via or [],
+            # 아무 것도 안 주면 `with` 를 쓴 지점이라도 남긴다. 손으로 적지
+            # 않아도 "이 단계가 어디서 시작됐는가"는 항상 답할 수 있어야 한다.
+            sources=list(sources) if sources else [s for s in (caller_source(depth=3),) if s],
             start_time=now,
             metadata=metadata or SpanMetadata(),
         )

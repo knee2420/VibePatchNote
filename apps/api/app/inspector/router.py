@@ -64,16 +64,30 @@ def get_matrix(
 
 @router.get("/source", response_model=SourceCodeResponse)
 def get_source_code(
-    file_path: str = Query(..., description="조회할 파일 경로 또는 파일명"),
-    symbol: Optional[str] = Query(None, description="특정 클래스명 또는 함수명"),
+    module: Optional[str] = Query(
+        None,
+        description="import 가능한 모듈 이름 (예: scaffold_engine.outline.pipeline). 가장 정확하다",
+    ),
+    file_path: Optional[str] = Query(
+        None,
+        description="저장소 루트 기준 **정확 경로**. 파일명만 주는 탐색은 지원하지 않는다",
+    ),
+    symbol: Optional[str] = Query(None, description="클래스명 또는 Class.method"),
     service: InspectorService = Depends(get_inspector_service),
 ):
-    """지정된 파일의 실제 구현 코드 또는 프롬프트 전문을 반환합니다."""
-    res = service.get_source_code(file_path=file_path, symbol=symbol)
+    """지정된 코드 지점의 원본을 반환합니다.
+
+    `module` 과 `file_path` 중 하나는 있어야 한다. 둘 다 있으면 `module` 이 이긴다 —
+    import 해석은 정확하고, 경로는 리팩터링에 뒤처진다.
+    """
+    if not module and not file_path:
+        raise HTTPException(status_code=422, detail="module 또는 file_path 중 하나가 필요합니다.")
+
+    res = service.get_source_code(file_path=file_path, symbol=symbol, module=module)
     if not res:
         raise HTTPException(
             status_code=404,
-            detail=f"Source not found for file '{file_path}' (symbol: {symbol})",
+            detail=f"Source not found (module={module!r}, file_path={file_path!r}, symbol={symbol!r})",
         )
     return res
 

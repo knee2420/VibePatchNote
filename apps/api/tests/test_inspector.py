@@ -237,26 +237,63 @@ def test_run_without_ledger_still_lists(observability_runs: list[str]):
     assert instrumented["has_span_detail"] is True
 
 
-def test_inspector_source_code_resolution():
-    """Inspector 소스 코드 조회 및 레거시 별칭 경로 자동 매핑 검증."""
-    # 1. 실제 파일명으로 조회
-    resp = client.get("/api/v1/inspector/source?file_path=local_document_artifact_repository.py")
+def test_source_resolves_by_module_exactly():
+    """모듈 이름은 파일 하나로 정확히 해석된다. 탐색하지 않는다."""
+    resp = client.get(
+        "/api/v1/inspector/source",
+        params={"module": "agent_telemetry.contracts.usage", "symbol": "SpanUsage"},
+    )
     assert resp.status_code == 200
     data = resp.json()
-    assert "class LocalDocumentArtifactRepository" in data["content"]
+    assert data["file_path"] == "packages/agent-telemetry/agent_telemetry/contracts/usage.py"
+    assert data["content"].startswith("class SpanUsage(BaseModel):")
     assert data["language"] == "python"
+    assert data["start_line"] > 0 and data["end_line"] >= data["start_line"]
 
-    # 2. 레거시(오타) 경로로 조회 시에도 alias 매핑되어 성공하는지 검증
-    legacy_resp = client.get("/api/v1/inspector/source?file_path=apps/api/app/scaffolds/adapters/local_artifact_repository.py")
-    assert legacy_resp.status_code == 200
-    legacy_data = legacy_resp.json()
-    assert "class LocalDocumentArtifactRepository" in legacy_data["content"]
 
-    # 3. 레거시 심볼 이름으로 조회 시에도 성공하는지 검증
-    symbol_resp = client.get(
-        "/api/v1/inspector/source?file_path=local_artifact_repository.py&symbol=LocalArtifactRepository"
+def test_source_extracts_method_by_qualname():
+    resp = client.get(
+        "/api/v1/inspector/source",
+        params={"module": "app.inspector.service", "symbol": "InspectorService.list_runs"},
     )
-    assert symbol_resp.status_code == 200
-    symbol_data = symbol_resp.json()
-    assert "class LocalDocumentArtifactRepository" in symbol_data["content"]
+    assert resp.status_code == 200
+    content = resp.json()["content"]
+    assert content.lstrip().startswith("def list_runs")
 
+
+def test_source_refuses_dependencies_and_traversal():
+    """저장소 밖과 venv 는 우리 코드가 아니다.
+
+    예전에는 파일명으로 apps/** packages/** 를 전수 glob 한 뒤 **크기 내림차순**
+    으로 골랐다. 그래서 `schema.py` 요청이 venv 의 `pydantic/v1/schema.py` 를
+    돌려줬고, 그 노드는 모든 run 의 검증 스팬에 있었다.
+    """
+    refused = [
+        {"module": "pydantic.v1.schema"},
+        {"file_path": "../../../Windows/win.ini"},
+        {"file_path": "apps/api/venv/Lib/site-packages/requests/models.py"},
+        # 파일명만 주는 탐색은 더 이상 지원하지 않는다.
+        {"file_path": "schema.py"},
+        {"module": "nope.not_real"},
+    ]
+    for params in refused:
+        resp = client.get("/api/v1/inspector/source", params=params)
+        assert resp.status_code == 404, f"{params} 가 통과했습니다: {resp.text[:200]}"
+
+
+def test_source_requires_a_locator():
+    assert client.get("/api/v1/inspector/source").status_code == 422
+
+
+def test_source_lookup_is_fast():
+    """탐색을 없앴으므로 요청은 즉시 끝나야 한다 (예전 실측 1.4초)."""
+    import time
+
+    t0 = time.perf_counter()
+    resp = client.get(
+        "/api/v1/inspector/source",
+        params={"module": "scaffold_engine.outline.pipeline"},
+    )
+    elapsed = time.perf_counter() - t0
+    assert resp.status_code == 200
+    assert elapsed < 0.5, f"소스 조회가 {elapsed:.2f}초 걸렸습니다. 탐색이 되살아났는지 확인하십시오."

@@ -27,6 +27,20 @@ export type FailureReason = 'timeout' | 'rate_limit_429' | 'process_crash' | 'au
 
 // ── 계약 ────────────────────────────────────────────────
 
+/** 스팬이 거쳐 간 코드 지점 하나. */
+export interface SpanSource {
+  /** import 가능한 모듈 이름 (예: scaffold_engine.outline.pipeline) */
+  readonly module: string
+  /** 모듈 안의 한정 이름 (예: OutlinePipeline.execute). 모듈 자체면 빈 문자열 */
+  readonly qualname: string
+  /** 정의 시작 줄. 모르면 0 */
+  readonly lineno: number
+  /** 이 지점의 종류 */
+  readonly kind: 'function' | 'method' | 'class' | 'module' | 'prompt' | 'model'
+  /** 사람이 읽을 이름. 없으면 소비자가 qualname 으로 만든다 */
+  readonly label: string | null
+}
+
 /** 토큰 소모량 및 소요 시간 집계. */
 export interface SpanUsage {
   /** 입력 프롬프트 토큰 수 */
@@ -117,7 +131,9 @@ export interface SpanRecord {
   readonly data_in: string | null
   /** 출력 파일명 또는 출력 데이터/객체/리스트명 */
   readonly data_out: string | null
-  /** 관여 파일/클래스/함수 체인 목록 */
+  /** 이 스팬이 거쳐 간 코드 지점 (module·qualname). 경로 해석은 호스트가 한다 */
+  readonly sources: SpanSource[]
+  /** [deprecated] 관여 파일/클래스/함수 체인 문자열. `sources` 를 쓸 것 */
   readonly data_via: string[]
   /** 시작 시각 (UTC) */
   readonly start_time: string
@@ -207,7 +223,9 @@ export interface InspectorSpanView {
   readonly data_in: string | null
   /** 출력 파일명 또는 출력 데이터/객체/리스트명 */
   readonly data_out: string | null
-  /** 관여 파일/클래스/함수 체인 목록 */
+  /** 이 스팬이 거쳐 간 코드 지점 (module·qualname). 경로 해석은 호스트가 한다 */
+  readonly sources: SpanSource[]
+  /** [deprecated] 관여 파일/클래스/함수 체인 문자열. `sources` 를 쓸 것 */
   readonly data_via: string[]
   /** 시작 시각 (UTC) */
   readonly start_time: string

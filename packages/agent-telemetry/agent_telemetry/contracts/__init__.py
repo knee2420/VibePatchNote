@@ -8,6 +8,12 @@ from agent_telemetry.contracts.enums import (
 )
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
+from agent_telemetry.contracts.source import (
+    SpanSource,
+    caller_source,
+    model_source,
+    source_of,
+)
 from agent_telemetry.contracts.span import SpanRecord
 from agent_telemetry.contracts.telemetry import PipelineTelemetry
 from agent_telemetry.contracts.usage import (
@@ -26,6 +32,10 @@ __all__ = [
     "SpanError",
     "SpanMetadata",
     "SpanRecord",
+    "SpanSource",
+    "source_of",
+    "caller_source",
+    "model_source",
     "ModelAttemptRecord",
     "FallbackChainSummary",
     "StageSnapshotRecord",

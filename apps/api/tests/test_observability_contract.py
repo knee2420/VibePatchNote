@@ -231,3 +231,86 @@ def test_rule_document_exists(marker: str) -> None:
     assert rule.exists()
     if marker != "observability.md":
         assert marker in rule.read_text(encoding="utf-8")
+
+
+# ── A2 구조화된 코드 지점 ────────────────────────────────────────
+
+
+def test_span_sources_are_structured_not_strings() -> None:
+    """계측은 문자열이 아니라 대상 자체를 넘긴다.
+
+    `source_of(fn)` 은 이름을 바꾸면 따라오고, 오타가 나면 그 자리에서
+    AttributeError 가 난다. 문자열은 둘 다 못 한다.
+    """
+    from agent_telemetry import SpanType, StepCollector, model_source, source_of
+    from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
+
+    collector = StepCollector(pipeline_name="T")
+    with collector.step(
+        "S",
+        span_type=SpanType.TOOL,
+        sources=[source_of(DocumentContextBuilder.build_context), model_source("m-1")],
+    ):
+        pass
+
+    sources = collector.spans[0].sources
+    assert len(sources) == 2
+
+    code, model = sources
+    assert code.module == "scaffold_engine.outline.prompts.context_builder"
+    assert code.qualname == "DocumentContextBuilder.build_context"
+    assert code.lineno > 0
+    assert code.kind == "method"
+
+    # 모델은 코드가 아니다. 접두어 문자열이 아니라 kind 가 그것을 말한다.
+    assert model.kind == "model"
+    assert model.qualname == "m-1"
+
+
+def test_step_records_its_own_declaration_site() -> None:
+    """아무 것도 안 줘도 `with` 를 쓴 지점은 남는다."""
+    from agent_telemetry import StepCollector
+
+    collector = StepCollector(pipeline_name="T")
+    with collector.step("S"):
+        pass
+
+    source = collector.spans[0].sources[0]
+    assert source.module == __name__
+    assert source.lineno > 0
+
+
+def test_every_declared_source_resolves_to_a_real_file() -> None:
+    """계측이 가리키는 지점은 전부 열린다.
+
+    예전에는 프론트가 `KNOWN_FILE_PATHS` 하드코딩 표로 경로를 찾았고, 표가
+    틀려도 아무도 몰랐다 — `schema.py` 항목이 틀려서 모든 run 의 검증 스팬이
+    venv 의 `pydantic/v1/schema.py` 를 열고 있었다.
+    """
+    from agent_telemetry import source_of
+    from scaffold_engine.outline.pipeline import OutlinePipeline
+    from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
+    from scaffold_engine.outline.schemas.models import OutlineDocument, OutlineOutput
+
+    declared = [
+        source_of(DocumentContextBuilder.build_context),
+        source_of(OutlinePipeline.execute),
+        # 스키마는 클래스를 가리킨다. `model_validate` 는 pydantic 이 상속시킨
+        # 메서드이므로 우리 코드가 아니다 — 구 문자열 표기는 이 거짓을 감췄다.
+        source_of(OutlineOutput),
+        source_of(OutlineDocument.from_outline_output),
+    ]
+
+    for source in declared:
+        assert source is not None
+        resp = client.get(
+            "/api/v1/inspector/source",
+            params={"module": source.module, "symbol": source.qualname},
+        )
+        assert resp.status_code == 200, f"{source.module}::{source.qualname} 를 열지 못했습니다"
+
+        data = resp.json()
+        # 저장소 안의 우리 코드여야 한다. venv 나 node_modules 가 아니다.
+        assert not data["file_path"].startswith("apps/api/venv/")
+        assert "node_modules" not in data["file_path"]
+        assert data["file_path"].endswith(".py")
