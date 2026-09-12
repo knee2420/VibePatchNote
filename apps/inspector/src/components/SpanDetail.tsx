@@ -144,33 +144,33 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
   const isSlotB = compareSlotBId === effectiveCardId
 
   return (
-    <div className="rounded-lg border border-slate-800/90 bg-[#080d1a] shadow-lg overflow-hidden flex flex-col transition-all hover:border-slate-700/80">
-      {/* 카드 상단 툴바 헤더 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#0d152a] border-b border-slate-800 text-[11px] font-mono">
+    <div className="rounded-md border border-[#30363d] bg-[#0d1117] shadow-sm overflow-hidden flex flex-col transition-all hover:border-[#848d97]/50">
+      {/* 카드 상단 툴바 헤더 (GitHub Blob Header 스타일) */}
+      <div className="flex items-center justify-between px-3 py-2 bg-[#161b22] border-b border-[#30363d] text-[11px] font-mono">
         <div className="flex items-center gap-2 min-w-0">
           {title.toLowerCase().includes('command') ? (
-            <Terminal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <Terminal className="w-3.5 h-3.5 text-[#d29922] shrink-0" />
           ) : language === 'json' ? (
-            <Code2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <Code2 className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
           ) : language === 'markdown' ? (
-            <FileText className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <FileText className="w-3.5 h-3.5 text-[#3fb950] shrink-0" />
           ) : (
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
           )}
 
-          <span className="font-semibold text-slate-200 truncate">{title}</span>
+          <span className="font-semibold text-[#e6edf3] truncate">{title}</span>
 
           {badgeLabel && (
-            <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-800/50 text-cyan-300 font-sans">
+            <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#21262d] border border-[#30363d] text-[#58a6ff] font-sans">
               {badgeLabel}
             </span>
           )}
 
-          <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-sans">
+          <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#21262d] text-[#848d97] border border-[#30363d] font-sans">
             {language.toUpperCase()}
           </span>
 
-          <span className="text-[10px] text-slate-500 font-sans hidden sm:inline">
+          <span className="text-[10px] text-[#848d97] font-sans hidden sm:inline">
             {charCount.toLocaleString()} 자
           </span>
         </div>
@@ -180,11 +180,11 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
           {isCompareMode && textValue && (
             <div>
               {isSlotA ? (
-                <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] text-[9px] font-mono font-bold">
                   🅰️ 픽됨
                 </span>
               ) : isSlotB ? (
-                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                <span className="px-1.5 py-0.2 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] text-[9px] font-mono font-bold">
                   🅱️ 픽됨
                 </span>
               ) : (
@@ -200,7 +200,7 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
                       language,
                     })
                   }}
-                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] transition-colors shadow-sm cursor-pointer"
                   title="이 카드를 Compare 슬롯에 추가"
                 >
                   + Compare
@@ -212,17 +212,17 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 transition-colors cursor-pointer border border-slate-700/60"
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white transition-colors cursor-pointer border border-[#30363d]"
             title="클립보드에 복사"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400">복사됨</span>
+                <Check className="w-3 h-3 text-[#3fb950]" />
+                <span className="text-[#3fb950]">복사됨</span>
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3 text-slate-400" />
+                <Copy className="w-3 h-3 text-[#848d97]" />
                 <span>복사</span>
               </>
             )}
@@ -231,10 +231,10 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
           <button
             type="button"
             onClick={() => onOpenModal(title, textValue, language, charCount)}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-cyan-950/70 hover:bg-cyan-900/80 text-cyan-300 hover:text-cyan-100 transition-colors cursor-pointer border border-cyan-800/60"
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] hover:text-[#79c0ff] transition-colors cursor-pointer border border-[#30363d]"
             title="전체화면으로 전문 크게 보기 (검색/가상스크롤 지원)"
           >
-            <Maximize2 className="w-3 h-3 text-cyan-400" />
+            <Maximize2 className="w-3 h-3 text-[#58a6ff]" />
             <span>전체화면</span>
           </button>
         </div>
@@ -310,16 +310,16 @@ const SimplePropertiesGrid: React.FC<{ properties: Record<string, any> }> = ({ p
   if (entries.length === 0) return null
 
   return (
-    <div className="grid grid-cols-2 gap-2 p-2.5 rounded-lg bg-[#080d19]/90 border border-slate-800/80 shadow-sm">
+    <div className="grid grid-cols-2 gap-2 p-2.5 rounded-md bg-[#161b22] border border-[#30363d] shadow-sm">
       {entries.map(([key, value]) => {
         const { display, full } = formatPropertyValue(value)
         return (
           <div key={key} className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[10px] text-slate-500 font-sans truncate" title={key}>
+            <span className="text-[10px] text-[#848d97] font-sans truncate" title={key}>
               {key}
             </span>
             <span
-              className="font-mono text-xs text-slate-300 font-medium truncate bg-slate-900/70 px-2 py-0.5 rounded border border-slate-800 hover:text-cyan-200 transition-colors"
+              className="font-mono text-xs text-[#e6edf3] font-medium truncate bg-[#0d1117] px-2 py-0.5 rounded border border-[#30363d] hover:text-[#58a6ff] transition-colors"
               title={full}
             >
               {display}
@@ -635,52 +635,52 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
 
 const CHIP_STYLES: Record<CliSettingChip['color'], { bg: string; border: string; text: string; label: string }> = {
   cyan: {
-    bg: 'bg-cyan-950/70',
-    border: 'border-cyan-800/70 hover:border-cyan-600',
-    text: 'text-cyan-200',
-    label: 'text-cyan-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#58a6ff]',
+    text: 'text-[#58a6ff]',
+    label: 'text-[#58a6ff]',
   },
   emerald: {
-    bg: 'bg-emerald-950/70',
-    border: 'border-emerald-800/70 hover:border-emerald-600',
-    text: 'text-emerald-200',
-    label: 'text-emerald-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#3fb950]',
+    text: 'text-[#3fb950]',
+    label: 'text-[#3fb950]',
   },
   amber: {
-    bg: 'bg-amber-950/70',
-    border: 'border-amber-800/70 hover:border-amber-600',
-    text: 'text-amber-200',
-    label: 'text-amber-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#d29922]',
+    text: 'text-[#d29922]',
+    label: 'text-[#d29922]',
   },
   purple: {
-    bg: 'bg-purple-950/70',
-    border: 'border-purple-800/70 hover:border-purple-600',
-    text: 'text-purple-200',
-    label: 'text-purple-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#bc8cff]',
+    text: 'text-[#bc8cff]',
+    label: 'text-[#bc8cff]',
   },
   rose: {
-    bg: 'bg-rose-950/70',
-    border: 'border-rose-800/70 hover:border-rose-600',
-    text: 'text-rose-200',
-    label: 'text-rose-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#f85149]',
+    text: 'text-[#f85149]',
+    label: 'text-[#f85149]',
   },
   indigo: {
-    bg: 'bg-indigo-950/70',
-    border: 'border-indigo-800/70 hover:border-indigo-600',
-    text: 'text-indigo-200',
-    label: 'text-indigo-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#58a6ff]',
+    text: 'text-[#58a6ff]',
+    label: 'text-[#58a6ff]',
   },
   blue: {
-    bg: 'bg-blue-950/70',
-    border: 'border-blue-800/70 hover:border-blue-600',
-    text: 'text-blue-200',
-    label: 'text-blue-400',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#58a6ff]',
+    text: 'text-[#58a6ff]',
+    label: 'text-[#58a6ff]',
   },
   slate: {
-    bg: 'bg-slate-900/80',
-    border: 'border-slate-800 hover:border-slate-700',
-    text: 'text-slate-300',
-    label: 'text-slate-500',
+    bg: 'bg-[#21262d]',
+    border: 'border-[#30363d] hover:border-[#848d97]',
+    text: 'text-[#848d97]',
+    label: 'text-[#848d97]',
   },
 }
 
@@ -729,36 +729,36 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
   const getChipIcon = (iconType?: string) => {
     switch (iconType) {
       case 'model':
-        return <Cpu className="w-3 h-3 text-cyan-400 shrink-0" />
+        return <Cpu className="w-3 h-3 text-[#58a6ff] shrink-0" />
       case 'io':
-        return <ArrowRightLeft className="w-3 h-3 text-emerald-400 shrink-0" />
+        return <ArrowRightLeft className="w-3 h-3 text-[#3fb950] shrink-0" />
       case 'effort':
-        return <Zap className="w-3 h-3 text-amber-400 shrink-0" />
+        return <Zap className="w-3 h-3 text-[#d29922] shrink-0" />
       case 'shield':
-        return <ShieldAlert className="w-3 h-3 text-rose-400 shrink-0" />
+        return <ShieldAlert className="w-3 h-3 text-[#f85149] shrink-0" />
       case 'schema':
-        return <FileCode className="w-3 h-3 text-indigo-400 shrink-0" />
+        return <FileCode className="w-3 h-3 text-[#bc8cff] shrink-0" />
       case 'file':
-        return <Paperclip className="w-3 h-3 text-teal-400 shrink-0" />
+        return <Paperclip className="w-3 h-3 text-[#58a6ff] shrink-0" />
       case 'api':
-        return <Sparkles className="w-3 h-3 text-purple-400 shrink-0" />
+        return <Sparkles className="w-3 h-3 text-[#bc8cff] shrink-0" />
       default:
-        return <Terminal className="w-3 h-3 text-amber-400 shrink-0" />
+        return <Terminal className="w-3 h-3 text-[#d29922] shrink-0" />
     }
   }
 
   return (
-    <div className="rounded-lg border border-amber-500/50 bg-[#070d1a] shadow-xl overflow-hidden flex flex-col transition-all hover:border-amber-400/80">
+    <div className="rounded-md border border-[#30363d] bg-[#0d1117] shadow-sm overflow-hidden flex flex-col transition-all hover:border-[#848d97]/50">
       {/* 1. 최상단 타이틀 바 */}
-      <div className="flex items-center justify-between px-3 py-2 bg-[#0e1628] border-b border-amber-500/30 text-[11px] font-mono">
+      <div className="flex items-center justify-between px-3 py-2 bg-[#161b22] border-b border-[#30363d] text-[11px] font-mono">
         <div className="flex items-center gap-2 min-w-0">
-          <Terminal className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
-          <span className="font-semibold text-amber-200">LLM 송출 설정 & 명령어</span>
+          <Terminal className="w-3.5 h-3.5 text-[#d29922] shrink-0" />
+          <span className="font-semibold text-[#e6edf3]">LLM 송출 설정 & 명령어</span>
           <span
             className={`text-[9px] px-2 py-0.5 rounded-full font-sans font-semibold border ${
               isApi
-                ? 'bg-purple-950/80 border-purple-700/60 text-purple-300'
-                : 'bg-amber-950/80 border-amber-700/60 text-amber-300'
+                ? 'bg-[#21262d] border-[#30363d] text-[#bc8cff]'
+                : 'bg-[#21262d] border-[#30363d] text-[#d29922]'
             }`}
           >
             {isApi ? 'API REQUEST (cURL)' : 'CLI COMMAND (agy)'}
@@ -769,11 +769,11 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
           {isCompareMode && (
             <div>
               {compareSlotAId === `command:${span.span_id}` ? (
-                <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                <span className="px-1.5 py-0.5 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] text-[9px] font-mono font-bold">
                   🅰️ 픽됨
                 </span>
               ) : compareSlotBId === `command:${span.span_id}` ? (
-                <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                <span className="px-1.5 py-0.5 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] text-[9px] font-mono font-bold">
                   🅱️ 픽됨
                 </span>
               ) : (
@@ -790,7 +790,7 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
                       spanId: span.span_id,
                     })
                   }}
-                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] transition-colors shadow-sm cursor-pointer"
                   title="이 실행 명령어 전문을 Compare 슬롯에 추가"
                 >
                   + Compare
@@ -802,17 +802,17 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 transition-colors cursor-pointer border border-slate-700/60"
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white transition-colors cursor-pointer border border-[#30363d]"
             title="실행 명령어 클립보드에 복사"
           >
             {copied ? (
               <>
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400">복사됨</span>
+                <Check className="w-3 h-3 text-[#3fb950]" />
+                <span className="text-[#3fb950]">복사됨</span>
               </>
             ) : (
               <>
-                <Copy className="w-3 h-3 text-slate-400" />
+                <Copy className="w-3 h-3 text-[#848d97]" />
                 <span>명령어 복사</span>
               </>
             )}
@@ -820,10 +820,10 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
           <button
             type="button"
             onClick={() => onOpenModal('LLM Execution Command', command, 'text', command.length)}
-            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-slate-100 transition-colors cursor-pointer border border-slate-700/60"
+            className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] hover:text-[#79c0ff] transition-colors cursor-pointer border border-[#30363d]"
             title="전체화면으로 확대"
           >
-            <Maximize2 className="w-3 h-3 text-slate-400" />
+            <Maximize2 className="w-3 h-3 text-[#58a6ff]" />
             <span>전체화면</span>
           </button>
         </div>
@@ -898,32 +898,32 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
           )}
 
           {hoveredChip && (
-            <div className="shrink-0 font-mono text-[10px] text-slate-400 bg-slate-900/90 px-2.5 py-1 rounded border border-slate-800 flex items-center gap-1.5">
-              <span className="text-slate-400">설정값:</span>
-              <span className="text-slate-100 font-semibold">{hoveredChip.value}</span>
+            <div className="shrink-0 font-mono text-[10px] text-[#848d97] bg-[#21262d] px-2.5 py-1 rounded border border-[#30363d] flex items-center gap-1.5">
+              <span className="text-[#848d97]">설정값:</span>
+              <span className="text-[#e6edf3] font-semibold">{hoveredChip.value}</span>
             </div>
           )}
         </div>
       </div>
 
       {/* 3. 원문 실행 명령어 전문 (토글 및 CodeMirror 가상화 뷰어) */}
-      <div className="bg-[#050912]">
+      <div className="bg-[#0d1117]">
         <div
           onClick={() => setShowRawCommand((prev) => !prev)}
-          className="flex items-center justify-between px-3 py-1.5 bg-[#080d19] border-b border-slate-800/60 text-[10px] font-mono text-slate-400 cursor-pointer hover:text-slate-200 transition-colors select-none"
+          className="flex items-center justify-between px-3 py-1.5 bg-[#161b22] border-b border-[#30363d] text-[10px] font-mono text-[#848d97] cursor-pointer hover:text-[#e6edf3] transition-colors select-none"
         >
           <div className="flex items-center gap-1.5">
-            <span className="text-amber-400 font-bold">$</span>
+            <span className="text-[#d29922] font-bold">$</span>
             <span>실제 송출 쉘 명령어 전문 ({command.length.toLocaleString()}자)</span>
           </div>
-          <div className="flex items-center gap-1 text-slate-500 text-[10px] font-sans">
+          <div className="flex items-center gap-1 text-[#848d97] text-[10px] font-sans">
             <span>{showRawCommand ? '접기' : '펼치기'}</span>
             {showRawCommand ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </div>
         </div>
 
         {showRawCommand && (
-          <div className="p-1">
+          <div className="p-1 bg-[#0d1117]">
             <CodeMirror
               value={command}
               height="130px"
@@ -1136,21 +1136,21 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
   const hasAttempts = attempts.length > 0
 
   return (
-    <div className="w-[420px] lg:w-[540px] xl:w-[600px] shrink-0 flex flex-col h-full bg-[#070b14] border-l border-slate-800 shadow-2xl relative">
+    <div className="w-[420px] lg:w-[540px] xl:w-[600px] shrink-0 flex flex-col h-full bg-[#0d1117] border-l border-[#30363d] relative">
       {/* 1. 최상단 헤더 정보 (스팬 명칭, 상태, 레이턴시, 차수) */}
-      <div className="p-3.5 border-b border-slate-800/90 bg-[#0c1222] shadow-sm">
+      <div className="p-3.5 border-b border-[#30363d] bg-[#161b22] shadow-sm">
         <div className="flex items-center justify-between mb-1.5 gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <span
               className={`w-2 h-2 rounded-full shrink-0 ${
                 span.status === 'SUCCESS'
-                  ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                  ? 'bg-[#3fb950]'
                   : span.status === 'FALLBACK_TRIGGERED'
-                  ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]'
-                  : 'bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.6)]'
+                  ? 'bg-[#d29922]'
+                  : 'bg-[#f85149]'
               }`}
             />
-            <span className="font-mono text-sm font-semibold text-slate-100 truncate" title={span.name}>
+            <span className="font-mono text-sm font-semibold text-[#e6edf3] truncate" title={span.name}>
               {span.name}
             </span>
           </div>
@@ -1158,45 +1158,45 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
           <span
             className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 border ${
               span.status === 'SUCCESS'
-                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                ? 'bg-[rgba(46,160,67,0.15)] text-[#3fb950] border-[rgba(46,160,67,0.3)]'
                 : span.status === 'FALLBACK_TRIGGERED'
-                ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
-                : 'bg-rose-500/10 text-rose-300 border-rose-500/30'
+                ? 'bg-[rgba(210,153,34,0.15)] text-[#d29922] border-[rgba(210,153,34,0.3)]'
+                : 'bg-[rgba(248,81,73,0.15)] text-[#f85149] border-[rgba(248,81,73,0.3)]'
             }`}
           >
             {span.status}
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-slate-400 font-mono flex-wrap">
+        <div className="flex items-center gap-3 text-[11px] text-[#848d97] font-mono flex-wrap">
           <span className="flex items-center gap-1">
-            <span className="text-slate-500 font-sans">Type:</span>
-            <span className="text-cyan-300 font-semibold px-1.5 py-0.2 rounded bg-cyan-950/60 border border-cyan-800/50">
+            <span className="text-[#848d97] font-sans">Type:</span>
+            <span className="text-[#58a6ff] font-semibold px-1.5 py-0.2 rounded bg-[#21262d] border border-[#30363d]">
               {span.span_type.toUpperCase()}
             </span>
           </span>
 
           <span className="flex items-center gap-1">
-            <span className="text-slate-500 font-sans">Latency:</span>
-            <span className="text-amber-300 font-semibold">{span.duration_ms.toFixed(1)}ms</span>
+            <span className="text-[#848d97] font-sans">Latency:</span>
+            <span className="text-[#d29922] font-semibold">{span.duration_ms.toFixed(1)}ms</span>
           </span>
 
           <span className="flex items-center gap-1 ml-auto">
-            <span className="text-slate-500 font-sans">Order:</span>
-            <span className="text-slate-300 text-[10px] truncate max-w-[140px]">#{span.dotted_order}</span>
+            <span className="text-[#848d97] font-sans">Order:</span>
+            <span className="text-[#848d97] text-[10px] truncate max-w-[140px]">#{span.dotted_order}</span>
           </span>
         </div>
       </div>
 
-      {/* 2. 탭 네비게이션 */}
-      <div className="flex border-b border-slate-800 bg-[#090f1d] px-2 text-xs select-none">
+      {/* 2. 탭 네비게이션 (GitHub UnderlineNav) */}
+      <div className="flex border-b border-[#30363d] bg-[#161b22] px-2 text-xs select-none">
         <button
           type="button"
           onClick={() => setActiveTab('io')}
           className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-medium transition-all cursor-pointer ${
             activeTab === 'io'
-              ? 'border-cyan-400 text-cyan-300 bg-cyan-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#f78166] text-[#e6edf3] font-semibold'
+              : 'border-transparent text-[#848d97] hover:text-[#e6edf3] hover:bg-[#21262d]/40'
           }`}
         >
           <Braces className="w-3.5 h-3.5" />
@@ -1209,8 +1209,8 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
             onClick={() => setActiveTab('attempts')}
             className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-medium transition-all cursor-pointer ${
               activeTab === 'attempts'
-                ? 'border-cyan-400 text-cyan-300 bg-cyan-950/20'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#f78166] text-[#e6edf3] font-semibold'
+                : 'border-transparent text-[#848d97] hover:text-[#e6edf3] hover:bg-[#21262d]/40'
             }`}
           >
             <Cpu className="w-3.5 h-3.5" />
@@ -1218,14 +1218,13 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
           </button>
         )}
 
-
         <button
           type="button"
           onClick={() => setActiveTab('raw')}
           className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-medium transition-all cursor-pointer ${
             activeTab === 'raw'
-              ? 'border-cyan-400 text-cyan-300 bg-cyan-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-[#f78166] text-[#e6edf3] font-semibold'
+              : 'border-transparent text-[#848d97] hover:text-[#e6edf3] hover:bg-[#21262d]/40'
           }`}
         >
           <Code2 className="w-3.5 h-3.5" />
@@ -1234,17 +1233,17 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
       </div>
 
       {/* 3. 탭 본문 영역 */}
-      <div className="flex-1 overflow-y-auto p-3.5 space-y-4 text-xs font-mono">
+      <div className="flex-1 overflow-y-auto p-3.5 space-y-4 text-xs font-mono bg-[#0d1117]">
         {activeTab === 'io' && (
           <>
             {/* 에러 발생 시 최우선 배너 */}
             {span.error && (
-              <div className="p-3 rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-300 space-y-1.5 shadow-md">
-                <div className="flex items-center gap-1.5 font-semibold text-rose-400 text-xs">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              <div className="p-3 rounded-md border border-[rgba(248,81,73,0.4)] bg-[rgba(248,81,73,0.1)] text-[#f85149] space-y-1.5 shadow-sm">
+                <div className="flex items-center gap-1.5 font-semibold text-[#f85149] text-xs">
+                  <AlertCircle className="w-4 h-4 text-[#f85149] shrink-0" />
                   <span>실행 에러: {span.error.code}</span>
                 </div>
-                <div className="text-[11px] break-words leading-relaxed text-rose-200">{span.error.message}</div>
+                <div className="text-[11px] break-words leading-relaxed text-[#e6edf3]">{span.error.message}</div>
                 {span.error.traceback && (
                   <VirtualCodeCard
                     title="Error Traceback"
@@ -1259,9 +1258,9 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
             {/* INPUTS 섹션 */}
             <div className="space-y-3">
-              <div className="text-[11px] font-semibold text-sky-400 flex items-center justify-between border-b border-slate-800/80 pb-1">
+              <div className="text-[11px] font-semibold text-[#58a6ff] flex items-center justify-between border-b border-[#30363d] pb-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#58a6ff]" />
                   <span>INPUTS (입력 데이터)</span>
                 </div>
 
@@ -1318,7 +1317,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                             spanId: span.span_id,
                           })
                         }}
-                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] transition-colors shadow-sm cursor-pointer"
                         title="이 스팬의 전체 INPUTS (설정값·명령어·프롬프트)를 Compare 슬롯에 추가"
                       >
                         + Compare
@@ -1368,20 +1367,20 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
             {/* OUTPUTS 섹션 */}
             <div className="space-y-2 pt-2">
-              <div className="text-[11px] font-semibold text-emerald-400 flex items-center justify-between border-b border-slate-800/80 pb-1">
+              <div className="text-[11px] font-semibold text-[#3fb950] flex items-center justify-between border-b border-[#30363d] pb-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950]" />
                   <span>OUTPUTS (산출물 및 전문 실측)</span>
                 </div>
 
                 {isCompareMode && (
                   <div>
                     {compareSlotAId === `outputs:${span.span_id}` ? (
-                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                      <span className="px-1.5 py-0.2 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] text-[9px] font-mono font-bold">
                         🅰️ 픽됨
                       </span>
                     ) : compareSlotBId === `outputs:${span.span_id}` ? (
-                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                      <span className="px-1.5 py-0.2 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] text-[9px] font-mono font-bold">
                         🅱️ 픽됨
                       </span>
                     ) : (
@@ -1413,7 +1412,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                             spanId: span.span_id,
                           })
                         }}
-                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] transition-colors shadow-sm cursor-pointer"
                         title="이 스팬의 전체 OUTPUTS를 Compare 슬롯에 추가"
                       >
                         + Compare
@@ -1452,44 +1451,44 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
         {activeTab === 'attempts' && (
           <div className="space-y-3">
             {attempts.map((att) => (
-              <div key={att.attempt_index} className="p-3 rounded-lg border border-slate-800 bg-[#0a101f] space-y-2.5">
+              <div key={att.attempt_index} className="p-3 rounded-md border border-[#30363d] bg-[#161b22] space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-200 text-xs">
+                  <span className="font-semibold text-[#e6edf3] text-xs">
                     시도 #{att.attempt_index + 1}: {att.provider}
                   </span>
                   {att.status === 'SUCCESS' ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)]">
                       <CheckCircle2 className="w-3 h-3" />
                       SUCCESS
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30">
+                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)]">
                       <AlertCircle className="w-3 h-3" />
                       FAILED
                     </span>
                   )}
                 </div>
 
-                <div className="text-[11px] text-slate-400 grid grid-cols-2 gap-2 bg-[#060a14] p-2 rounded border border-slate-800/80">
+                <div className="text-[11px] text-[#848d97] grid grid-cols-2 gap-2 bg-[#0d1117] p-2 rounded border border-[#30363d]">
                   <div>
-                    모델: <span className="text-slate-200 font-mono">{att.model}</span>
+                    모델: <span className="text-[#e6edf3] font-mono">{att.model}</span>
                   </div>
                   <div>
-                    지연시간: <span className="text-cyan-400 font-mono">{att.duration_ms.toFixed(1)}ms</span>
+                    지연시간: <span className="text-[#58a6ff] font-mono">{att.duration_ms.toFixed(1)}ms</span>
                   </div>
                   <div>
                     토큰수:{' '}
-                    <span className="text-slate-200 font-mono">
+                    <span className="text-[#e6edf3] font-mono">
                       입 {att.input_tokens.toLocaleString()} · 출 {att.output_tokens.toLocaleString()} (총 {(att.input_tokens + att.output_tokens).toLocaleString()} tok)
                     </span>
                   </div>
                   <div>
-                    비용: <span className="text-emerald-400 font-mono">${att.cost_usd.toFixed(4)}</span>
+                    비용: <span className="text-[#3fb950] font-mono">${att.cost_usd.toFixed(4)}</span>
                   </div>
                 </div>
 
                 {att.failure_reason && (
-                  <div className="text-[11px] text-rose-400 p-2 rounded bg-rose-950/20 border border-rose-900/40">
+                  <div className="text-[11px] text-[#f85149] p-2 rounded bg-[rgba(248,81,73,0.1)] border border-[rgba(248,81,73,0.3)]">
                     원인: {att.failure_reason}
                   </div>
                 )}
@@ -1537,18 +1536,18 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
       {/* 4. 전체화면 대형 모달 (수만~수십만 자 쾌적 열람, 검색, 복사) */}
       {modalViewer.isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
-          <div className="w-full max-w-5xl h-[88vh] bg-[#070c17] border border-slate-700/80 rounded-xl shadow-2xl flex flex-col overflow-hidden">
-            {/* 모달 헤더 */}
-            <div className="flex items-center justify-between px-5 py-3.5 bg-[#0c1427] border-b border-slate-800">
-              <div className="flex items-center gap-3">
-                <FileCode className="w-5 h-5 text-cyan-400 shrink-0" />
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-150">
+          <div className="w-full max-w-5xl h-[88vh] bg-[#0d1117] border border-[#30363d] rounded-md shadow-2xl flex flex-col overflow-hidden">
+            {/* 모달 헤더 (GitHub Dialog Header) */}
+            <div className="flex items-center justify-between px-4 py-3 bg-[#161b22] border-b border-[#30363d]">
+              <div className="flex items-center gap-2.5">
+                <FileCode className="w-4 h-4 text-[#58a6ff] shrink-0" />
                 <div className="flex flex-col">
-                  <span className="font-mono text-sm font-semibold text-slate-100">{modalViewer.title}</span>
-                  <span className="text-[11px] text-slate-400 font-sans">
+                  <span className="font-mono text-sm font-semibold text-[#e6edf3]">{modalViewer.title}</span>
+                  <span className="text-[11px] text-[#848d97] font-sans">
                     {modalViewer.language.toUpperCase()} • 실측 {modalViewer.charCount.toLocaleString()} 자 (가상 스크롤
-                    검색 지원: <kbd className="px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ctrl</kbd> +{' '}
-                    <kbd className="px-1 py-0.2 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">F</kbd>)
+                    검색: <kbd className="px-1 py-0.2 rounded bg-[#21262d] text-[#e6edf3] border border-[#30363d] font-mono text-[10px]">Ctrl</kbd> +{' '}
+                    <kbd className="px-1 py-0.2 rounded bg-[#21262d] text-[#e6edf3] border border-[#30363d] font-mono text-[10px]">F</kbd>)
                   </span>
                 </div>
               </div>
@@ -1557,16 +1556,16 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                 <button
                   type="button"
                   onClick={handleModalCopy}
-                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white border border-[#30363d] transition-colors cursor-pointer"
                 >
                   {modalCopied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400 font-semibold">복사 완료</span>
+                      <Check className="w-3.5 h-3.5 text-[#3fb950]" />
+                      <span className="text-[#3fb950] font-semibold">복사 완료</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-slate-300" />
+                      <Copy className="w-3.5 h-3.5 text-[#848d97]" />
                       <span>전체 복사</span>
                     </>
                   )}
@@ -1575,16 +1574,16 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                 <button
                   type="button"
                   onClick={() => setModalViewer((prev) => ({ ...prev, isOpen: false }))}
-                  className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-md hover:bg-[#21262d] text-[#848d97] hover:text-[#e6edf3] transition-colors cursor-pointer"
                   title="닫기 (ESC)"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* 모달 CodeMirror 뷰어 */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden bg-[#0d1117]">
               <CodeMirror
                 value={modalViewer.content}
                 height="100%"

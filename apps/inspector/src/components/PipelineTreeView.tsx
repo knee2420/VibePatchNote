@@ -383,15 +383,15 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
     const getIcon = () => {
       switch (node.type) {
         case 'file':
-          return <FileCode className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+          return <FileCode className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
         case 'class':
-          return <Package className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          return <Package className="w-3.5 h-3.5 text-[#bc8cff] shrink-0" />
         case 'function':
-          return <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          return <Zap className="w-3.5 h-3.5 text-[#d29922] shrink-0" />
         case 'prompt':
-          return <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          return <Sparkles className="w-3.5 h-3.5 text-[#3fb950] shrink-0" />
         default:
-          return <Code2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          return <Code2 className="w-3.5 h-3.5 text-[#848d97] shrink-0" />
       }
     }
 
@@ -401,15 +401,15 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
         <div
           onClick={() => toggleNode(node)}
           style={{ paddingLeft: `${depth * 16 + 8}px` }}
-          className={`flex items-center justify-between py-1.5 pr-2 rounded-md transition-all cursor-pointer select-none group ${
+          className={`flex items-center justify-between py-1.5 pr-2 rounded-md transition-colors cursor-pointer select-none group ${
             isExpanded
-              ? 'bg-slate-800/90 text-slate-100'
-              : 'hover:bg-slate-850/80 text-slate-300'
+              ? 'bg-[#21262d] text-[#e6edf3]'
+              : 'hover:bg-[#21262d]/60 text-[#848d97]'
           }`}
         >
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {hasChildren || isLeafCode ? (
-              <span className="text-slate-500 group-hover:text-slate-300 transition-colors">
+              <span className="text-[#848d97] group-hover:text-[#e6edf3] transition-colors">
                 {isExpanded ? (
                   <ChevronDown className="w-3.5 h-3.5" />
                 ) : (
@@ -425,19 +425,19 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
             <span
               className={`font-mono text-xs truncate ${
                 node.type === 'file'
-                  ? 'text-blue-300 font-semibold'
+                  ? 'text-[#58a6ff] font-semibold'
                   : node.type === 'class'
-                  ? 'text-purple-300 font-medium'
+                  ? 'text-[#bc8cff] font-medium'
                   : node.type === 'prompt'
-                  ? 'text-emerald-300 font-semibold'
-                  : 'text-amber-200'
+                  ? 'text-[#3fb950] font-semibold'
+                  : 'text-[#e6edf3]'
               }`}
             >
               {node.name}
             </span>
 
             {node.type === 'prompt' && (
-              <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans">
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#238636]/20 text-[#3fb950] border border-[#238636]/40 font-mono">
                 PROMPT
               </span>
             )}
@@ -445,10 +445,10 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
 
           <div className="flex items-center gap-2 shrink-0">
             {isLoading && (
-              <Loader2 className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 text-[#58a6ff] animate-spin" />
             )}
             {isLeafCode && !isLoading && (
-              <span className="text-[10px] text-slate-500 font-sans opacity-70 group-hover:opacity-100 transition-opacity">
+              <span className="text-[10px] text-[#848d97] font-sans opacity-70 group-hover:opacity-100 transition-opacity">
                 {isExpanded ? '코드 접기' : '코드 펼치기'}
               </span>
             )}
@@ -457,7 +457,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
 
         {/* 자식 노드 재귀 렌더링 */}
         {hasChildren && isExpanded && (
-          <div className="flex flex-col border-l border-slate-800/80 ml-3 my-0.5">
+          <div className="flex flex-col border-l border-[#30363d] ml-3 my-0.5">
             {node.children!.map((child) => renderNode(child, depth + 1))}
           </div>
         )}
@@ -466,17 +466,17 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
         {isLeafCode && isExpanded && (
           <div
             style={{ marginLeft: `${depth * 16 + 12}px` }}
-            className="my-1.5 mr-2 rounded-lg border border-slate-800 bg-[#050811] overflow-hidden shadow-2xl"
+            className="my-1.5 mr-2 rounded-md border border-[#30363d] bg-[#0d1117] overflow-hidden shadow-sm"
           >
-            {/* 코드 뷰어 상단 메타 바 */}
-            <div className="flex items-center justify-between px-3 py-1.5 bg-[#0e1424] border-b border-slate-800/90 text-[11px] font-mono text-slate-400">
+            {/* 코드 뷰어 상단 메타 바 (GitHub Blob Header 스타일) */}
+            <div className="flex items-center justify-between px-3 py-1.5 bg-[#161b22] border-b border-[#30363d] text-[11px] font-mono text-[#848d97]">
               <div className="flex items-center gap-2 min-w-0">
-                <Terminal className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <span className="text-slate-300 truncate max-w-[240px]">
+                <Terminal className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
+                <span className="text-[#e6edf3] font-semibold truncate max-w-[240px]">
                   {sourceData?.file_path || node.filePath || 'Inline Prompt'}
                 </span>
                 {sourceData && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-800/60 text-cyan-300">
+                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#21262d] border border-[#30363d] text-[#848d97]">
                     Line {sourceData.start_line} - {sourceData.end_line}
                   </span>
                 )}
@@ -486,11 +486,11 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                 {isCompareMode && contentToShow && (
                   <div>
                     {compareSlotAId === `code:${node.id}` ? (
-                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                      <span className="px-1.5 py-0.5 rounded bg-[#f85149]/20 text-[#f85149] border border-[#f85149]/40 text-[9px] font-mono font-bold">
                         🅰️ 픽됨
                       </span>
                     ) : compareSlotBId === `code:${node.id}` ? (
-                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                      <span className="px-1.5 py-0.5 rounded bg-[#238636]/20 text-[#3fb950] border border-[#238636]/40 text-[9px] font-mono font-bold">
                         🅱️ 픽됨
                       </span>
                     ) : (
@@ -513,7 +513,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                             spanId: span.span_id,
                           })
                         }}
-                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#21262d] text-[#c9d1d9] border border-[#30363d] hover:bg-[#30363d] hover:text-[#e6edf3] transition-colors cursor-pointer"
                         title="이 소스코드를 Compare 슬롯에 추가"
                       >
                         + Compare
@@ -526,17 +526,17 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                   <button
                     type="button"
                     onClick={(e) => handleCopyCode(node.id, contentToShow, e)}
-                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] border border-[#30363d] transition-colors cursor-pointer"
                     title="코드 복사"
                   >
                     {copiedNodeId === node.id ? (
                       <>
-                        <Check className="w-3 h-3 text-emerald-400" />
-                        <span className="text-emerald-400">복사됨</span>
+                        <Check className="w-3 h-3 text-[#3fb950]" />
+                        <span className="text-[#3fb950]">복사됨</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3 h-3 text-slate-400" />
+                        <Copy className="w-3 h-3 text-[#848d97]" />
                         <span>복사</span>
                       </>
                     )}
@@ -546,7 +546,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
             </div>
 
             {/* 코드 본문 */}
-            <div className="bg-[#070b14] text-xs">
+            <div className="bg-[#0d1117] text-xs">
               {contentToShow ? (
                 <CodeMirror
                   value={contentToShow}
@@ -570,7 +570,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                   }}
                 />
               ) : (
-                <div className="p-3 text-slate-500 italic">
+                <div className="p-3 text-[#848d97] italic">
                   코드를 불러오는 중이거나 코드가 비어 있습니다.
                 </div>
               )}
@@ -582,16 +582,16 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
   }
 
   return (
-    <div className="mt-2.5 p-2.5 rounded-lg bg-[#080d19]/90 border border-slate-800/90 flex flex-col gap-2">
-      {/* 1. 입력이 파일(PDF 등)인 경우: "만약 'pdf', 이거나 파일 형식의 input 이라면 그냥 파일명만 남겨놔" */}
+    <div className="mt-2.5 p-3 rounded-md bg-[#161b22] border border-[#30363d] flex flex-col gap-2.5">
+      {/* 1. 입력이 파일(PDF 등)인 경우 */}
       {isInputPdfOrFile && dataIn && (
-        <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-md bg-sky-950/50 border border-sky-800/60 text-xs">
-          <FileText className="w-4 h-4 text-sky-400 shrink-0" />
-          <span className="text-[11px] font-semibold text-slate-400">입력 문서 (원본):</span>
-          <span className="font-mono text-xs text-sky-300 font-semibold truncate" title={dataIn}>
+        <div className="flex items-center gap-2 py-1.5 px-3 rounded-md bg-[#0d1117] border border-[#30363d] text-xs">
+          <FileText className="w-4 h-4 text-[#58a6ff] shrink-0" />
+          <span className="text-[11px] font-semibold text-[#848d97]">입력 문서 (원본):</span>
+          <span className="font-mono text-xs text-[#58a6ff] font-semibold truncate" title={dataIn}>
             {dataIn}
           </span>
-          <span className="ml-auto text-[10px] text-slate-500 font-sans">
+          <span className="ml-auto text-[10px] text-[#848d97] font-sans">
             (바이너리 파일 입력)
           </span>
         </div>
@@ -599,10 +599,10 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
 
       {/* 2. 관여 파일, 클래스, 함수 & 프롬프트 트리 뷰 */}
       <div className="flex flex-col gap-0.5">
-        <div className="flex items-center gap-1.5 px-1 pb-1 text-[11px] font-semibold text-slate-400 border-b border-slate-800/60 mb-1">
-          <Folder className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="flex items-center gap-1.5 px-1 pb-1.5 text-[11px] font-semibold text-[#e6edf3] border-b border-[#30363d] mb-1">
+          <Folder className="w-3.5 h-3.5 text-[#58a6ff]" />
           <span>파이프라인 심볼 & 코드 구현 트리</span>
-          <span className="text-[10px] font-normal text-slate-500 ml-auto">
+          <span className="text-[10px] font-normal text-[#848d97] ml-auto">
             (노드를 클릭하여 구현 코드와 프롬프트 확인)
           </span>
         </div>
@@ -610,7 +610,7 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
         {tree.length > 0 ? (
           tree.map((node) => renderNode(node, 0))
         ) : (
-          <div className="text-xs text-slate-500 p-2 italic">
+          <div className="text-xs text-[#848d97] p-2 italic">
             연결된 코드 심볼 정보가 없습니다.
           </div>
         )}

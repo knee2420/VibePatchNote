@@ -3,7 +3,6 @@ import {
   Activity,
   Cpu,
   GitCompare,
-  Radio,
   Sparkles,
 } from 'lucide-react'
 import { deleteRun, fetchRunDetail, fetchRuns } from './api'
@@ -137,18 +136,18 @@ export const App: React.FC = () => {
     runDetail?.spans.find((s) => s.span_id === selectedSpanId) || null
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#070b14] text-slate-100 overflow-hidden font-sans">
-      {/* Top Navbar */}
-      <header className="h-12 bg-[#0d1322] border-b border-slate-800 flex items-center justify-between px-4 shrink-0">
+    <div className="flex flex-col h-screen w-screen bg-[#0d1117] text-[#e6edf3] overflow-hidden font-sans">
+      {/* Top Navbar (GitHub Dark Inset Header) */}
+      <header className="h-12 bg-[#010409] border-b border-[#30363d] flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-cyan-950/40">
-              <Sparkles className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-md bg-[#21262d] border border-[#30363d] flex items-center justify-center text-[#e6edf3] shadow-sm">
+              <Sparkles className="w-4 h-4 text-[#58a6ff]" />
             </div>
-            <span className="font-bold text-sm tracking-wide text-white">
-              VIBE <span className="text-cyan-400 font-mono text-xs font-normal">INSPECTOR</span>
+            <span className="font-bold text-sm tracking-wide text-[#e6edf3]">
+              VIBE <span className="text-[#848d97] font-mono text-xs font-normal">INSPECTOR</span>
             </span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 ml-1">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#21262d] text-[#848d97] border border-[#30363d] ml-1">
               :5174
             </span>
           </div>
@@ -156,10 +155,10 @@ export const App: React.FC = () => {
           <nav className="flex items-center gap-1">
             <button
               onClick={() => setNavTab('runs')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 navTab === 'runs'
-                  ? 'bg-slate-800 text-cyan-300'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                  : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
@@ -168,25 +167,25 @@ export const App: React.FC = () => {
 
             <button
               onClick={() => setNavTab('compare')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 navTab === 'compare'
-                  ? 'bg-slate-800 text-cyan-300 ring-1 ring-cyan-500/40 font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                  : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
               }`}
             >
-              <GitCompare className="w-3.5 h-3.5 text-cyan-400" />
+              <GitCompare className="w-3.5 h-3.5 text-[#58a6ff]" />
               Run & Span Compare
               {(compareSlotA || compareSlotB) && (
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse ml-0.5" />
+                <span className="w-2 h-2 rounded-full bg-[#58a6ff] animate-pulse ml-0.5" />
               )}
             </button>
 
             <button
               onClick={() => setNavTab('matrix')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                 navTab === 'matrix'
-                  ? 'bg-slate-800 text-cyan-300'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                  : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
               }`}
             >
               <Cpu className="w-3.5 h-3.5" />
@@ -196,22 +195,22 @@ export const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 text-xs">
-          {/* Compare 모드 바로 켜기 토글 버튼 */}
+          {/* Compare 모드 바로 켜기 토글 버튼 (GitHub Button 룩앤필) */}
           <button
             type="button"
             onClick={() => setIsCompareMode((prev) => !prev)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
               isCompareMode
-                ? 'bg-cyan-600 text-white shadow-md ring-1 ring-cyan-400'
-                : 'bg-slate-800 text-slate-300 hover:text-cyan-300 hover:bg-slate-700'
+                ? 'bg-[#1f6feb] text-white border border-[#388bfd]/50 shadow-sm font-semibold'
+                : 'bg-[#21262d] text-[#c9d1d9] border border-[#30363d] hover:bg-[#30363d] hover:text-white'
             }`}
           >
             <GitCompare className="w-3.5 h-3.5" />
             {isCompareMode ? 'Compare 모드 ON' : 'Compare 모드'}
           </button>
 
-          <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
-            <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-1.5 text-[#848d97] font-mono text-[11px]">
+            <span className="w-2 h-2 rounded-full bg-[#3fb950]" />
             <span>API: 8000</span>
           </div>
         </div>
@@ -272,7 +271,7 @@ export const App: React.FC = () => {
                 />
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-slate-500 text-xs">
+              <div className="flex-1 flex items-center justify-center text-[#848d97] text-xs">
                 {loading ? 'Loading run details...' : 'Select a run from the left panel'}
               </div>
             )}

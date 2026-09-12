@@ -26,23 +26,23 @@ export const MatrixViewer: React.FC = () => {
   }, [])
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0b0f19] p-6 overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-[#0d1117] p-6 overflow-y-auto">
       <div className="max-w-6xl mx-auto w-full space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-[#30363d] pb-4">
           <div>
-            <h1 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-              <Cpu className="w-5 h-5 text-cyan-400" />
+            <h1 className="text-lg font-semibold text-[#e6edf3] flex items-center gap-2">
+              <Cpu className="w-5 h-5 text-[#58a6ff]" />
               Engine & Model Registry (SSOT)
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Registered models, execution harnesses, and fallback routing matrix defined in <code className="text-cyan-300">scaffold-engine</code>.
+            <p className="text-xs text-[#848d97] mt-1">
+              Registered models, execution harnesses, and fallback routing matrix defined in <code className="text-[#58a6ff]">scaffold-engine</code>.
             </p>
           </div>
           <button
             onClick={loadMatrix}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-xs font-medium text-[#c9d1d9] transition-colors cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh Matrix
@@ -50,8 +50,8 @@ export const MatrixViewer: React.FC = () => {
         </div>
 
         {error && (
-          <div className="p-4 rounded border border-rose-500/30 bg-rose-500/10 text-rose-300 text-xs flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400" />
+          <div className="p-4 rounded-md border border-[#f85149]/40 bg-[#f85149]/10 text-[#f85149] text-xs flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-[#f85149]" />
             {error}
           </div>
         )}
@@ -60,43 +60,43 @@ export const MatrixViewer: React.FC = () => {
           <>
             {/* Routing Policy Card */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg border border-cyan-500/20 bg-cyan-950/10 space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-cyan-400">
+              <div className="p-4 rounded-md border border-[#30363d] bg-[#161b22] space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#58a6ff]">
                   Primary Routing Provider
                 </span>
-                <div className="text-base font-mono font-bold text-slate-100">
+                <div className="text-base font-mono font-bold text-[#e6edf3]">
                   {matrix.primary_provider}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-[#848d97]">
                   Default execution path for all pipeline requests.
                 </div>
               </div>
 
-              <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-950/10 space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">
+              <div className="p-4 rounded-md border border-[#30363d] bg-[#161b22] space-y-1">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#d29922]">
                   Fallback Provider (Fail-safe)
                 </span>
-                <div className="text-base font-mono font-bold text-slate-100">
+                <div className="text-base font-mono font-bold text-[#e6edf3]">
                   {matrix.fallback_provider}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-[#848d97]">
                   Automatically triggered upon 429 quota exhaustion or CLI bridge failures.
                 </div>
               </div>
             </div>
 
             {/* Models Table */}
-            <div className="rounded-lg border border-slate-800 bg-[#0d1322] overflow-hidden">
-              <div className="p-3.5 border-b border-slate-800 bg-[#11192e] flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-cyan-400" />
+            <div className="rounded-md border border-[#30363d] bg-[#0d1117] overflow-hidden">
+              <div className="p-3.5 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#e6edf3] uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#58a6ff]" />
                   Available Model Registry ({matrix.models.length})
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-slate-900/60 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                  <thead className="bg-[#161b22] text-[#848d97] uppercase text-[10px] tracking-wider border-b border-[#30363d]">
                     <tr>
                       <th className="p-3">Model Name</th>
                       <th className="p-3">Family</th>
@@ -107,40 +107,40 @@ export const MatrixViewer: React.FC = () => {
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/40 text-slate-300">
+                  <tbody className="divide-y divide-[#30363d] text-[#c9d1d9]">
                     {matrix.models.map((model) => (
-                      <tr key={model.name} className="hover:bg-slate-800/20">
-                        <td className="p-3 font-semibold text-cyan-300">
+                      <tr key={model.name} className="hover:bg-[#161b22]/50 transition-colors">
+                        <td className="p-3 font-semibold text-[#58a6ff]">
                           {model.name}
                           {model.display_name && (
-                            <span className="ml-2 font-normal text-slate-400 text-[11px]">
+                            <span className="ml-2 font-normal text-[#848d97] text-[11px]">
                               ({model.display_name})
                             </span>
                           )}
                         </td>
                         <td className="p-3">
-                          <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px]">
+                          <span className="px-1.5 py-0.5 rounded bg-[#21262d] border border-[#30363d] text-[#c9d1d9] text-[11px]">
                             {model.family}
                           </span>
                         </td>
-                        <td className="p-3 text-slate-400">{model.provider}</td>
-                        <td className="p-3 text-slate-300">
+                        <td className="p-3 text-[#848d97]">{model.provider}</td>
+                        <td className="p-3 text-[#e6edf3]">
                           {model.max_input_tokens.toLocaleString()} tokens
                         </td>
-                        <td className="p-3 text-slate-300">
+                        <td className="p-3 text-[#e6edf3]">
                           {model.max_output_tokens.toLocaleString()} tokens
                         </td>
                         <td className="p-3">
                           {model.supports_structured_schema ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-400 text-[11px]">
+                            <span className="inline-flex items-center gap-1 text-[#3fb950] text-[11px]">
                               <Check className="w-3.5 h-3.5" /> Supported
                             </span>
                           ) : (
-                            <span className="text-slate-500 text-[11px]">No</span>
+                            <span className="text-[#848d97] text-[11px]">No</span>
                           )}
                         </td>
                         <td className="p-3">
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-500/10 text-emerald-400">
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] bg-[#238636]/20 text-[#3fb950] border border-[#238636]/40">
                             ACTIVE
                           </span>
                         </td>

@@ -482,18 +482,18 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
   const labelB = summaryB?.workflow_label || summaryB?.task_name || runBId?.slice(0, 8) || 'Run B'
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#070b14] overflow-hidden text-slate-100">
+    <div className="flex-1 flex flex-col h-full bg-[#0d1117] overflow-hidden text-[#e6edf3]">
       {/* 1. Header: Run A vs Run B Selectors & KPI Delta Dashboard */}
-      <div className="bg-[#0b101e] border-b border-slate-800/80 p-3.5 shrink-0 flex flex-col gap-3">
+      <div className="bg-[#161b22] border-b border-[#30363d] p-3.5 shrink-0 flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Run Selectors */}
+          {/* Run Selectors (GitHub Branch Compare Look & Feel) */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Run A Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-900/90 border border-rose-900/50 rounded-lg px-2.5 py-1.5 shadow-sm">
-              <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center font-mono font-bold text-xs">
+            {/* Run A Selector (Base) */}
+            <div className="flex items-center gap-1.5 bg-[#21262d] border border-[#30363d] rounded-md px-2.5 py-1.5 shadow-sm">
+              <span className="w-5 h-5 rounded-full bg-[rgba(248,81,73,0.2)] text-[#f85149] flex items-center justify-center font-mono font-bold text-xs">
                 🅰️
               </span>
-              <span className="text-[11px] font-semibold text-rose-300">Base:</span>
+              <span className="text-[11px] font-semibold text-[#f85149]">base:</span>
               <select
                 value={runAId || ''}
                 onChange={(e) => {
@@ -501,10 +501,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                   setRunAId(newId)
                   if (onSelectRunA) onSelectRunA(newId)
                 }}
-                className="bg-transparent text-xs text-slate-200 font-mono outline-none cursor-pointer max-w-[220px] truncate"
+                className="bg-transparent text-xs text-[#e6edf3] font-mono outline-none cursor-pointer max-w-[220px] truncate"
               >
                 {runs.map((r) => (
-                  <option key={r.run_id} value={r.run_id} className="bg-slate-900 text-slate-200">
+                  <option key={r.run_id} value={r.run_id} className="bg-[#161b22] text-[#e6edf3]">
                     [{r.workflow_label || r.task_name}] {r.primary_model || ''} ({r.run_id.slice(0, 8)})
                   </option>
                 ))}
@@ -515,18 +515,18 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
             <button
               type="button"
               onClick={handleSwap}
-              className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-cyan-300 transition-colors border border-slate-700"
+              className="p-1.5 rounded-md bg-[#21262d] hover:bg-[#30363d] text-[#848d97] hover:text-[#e6edf3] transition-colors border border-[#30363d] cursor-pointer"
               title="A와 B의 기준/비교 위치 교체 (Swap)"
             >
               <ArrowRightLeft className="w-3.5 h-3.5" />
             </button>
 
-            {/* Run B Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-900/90 border border-emerald-900/50 rounded-lg px-2.5 py-1.5 shadow-sm">
-              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono font-bold text-xs">
+            {/* Run B Selector (Target) */}
+            <div className="flex items-center gap-1.5 bg-[#21262d] border border-[#30363d] rounded-md px-2.5 py-1.5 shadow-sm">
+              <span className="w-5 h-5 rounded-full bg-[rgba(46,160,67,0.2)] text-[#3fb950] flex items-center justify-center font-mono font-bold text-xs">
                 🅱️
               </span>
-              <span className="text-[11px] font-semibold text-emerald-300">Target:</span>
+              <span className="text-[11px] font-semibold text-[#3fb950]">compare:</span>
               <select
                 value={runBId || ''}
                 onChange={(e) => {
@@ -534,10 +534,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                   setRunBId(newId)
                   if (onSelectRunB) onSelectRunB(newId)
                 }}
-                className="bg-transparent text-xs text-slate-200 font-mono outline-none cursor-pointer max-w-[220px] truncate"
+                className="bg-transparent text-xs text-[#e6edf3] font-mono outline-none cursor-pointer max-w-[220px] truncate"
               >
                 {runs.map((r) => (
-                  <option key={r.run_id} value={r.run_id} className="bg-slate-900 text-slate-200">
+                  <option key={r.run_id} value={r.run_id} className="bg-[#161b22] text-[#e6edf3]">
                     [{r.workflow_label || r.task_name}] {r.primary_model || ''} ({r.run_id.slice(0, 8)})
                   </option>
                 ))}
@@ -546,9 +546,9 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
           </div>
 
           {/* Quick Info & State Indicator */}
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#848d97]">
             {(loadingA || loadingB || loadingCode) && (
-              <span className="flex items-center gap-1.5 text-cyan-400">
+              <span className="flex items-center gap-1.5 text-[#58a6ff]">
                 <Zap className="w-3 h-3 animate-spin" />
                 대조 분석 중...
               </span>
@@ -560,14 +560,14 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
         {summaryA && summaryB && metricsDelta && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
             {/* 1. 소요 시간 대조 */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col gap-0.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="bg-[#0d1117] border border-[#30363d] rounded-md p-2 flex flex-col gap-0.5">
+              <div className="flex items-center justify-between text-[11px] text-[#848d97]">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-slate-500" /> 소요 시간 (Duration)
+                  <Clock className="w-3 h-3 text-[#848d97]" /> 소요 시간 (Duration)
                 </span>
                 <span
                   className={`font-mono text-[10px] font-bold ${
-                    metricsDelta.durDelta <= 0 ? 'text-emerald-400' : 'text-rose-400'
+                    metricsDelta.durDelta <= 0 ? 'text-[#3fb950]' : 'text-[#f85149]'
                   }`}
                 >
                   {metricsDelta.durDelta <= 0 ? '▼ 더 빠름' : '▲ 더 느림'}{' '}
@@ -575,23 +575,23 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                 </span>
               </div>
               <div className="flex items-center justify-between font-mono text-[11px] mt-0.5">
-                <span className="text-rose-300">🅰️ {formatDuration(summaryA.total_duration_ms)}</span>
-                <span className="text-slate-600">vs</span>
-                <span className="text-emerald-300">
+                <span className="text-[#f85149]">🅰️ {formatDuration(summaryA.total_duration_ms)}</span>
+                <span className="text-[#6e7681]">vs</span>
+                <span className="text-[#3fb950]">
                   🅱️ {formatDuration(summaryB.total_duration_ms)}
                 </span>
               </div>
             </div>
 
             {/* 2. 입력 토큰 대조 */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col gap-0.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="bg-[#0d1117] border border-[#30363d] rounded-md p-2 flex flex-col gap-0.5">
+              <div className="flex items-center justify-between text-[11px] text-[#848d97]">
                 <span className="flex items-center gap-1">
-                  <Coins className="w-3 h-3 text-cyan-400" /> 입력 토큰 (Prompt)
+                  <Coins className="w-3 h-3 text-[#58a6ff]" /> 입력 토큰 (Prompt)
                 </span>
                 <span
                   className={`font-mono text-[10px] font-bold ${
-                    metricsDelta.inTokensDelta <= 0 ? 'text-emerald-400' : 'text-amber-400'
+                    metricsDelta.inTokensDelta <= 0 ? 'text-[#3fb950]' : 'text-[#d29922]'
                   }`}
                 >
                   Δ {metricsDelta.inTokensDelta > 0 ? '+' : ''}
@@ -599,46 +599,46 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                 </span>
               </div>
               <div className="flex items-center justify-between font-mono text-[11px] mt-0.5">
-                <span className="text-rose-300">🅰️ {formatToken(summaryA.input_tokens)}</span>
-                <span className="text-slate-600">vs</span>
-                <span className="text-emerald-300">🅱️ {formatToken(summaryB.input_tokens)}</span>
+                <span className="text-[#f85149]">🅰️ {formatToken(summaryA.input_tokens)}</span>
+                <span className="text-[#6e7681]">vs</span>
+                <span className="text-[#3fb950]">🅱️ {formatToken(summaryB.input_tokens)}</span>
               </div>
             </div>
 
             {/* 3. 출력 토큰 대조 */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col gap-0.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="bg-[#0d1117] border border-[#30363d] rounded-md p-2 flex flex-col gap-0.5">
+              <div className="flex items-center justify-between text-[11px] text-[#848d97]">
                 <span className="flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-emerald-400" /> 출력 토큰 (Output)
+                  <Sparkles className="w-3 h-3 text-[#3fb950]" /> 출력 토큰 (Output)
                 </span>
-                <span className="font-mono text-[10px] font-bold text-slate-300">
+                <span className="font-mono text-[10px] font-bold text-[#e6edf3]">
                   Δ {metricsDelta.outTokensDelta > 0 ? '+' : ''}
                   {formatToken(metricsDelta.outTokensDelta)}
                 </span>
               </div>
               <div className="flex items-center justify-between font-mono text-[11px] mt-0.5">
-                <span className="text-rose-300">🅰️ {formatToken(summaryA.output_tokens)}</span>
-                <span className="text-slate-600">vs</span>
-                <span className="text-emerald-300">🅱️ {formatToken(summaryB.output_tokens)}</span>
+                <span className="text-[#f85149]">🅰️ {formatToken(summaryA.output_tokens)}</span>
+                <span className="text-[#6e7681]">vs</span>
+                <span className="text-[#3fb950]">🅱️ {formatToken(summaryB.output_tokens)}</span>
               </div>
             </div>
 
             {/* 4. 모델 & 엔진 대조 */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col gap-0.5">
-              <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="bg-[#0d1117] border border-[#30363d] rounded-md p-2 flex flex-col gap-0.5">
+              <div className="flex items-center justify-between text-[11px] text-[#848d97]">
                 <span className="flex items-center gap-1">
-                  <Cpu className="w-3 h-3 text-indigo-400" /> 주력 모델 (Model)
+                  <Cpu className="w-3 h-3 text-[#58a6ff]" /> 주력 모델 (Model)
                 </span>
-                <span className="font-mono text-[10px] text-slate-500">
+                <span className="font-mono text-[10px] text-[#848d97]">
                   {summaryA.primary_model === summaryB.primary_model ? '동일 모델' : 'A/B 비교'}
                 </span>
               </div>
               <div className="flex items-center justify-between font-mono text-[11px] mt-0.5 truncate">
-                <span className="text-rose-300 truncate max-w-[90px]">
+                <span className="text-[#f85149] truncate max-w-[90px]">
                   🅰️ {summaryA.primary_model?.replace('gemini-', '') || 'None'}
                 </span>
-                <span className="text-slate-600">vs</span>
-                <span className="text-emerald-300 truncate max-w-[90px]">
+                <span className="text-[#6e7681]">vs</span>
+                <span className="text-[#3fb950] truncate max-w-[90px]">
                   🅱️ {summaryB.primary_model?.replace('gemini-', '') || 'None'}
                 </span>
               </div>
@@ -650,16 +650,16 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
       {/* 2. Main Body: Left Span Mapping Sidebar & Right Element Diff Panel */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar: Span 1:1 Mapping Tree */}
-        <div className="w-72 lg:w-80 bg-[#0a0f1d] border-r border-slate-800/80 flex flex-col shrink-0">
-          <div className="p-3 border-b border-slate-800/80 bg-[#0d1424] flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="w-72 lg:w-80 bg-[#0d1117] border-r border-[#30363d] flex flex-col shrink-0">
+          <div className="p-3 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#e6edf3] flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-[#58a6ff]" />
               Trace Elements ({spanPairs.length + 1})
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">1:1 Pair Match</span>
+            <span className="text-[10px] text-[#848d97] font-mono">1:1 Pair Match</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-800/40 p-1.5 space-y-1">
+          <div className="flex-1 overflow-y-auto divide-y divide-[#21262d]/60 p-1.5 space-y-1">
             {/* Top Item: Custom 2-Card Compare */}
             {customSlotA && customSlotB && (
               <div
@@ -668,22 +668,22 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                 onClick={() => setSelectedPairId('custom')}
                 className={`p-2.5 rounded-md cursor-pointer transition-all text-xs flex items-center justify-between mb-1.5 ${
                   selectedPairId === 'custom'
-                    ? 'bg-gradient-to-r from-rose-950/70 to-emerald-950/70 border border-cyan-400 text-white font-semibold shadow-lg'
-                    : 'text-slate-300 hover:bg-slate-800/60 border border-slate-700/80 bg-slate-900/50'
+                    ? 'bg-[#161b22] border-l-2 border-l-[#58a6ff] border-[#30363d] text-[#e6edf3] font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]/50 border border-[#30363d]/60 bg-[#161b22]/20'
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
                   <span className="text-xs">⚖️</span>
                   <div className="truncate">
-                    <div className="font-semibold text-cyan-300 truncate">
+                    <div className="font-semibold text-[#58a6ff] truncate">
                       픽된 2개 카드 1:1 대조
                     </div>
-                    <div className="text-[10px] text-slate-400 truncate">
+                    <div className="text-[10px] text-[#848d97] truncate">
                       {customSlotA.title} vs {customSlotB.title}
                     </div>
                   </div>
                 </div>
-                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-bold shrink-0">
+                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#21262d] text-[#58a6ff] border border-[#30363d] font-bold shrink-0">
                   Custom
                 </span>
               </div>
@@ -699,15 +699,15 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
               }}
               className={`p-2.5 rounded-md cursor-pointer transition-colors text-xs flex items-center justify-between ${
                 selectedPairId === 'overview'
-                  ? 'bg-cyan-950/40 border border-cyan-500/50 text-white font-medium'
-                  : 'text-slate-300 hover:bg-slate-800/50'
+                  ? 'bg-[#161b22] border-l-2 border-l-[#58a6ff] text-[#e6edf3] font-medium'
+                  : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]/40'
               }`}
             >
               <div className="flex items-center gap-2 truncate">
-                <Sliders className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <Sliders className="w-3.5 h-3.5 text-[#58a6ff] shrink-0" />
                 <span className="truncate">전체 실행 개요 (Run Overview)</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#21262d] text-[#848d97] border border-[#30363d] shrink-0">
                 Summary
               </span>
             </div>
@@ -731,41 +731,41 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                   }}
                   className={`p-2.5 rounded-md cursor-pointer transition-colors text-xs flex flex-col gap-1.5 ${
                     isSelected
-                      ? 'bg-cyan-950/40 border border-cyan-500/50 text-white'
-                      : 'text-slate-300 hover:bg-slate-800/50 border border-transparent'
+                      ? 'bg-[#161b22] border-l-2 border-l-[#58a6ff] text-[#e6edf3]'
+                      : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]/40 border border-transparent'
                   }`}
                 >
                   {/* Pair Header: Label & Status Badge */}
                   <div className="flex items-center justify-between gap-1">
-                    <div className="font-medium truncate text-slate-200">
+                    <div className="font-medium truncate text-[#e6edf3]">
                       {pair.displayLabel}
                     </div>
                     {isMatched ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] shrink-0">
                         1:1 Matched
                       </span>
                     ) : isOnlyA ? (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] shrink-0">
                         Only in 🅰️
                       </span>
                     ) : (
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 shrink-0">
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] shrink-0">
                         Only in 🅱️
                       </span>
                     )}
                   </div>
 
                   {/* Pair Subtitle: System Span Name */}
-                  <div className="font-mono text-[10px] text-slate-500 truncate">
+                  <div className="font-mono text-[10px] text-[#848d97] truncate">
                     {pair.name}
                   </div>
 
                   {/* Pair Metrics Delta */}
                   {isMatched && (
-                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-800/60">
+                    <div className="flex items-center justify-between text-[10px] font-mono text-[#848d97] pt-1 border-t border-[#30363d]/60">
                       <span
                         className={
-                          pair.durationDiffMs <= 0 ? 'text-emerald-400' : 'text-rose-400'
+                          pair.durationDiffMs <= 0 ? 'text-[#3fb950]' : 'text-[#f85149]'
                         }
                       >
                         ⏱️ {pair.durationDiffMs > 0 ? '+' : ''}
@@ -774,7 +774,7 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
                       {pair.tokenDiff !== 0 && (
                         <span
                           className={
-                            pair.tokenDiff <= 0 ? 'text-emerald-400' : 'text-amber-400'
+                            pair.tokenDiff <= 0 ? 'text-[#3fb950]' : 'text-[#d29922]'
                           }
                         >
                           🪙 {pair.tokenDiff > 0 ? '+' : ''}
@@ -790,17 +790,17 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
         </div>
 
         {/* Right Main Content: Element Category Tabs & Split Diff Viewer */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#070b14] p-3.5 gap-3">
-          {/* Sub Navigation: Element Categories */}
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-2 shrink-0">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#0d1117] p-3.5 gap-3">
+          {/* Sub Navigation: Element Categories (GitHub Style SubNav) */}
+          <div className="flex items-center justify-between border-b border-[#30363d] pb-2 shrink-0">
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setSelectedCategory('inputs')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   selectedCategory === 'inputs'
-                    ? 'bg-cyan-600/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
                 }`}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -810,10 +810,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory('outputs')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   selectedCategory === 'outputs'
-                    ? 'bg-cyan-600/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -823,10 +823,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory('config')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   selectedCategory === 'config'
-                    ? 'bg-cyan-600/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
                 }`}
               >
                 <Sliders className="w-3.5 h-3.5" />
@@ -836,10 +836,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory('code')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   selectedCategory === 'code'
-                    ? 'bg-cyan-600/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
                 }`}
               >
                 <FileCode className="w-3.5 h-3.5" />
@@ -849,10 +849,10 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory('raw')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
                   selectedCategory === 'raw'
-                    ? 'bg-cyan-600/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                    : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
                 }`}
               >
                 <FileJson className="w-3.5 h-3.5" />
@@ -861,9 +861,9 @@ export const RunCompareView: React.FC<RunCompareViewProps> = ({
             </div>
 
             {/* Target Label Display */}
-            <div className="text-xs font-mono text-slate-400 hidden md:flex items-center gap-2">
+            <div className="text-xs font-mono text-[#848d97] hidden md:flex items-center gap-2">
               <span>대조 타겟:</span>
-              <span className="text-cyan-300 font-semibold">
+              <span className="text-[#58a6ff] font-semibold">
                 {selectedPairId === 'custom'
                   ? '선택된 2개 카드 1:1 대조'
                   : selectedPair

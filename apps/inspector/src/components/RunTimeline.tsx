@@ -175,33 +175,33 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
       <div
         key={span.span_id}
         onClick={() => onSelectSpan(span.span_id)}
-        className={`p-3.5 rounded-lg border transition-all cursor-pointer ${
+        className={`p-3.5 rounded-md border transition-all cursor-pointer ${
           isSelected
-            ? 'bg-slate-800/95 border-cyan-500 shadow-lg shadow-cyan-950/40 ring-1 ring-cyan-500/50'
-            : 'bg-slate-900/70 border-slate-800/80 hover:border-slate-700 hover:bg-slate-850/80'
+            ? 'bg-[#161b22] border-[#58a6ff] shadow-sm'
+            : 'bg-[#161b22]/40 border-[#30363d] hover:border-[#848d97]/50 hover:bg-[#161b22]/70'
         }`}
       >
         {/* 상단: 타이틀 + 뱃지 + 실행시간 + Compare 픽 버튼 */}
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="p-1 rounded bg-slate-800/80 border border-slate-700/60 shrink-0">
+            <div className="p-1 rounded-md bg-[#21262d] border border-[#30363d] shrink-0">
               {getSpanIcon(span.span_type)}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-slate-100 truncate">
+                <span className="text-xs font-semibold text-[#e6edf3] truncate">
                   {mainTitle}
                 </span>
                 {getSpanTypeBadge(span.span_type)}
                 {hasFallback && (
-                  <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
+                  <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[rgba(210,153,34,0.15)] text-[#d29922] border border-[rgba(210,153,34,0.3)] font-medium">
                     <AlertTriangle className="w-3 h-3" />
                     자동 폴백 전환
                   </span>
                 )}
               </div>
               {subtitle && (
-                <div className="text-[11px] font-mono text-slate-500 truncate mt-0.5">
+                <div className="text-[11px] font-mono text-[#848d97] truncate mt-0.5">
                   {subtitle}
                 </div>
               )}
@@ -213,11 +213,11 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
             {isCompareMode && (
               <div>
                 {isSlotA ? (
-                  <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                  <span className="px-1.5 py-0.2 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] text-[9px] font-mono font-bold">
                     🅰️ 픽됨
                   </span>
                 ) : isSlotB ? (
-                  <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                  <span className="px-1.5 py-0.2 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] text-[9px] font-mono font-bold">
                     🅱️ 픽됨
                   </span>
                 ) : (
@@ -237,7 +237,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
                         spanId: span.span_id,
                       })
                     }}
-                    className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm"
+                    className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] transition-colors shadow-sm cursor-pointer"
                     title="이 스팬 카드를 Compare 슬롯에 추가"
                   >
                     + Compare
@@ -246,7 +246,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
               </div>
             )}
 
-            <span className="font-mono text-xs font-semibold text-slate-200">
+            <span className="font-mono text-xs font-semibold text-[#e6edf3]">
               {(span.duration_ms || 0).toLocaleString(undefined, {
                 minimumFractionDigits: 1,
                 maximumFractionDigits: 1,
@@ -262,30 +262,30 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
           if (!hasContent) return null
 
           return (
-            <div className="mt-2 pt-2 border-t border-slate-800/60 flex flex-col gap-2">
+            <div className="mt-2 pt-2 border-t border-[#30363d]/60 flex flex-col gap-2">
               {span.description && (
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-[#848d97] leading-relaxed">
                   {span.description}
                 </p>
               )}
 
               {/* 데이터 흐름 (Input ➔ Via Pipeline ➔ Output Chip UI) */}
               {(flow.in || flow.out || flow.via.length > 0) && (
-                <div className="flex items-center gap-2 flex-wrap py-1.5 px-2 rounded-md bg-slate-950/60 border border-slate-800/80">
-                  <span className="text-[10px] font-bold tracking-wider text-slate-500 uppercase shrink-0">
+                <div className="flex items-center gap-2 flex-wrap py-1.5 px-2 rounded-md bg-[#0d1117] border border-[#30363d]">
+                  <span className="text-[10px] font-bold tracking-wider text-[#848d97] uppercase shrink-0">
                     FLOW
                   </span>
                   <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     {/* 1. INPUT */}
                     {flow.in && (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-sky-950/70 border border-sky-800/60 text-sky-300 font-mono text-[11px] shadow-sm">
-                        <span className="text-[9px] font-bold text-sky-400 bg-sky-900/90 px-1 py-0.2 rounded">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#21262d] border border-[#30363d] text-[#58a6ff] font-mono text-[11px] shadow-sm">
+                        <span className="text-[9px] font-bold text-[#58a6ff] bg-[#30363d] px-1 py-0.2 rounded">
                           IN
                         </span>
                         {isFileName(flow.in) ? (
-                          <FileText className="w-3 h-3 text-sky-400 shrink-0" />
+                          <FileText className="w-3 h-3 text-[#58a6ff] shrink-0" />
                         ) : (
-                          <Box className="w-3 h-3 text-sky-400 shrink-0" />
+                          <Box className="w-3 h-3 text-[#58a6ff] shrink-0" />
                         )}
                         <span className="truncate max-w-[200px]" title={flow.in}>
                           {flow.in}
@@ -297,13 +297,13 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
                     {flow.via.map((viaItem, idx) => (
                       <React.Fragment key={idx}>
                         {(flow.in || idx > 0) && (
-                          <ArrowRight className="w-3 h-3 text-slate-600 shrink-0" />
+                          <ArrowRight className="w-3 h-3 text-[#6e7681] shrink-0" />
                         )}
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-950/70 border border-purple-800/60 text-purple-300 font-mono text-[11px] shadow-sm">
-                          <span className="text-[9px] font-bold text-purple-400 bg-purple-900/90 px-1 py-0.2 rounded">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#21262d] border border-[#30363d] text-[#bc8cff] font-mono text-[11px] shadow-sm">
+                          <span className="text-[9px] font-bold text-[#bc8cff] bg-[#30363d] px-1 py-0.2 rounded">
                             VIA
                           </span>
-                          <FileCode className="w-3 h-3 text-purple-400 shrink-0" />
+                          <FileCode className="w-3 h-3 text-[#bc8cff] shrink-0" />
                           <span className="truncate max-w-[220px]" title={viaItem}>
                             {viaItem}
                           </span>
@@ -315,16 +315,16 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
                     {flow.out && (
                       <>
                         {(flow.in || flow.via.length > 0) && (
-                          <ArrowRight className="w-3 h-3 text-slate-600 shrink-0" />
+                          <ArrowRight className="w-3 h-3 text-[#6e7681] shrink-0" />
                         )}
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-800/60 text-emerald-300 font-mono text-[11px] shadow-sm">
-                          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-900/90 px-1 py-0.2 rounded">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#21262d] border border-[#30363d] text-[#3fb950] font-mono text-[11px] shadow-sm">
+                          <span className="text-[9px] font-bold text-[#3fb950] bg-[#30363d] px-1 py-0.2 rounded">
                             OUT
                           </span>
                           {isFileName(flow.out) ? (
-                            <FileText className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <FileText className="w-3 h-3 text-[#3fb950] shrink-0" />
                           ) : (
-                            <Box className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <Box className="w-3 h-3 text-[#3fb950] shrink-0" />
                           )}
                           <span className="truncate max-w-[200px]" title={flow.out}>
                             {flow.out}
@@ -338,8 +338,8 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
 
               {span.summary_pill && (
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                    <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)]">
+                    <CheckCircle2 className="w-3 h-3 text-[#3fb950]" />
                     {span.summary_pill}
                   </span>
                 </div>
@@ -348,8 +348,8 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
           )
         })()}
 
-        {/* 하단: 트리 펼치기 토글 & 식별자 (타임바 제거 완료) */}
-        <div className="mt-3 pt-2.5 border-t border-slate-800/60 flex items-center justify-between gap-2 flex-wrap">
+        {/* 하단: 트리 펼치기 토글 & 식별자 */}
+        <div className="mt-3 pt-2.5 border-t border-[#30363d]/60 flex items-center justify-between gap-2 flex-wrap">
           <button
             type="button"
             onClick={(e) => {
@@ -359,18 +359,18 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
                 [span.span_id]: !prev[span.span_id],
               }))
             }}
-            className="flex items-center gap-1.5 text-xs font-medium text-cyan-400 hover:text-cyan-300 py-1 px-2.5 rounded bg-cyan-950/50 hover:bg-cyan-900/60 border border-cyan-800/60 transition-all cursor-pointer select-none"
+            className="flex items-center gap-1.5 text-xs font-medium text-[#58a6ff] hover:text-[#79c0ff] py-1 px-2.5 rounded-md bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] transition-all cursor-pointer select-none"
           >
             <FolderTree className="w-3.5 h-3.5" />
             <span>관여 함수 & 객체 파이프라인 트리</span>
             <ChevronDown
               className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                isTreeExpanded ? 'rotate-180 text-cyan-300' : 'text-cyan-500'
+                isTreeExpanded ? 'rotate-180 text-[#58a6ff]' : 'text-[#848d97]'
               }`}
             />
           </button>
 
-          <div className="flex items-center gap-2 text-[10px] font-mono text-slate-500">
+          <div className="flex items-center gap-2 text-[10px] font-mono text-[#848d97]">
             <span className="truncate max-w-[200px]">
               ID: {span.dotted_order.split('span-')[1] ? `span-${span.dotted_order.split('span-')[1]}` : span.span_id}
             </span>
@@ -400,65 +400,65 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0b0f19] border-r border-slate-800/80 overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-[#0d1117] border-r border-[#30363d] overflow-hidden">
       {/* 1. 최상단 헤더 */}
-      <div className="p-3.5 border-b border-slate-800 bg-[#11192e] flex items-center justify-between">
-        <h2 className="text-xs font-semibold tracking-wider text-slate-300 uppercase flex items-center gap-2">
-          <Layers className="w-4 h-4 text-cyan-400" />
+      <div className="p-3.5 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
+        <h2 className="text-xs font-semibold tracking-wider text-[#e6edf3] uppercase flex items-center gap-2">
+          <Layers className="w-4 h-4 text-[#58a6ff]" />
           Execution Waterfall ({spans.length} Spans)
         </h2>
-        <div className="text-xs text-slate-400 font-mono">
-          Total Duration: <span className="text-cyan-300 font-semibold">{(safeTotal / 1000).toFixed(2)}s</span>
+        <div className="text-xs text-[#848d97] font-mono">
+          Total Duration: <span className="text-[#58a6ff] font-semibold">{(safeTotal / 1000).toFixed(2)}s</span>
         </div>
       </div>
 
-      {/* 2. 상단 E2E 3단계 Stepper Bar (이용자가 한눈에 보는 흐름도) */}
-      <div className="p-3 bg-[#0d1424] border-b border-slate-800/80">
+      {/* 2. 상단 E2E 3단계 Stepper Bar (GitHub Actions Job Group 스타일) */}
+      <div className="p-3 bg-[#161b22] border-b border-[#30363d]">
         <div className="grid grid-cols-3 gap-2">
           {/* Phase 1: Pre-LLM */}
-          <div className="p-2 rounded border border-blue-500/20 bg-blue-950/20 flex flex-col justify-between">
+          <div className="p-2 rounded-md border border-[#30363d] bg-[#0d1117] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-semibold text-blue-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+              <span className="text-[11px] font-semibold text-[#58a6ff] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#58a6ff]" />
                 1. 인입 & 하네스 라우팅
               </span>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] font-mono text-[#848d97]">
                 {preLlmSpans.length}단계
               </span>
             </div>
-            <div className="text-xs font-mono font-medium text-slate-200">
+            <div className="text-xs font-mono font-medium text-[#e6edf3]">
               {preDuration.toFixed(1)} ms
             </div>
           </div>
 
           {/* Phase 2: LLM Inference */}
-          <div className="p-2 rounded border border-purple-500/30 bg-purple-950/20 flex flex-col justify-between">
+          <div className="p-2 rounded-md border border-[#30363d] bg-[#0d1117] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-semibold text-purple-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-purple-400" />
+              <span className="text-[11px] font-semibold text-[#bc8cff] flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-[#bc8cff]" />
                 2. 프롬프트 & AI 모델 추론
               </span>
-              <span className="text-[10px] font-mono text-purple-400">
+              <span className="text-[10px] font-mono text-[#bc8cff]">
                 {safeTotal > 0 ? `${((llmDuration / safeTotal) * 100).toFixed(0)}%` : '0%'}
               </span>
             </div>
-            <div className="text-xs font-mono font-medium text-purple-200">
+            <div className="text-xs font-mono font-medium text-[#e6edf3]">
               {(llmDuration / 1000).toFixed(2)} s
             </div>
           </div>
 
           {/* Phase 3: Post-LLM */}
-          <div className="p-2 rounded border border-emerald-500/20 bg-emerald-950/20 flex flex-col justify-between">
+          <div className="p-2 rounded-md border border-[#30363d] bg-[#0d1117] flex flex-col justify-between">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span className="text-[11px] font-semibold text-[#3fb950] flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-[#3fb950]" />
                 3. 스키마 검증 & 원장 정산
               </span>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] font-mono text-[#848d97]">
                 {postLlmSpans.length}단계
               </span>
             </div>
-            <div className="text-xs font-mono font-medium text-slate-200">
+            <div className="text-xs font-mono font-medium text-[#e6edf3]">
               {postDuration.toFixed(1)} ms
             </div>
           </div>
@@ -466,16 +466,16 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
       </div>
 
       {/* 3. 본문: 페이즈별 그룹화 워터폴 리스트 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-[#0d1117]">
         {/* 그룹 1: Pre-LLM */}
         {preLlmSpans.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold text-blue-400 px-1">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#58a6ff] px-1">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-blue-400" />
+                <span className="w-2 h-2 rounded-full bg-[#58a6ff]" />
                 인입, 사전 검사 & 하네스 정책 라우팅 (Pre-LLM)
               </span>
-              <span className="text-[11px] font-mono text-slate-400">
+              <span className="text-[11px] font-mono text-[#848d97]">
                 {preDuration.toFixed(1)} ms
               </span>
             </div>
@@ -488,12 +488,12 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
         {/* 그룹 2: LLM Inference */}
         {llmSpans.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold text-purple-300 px-1">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#bc8cff] px-1">
               <span className="flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <Sparkles className="w-3.5 h-3.5 text-[#bc8cff]" />
                 프롬프트 조립 & AI 모델 핵심 추론 (LLM Inference)
               </span>
-              <span className="text-[11px] font-mono text-purple-400">
+              <span className="text-[11px] font-mono text-[#bc8cff]">
                 {(llmDuration / 1000).toFixed(2)} s
               </span>
             </div>
@@ -506,12 +506,12 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
         {/* 그룹 3: Post-LLM */}
         {postLlmSpans.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-semibold text-emerald-400 px-1">
+            <div className="flex items-center justify-between text-xs font-semibold text-[#3fb950] px-1">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#3fb950]" />
                 스키마 검증, 아티팩트 커밋 & 원장 정산 (Post-LLM)
               </span>
-              <span className="text-[11px] font-mono text-slate-400">
+              <span className="text-[11px] font-mono text-[#848d97]">
                 {postDuration.toFixed(1)} ms
               </span>
             </div>
@@ -522,7 +522,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
         )}
 
         {sortedSpans.length === 0 && (
-          <div className="h-40 flex items-center justify-center text-slate-500 text-xs">
+          <div className="h-40 flex items-center justify-center text-[#848d97] text-xs">
             기록된 실행 단계가 없습니다.
           </div>
         )}

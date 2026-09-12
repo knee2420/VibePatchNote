@@ -29,22 +29,21 @@ export const CompareDock: React.FC<CompareDockProps> = ({
   const isReady = Boolean(slotA && slotB)
 
   return (
-    <div className="w-full bg-[#0d1527] border-b border-cyan-800/80 shadow-2xl px-4 py-2.5 flex items-center justify-between gap-4 z-40 text-xs shrink-0 animate-fadeIn">
+    <div className="w-full bg-[#161b22] border-b border-[#30363d] shadow-md px-4 py-2 flex items-center justify-between gap-4 z-40 text-xs shrink-0">
       {/* 1. 타이틀 & 가이드 안내 */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="w-6 h-6 rounded-md bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 flex items-center justify-center font-bold">
-          <GitCompare className="w-3.5 h-3.5" />
+      <div className="flex items-center gap-2.5 shrink-0">
+        <div className="w-6 h-6 rounded-md bg-[#21262d] text-[#e6edf3] border border-[#30363d] flex items-center justify-center font-bold">
+          <GitCompare className="w-3.5 h-3.5 text-[#58a6ff]" />
         </div>
         <div>
-          <div className="font-semibold text-white flex items-center gap-1.5">
+          <div className="font-semibold text-[#e6edf3] flex items-center gap-1.5">
             <span>Universal Compare Mode</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800/60 font-mono">
+            <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#21262d] text-[#58a6ff] border border-[#30363d] font-mono">
               2개 카드 픽
             </span>
           </div>
-          <div className="text-[11px] text-slate-400">
-            화면의 어떤 카드든 <span className="text-cyan-300 font-semibold">[+ Compare]</span>를
-            눌러 비교 대상을 담으세요.
+          <div className="text-[11px] text-[#848d97]">
+            비교할 요소의 <span className="text-[#58a6ff] font-medium">[+ Compare]</span>를 눌러 2개 카드를 슬롯에 담으세요.
           </div>
         </div>
       </div>
@@ -53,29 +52,29 @@ export const CompareDock: React.FC<CompareDockProps> = ({
       <div className="flex-1 max-w-3xl flex items-center justify-center gap-2">
         {/* Slot A (Base) */}
         <div
-          className={`flex-1 min-w-0 max-w-[340px] px-3 py-1.5 rounded-lg border flex items-center justify-between gap-2 transition-all ${
+          className={`flex-1 min-w-0 max-w-[340px] px-3 py-1.5 rounded-md border flex items-center justify-between gap-2 transition-all ${
             slotA
-              ? 'bg-rose-950/40 border-rose-500/60 text-slate-100 shadow-md'
-              : 'bg-slate-900/60 border-dashed border-slate-700 text-slate-500'
+              ? 'bg-[rgba(248,81,73,0.1)] border-[rgba(248,81,73,0.4)] text-[#e6edf3]'
+              : 'bg-[#0d1117] border-dashed border-[#30363d] text-[#848d97]'
           }`}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-5 h-5 rounded-full bg-rose-500/20 text-rose-300 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+            <span className="w-5 h-5 rounded-full bg-[rgba(248,81,73,0.2)] text-[#f85149] flex items-center justify-center font-mono font-bold text-xs shrink-0">
               🅰️
             </span>
             {slotA ? (
               <div className="min-w-0">
-                <div className="font-semibold text-rose-200 truncate text-[11px]">
+                <div className="font-semibold text-[#f85149] truncate text-[11px]">
                   {slotA.title}
                 </div>
                 {slotA.subtitle && (
-                  <div className="text-[10px] text-slate-400 font-mono truncate">
+                  <div className="text-[10px] text-[#848d97] font-mono truncate">
                     {slotA.subtitle}
                   </div>
                 )}
               </div>
             ) : (
-              <span className="text-[11px] text-slate-400 italic truncate">
+              <span className="text-[11px] text-[#848d97] italic truncate">
                 1번째 카드를 픽하세요
               </span>
             )}
@@ -85,7 +84,7 @@ export const CompareDock: React.FC<CompareDockProps> = ({
             <button
               type="button"
               onClick={onClearSlotA}
-              className="p-1 text-slate-400 hover:text-rose-300 rounded hover:bg-rose-900/40 transition-colors shrink-0"
+              className="p-1 text-[#848d97] hover:text-[#f85149] rounded hover:bg-[#21262d] transition-colors shrink-0 cursor-pointer"
               title="슬롯 A 비우기"
             >
               <X className="w-3 h-3" />
@@ -94,35 +93,35 @@ export const CompareDock: React.FC<CompareDockProps> = ({
         </div>
 
         {/* Arrow Divider */}
-        <div className="text-slate-600 shrink-0 font-mono">
+        <div className="text-[#6e7681] shrink-0 font-mono">
           <ArrowRight className="w-4 h-4" />
         </div>
 
         {/* Slot B (Target) */}
         <div
-          className={`flex-1 min-w-0 max-w-[340px] px-3 py-1.5 rounded-lg border flex items-center justify-between gap-2 transition-all ${
+          className={`flex-1 min-w-0 max-w-[340px] px-3 py-1.5 rounded-md border flex items-center justify-between gap-2 transition-all ${
             slotB
-              ? 'bg-emerald-950/40 border-emerald-500/60 text-slate-100 shadow-md'
-              : 'bg-slate-900/60 border-dashed border-slate-700 text-slate-500'
+              ? 'bg-[rgba(46,160,67,0.1)] border-[rgba(46,160,67,0.4)] text-[#e6edf3]'
+              : 'bg-[#0d1117] border-dashed border-[#30363d] text-[#848d97]'
           }`}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+            <span className="w-5 h-5 rounded-full bg-[rgba(46,160,67,0.2)] text-[#3fb950] flex items-center justify-center font-mono font-bold text-xs shrink-0">
               🅱️
             </span>
             {slotB ? (
               <div className="min-w-0">
-                <div className="font-semibold text-emerald-200 truncate text-[11px]">
+                <div className="font-semibold text-[#3fb950] truncate text-[11px]">
                   {slotB.title}
                 </div>
                 {slotB.subtitle && (
-                  <div className="text-[10px] text-slate-400 font-mono truncate">
+                  <div className="text-[10px] text-[#848d97] font-mono truncate">
                     {slotB.subtitle}
                   </div>
                 )}
               </div>
             ) : (
-              <span className="text-[11px] text-slate-400 italic truncate">
+              <span className="text-[11px] text-[#848d97] italic truncate">
                 2번째 카드를 픽하세요
               </span>
             )}
@@ -132,7 +131,7 @@ export const CompareDock: React.FC<CompareDockProps> = ({
             <button
               type="button"
               onClick={onClearSlotB}
-              className="p-1 text-slate-400 hover:text-emerald-300 rounded hover:bg-emerald-900/40 transition-colors shrink-0"
+              className="p-1 text-[#848d97] hover:text-[#3fb950] rounded hover:bg-[#21262d] transition-colors shrink-0 cursor-pointer"
               title="슬롯 B 비우기"
             >
               <X className="w-3 h-3" />
@@ -147,10 +146,10 @@ export const CompareDock: React.FC<CompareDockProps> = ({
           type="button"
           onClick={onOpenDiff}
           disabled={!isReady}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold text-xs transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-semibold text-xs transition-all cursor-pointer ${
             isReady
-              ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-lg shadow-cyan-900/40 animate-pulse'
-              : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+              ? 'bg-[#238636] hover:bg-[#2ea043] text-white border border-[rgba(240,246,252,0.1)] shadow-sm'
+              : 'bg-[#21262d] text-[#848d97] border border-[#30363d] cursor-not-allowed'
           }`}
           title={isReady ? 'GitHub Split Diff 열기' : '2개 카드를 모두 선택해야 합니다'}
         >
@@ -161,7 +160,7 @@ export const CompareDock: React.FC<CompareDockProps> = ({
         <button
           type="button"
           onClick={onCloseCompareMode}
-          className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+          className="p-1.5 text-[#848d97] hover:text-[#e6edf3] rounded-md hover:bg-[#21262d] border border-transparent hover:border-[#30363d] transition-colors cursor-pointer"
           title="Compare 모드 종료"
         >
           <X className="w-4 h-4" />
