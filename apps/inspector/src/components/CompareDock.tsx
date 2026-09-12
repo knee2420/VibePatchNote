@@ -38,12 +38,26 @@ export const CompareDock: React.FC<CompareDockProps> = ({
         <div>
           <div className="font-semibold text-[#e6edf3] flex items-center gap-1.5">
             <span>Universal Compare Mode</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded bg-[#21262d] text-[#58a6ff] border border-[#30363d] font-mono">
-              2개 카드 픽
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded font-mono border ${
+                slotA?.type === 'workflow'
+                  ? 'bg-[#8957e5]/20 text-[#bc8cff] border-[#8957e5]/40'
+                  : 'bg-[#21262d] text-[#58a6ff] border-[#30363d]'
+              }`}
+            >
+              {slotA?.type === 'workflow' ? '워크플로우 전용 대조' : '2개 카드 픽'}
             </span>
           </div>
           <div className="text-[11px] text-[#848d97]">
-            비교할 요소의 <span className="text-[#58a6ff] font-medium">[+ Compare]</span>를 눌러 2개 카드를 슬롯에 담으세요.
+            {slotA?.type === 'workflow' ? (
+              <span>
+                다른 실행(Trace)을 선택한 후 <span className="text-[#58a6ff] font-medium">[+ 전체 워크플로우 비교]</span>를 눌러주세요.
+              </span>
+            ) : (
+              <span>
+                비교할 요소의 <span className="text-[#58a6ff] font-medium">[+ Compare]</span>를 눌러 2개 카드를 슬롯에 담으세요.
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -122,7 +136,7 @@ export const CompareDock: React.FC<CompareDockProps> = ({
               </div>
             ) : (
               <span className="text-[11px] text-[#848d97] italic truncate">
-                2번째 카드를 픽하세요
+                {slotA?.type === 'workflow' ? '2번째 워크플로우를 픽하세요' : '2번째 카드를 픽하세요'}
               </span>
             )}
           </div>

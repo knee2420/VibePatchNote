@@ -249,7 +249,7 @@ class OutlinePipeline:
                     raw_command = (
                         f'curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/{clean_m}:generateContent?key=$GOOGLE_API_KEY" \\\n'
                         f'  -H "Content-Type: application/json" \\\n'
-                        f'  -d \'{{"generationConfig": {{"responseMimeType": "application/json"}}, "contents": [{{"role": "user", "parts": [...]}}]}}\''
+                        f'  -d \'{{"generationConfig": {{"responseMimeType": "application/json", "responseSchema": "<{self.schema_path.name}>"}}, "contents": [{{"role": "user", "parts": [{{"inlineData": {{"mimeType": "application/pdf", "data": "<BASE64_PDF: {target_display_name}>"}}}}, {{"text": "<PROMPT_STRING ({len(prompt)} chars)>"}}]}}]}}\''
                     )
                 else:
                     effort_arg = f" --effort {target_effort}" if target_effort else ""
@@ -340,7 +340,7 @@ class OutlinePipeline:
             "error": exec_res.error,
             "total_pages": doc_ctx.get("total_pages", 1),
             "context_chars": context_chars,
-            "prompt_snippet": prompt[:300],
+            "prompt": prompt,
             "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
             "steps": legacy_steps,
             "provenance": provenance_dict,

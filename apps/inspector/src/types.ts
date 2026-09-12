@@ -112,7 +112,7 @@ export interface SourceCodeResponse {
 
 export interface CompareItem {
   readonly id: string
-  readonly type: 'run' | 'span' | 'inputs' | 'outputs' | 'code' | 'json'
+  readonly type: 'run' | 'span' | 'inputs' | 'outputs' | 'code' | 'json' | 'workflow'
   readonly title: string
   readonly subtitle?: string
   readonly content: string

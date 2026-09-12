@@ -15,7 +15,8 @@ class ModelAttemptRecord(BaseModel):
     status: SpanStatus = Field(SpanStatus.PENDING, description="시도 결과 상태")
     latency_ms: float = Field(0.0, description="해당 시도 소요 시간 (밀리초)")
 
-    request_prompt_snippet: str = Field("", description="전송된 프롬프트 요약")
+    request_prompt: str = Field("", description="전송된 프롬프트 전문")
+    request_prompt_snippet: str = Field("", description="전송된 프롬프트 요약 (하위 호환)")
     raw_response: Optional[str] = Field(None, description="모델이 반환한 원문 텍스트")
     error: Optional[SpanError] = Field(None, description="실패 시 에러 상세")
 

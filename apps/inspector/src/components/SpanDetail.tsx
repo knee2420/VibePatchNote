@@ -1031,18 +1031,26 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
     const commandKeys = new Set(['execution_command', 'cli_command', 'command', 'raw_command'])
 
     if (span?.inputs) {
+      // 1. prompt 키 우선권 부여: prompt가 있으면 prompt_snippet은 무시
+      const hasFullPrompt = Boolean(span.inputs.prompt)
       Object.entries(span.inputs).forEach(([k, v]) => {
         // LLM 스팬인 경우, 커맨드는 상단 전용 칩 카드로 렌더링되므로 일반 입력 목록에서는 제외
         if (isLlmSpan && commandKeys.has(k)) return
-        if (isLarge(k, v)) lIn[k] = v
-        else sIn[k] = v
+        if (k === 'prompt_snippet' && hasFullPrompt) return
+        const normalizedKey = k === 'prompt_snippet' ? 'prompt' : k
+        if (isLarge(normalizedKey, v)) lIn[normalizedKey] = v
+        else sIn[normalizedKey] = v
       })
     }
 
     if (span?.outputs) {
+      // 2. raw_response 키 우선권 부여: raw_response가 있으면 raw_response_snippet은 무시
+      const hasFullResponse = Boolean(span.outputs.raw_response)
       Object.entries(span.outputs).forEach(([k, v]) => {
-        if (isLarge(k, v)) lOut[k] = v
-        else sOut[k] = v
+        if (k === 'raw_response_snippet' && hasFullResponse) return
+        const normalizedKey = k === 'raw_response_snippet' ? 'raw_response' : k
+        if (isLarge(normalizedKey, v)) lOut[normalizedKey] = v
+        else sOut[normalizedKey] = v
       })
     }
 
@@ -1089,18 +1097,30 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
     const isApi = provider === 'google_api' || String(provider).toLowerCase().includes('api')
     if (isApi) {
+      const docName = span.inputs?.attached_document || span.inputs?.filename || 'source.pdf'
+      const promptChars = span.inputs?.prompt_chars ? `${span.inputs.prompt_chars.toLocaleString()} chars` : 'Full Prompt'
+      const schemaFile = span.inputs?.schema_file || 'outline_schema.json'
       return formatCommand(
         `curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=$GOOGLE_API_KEY" \\\n` +
         `  -H "Content-Type: application/json" \\\n` +
         `  -d '{\n` +
         `    "generationConfig": {\n` +
-        `      "responseMimeType": "application/json"\n` +
+        `      "responseMimeType": "application/json",\n` +
+        `      "responseSchema": "<${schemaFile}>"\n` +
         `    },\n` +
         `    "contents": [\n` +
         `      {\n` +
         `        "role": "user",\n` +
         `        "parts": [\n` +
-        `          {"text": "<PROMPT_STRING>"}\n` +
+        `          {\n` +
+        `            "inlineData": {\n` +
+        `              "mimeType": "application/pdf",\n` +
+        `              "data": "<BASE64_ENCODED_BINARY: ${docName}>"\n` +
+        `            }\n` +
+        `          },\n` +
+        `          {\n` +
+        `            "text": "<PROMPT_STRING (${promptChars})>"\n` +
+        `          }\n` +
         `        ]\n` +
         `      }\n` +
         `    ]\n` +

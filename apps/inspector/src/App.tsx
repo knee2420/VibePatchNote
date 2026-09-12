@@ -82,24 +82,54 @@ export const App: React.FC = () => {
     }
   }
 
-  // 카드 픽 핸들러 (임의의 카드를 슬롯 1 / 슬롯 2에 순서대로 등록)
+  // 카드 픽 핸들러 (임의의 카드를 슬롯 1 / 슬롯 2에 등록, workflow 타입 강제)
   const handlePickCompareItem = (item: CompareItem) => {
+    // 1. 만약 새로 선택한 아이템이 'workflow'(전체 워크플로우)인 경우:
+    if (item.type === 'workflow') {
+      if (!compareSlotA || compareSlotA.type !== 'workflow') {
+        // 슬롯 A가 비어있거나 기존 슬롯 A가 일반 카드인 경우: 워크플로우 전용 슬롯으로 세팅
+        setCompareSlotA(item)
+        setCompareSlotB(null)
+        return
+      }
+
+      if (compareSlotA.id === item.id) {
+        // 동일한 런의 워크플로우 다시 클릭 시 슬롯 A 취소
+        setCompareSlotA(null)
+        return
+      }
+
+      // 슬롯 A에 이미 다른 런의 워크플로우가 있는 경우: 슬롯 B에 등록하고 400ms 후 Compare 탭으로 이동!
+      setCompareSlotB(item)
+      setTimeout(() => {
+        setIsCompareMode(false)
+        setNavTab('compare')
+      }, 400)
+      return
+    }
+
+    // 2. 만약 새로 선택한 아이템이 일반 카드인데, 슬롯 A에 'workflow'가 이미 담겨 있는 경우:
+    if (compareSlotA?.type === 'workflow') {
+      // 형을 강제하므로 일반 카드와 워크플로우는 혼용 불가 -> 새 일반 카드 비교로 전환
+      setCompareSlotA(item)
+      setCompareSlotB(null)
+      return
+    }
+
+    // 3. 일반 카드 간의 1:1 대조 (코드 vs 코드, 프롬프트 vs 프롬프트 등)
     if (!compareSlotA) {
       setCompareSlotA(item)
     } else if (!compareSlotB) {
       if (compareSlotA.id === item.id) {
-        // 동일 아이템 다시 클릭 시 슬롯 A 취소
         setCompareSlotA(null)
         return
       }
       setCompareSlotB(item)
-      // 2개 아이템이 모두 선택되면 400ms 후 자동으로 모드 완료 및 Compare 탭으로 이동!
       setTimeout(() => {
         setIsCompareMode(false)
         setNavTab('compare')
       }, 400)
     } else {
-      // 둘 다 채워져 있을 때 새로 누르면 슬롯 B 교체
       setCompareSlotB(item)
     }
   }
@@ -252,6 +282,9 @@ export const App: React.FC = () => {
             {runDetail ? (
               <>
                 <RunTimeline
+                  runId={selectedRunId || undefined}
+                  runLabel={runs.find((r) => r.run_id === selectedRunId)?.workflow_label || runs.find((r) => r.run_id === selectedRunId)?.task_name || undefined}
+                  primaryModel={runs.find((r) => r.run_id === selectedRunId)?.primary_model || undefined}
                   spans={runDetail.spans}
                   selectedSpanId={selectedSpanId}
                   onSelectSpan={(id) => setSelectedSpanId(id)}
@@ -290,6 +323,11 @@ export const App: React.FC = () => {
             onClearCustomSlots={() => {
               setCompareSlotA(null)
               setCompareSlotB(null)
+            }}
+            onSwapCustomSlots={() => {
+              const tmp = compareSlotA
+              setCompareSlotA(compareSlotB)
+              setCompareSlotB(tmp)
             }}
           />
         )}

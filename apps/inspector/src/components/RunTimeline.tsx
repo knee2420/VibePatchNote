@@ -13,13 +13,18 @@ import {
   FolderTree,
   Layers,
   Sparkles,
+  Workflow,
   Wrench,
   Zap,
 } from 'lucide-react'
 import type { CompareItem, SpanPhase, SpanRecord, SpanType } from '../types'
+import { generateWorkflowTraceText } from '../utils/workflowTrace'
 import { PipelineTreeView } from './PipelineTreeView'
 
 interface RunTimelineProps {
+  runId?: string
+  runLabel?: string
+  primaryModel?: string | null
   spans: SpanRecord[]
   selectedSpanId: string | null
   onSelectSpan: (spanId: string) => void
@@ -122,6 +127,9 @@ function deriveDataFlow(span: SpanRecord): { in: string | null; out: string | nu
 }
 
 export const RunTimeline: React.FC<RunTimelineProps> = ({
+  runId,
+  runLabel,
+  primaryModel,
   spans,
   selectedSpanId,
   onSelectSpan,
@@ -403,10 +411,54 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
     <div className="flex-1 flex flex-col h-full bg-[#0d1117] border-r border-[#30363d] overflow-hidden">
       {/* 1. 최상단 헤더 */}
       <div className="p-3.5 border-b border-[#30363d] bg-[#161b22] flex items-center justify-between">
-        <h2 className="text-xs font-semibold tracking-wider text-[#e6edf3] uppercase flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#58a6ff]" />
-          Execution Waterfall ({spans.length} Spans)
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xs font-semibold tracking-wider text-[#e6edf3] uppercase flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#58a6ff]" />
+            Execution Waterfall ({spans.length} Spans)
+          </h2>
+
+          {/* 전체 워크플로우 비교 버튼 */}
+          {isCompareMode && runId && (
+            <div>
+              {compareSlotAId === `workflow:${runId}` ? (
+                <span className="px-2 py-0.5 rounded bg-[#f85149]/20 text-[#f85149] border border-[#f85149]/40 text-[10px] font-mono font-bold">
+                  🅰️ 워크플로우 픽됨
+                </span>
+              ) : compareSlotBId === `workflow:${runId}` ? (
+                <span className="px-2 py-0.5 rounded bg-[#238636]/20 text-[#3fb950] border border-[#238636]/40 text-[10px] font-mono font-bold">
+                  🅱️ 워크플로우 픽됨
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onPickCompareItem?.({
+                      id: `workflow:${runId}`,
+                      type: 'workflow',
+                      title: `[전체 워크플로우] ${runLabel || runId.slice(0, 8)}`,
+                      subtitle: `${primaryModel || 'Pipeline'} (${spans.length} Steps)`,
+                      content: generateWorkflowTraceText({
+                        runId,
+                        taskLabel: runLabel,
+                        totalDurationMs: safeTotal,
+                        primaryModel,
+                        spans: sortedSpans,
+                      }),
+                      language: 'text',
+                      runId,
+                    })
+                  }}
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-[#21262d] text-[#58a6ff] border border-[#30363d] hover:bg-[#30363d] hover:text-[#e6edf3] transition-colors shadow-sm cursor-pointer"
+                  title="이 실행의 전체 IN ➔ PROCESS ➔ OUT 워크플로우를 다른 실행과 비교합니다"
+                >
+                  <Workflow className="w-3 h-3 text-[#58a6ff]" />
+                  <span>+ 전체 워크플로우 비교</span>
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="text-xs text-[#848d97] font-mono">
           Total Duration: <span className="text-[#58a6ff] font-semibold">{(safeTotal / 1000).toFixed(2)}s</span>
         </div>
