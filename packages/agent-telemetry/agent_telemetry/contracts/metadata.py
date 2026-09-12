@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 from agent_telemetry.contracts.enums import ExecutionProtocol, FailureReason
 
 

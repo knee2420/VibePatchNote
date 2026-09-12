@@ -356,27 +356,34 @@ def ingest_pipeline_telemetry(
         if not primary_model and telemetry.provenance:
             primary_model = telemetry.provenance.get("model")
 
-        # 스팬 목록에서 llm 스팬의 provider 및 model_name 탐색 (스팬 메타데이터 파싱)
+        # 스팬 목록에서 llm 스팬의 provider 및 model_name 탐색.
+        #
+        # `metadata` 는 `SpanMetadata` **모델**이지 딕셔너리가 아니다. 예전에는
+        # `.get()` 을 불러서 AttributeError 가 났고, `ingest_pipeline_telemetry` 의
+        # 광범위한 except 가 그것을 삼켜 **계측 전체가 조용히 사라졌다.**
+        # outline 파이프라인은 provenance 에 model 이 있어 이 분기에 닿지 않아
+        # 드러나지 않았을 뿐이다. 두 번째 파이프라인이 즉시 밟았다.
         if not primary_provider or not primary_model:
             for sp in telemetry.spans:
                 sp_type = getattr(sp, "span_type", "")
-                if sp_type == "llm" or "LLM" in getattr(sp, "name", ""):
-                    sp_meta = getattr(sp, "metadata", {}) or {}
-                    if not primary_provider:
-                        p_candidate = (
-                            sp_meta.get("provider")
-                            or sp_meta.get("extra", {}).get("provider")
-                        )
-                        if p_candidate and p_candidate != "unknown":
-                            primary_provider = p_candidate
-                    if not primary_model:
-                        m_candidate = (
-                            sp_meta.get("model_name")
-                            or getattr(sp, "model_name", None)
-                            or sp_meta.get("extra", {}).get("model")
-                        )
-                        if m_candidate and m_candidate != "unknown":
-                            primary_model = m_candidate
+                if sp_type != "llm" and "LLM" not in getattr(sp, "name", ""):
+                    continue
+
+                sp_meta = getattr(sp, "metadata", None)
+                if sp_meta is None:
+                    continue
+                # 모델이든 딕셔너리든 같은 방식으로 읽는다.
+                meta_map = sp_meta if isinstance(sp_meta, dict) else sp_meta.model_dump(mode="json")
+                extra = meta_map.get("extra") or {}
+
+                if not primary_provider:
+                    p_candidate = meta_map.get("provider") or extra.get("provider")
+                    if p_candidate and p_candidate != "unknown":
+                        primary_provider = p_candidate
+                if not primary_model:
+                    m_candidate = meta_map.get("model_name") or extra.get("model")
+                    if m_candidate and m_candidate != "unknown":
+                        primary_model = m_candidate
 
         # 모델명 기반 폴백 공급자 판정
         if not primary_provider and primary_model:
@@ -430,7 +437,15 @@ def ingest_pipeline_telemetry(
         return run_dir
 
     except Exception as exc:
-        logger.error("[LlmTracer] PipelineTelemetry 저장 실패: %s", exc)
+        # 계측 저장 실패가 본 작업을 막지는 않는다. 다만 **조용히** 넘어가지도
+        # 않는다 — 예전에는 트레이스백 없이 한 줄만 남겨서, SpanMetadata 에
+        # `.get()` 을 부르던 버그가 "계측이 그냥 안 생긴다"로만 보였다.
+        logger.error(
+            "[LlmTracer] PipelineTelemetry 저장 실패 (run=%s): %s",
+            run_id or getattr(telemetry_data, "trace_id", "?"),
+            exc,
+            exc_info=True,
+        )
         return None
 
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import time
 import traceback
 import uuid
@@ -7,8 +8,14 @@ from datetime import datetime, timezone
 from typing import Any, Dict, Generator, List, Optional
 
 from agent_telemetry.collector.scope import StepScope
+from agent_telemetry.collector.traceable import reset_collector, set_collector
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
-from agent_telemetry.contracts.enums import FailureReason, SpanPhase, SpanStatus, SpanType
+from agent_telemetry.contracts.enums import (
+    FailureReason,
+    SpanPhase,
+    SpanStatus,
+    SpanType,
+)
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
 from agent_telemetry.contracts.source import SpanSource, caller_source
@@ -57,6 +64,19 @@ class StepCollector:
 
         # 중첩 스팬 처리를 위한 부모 스택
         self._span_stack: List[SpanRecord] = []
+
+    @contextmanager
+    def activate(self) -> Generator["StepCollector", None, None]:
+        """이 수집기를 활성화한다. 안쪽의 `@traceable` 들이 여기에 붙는다.
+
+        엔진이 호스트 없이도 돌아야 하므로, 활성화하지 않으면 `@traceable` 은
+        원본 함수를 그대로 부른다.
+        """
+        token = set_collector(self)
+        try:
+            yield self
+        finally:
+            reset_collector(token)
 
     @contextmanager
     def step(

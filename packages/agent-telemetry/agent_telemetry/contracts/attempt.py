@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
+
 from agent_telemetry.contracts.enums import ExecutionProtocol, SpanStatus
 from agent_telemetry.contracts.metadata import SpanError
 from agent_telemetry.contracts.usage import SpanUsage

@@ -198,6 +198,8 @@ USD 비용을 실제로 쓰려면 `ModelSpec` 에 단가 축을 추가하고 **�
 | 코드 지점은 구조화된다 | `::test_span_sources_are_structured_not_strings` | ✅ |
 | 계측 지점은 전부 열린다 | `::test_every_declared_source_resolves_to_a_real_file` | ✅ |
 | 소스 조회는 탐색하지 않는다 | `test_inspector.py::test_source_refuses_dependencies_and_traversal` | ✅ |
+| 새 워크플로우가 코드 수정 없이 보인다 | `test_scaffold_observability.py::test_scaffold_run_appears_without_inspector_changes` | ✅ |
+| 스팬은 도메인 중립 어휘만 쓴다 | `::test_scaffold_spans_are_domain_neutral` | ✅ |
 
 **TS 타입 수기 작성 금지**가 이 목록에서 가장 중요하다. 예전 `apps/inspector/src/types.ts`
 는 손으로 베낀 것이었고, 그래서 `ModelAttemptRecord` 가 백엔드와 필드 하나도 맞지
@@ -220,7 +222,9 @@ python apps/api/scripts/generate_inspector_types.py --check   # 게이트
 ## 6. 새 워크플로우를 계측할 때
 
 1. `StepCollector` 로 감싼다. **감싸지 않은 파이프라인은 목록에는 뜨지만 상세가 없다**
-   (§2-3). 상세가 필요하면 계측이 조건이다
+   (§2-3). 상세가 필요하면 계측이 조건이다.
+   함수 하나를 통째로 재려면 `@traceable` 이 더 짧다 — 활성 수집기가 없으면
+   원본 함수를 그대로 부르므로, 계측을 붙였다고 엔진이 호스트를 요구하게 되지 않는다
 2. 상태·토큰은 §3 의 어휘만 쓴다. 새 열거값을 만들지 않는다
 3. 사람이 읽을 라벨(`display_label` · `description` · `summary_pill`)은
    **기록 시점에** 파이프라인이 정한다. 조회 계층이 이름을 보고 추측하지 않는다 (§4)

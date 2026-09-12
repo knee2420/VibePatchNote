@@ -12,7 +12,7 @@ from typing import Any
 from scaffold_engine import ScaffoldExtractResult, ScaffoldPipeline
 
 from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
-from app.core.llm import BaseLlmHarness
+from app.core.llm import BaseLlmHarness, ingest_pipeline_telemetry
 
 from ..ports import DocumentSourceRepository, ScaffoldArchivePort
 
@@ -38,10 +38,15 @@ class GenerateScaffoldUseCase:
 
     async def _run_pipeline(
         self, file_path: Any, display_name: str | None = None
-    ) -> ScaffoldExtractResult:
-        """독립 문서 엔진(scaffold_engine)의 ScaffoldPipeline을 스레드 풀에서 직접 실행합니다."""
+    ) -> tuple[ScaffoldExtractResult, Any]:
+        """독립 문서 엔진(scaffold_engine)의 ScaffoldPipeline을 스레드 풀에서 직접 실행합니다.
+
+        엔진은 계측 결과를 `last_telemetry` 에 남길 뿐 어디에 저장할지는 모른다
+        (`60-data/rule.md` §4-5). 원장에 넣는 것은 호스트인 이 유스케이스의 일이다.
+        """
         pipeline = ScaffoldPipeline(harness=self._harness)
-        return await asyncio.to_thread(pipeline.run, file_path, display_name=display_name)
+        result = await asyncio.to_thread(pipeline.run, file_path, display_name=display_name)
+        return result, pipeline.last_telemetry
 
     async def execute(self, doc_id: str) -> dict[str, Any]:
         meta = self._source.get(doc_id)
@@ -51,9 +56,11 @@ class GenerateScaffoldUseCase:
         file_path = self._source.resolve_file(doc_id)
         run_id = current_run_id()
         if run_id:
-            result = await self._run_pipeline(file_path, display_name=meta.original_name)
+            result, telemetry = await self._run_pipeline(
+                file_path, display_name=meta.original_name
+            )
         else:
-            agent_run, result = await self._runtime.execute(
+            agent_run, (result, telemetry) = await self._runtime.execute(
                 self.name,
                 lambda: self._run_pipeline(file_path, display_name=meta.original_name),
                 doc_id=doc_id,
@@ -62,6 +69,20 @@ class GenerateScaffoldUseCase:
                 ),
             )
             run_id = agent_run.run_id
+
+        # 단계별 상세를 원장에 남긴다. 실패해도 본 작업을 막지 않는다 —
+        # 상세의 부재는 오류가 아니라 정상 상태다
+        # (`.agents/rules/60-data/observability.md` §2-3).
+        if telemetry is not None and run_id:
+            try:
+                ingest_pipeline_telemetry(
+                    telemetry,
+                    run_id=run_id,
+                    doc_id=doc_id,
+                    target_name=meta.original_name,
+                )
+            except Exception as exc:
+                logger.warning("[GenerateScaffold] 계측 저장 실패(치명적 아님): %s", exc)
         logger.info(
             "[GenerateScaffold] 완료: %s (slots=%d, html=%d자)",
             doc_id, len(result.slots), len(result.html_content),

@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Any, Dict, List, Optional
+
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
 from agent_telemetry.contracts.source import SpanSource, source_of

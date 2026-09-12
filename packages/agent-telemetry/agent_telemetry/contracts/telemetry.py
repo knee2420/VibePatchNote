@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
+
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
 from agent_telemetry.contracts.enums import SpanStatus
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord

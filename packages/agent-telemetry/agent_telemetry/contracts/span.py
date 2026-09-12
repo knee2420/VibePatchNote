@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field, computed_field
+
 from agent_telemetry.contracts.enums import SpanPhase, SpanStatus, SpanType
 from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.source import SpanSource

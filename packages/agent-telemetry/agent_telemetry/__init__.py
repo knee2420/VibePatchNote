@@ -1,10 +1,15 @@
 """Agent Telemetry & Tracing Library (Pure Host-Independent Contracts)"""
 
-from agent_telemetry.collector import StepCollector, StepScope
+from agent_telemetry.collector import (
+    StepCollector,
+    StepScope,
+    current_collector,
+    traceable,
+)
 from agent_telemetry.contracts import (
     ExecutionProtocol,
-    FallbackChainSummary,
     FailureReason,
+    FallbackChainSummary,
     ModelAttemptRecord,
     PipelineTelemetry,
     SpanError,
@@ -26,6 +31,8 @@ from agent_telemetry.contracts import (
 __all__ = [
     "StepCollector",
     "StepScope",
+    "traceable",
+    "current_collector",
     "SpanType",
     "SpanStatus",
     "SpanPhase",

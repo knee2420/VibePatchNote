@@ -14,7 +14,15 @@ from __future__ import annotations
 import logging
 import time
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
+
+from agent_telemetry import (
+    SpanPhase,
+    SpanType,
+    StepCollector,
+    model_source,
+    source_of,
+)
 
 from scaffold_engine.assemble.html import HtmlAssembler
 from scaffold_engine.classify.agent import SlotClassifier
@@ -46,12 +54,42 @@ class ScaffoldPipeline:
         self.extractor = PdfGeometryExtractor()
         self.classifier = SlotClassifier(self.harness)
         self.assembler = HtmlAssembler()
+        # 마지막 실행의 계측 결과. 호스트가 원장에 넣을지는 호스트가 정한다.
+        self.last_telemetry: Optional[Any] = None
 
     def run(
         self,
         pdf_path: Union[str, Path],
         page_number: int = 1,
         display_name: Optional[str] = None,
+    ) -> ScaffoldExtractResult:
+        """PDF 한 페이지를 스캐폴딩으로 만든다.
+
+        계측 결과는 `self.last_telemetry` 에 남는다. 호스트가 그것을 원장에
+        넣을지는 호스트가 정한다 — 엔진은 저장 위치를 모른다.
+        """
+        collector = StepCollector(
+            pipeline_name="ScaffoldPipeline",
+            domain="documents",
+            workflow_name="documents.generate_scaffold",
+            workflow_label="와이어프레임 생성",
+            target_name=display_name or Path(pdf_path).name,
+        )
+        try:
+            with collector.activate():
+                return self._run_traced(collector, pdf_path, page_number, display_name)
+        finally:
+            # 실패해도 거기까지의 단계는 남는다. 관측 도구가 가장 봐야 할 기록이다.
+            self.last_telemetry = collector.export_telemetry(
+                provenance={"engine": "scaffold", "harness": self.harness.name}
+            )
+
+    def _run_traced(
+        self,
+        collector: StepCollector,
+        pdf_path: Union[str, Path],
+        page_number: int,
+        display_name: Optional[str],
     ) -> ScaffoldExtractResult:
         started = time.time()
         pdf_path = Path(pdf_path).resolve()
@@ -60,13 +98,31 @@ class ScaffoldPipeline:
         logger.info("[pipeline] 시작: %s (p%d)", target_display_name, page_number)
 
         # A. 측정
-        step = time.time()
-        pages = self.extractor.extract(pdf_path)
-        if not pages:
-            raise ValueError(f"페이지를 읽을 수 없습니다: {target_display_name}")
-        page = pages[min(max(page_number, 1), len(pages)) - 1]
-        logger.info("[pipeline] A 측정 %.2fs — %s, 블록 %d, 표 %d",
-                    time.time() - step, page.doc_type, len(page.classifiable()), len(page.tables))
+        with collector.step(
+            "GeometryExtraction",
+            span_type=SpanType.TOOL,
+            phase=SpanPhase.PRE_LLM,
+            display_label="PDF 기하 실측",
+            description="원본 PDF에서 블록·표의 좌표와 폰트 크기를 결정적으로 측정합니다. AI를 쓰지 않습니다.",
+            data_in=target_display_name,
+            sources=[source_of(PdfGeometryExtractor.extract)],
+        ) as s_extract:
+            pages = self.extractor.extract(pdf_path)
+            if not pages:
+                raise ValueError(f"페이지를 읽을 수 없습니다: {target_display_name}")
+            page = pages[min(max(page_number, 1), len(pages)) - 1]
+            s_extract.set_inputs({"filename": target_display_name, "page_number": page_number})
+            s_extract.set_outputs({
+                "total_pages": len(pages),
+                "doc_type": page.doc_type,
+                "blocks": len(page.classifiable()),
+                "tables": len(page.tables),
+                "has_text_layer": page.has_text_layer,
+            })
+            s_extract.set_label(
+                summary_pill=f"{page.doc_type} · 블록 {len(page.classifiable())}개 · 표 {len(page.tables)}개",
+                data_out=f"PageGeometry ({len(page.classifiable())} blocks)",
+            )
 
         if not page.has_text_layer:
             raise ScannedDocumentError(
@@ -74,23 +130,73 @@ class ScaffoldPipeline:
                 "이 파이프라인은 텍스트 기반 추출만 지원합니다."
             )
 
-        # B. 판정
-        step = time.time()
-        decisions = self.classifier.classify(target_display_name, page)
-        logger.info("[pipeline] B 판정 %.2fs — %d개 분류",
-                    time.time() - step, len(decisions.get("blocks", [])))
+        # B. 판정 (유일하게 AI 가 개입하는 단계)
+        with collector.step(
+            f"LLM:{self.harness.name}",
+            span_type=SpanType.LLM,
+            phase=SpanPhase.LLM,
+            display_label=f"{self.harness.name} 블록 역할 판정",
+            description="실측된 블록이 제목·본문·표·입력란 중 무엇인지 모델이 판정합니다. 좌표는 만들지 않습니다.",
+            data_in=f"PageGeometry ({len(page.classifiable())} blocks)",
+            sources=[
+                source_of(SlotClassifier.classify),
+                model_source(self.harness.name),
+            ],
+        ) as s_classify:
+            decisions = self.classifier.classify(target_display_name, page)
+            classified = len(decisions.get("blocks", []))
+            s_classify.set_inputs({
+                "source_name": target_display_name,
+                "candidate_blocks": len(page.classifiable()),
+            })
+            s_classify.set_outputs({
+                "classified_blocks": classified,
+                "doc_title": decisions.get("doc_title"),
+            })
+            s_classify.set_label(
+                summary_pill=f"{classified}개 블록 분류",
+                data_out="BlockDecisions",
+            )
 
         # C. 조립
-        step = time.time()
-        html, markdown, slots = self.assembler.assemble(pdf_path, page, decisions)
-        logger.info("[pipeline] C 조립 %.2fs — 슬롯 %d", time.time() - step, len(slots))
+        with collector.step(
+            "ScaffoldAssembly",
+            span_type=SpanType.TOOL,
+            phase=SpanPhase.POST_LLM,
+            display_label="와이어프레임 조립",
+            description="A의 실측 좌표와 B의 판정을 합쳐 HTML·Markdown·슬롯을 만듭니다. 좌표는 A의 것만 씁니다.",
+            data_in="PageGeometry + BlockDecisions",
+            sources=[source_of(HtmlAssembler.assemble)],
+        ) as s_assemble:
+            html, markdown, slots = self.assembler.assemble(pdf_path, page, decisions)
+            s_assemble.set_outputs({
+                "slots": len(slots),
+                "html_chars": len(html),
+                "markdown_chars": len(markdown),
+            })
+            s_assemble.set_label(
+                summary_pill=f"슬롯 {len(slots)}개 · HTML {len(html):,}자",
+                data_out=f"ScaffoldExtractResult (slots: {len(slots)})",
+            )
 
         # D. 채점 (출력 누락 검사. 렌더 좌표를 주면 IoU 까지 본다)
-        report = score_page(page, html)
+        with collector.step(
+            "FidelityScoring",
+            span_type=SpanType.PARSER,
+            phase=SpanPhase.POST_LLM,
+            display_label="원본 대비 충실도 채점",
+            description="조립 결과가 원본의 내용을 빠뜨리지 않았는지 검사합니다.",
+            data_in=f"ScaffoldExtractResult (slots: {len(slots)})",
+            sources=[source_of(score_page)],
+        ) as s_score:
+            report = score_page(page, html)
+            s_score.set_outputs({"ok": report.ok, "summary": report.summary()})
+            s_score.set_label(
+                summary_pill=report.summary(),
+                data_out="FidelityReport",
+            )
         if not report.ok:
             logger.warning("[pipeline] D 채점 미달 — %s", report.summary())
-        else:
-            logger.info("[pipeline] D 채점 — %s", report.summary())
 
         meta = ScaffoldMeta(
             id=f"scaffold-{display_stem.lower().replace(' ', '-')}",
