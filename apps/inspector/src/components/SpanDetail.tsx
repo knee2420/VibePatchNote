@@ -479,13 +479,14 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
   const tokens = normalized.split(' ').filter(Boolean)
 
   let modelVal = span.inputs?.target_model || meta.model_name
-  let inputFormat = 'stream-json'
-  let outputFormat = 'stream-json'
+  let inputFormat = ''
+  let outputFormat = 'json'
   let effortVal = span.inputs?.effort || meta.extra?.effort_flag
   let skipPermissions = false
   let disableSlash = false
   let schemaPath = span.inputs?.schema_file || ''
   let conversationId = ''
+  let addDir = ''
 
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i]
@@ -497,6 +498,9 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
       i++
     } else if (t === '--output-format' && tokens[i + 1]) {
       outputFormat = tokens[i + 1]
+      i++
+    } else if (t === '--add-dir' && tokens[i + 1]) {
+      addDir = tokens[i + 1].replace(/^["']|["']$/g, '')
       i++
     } else if (t === '--effort' && tokens[i + 1]) {
       effortVal = tokens[i + 1]
@@ -538,16 +542,28 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
     })
   }
 
-  // Input Format
-  chips.push({
-    key: 'input-format',
-    label: 'INPUT-FORMAT',
-    value: inputFormat,
-    color: 'blue',
-    icon: 'io',
-    flag: `--input-format ${inputFormat}`,
-    description: '소설 원문과 질문 프롬프트를 터미널에 안정적으로 한 줄씩 실시간 밀어넣어 전달하는 입력 방식입니다.',
-  })
+  // Input Transport / Format
+  if (inputFormat) {
+    chips.push({
+      key: 'input-format',
+      label: 'INPUT-FORMAT',
+      value: inputFormat,
+      color: 'blue',
+      icon: 'io',
+      flag: `--input-format ${inputFormat}`,
+      description: '소설 원문과 질문 프롬프트를 터미널에 안정적으로 한 줄씩 실시간 밀어넣어 전달하는 입력 방식입니다.',
+    })
+  } else {
+    chips.push({
+      key: 'input-transport',
+      label: 'INPUT-STREAM',
+      value: 'file/stdin (text)',
+      color: 'blue',
+      icon: 'io',
+      flag: '< prompt.txt (stdin)',
+      description: '명령줄 32KB 한계를 방어하기 위해 순수 텍스트 파일(.txt)로 저장한 뒤 표준 입력(stdin) 스트림으로 직결 공급하는 방식입니다.',
+    })
+  }
 
   // Output Format
   chips.push({
@@ -557,8 +573,22 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
     color: 'emerald',
     icon: 'io',
     flag: `--output-format ${outputFormat}`,
-    description: 'AI가 답변 작성을 마칠 때까지 기다리지 않고, 실시간으로 타자 치듯 결과 데이터를 곧바로 화면에 수신하는 방식입니다.',
+    description: 'AI가 답변 작성을 마쳤을 때 단일 정형 JSON 엔벨로프로 즉시 회수하는 헤드리스 출력 방식입니다.',
   })
+
+  // Add Dir (Isolated Source Directory)
+  if (addDir) {
+    const dirName = addDir.split(/[/\\]/).filter(Boolean).pop() || addDir
+    chips.push({
+      key: 'add-dir',
+      label: 'ISOLATED-SOURCE',
+      value: dirName,
+      color: 'indigo',
+      icon: 'file',
+      flag: `--add-dir ${addDir}`,
+      description: `과거 산출물(artifacts) 오염 및 치팅을 원천 차단하기 위해, 분석 대상 source 문서만 단독 격리하여 마운트한 워크스페이스 디렉터리입니다. (${addDir})`,
+    })
+  }
 
   // Effort (if set)
   if (effortVal && effortVal !== 'default') {
@@ -1147,7 +1177,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
       const effortArg = effort && effort !== 'default' ? ` --effort ${effort}` : ''
       const schemaFile = span.inputs?.schema_file || 'packages/scaffold-engine/scaffold_engine/outline/schemas/outline_schema.json'
       return formatCommand(
-        `agy --model ${model}${effortArg} --input-format stream-json --output-format stream-json --dangerously-skip-permissions --disable-slash-commands --json-schema "${schemaFile}"`
+        `agy --model ${model}${effortArg} --output-format json --dangerously-skip-permissions --disable-slash-commands --json-schema "${schemaFile}" < prompt.txt`
       )
     }
   }, [span, isLlmSpan])
