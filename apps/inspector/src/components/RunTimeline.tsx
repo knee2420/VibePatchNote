@@ -17,16 +17,25 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react'
-import type { CompareItem, SpanPhase, SpanRecordView, SpanType } from '../types'
+import type {
+  CompareItem,
+  SpanPhase,
+  SpanRecordView,
+  SpanType,
+  StageSnapshotRecord,
+} from '../types'
 import { hasFallback } from '../types'
 import { generateWorkflowTraceText } from '../utils/workflowTrace'
 import { PipelineTreeView } from './PipelineTreeView'
+import { StageSnapshots } from './StageSnapshots'
 
 interface RunTimelineProps {
   runId?: string
   runLabel?: string
   primaryModel?: string | null
   spans: SpanRecordView[]
+  /** run 수준 단계 스냅샷. span 이 아니라 run 에 속한다. */
+  snapshots?: readonly StageSnapshotRecord[]
   selectedSpanId: string | null
   onSelectSpan: (spanId: string) => void
   totalDurationMs: number
@@ -132,6 +141,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
   runLabel,
   primaryModel,
   spans,
+  snapshots = [],
   selectedSpanId,
   onSelectSpan,
   totalDurationMs,
@@ -558,6 +568,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
 
       {/* 3. 본문: 페이즈별 그룹화 워터폴 리스트 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-[#0d1117]">
+        <StageSnapshots snapshots={snapshots} />
         {/* 그룹 1: Pre-LLM */}
         {preLlmSpans.length > 0 && (
           <div className="space-y-2">

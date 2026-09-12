@@ -48,3 +48,18 @@ export async function fetchSourceCode(
   return res.json()
 }
 
+
+/**
+ * 대용량 페이로드의 본문을 받아온다.
+ *
+ * 원장에는 포인터와 미리보기만 실린다 — 본문을 상세 응답에 끼워 넣으면
+ * 응답이 수 MB 가 된다(실측 원장 7.1MB 중 93%가 다섯 개 키였다).
+ */
+export async function fetchPayload(runId: string, digest: string): Promise<string> {
+  const res = await fetch(
+    `/api/v1/inspector/runs/${encodeURIComponent(runId)}/payloads/${encodeURIComponent(digest)}`
+  )
+  if (!res.ok) throw new Error(`Failed to fetch payload ${digest.slice(0, 12)}: ${res.statusText}`)
+  const body = (await res.json()) as { digest: string; content: string }
+  return body.content
+}

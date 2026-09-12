@@ -11,13 +11,16 @@ from typing import Any, Optional
 
 from agent_telemetry.contracts import (
     SpanUsage,
+    StageSnapshotRecord,
     usage_from_product_dict,
     usage_to_product_dict,
 )
+from pydantic import ValidationError
 
 from app.core.agent_runtime.repository import LocalAgentRunRepository
 from app.core.config import settings
 from app.core.storage.paths import safe_segment
+from app.core.storage.payloads import read_payload
 from app.inspector.schemas import (
     MatrixModelInfo,
     MatrixResponse,
@@ -337,25 +340,52 @@ class InspectorService:
                 if sp.get("span_type") == "llm" and not sp.get("attempts"):
                     sp["attempts"] = raw_attempts
 
-        snapshots: dict[str, Any] = {}
+        # 스냅샷은 계약(`StageSnapshotRecord`) 그대로 돌려준다.
+        #
+        # 예전에는 `{stage_name: data}` 딕셔너리로 납작하게 만들면서 `stage_id` 와
+        # 순서를 잃었고, 게다가 계약에 없는 `data` 키를 읽어서 **값이 전부 None**
+        # 이었다. 프론트가 이것을 렌더한 적이 없어 아무도 몰랐다.
+        snapshots: list[StageSnapshotRecord] = []
         snapshots_file = run_path / "snapshots.json"
         if snapshots_file.exists():
             try:
                 raw_snaps = json.loads(snapshots_file.read_text(encoding="utf-8"))
-                if isinstance(raw_snaps, list):
-                    for s in raw_snaps:
-                        if isinstance(s, dict) and "stage_name" in s:
-                            snapshots[s["stage_name"]] = s.get("data")
-                elif isinstance(raw_snaps, dict):
-                    snapshots = raw_snaps
-            except Exception as e:
-                logger.warning("Error reading snapshots.json for run %s: %s", run_id, e)
+            except (OSError, json.JSONDecodeError) as exc:
+                logger.warning("[Inspector] snapshots.json 해석 실패 (%s): %s", run_id, exc)
+                raw_snaps = []
+
+            # 옛 기록은 `{stage_name: payload}` 딕셔너리일 수 있다.
+            if isinstance(raw_snaps, dict):
+                raw_snaps = [
+                    {"stage_id": name, "stage_name": name, "payload": payload}
+                    for name, payload in raw_snaps.items()
+                ]
+
+            for item in raw_snaps if isinstance(raw_snaps, list) else []:
+                try:
+                    snapshots.append(StageSnapshotRecord.model_validate(item))
+                except ValidationError:
+                    # 한 건이 깨져도 나머지는 보여준다. 관측 도구는 깨진 데이터를
+                    # 보여주는 것이 일이다.
+                    logger.info("[Inspector] 해석할 수 없는 스냅샷을 건너뜁니다 (%s)", run_id)
 
         return RunDetailResponse(
             meta=meta,
             spans=spans,
             snapshots=snapshots,
         )
+
+    def get_payload(self, run_id: str, digest: str) -> Optional[str]:
+        """포인터가 가리키는 대용량 본문을 돌려준다.
+
+        상세 응답에 본문을 다시 끼워 넣지 않는 이유는 그러면 응답이 다시
+        수 MB 가 되기 때문이다. 소비자는 카드를 펼칠 때만 이것을 부른다.
+        """
+        try:
+            safe_id = safe_segment(run_id)
+        except Exception:
+            return None
+        return read_payload(self.runs_dir / safe_id, digest)
 
     def get_matrix(self) -> MatrixResponse:
         """현재 등록된 모델 매트릭스 및 라우팅 설정 반환."""

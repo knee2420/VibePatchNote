@@ -54,6 +54,23 @@ def delete_run(
     return {"status": "DELETED", "run_id": run_id}
 
 
+@router.get("/runs/{run_id}/payloads/{digest}")
+def get_payload(
+    run_id: str,
+    digest: str,
+    service: InspectorService = Depends(get_inspector_service),
+):
+    """스팬 페이로드의 대용량 본문을 반환합니다.
+
+    원장에는 포인터와 미리보기만 실린다. 본문을 상세 응답에 다시 끼워 넣으면
+    응답이 수 MB 가 되므로, 필요한 카드를 펼칠 때만 여기로 받아 간다.
+    """
+    content = service.get_payload(run_id, digest)
+    if content is None:
+        raise HTTPException(status_code=404, detail="Payload not found.")
+    return {"digest": digest, "content": content}
+
+
 @router.get("/matrix", response_model=MatrixResponse)
 def get_matrix(
     service: InspectorService = Depends(get_inspector_service),

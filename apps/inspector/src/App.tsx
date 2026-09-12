@@ -289,6 +289,7 @@ export const App: React.FC = () => {
                   runLabel={runs.find((r) => r.run_id === selectedRunId)?.workflow_label || runs.find((r) => r.run_id === selectedRunId)?.task_name || undefined}
                   primaryModel={runs.find((r) => r.run_id === selectedRunId)?.primary_model || undefined}
                   spans={runDetail.spans}
+                  snapshots={runDetail.snapshots}
                   selectedSpanId={selectedSpanId}
                   onSelectSpan={(id) => setSelectedSpanId(id)}
                   totalDurationMs={numberOf(runDetail.meta, 'total_latency_ms', 'duration_ms') ?? 0}
@@ -301,7 +302,7 @@ export const App: React.FC = () => {
                 <ErrorBoundary label="스팬 상세">
                 <SpanDetail
                   span={selectedSpan}
-                  snapshots={runDetail.snapshots || {}}
+                  runId={selectedRunId}
                   isCompareMode={isCompareMode}
                   compareSlotAId={compareSlotA?.id || null}
                   compareSlotBId={compareSlotB?.id || null}

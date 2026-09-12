@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from agent_telemetry.contracts import ModelAttemptRecord, SpanRecord
+from agent_telemetry.contracts import (
+    ModelAttemptRecord,
+    SpanRecord,
+    StageSnapshotRecord,
+)
 from pydantic import BaseModel, Field
 
 
@@ -57,7 +61,8 @@ class RunDetailResponse(BaseModel):
     """실행(Run)의 전체 원장 및 스냅샷 상세."""
     meta: dict[str, Any]
     spans: list[InspectorSpanView] = Field(default_factory=list)
-    snapshots: dict[str, Any] = Field(default_factory=dict)
+    # 계약 그대로. 납작한 딕셔너리로 만들면 stage_id 와 순서를 잃는다.
+    snapshots: list[StageSnapshotRecord] = Field(default_factory=list)
 
 
 class MatrixModelInfo(BaseModel):

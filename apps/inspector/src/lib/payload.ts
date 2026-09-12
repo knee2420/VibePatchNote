@@ -66,3 +66,31 @@ export function commandOf(value: unknown): string | null {
   }
   return null
 }
+
+/**
+ * 대용량 페이로드 포인터.
+ *
+ * 원장에는 본문 대신 이것이 실린다. 미리보기가 함께 오므로, 펼치지 않아도
+ * 무엇인지는 알 수 있다.
+ */
+export interface PayloadRef {
+  readonly __payload_ref__: string
+  readonly bytes: number
+  readonly preview: string
+  readonly media_type: string
+}
+
+export function isPayloadRef(value: unknown): value is PayloadRef {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    typeof (value as Record<string, unknown>).__payload_ref__ === 'string'
+  )
+}
+
+/** 포인터의 미디어 타입을 뷰어 언어로 옮긴다. */
+export function refLanguage(ref: PayloadRef): 'json' | 'markdown' | 'text' {
+  if (ref.media_type === 'application/json') return 'json'
+  if (ref.media_type === 'text/markdown') return 'markdown'
+  return 'text'
+}

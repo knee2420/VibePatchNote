@@ -37,7 +37,8 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import type { CompareItem, SpanRecordView } from '../types'
 import { hasFallback, statusTone } from '../types'
 import type { StatusTone } from '../types'
-import { asRecord, asText, commandOf, textOf } from '../lib/payload'
+import { asRecord, asText, commandOf, isPayloadRef, refLanguage, textOf } from '../lib/payload'
+import { fetchPayload } from '../api'
 
 /**
  * 상태 색은 `statusTone` 을 거친 뒤에만 고른다.
@@ -60,7 +61,8 @@ const TONE_PILL: Record<StatusTone, string> = {
 
 interface SpanDetailProps {
   readonly span: SpanRecordView | null
-  readonly snapshots?: Record<string, unknown>
+  /** 대용량 페이로드 본문을 받아오려면 어느 run 인지 알아야 한다. */
+  readonly runId?: string | null
   readonly isCompareMode?: boolean
   readonly compareSlotAId?: string | null
   readonly compareSlotBId?: string | null
@@ -84,6 +86,8 @@ interface ModalViewerState {
 interface VirtualCodeCardProps {
   readonly title: string
   readonly data: unknown
+  /** 포인터 본문을 받아오려면 어느 run 인지 알아야 한다. */
+  readonly runId?: string
   readonly defaultHeight?: string
   readonly badgeLabel?: string
   readonly isCompareMode?: boolean
@@ -102,6 +106,7 @@ interface VirtualCodeCardProps {
 const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
   title,
   data,
+  runId,
   defaultHeight = '240px',
   badgeLabel,
   isCompareMode = false,
@@ -112,10 +117,43 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
   onOpenModal,
 }) => {
   const [copied, setCopied] = useState(false)
+  // 포인터로 온 페이로드의 전문. 사용자가 요청하기 전에는 받아오지 않는다.
+  const [resolvedBody, setResolvedBody] = useState<string | null>(null)
+  const [loadingBody, setLoadingBody] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  const payloadRef = isPayloadRef(data) ? data : null
+
+  const loadFullBody = async (): Promise<string | null> => {
+    if (resolvedBody !== null) return resolvedBody
+    if (!payloadRef || !runId) return null
+    setLoadingBody(true)
+    setLoadError(null)
+    try {
+      const body = await fetchPayload(runId, payloadRef.__payload_ref__)
+      setResolvedBody(body)
+      return body
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err))
+      return null
+    } finally {
+      setLoadingBody(false)
+    }
+  }
 
   const { textValue, language, charCount } = useMemo(() => {
     if (data === null || data === undefined) {
       return { textValue: '', language: 'text' as const, charCount: 0 }
+    }
+
+    // 포인터: 전문을 받아왔으면 그것을, 아니면 미리보기를 보여준다.
+    if (isPayloadRef(data)) {
+      const body = resolvedBody
+      return {
+        textValue: body ?? data.preview,
+        language: refLanguage(data),
+        charCount: body?.length ?? data.bytes,
+      }
     }
 
     if (typeof data === 'string') {
@@ -146,7 +184,7 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
       const fallback = String(data)
       return { textValue: fallback, language: 'text' as const, charCount: fallback.length }
     }
-  }, [data])
+  }, [data, resolvedBody])
 
   const extensions = useMemo(() => {
     if (language === 'json') return [json()]
@@ -250,9 +288,26 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
             )}
           </button>
 
+          {/* 포인터로 온 페이로드는 사용자가 요청할 때만 전문을 받는다. */}
+          {payloadRef && resolvedBody === null && (
+            <button
+              type="button"
+              onClick={() => void loadFullBody()}
+              disabled={loadingBody}
+              className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#d29922] transition-colors cursor-pointer border border-[#30363d] disabled:opacity-50"
+              title={`미리보기만 표시 중입니다. 전문 ${payloadRef.bytes.toLocaleString()} 바이트를 받아옵니다.`}
+            >
+              {loadingBody ? '불러오는 중…' : `전문 불러오기 (${(payloadRef.bytes / 1024).toFixed(0)}KB)`}
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={() => onOpenModal(title, textValue, language, charCount)}
+            onClick={async () => {
+              // 전체화면에서는 전문이 필요하다. 아직 없으면 그때 받는다.
+              const body = payloadRef ? await loadFullBody() : null
+              onOpenModal(title, body ?? textValue, language, (body ?? textValue).length)
+            }}
             className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] hover:text-[#79c0ff] transition-colors cursor-pointer border border-[#30363d]"
             title="전체화면으로 전문 크게 보기 (검색/가상스크롤 지원)"
           >
@@ -261,6 +316,18 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
           </button>
         </div>
       </div>
+
+      {payloadRef && resolvedBody === null && (
+        <div className="px-3 py-1 bg-[#21262d] border-b border-[#30363d] text-[10px] text-[#d29922] font-sans">
+          미리보기 {payloadRef.preview.length.toLocaleString()}자 / 전체{' '}
+          {payloadRef.bytes.toLocaleString()} 바이트
+        </div>
+      )}
+      {loadError && (
+        <div className="px-3 py-1 bg-[rgba(248,81,73,0.1)] border-b border-[rgba(248,81,73,0.3)] text-[10px] text-[#f85149] font-sans">
+          전문을 불러오지 못했습니다: {loadError}
+        </div>
+      )}
 
       {/* CodeMirror 가상화 뷰어 본문 (수만 자도 초고속 렌더링) */}
       <div className="text-xs">
@@ -1022,6 +1089,7 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
 
 export const SpanDetail: React.FC<SpanDetailProps> = ({
   span,
+  runId,
   isCompareMode = false,
   compareSlotAId,
   compareSlotBId,
@@ -1314,6 +1382,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                 <div className="text-[11px] break-words leading-relaxed text-[#e6edf3]">{span.error.message}</div>
                 {span.error.stack_trace && (
                   <VirtualCodeCard
+                    runId={runId ?? undefined}
                     title="Error Traceback"
                     data={span.error.stack_trace}
                     defaultHeight="160px"
@@ -1414,6 +1483,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
               {/* 3. 대형 입력 페이로드 (프롬프트, 지침, 컨텍스트 등) */}
               {Object.entries(largeInputs).map(([k, v]) => (
                 <VirtualCodeCard
+                  runId={runId ?? undefined}
                   key={k}
                   cardId={`input:${span.span_id}:${k}`}
                   title={`Input: ${k}`}
@@ -1494,6 +1564,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
               {Object.entries(largeOutputs).map(([k, v]) => (
                 <VirtualCodeCard
+                  runId={runId ?? undefined}
                   key={k}
                   cardId={`output:${span.span_id}:${k}`}
                   title={`Output: ${k}`}
@@ -1591,6 +1662,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
                   {att.request_prompt && (
                     <VirtualCodeCard
+                      runId={runId ?? undefined}
                       title="Request Prompt"
                       data={att.request_prompt}
                       defaultHeight="140px"
@@ -1601,6 +1673,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
                   {att.raw_response && (
                     <VirtualCodeCard
+                      runId={runId ?? undefined}
                       title="Raw Response"
                       data={att.raw_response}
                       defaultHeight="140px"
@@ -1611,6 +1684,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
 
                   {att.error?.stderr && (
                     <VirtualCodeCard
+                      runId={runId ?? undefined}
                       title="Stderr Output"
                       data={att.error.stderr}
                       defaultHeight="140px"
@@ -1628,6 +1702,7 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
         {/* Raw JSON 탭 (전체 스팬 레코드를 가상화 뷰어로 열람) */}
         {activeTab === 'raw' && (
           <VirtualCodeCard
+            runId={runId ?? undefined}
             title="Span Full Ledger Record"
             data={span}
             defaultHeight="520px"

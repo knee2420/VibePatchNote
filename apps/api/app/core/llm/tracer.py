@@ -25,6 +25,8 @@ from typing import Any, Dict, Generator, List, Optional
 
 from pydantic import BaseModel, Field
 
+from app.core.storage.payloads import externalize_span_dict
+
 logger = logging.getLogger(__name__)
 
 # 현재 비동기/스레드 컨텍스트의 활성 Trace 및 Span 추적
@@ -319,13 +321,19 @@ def ingest_pipeline_telemetry(
         run_dir.mkdir(parents=True, exist_ok=True)
 
         # 1. ledger.jsonl (Append-Only 불변 원장)
+        #
+        # 큰 문자열(프롬프트·모델 출력)은 원장에 싣지 않고 내용 해시로 밖에
+        # 저장한 뒤 포인터만 남긴다. 원장 한 줄이 본문 사본을 들고 있으면
+        # 원장이 본문만큼 커진다 — 실측 7.1MB 중 93%가 다섯 개 키였고,
+        # 그중 둘은 같은 데이터의 사본이었다.
+        # (`app/core/storage/payloads.py`, `60-data/rule.md` §4-1)
         ledger_path = run_dir / "ledger.jsonl"
         with open(ledger_path, "w", encoding="utf-8") as f:
             for sp in telemetry.spans:
                 entry = {
                     "event_type": "span",
                     "timestamp": sp.start_time.isoformat(),
-                    "data": sp.model_dump(mode="json"),
+                    "data": externalize_span_dict(sp.model_dump(mode="json"), run_dir),
                 }
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 

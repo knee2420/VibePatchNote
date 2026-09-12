@@ -237,6 +237,31 @@ def test_run_without_ledger_still_lists(observability_runs: list[str]):
     assert instrumented["has_span_detail"] is True
 
 
+def test_snapshots_keep_their_contract_shape(observability_runs: list[str]):
+    """스냅샷은 계약 그대로 온다. 납작한 딕셔너리로 만들면 잃는 것이 있다.
+
+    예전에는 `{stage_name: data}` 로 접으면서 `stage_id` 와 순서를 잃었고,
+    계약에 없는 `data` 키를 읽어서 **값이 전부 None** 이었다. 프론트가 이것을
+    렌더한 적이 없어 아무도 몰랐다.
+    """
+    detail = client.get(f"/api/v1/inspector/runs/{FIXTURE_RUN_FULL}").json()
+    snapshots = detail["snapshots"]
+
+    assert isinstance(snapshots, list) and snapshots, "스냅샷이 리스트로 와야 합니다"
+    for snapshot in snapshots:
+        assert snapshot["stage_id"]
+        assert snapshot["stage_name"]
+        assert isinstance(snapshot["payload"], dict)
+        assert snapshot["payload"], "payload 가 비어 있습니다 (예전엔 전부 None 이었습니다)"
+
+    # 목록의 개수 배지와 상세가 어긋나지 않는다.
+    summary = next(
+        r for r in client.get("/api/v1/inspector/runs").json()
+        if r["run_id"] == FIXTURE_RUN_FULL
+    )
+    assert summary["snapshots_count"] == len(snapshots)
+
+
 def test_source_resolves_by_module_exactly():
     """모듈 이름은 파일 하나로 정확히 해석된다. 탐색하지 않는다."""
     resp = client.get(

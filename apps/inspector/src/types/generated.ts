@@ -276,7 +276,7 @@ export interface RunSummary {
 export interface RunDetail {
   readonly meta: Record<string, unknown>
   readonly spans: InspectorSpanView[]
-  readonly snapshots: Record<string, unknown>
+  readonly snapshots: StageSnapshotRecord[]
 }
 
 export interface MatrixModelInfo {
