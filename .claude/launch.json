@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@vibe/api", "dev"],
       "port": 8000
+    },
+    {
+      "name": "inspector",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@vibe/inspector", "dev"],
+      "port": 5174
     }
   ]
 }

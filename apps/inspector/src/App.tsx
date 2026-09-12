@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   Activity,
+  Boxes,
   Cpu,
   GitCompare,
   Sparkles,
@@ -13,10 +14,11 @@ import { RunCompareView } from './components/RunCompareView'
 import { RunList } from './components/RunList'
 import { RunTimeline } from './components/RunTimeline'
 import { SpanDetail } from './components/SpanDetail'
+import { WorkflowCatalog } from './components/WorkflowCatalog'
 import type { CompareItem, RunDetail, RunSummary, SpanRecordView } from './types'
 import { numberOf } from './lib/payload'
 
-type NavTab = 'runs' | 'compare' | 'matrix'
+type NavTab = 'runs' | 'compare' | 'workflows' | 'matrix'
 
 export const App: React.FC = () => {
   const [navTab, setNavTab] = useState<NavTab>('runs')
@@ -61,6 +63,15 @@ export const App: React.FC = () => {
       console.error('Failed to load runs:', err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  /** 배경 갱신. 로딩 표시를 건드리지 않는다. */
+  const refreshRunsQuietly = async () => {
+    try {
+      setRuns(await fetchRuns())
+    } catch {
+      // 한 번 실패해도 다음 주기에 다시 시도한다. 화면을 흔들지 않는다.
     }
   }
 
@@ -140,6 +151,28 @@ export const App: React.FC = () => {
     loadRuns()
   }, [])
 
+  // 진행 중인 run 이 있을 때만 목록을 다시 읽는다.
+  //
+  // 예전에는 자동 갱신이 아예 없어서, 분석을 돌려 놓고도 새로고침 버튼을
+  // 누르기 전에는 아무 변화가 보이지 않았다. 반대로 무조건 폴링하면 아무 일도
+  // 없는 화면에서 계속 디스크를 읽는다.
+  //
+  // `waiting_*` 은 **사람의 결정을 기다리는 보류**다(60-data §4-6). 몇 시간이
+  // 걸릴 수 있으므로 폴링 대상이 아니다 — 사람이 조작하면 그때 갱신된다.
+  const hasRunningRun = runs.some(
+    (run) => run.status === 'running' || run.status === 'queued'
+  )
+
+  useEffect(() => {
+    if (!hasRunningRun) return
+    const timer = window.setInterval(() => {
+      // 배경 갱신이다. 재시도도 로딩 표시도 하지 않는다 — 3초마다 새로고침
+      // 아이콘이 도는 화면은 "무언가 잘못됐다"처럼 보인다.
+      void refreshRunsQuietly()
+    }, 3000)
+    return () => window.clearInterval(timer)
+  }, [hasRunningRun])
+
   useEffect(() => {
     if (!selectedRunId) {
       setRunDetail(null)
@@ -210,6 +243,18 @@ export const App: React.FC = () => {
               {(compareSlotA || compareSlotB) && (
                 <span className="w-2 h-2 rounded-full bg-[#58a6ff] animate-pulse ml-0.5" />
               )}
+            </button>
+
+            <button
+              onClick={() => setNavTab('workflows')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                navTab === 'workflows'
+                  ? 'bg-[#21262d] text-[#e6edf3] border border-[#30363d] shadow-sm font-semibold'
+                  : 'text-[#848d97] hover:text-[#e6edf3] hover:bg-[#161b22]'
+              }`}
+            >
+              <Boxes className="w-3.5 h-3.5" />
+              Workflow Catalog
             </button>
 
             <button
@@ -338,6 +383,12 @@ export const App: React.FC = () => {
               setCompareSlotB(tmp)
             }}
           />
+          </ErrorBoundary>
+        )}
+
+        {navTab === 'workflows' && (
+          <ErrorBoundary label="워크플로우 카탈로그">
+            <WorkflowCatalog />
           </ErrorBoundary>
         )}
 

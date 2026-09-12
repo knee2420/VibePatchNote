@@ -226,7 +226,10 @@ class OutlinePipeline:
         # 4. CLI / LLM 네이티브 구조화 실행
         actual_model = target_model
         with collector.step(
-            f"LLM:{target_model}",
+            # 스팬 **이름**은 단계의 정체성이다. 모델은 그 단계의 속성이므로
+            # 이름에 박으면 같은 단계가 모델마다 다른 단계로 집계된다
+            # (워크플로우 카탈로그에서 드러났다). 모델은 라벨과 sources 에 있다.
+            "LlmInference",
             span_type=SpanType.LLM,
             phase=SpanPhase.LLM,
             display_label=f"{target_model} 목차 구조 추론",

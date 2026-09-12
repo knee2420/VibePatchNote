@@ -322,3 +322,58 @@ def test_source_lookup_is_fast():
     elapsed = time.perf_counter() - t0
     assert resp.status_code == 200
     assert elapsed < 0.5, f"소스 조회가 {elapsed:.2f}초 걸렸습니다. 탐색이 되살아났는지 확인하십시오."
+
+
+def test_workflow_catalog_is_derived_from_runs(observability_runs: list[str]):
+    """카탈로그는 손으로 쓴 매니페스트가 아니라 기록된 실행에서 나온다.
+
+    매니페스트를 따로 관리하면 파이프라인이 바뀌어도 목록은 안 바뀌고,
+    어긋나도 아무도 모른다 — 방금 없앤 하드코딩이 다른 형태로 돌아오는 셈이다.
+    """
+    resp = client.get("/api/v1/inspector/workflows")
+    assert resp.status_code == 200
+
+    workflows = resp.json()
+    assert workflows, "실행 기록이 있는데 카탈로그가 비었습니다"
+
+    target = next(
+        (w for w in workflows if w["workflow_name"] == "documents.extract_outline"), None
+    )
+    assert target is not None
+
+    # 라벨은 파이프라인이 기록 시점에 정한 것 그대로다.
+    assert target["workflow_label"] == "문서 목차 추출"
+    assert target["run_count"] >= 1
+    assert target["stages"], "단계가 도출되지 않았습니다"
+
+    for stage in target["stages"]:
+        assert stage["name"]
+        assert stage["span_type"] in {"pipeline", "chain", "llm", "tool", "parser"}
+        assert stage["seen_in_runs"] >= 1
+
+
+def test_workflow_stages_are_not_duplicated(observability_runs: list[str]):
+    """한 워크플로우 안에 같은 단계가 두 번 나오지 않는다."""
+    for workflow in client.get("/api/v1/inspector/workflows").json():
+        names = [stage["name"] for stage in workflow["stages"]]
+        assert len(names) == len(set(names)), f"{workflow['workflow_name']} 에 중복 단계가 있습니다"
+
+
+def test_llm_span_name_does_not_carry_the_model():
+    """스팬 **이름**은 단계의 정체성이다. 모델은 그 단계의 속성일 뿐이다.
+
+    이름에 모델을 박으면(`LLM:gemini-3.8-flash-low`) 같은 단계가 모델마다 다른
+    단계로 집계된다 — 워크플로우 카탈로그를 만들면서 드러났다. 옛 기록은 그대로
+    두므로, 여기서는 **파이프라인이 지금 방출하는 이름**을 고정한다.
+    """
+    import inspect
+
+    from scaffold_engine.core import pipeline as scaffold_pipeline
+    from scaffold_engine.outline import pipeline as outline_pipeline
+
+    for module in (outline_pipeline, scaffold_pipeline):
+        source = inspect.getsource(module)
+        assert '"LlmInference"' in source, f"{module.__name__} 이 안정된 스팬 이름을 쓰지 않습니다"
+        assert 'f"LLM:{' not in source, (
+            f"{module.__name__} 이 스팬 이름에 모델명을 넣고 있습니다"
+        )

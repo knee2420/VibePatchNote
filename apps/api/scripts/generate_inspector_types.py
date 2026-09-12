@@ -54,6 +54,8 @@ from app.inspector.schemas import (  # noqa: E402
     RunDetailResponse,
     RunSummaryResponse,
     SourceCodeResponse,
+    WorkflowInfo,
+    WorkflowStageInfo,
 )
 
 # 방출 순서. 의존 대상을 먼저 둔다.
@@ -79,6 +81,8 @@ MODELS: list[type[BaseModel]] = [
     MatrixModelInfo,
     MatrixResponse,
     SourceCodeResponse,
+    WorkflowStageInfo,
+    WorkflowInfo,
 ]
 
 HEADER = """/**

@@ -1,4 +1,10 @@
-import type { MatrixResponse, RunDetail, RunSummary, SourceCodeResponse } from './types'
+import type {
+  MatrixResponse,
+  RunDetail,
+  RunSummary,
+  SourceCodeResponse,
+  WorkflowInfo,
+} from './types'
 
 export async function fetchRuns(limit = 50): Promise<RunSummary[]> {
   const res = await fetch(`/api/v1/inspector/runs?limit=${limit}`)
@@ -15,6 +21,17 @@ export async function fetchRunDetail(runId: string): Promise<RunDetail> {
 export async function fetchMatrix(): Promise<MatrixResponse> {
   const res = await fetch('/api/v1/inspector/matrix')
   if (!res.ok) throw new Error(`Failed to fetch matrix: ${res.statusText}`)
+  return res.json()
+}
+
+/**
+ * 시스템이 실행한 적 있는 워크플로우와 그 단계 구조.
+ *
+ * 손으로 쓴 매니페스트가 아니라 기록된 실행에서 도출된다.
+ */
+export async function fetchWorkflows(): Promise<WorkflowInfo[]> {
+  const res = await fetch('/api/v1/inspector/workflows')
+  if (!res.ok) throw new Error(`Failed to fetch workflows: ${res.statusText}`)
   return res.json()
 }
 

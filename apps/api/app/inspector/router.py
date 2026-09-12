@@ -10,6 +10,7 @@ from app.inspector.schemas import (
     RunDetailResponse,
     RunSummaryResponse,
     SourceCodeResponse,
+    WorkflowInfo,
 )
 from app.inspector.service import InspectorService
 
@@ -69,6 +70,19 @@ def get_payload(
     if content is None:
         raise HTTPException(status_code=404, detail="Payload not found.")
     return {"digest": digest, "content": content}
+
+
+@router.get("/workflows", response_model=list[WorkflowInfo])
+def list_workflows(
+    service: InspectorService = Depends(get_inspector_service),
+):
+    """시스템이 실행한 적 있는 워크플로우와 그 단계 구조를 반환합니다.
+
+    손으로 쓴 매니페스트가 아니라 **기록된 실행에서 도출**한다. 매니페스트를
+    따로 관리하면 파이프라인이 바뀌어도 매니페스트는 안 바뀌고, 어긋나도
+    아무도 모른다 — 방금 없앤 하드코딩이 다른 형태로 돌아오는 셈이다.
+    """
+    return service.list_workflows()
 
 
 @router.get("/matrix", response_model=MatrixResponse)

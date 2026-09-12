@@ -6,10 +6,12 @@ import importlib.util
 import json
 import logging
 import shutil
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Optional
 
 from agent_telemetry.contracts import (
+    SpanSource,
     SpanUsage,
     StageSnapshotRecord,
     usage_from_product_dict,
@@ -27,6 +29,8 @@ from app.inspector.schemas import (
     RunDetailResponse,
     RunSummaryResponse,
     SourceCodeResponse,
+    WorkflowInfo,
+    WorkflowStageInfo,
 )
 
 logger = logging.getLogger(__name__)
@@ -386,6 +390,149 @@ class InspectorService:
         except Exception:
             return None
         return read_payload(self.runs_dir / safe_id, digest)
+
+
+    # ── 워크플로우 카탈로그 ──────────────────────────────────────
+
+    #: 한 워크플로우당 구조를 도출할 때 훑을 최근 run 수.
+    #: 전부 훑으면 run 이 쌓일수록 느려지고, 얻는 정보는 늘지 않는다.
+    WORKFLOW_SAMPLE_RUNS = 20
+
+    def list_workflows(self) -> list[WorkflowInfo]:
+        """시스템이 실행한 적 있는 워크플로우와 그 단계 구조를 반환합니다.
+
+        **손으로 쓴 매니페스트가 아니라 기록된 실행에서 도출한다.**
+
+        매니페스트를 따로 관리하면, 방금 없앤 하드코딩이 다른 형태로 돌아온다 —
+        파이프라인이 바뀌어도 매니페스트는 안 바뀌고, 어긋나도 아무도 모른다.
+        실행 기록은 정의상 최신이고, 계측이 정확하면 이것도 정확하다.
+
+        요구사항 정본: REQ-06 FR-01(단계별 계약), FR-05(워크플로우 카탈로그).
+        """
+        if not self.runs_dir.exists():
+            return []
+
+        # 1. run 을 워크플로우별로 모은다. 최신순으로 본다.
+        grouped: dict[str, list[tuple[Path, dict[str, Any]]]] = defaultdict(list)
+        for run_path in self.runs_dir.iterdir():
+            if not run_path.is_dir():
+                continue
+            meta_file = run_path / "meta.json"
+            if not meta_file.exists():
+                continue
+            try:
+                meta = json.loads(meta_file.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if not isinstance(meta, dict):
+                continue
+            name = str(meta.get("workflow_name") or meta.get("pipeline_name") or "").strip()
+            if not name:
+                continue
+            grouped[name].append((run_path, meta))
+
+        workflows: list[WorkflowInfo] = []
+        for name, entries in grouped.items():
+            entries.sort(key=lambda item: str(item[1].get("start_time") or ""), reverse=True)
+            workflows.append(self._describe_workflow(name, entries))
+
+        workflows.sort(key=lambda w: w.last_run_at, reverse=True)
+        return workflows
+
+    def _describe_workflow(
+        self,
+        name: str,
+        entries: list[tuple[Path, dict[str, Any]]],
+    ) -> WorkflowInfo:
+        newest_meta = entries[0][1]
+
+        models: list[str] = []
+        status_counts: Counter[str] = Counter()
+        for _, meta in entries:
+            model = meta.get("primary_model")
+            if model and model not in models:
+                models.append(str(model))
+            recorded = str(meta.get("status") or "unknown").lower()
+            status_counts[_SPAN_TO_RUN_STATUS.get(recorded, recorded)] += 1
+
+        # 2. 최근 run 들의 스팬을 모아 단계 구조를 만든다.
+        durations: dict[str, list[float]] = defaultdict(list)
+        first_seen: dict[str, dict[str, Any]] = {}
+        order: list[str] = []
+        seen_runs: Counter[str] = Counter()
+
+        for run_path, _ in entries[: self.WORKFLOW_SAMPLE_RUNS]:
+            spans = self._read_spans(run_path)
+            names_in_run: set[str] = set()
+            for span in spans:
+                span_name = str(span.get("name") or "")
+                if not span_name:
+                    continue
+                if span_name not in first_seen:
+                    first_seen[span_name] = span
+                    order.append(span_name)
+                durations[span_name].append(float(span.get("duration_ms") or 0.0))
+                names_in_run.add(span_name)
+            for span_name in names_in_run:
+                seen_runs[span_name] += 1
+
+        stages: list[WorkflowStageInfo] = []
+        for span_name in order:
+            span = first_seen[span_name]
+            samples = sorted(durations[span_name])
+            stages.append(
+                WorkflowStageInfo(
+                    name=span_name,
+                    display_label=str(span.get("display_label") or ""),
+                    description=str(span.get("description") or ""),
+                    span_type=str(span.get("span_type") or "chain"),
+                    phase=span.get("phase"),
+                    seen_in_runs=seen_runs[span_name],
+                    median_duration_ms=samples[len(samples) // 2] if samples else 0.0,
+                    sources=[
+                        SpanSource.model_validate(src)
+                        for src in (span.get("sources") or [])
+                        if isinstance(src, dict)
+                    ],
+                )
+            )
+
+        return WorkflowInfo(
+            workflow_name=name,
+            workflow_label=str(newest_meta.get("workflow_label") or ""),
+            domain=str(newest_meta.get("domain") or "documents"),
+            pipeline_name=str(newest_meta.get("pipeline_name") or ""),
+            run_count=len(entries),
+            last_run_at=str(newest_meta.get("start_time") or ""),
+            models=models,
+            status_counts=dict(status_counts),
+            stages=stages,
+        )
+
+    @staticmethod
+    def _read_spans(run_path: Path) -> list[dict[str, Any]]:
+        """원장에서 스팬 레코드만 뽑는다. 없으면 빈 목록이다."""
+        ledger = run_path / "ledger.jsonl"
+        if not ledger.is_file():
+            return []
+        spans: list[dict[str, Any]] = []
+        try:
+            raw = ledger.read_text(encoding="utf-8")
+        except OSError:
+            return []
+        for line in raw.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(entry, dict) and entry.get("event_type") == "span":
+                data = entry.get("data")
+                if isinstance(data, dict):
+                    spans.append(data)
+        return spans
 
     def get_matrix(self) -> MatrixResponse:
         """현재 등록된 모델 매트릭스 및 라우팅 설정 반환."""

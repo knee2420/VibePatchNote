@@ -307,3 +307,38 @@ export interface SourceCodeResponse {
   readonly total_lines: number
   readonly language: string
 }
+
+/** 워크플로우를 이루는 단계 하나. **기록된 실행에서 도출**된다. */
+export interface WorkflowStageInfo {
+  /** 스팬 논리명 */
+  readonly name: string
+  /** 사람이 읽을 이름. 파이프라인이 기록 시점에 정한다 */
+  readonly display_label: string
+  /** 이용자 관점 설명 */
+  readonly description: string
+  /** 스팬 유형 */
+  readonly span_type: string
+  /** 실행 페이즈 */
+  readonly phase: string | null
+  /** 이 단계가 관측된 run 수 */
+  readonly seen_in_runs: number
+  /** 소요 시간 중앙값 */
+  readonly median_duration_ms: number
+  /** 이 단계가 거쳐 간 코드 지점 */
+  readonly sources: SpanSource[]
+}
+
+/** 시스템이 실제로 실행한 적 있는 워크플로우 하나. */
+export interface WorkflowInfo {
+  readonly workflow_name: string
+  readonly workflow_label: string
+  readonly domain: string
+  readonly pipeline_name: string
+  readonly run_count: number
+  readonly last_run_at: string
+  /** 이 워크플로우가 쓴 모델들 */
+  readonly models: string[]
+  /** 상태별 run 수 */
+  readonly status_counts: Record<string, number>
+  readonly stages: WorkflowStageInfo[]
+}

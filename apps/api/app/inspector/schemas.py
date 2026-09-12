@@ -6,6 +6,7 @@ from typing import Any, Optional
 from agent_telemetry.contracts import (
     ModelAttemptRecord,
     SpanRecord,
+    SpanSource,
     StageSnapshotRecord,
 )
 from pydantic import BaseModel, Field
@@ -63,6 +64,33 @@ class RunDetailResponse(BaseModel):
     spans: list[InspectorSpanView] = Field(default_factory=list)
     # 계약 그대로. 납작한 딕셔너리로 만들면 stage_id 와 순서를 잃는다.
     snapshots: list[StageSnapshotRecord] = Field(default_factory=list)
+
+
+class WorkflowStageInfo(BaseModel):
+    """워크플로우를 이루는 단계 하나. **기록된 실행에서 도출**된다."""
+
+    name: str = Field(description="스팬 논리명")
+    display_label: str = Field("", description="사람이 읽을 이름. 파이프라인이 기록 시점에 정한다")
+    description: str = Field("", description="이용자 관점 설명")
+    span_type: str = Field("chain", description="스팬 유형")
+    phase: Optional[str] = Field(None, description="실행 페이즈")
+    seen_in_runs: int = Field(0, description="이 단계가 관측된 run 수")
+    median_duration_ms: float = Field(0.0, description="소요 시간 중앙값")
+    sources: list[SpanSource] = Field(default_factory=list, description="이 단계가 거쳐 간 코드 지점")
+
+
+class WorkflowInfo(BaseModel):
+    """시스템이 실제로 실행한 적 있는 워크플로우 하나."""
+
+    workflow_name: str
+    workflow_label: str = ""
+    domain: str = "documents"
+    pipeline_name: str = ""
+    run_count: int = 0
+    last_run_at: str = ""
+    models: list[str] = Field(default_factory=list, description="이 워크플로우가 쓴 모델들")
+    status_counts: dict[str, int] = Field(default_factory=dict, description="상태별 run 수")
+    stages: list[WorkflowStageInfo] = Field(default_factory=list)
 
 
 class MatrixModelInfo(BaseModel):

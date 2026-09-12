@@ -132,7 +132,8 @@ class ScaffoldPipeline:
 
         # B. 판정 (유일하게 AI 가 개입하는 단계)
         with collector.step(
-            f"LLM:{self.harness.name}",
+            # 이름은 단계의 정체성, 모델은 속성이다. (outline 과 같은 이유)
+            "LlmInference",
             span_type=SpanType.LLM,
             phase=SpanPhase.LLM,
             display_label=f"{self.harness.name} 블록 역할 판정",
