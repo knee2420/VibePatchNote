@@ -35,15 +35,17 @@ from app.documents.adapters import (
     LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
 )
+from app.documents.agents import (
+    ExtractOutlineUseCase,
+    GenerateScaffoldUseCase,
+)
+from app.documents.experimental import ScanDocumentSegmentsUseCase
 from app.documents.service import DocumentService
 from app.documents.use_cases import (
     DeleteDocumentUseCase,
-    ExtractOutlineUseCase,
-    GenerateScaffoldUseCase,
     GetDocumentFileUseCase,
     ListDocumentArtifactsUseCase,
     RegisterDocumentUseCase,
-    ScanDocumentSegmentsUseCase,
 )
 from app.llm_settings.adapters import (
     AgyUsageReader,

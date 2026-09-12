@@ -22,7 +22,9 @@ from typing import Dict, Optional
 # 모델명 접미사로 노출되는 reasoning effort 등급
 EFFORT_SUFFIXES = ("low", "medium", "high")
 
-DEFAULT_MODEL_NAME = "gemini-3.8-flash-low"
+DEFAULT_GOOGLE_MODEL_NAME = "gemini-3.5-flash-lite"
+DEFAULT_CLI_MODEL_NAME = "gemini-3.8-flash-low"
+DEFAULT_MODEL_NAME = DEFAULT_CLI_MODEL_NAME
 
 
 @dataclass(frozen=True)
@@ -128,6 +130,15 @@ MODEL_REGISTRY.update({
         description="로컬 환경(vLLM/Ollama) 호스팅 예정 — 어댑터 미연결",
     ),
     # --- Google Generative Language Direct API 정규 시나리오 모델 ---
+    "gemini-3.5-flash-lite": ModelSpec(
+        name="gemini-3.5-flash-lite",
+        family="gemini",
+        provider="google_api",
+        max_input_tokens=1_000_000,
+        max_output_tokens=8_192,
+        display_name="Gemini 3.5 Flash Lite (Direct API)",
+        description="Google Direct API 기본 고속 구조화 모델",
+    ),
     "gemini-3.5-flash": ModelSpec(
         name="gemini-3.5-flash",
         family="gemini",

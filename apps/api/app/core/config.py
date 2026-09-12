@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import List
 
 from dotenv import dotenv_values
+from scaffold_engine.harness import DEFAULT_CLI_MODEL_NAME, DEFAULT_GOOGLE_MODEL_NAME
 
 from app.core.storage import StorageRoots
 
@@ -31,9 +32,9 @@ _DEFAULT_CORS_ORIGINS = [
 ]
 
 _DEFAULT_AGENT_CLI_BIN = "agy"
-_DEFAULT_AGENT_CLI_MODEL = "gemini-3.8-flash-low"
+_DEFAULT_AGENT_CLI_MODEL = DEFAULT_CLI_MODEL_NAME
 _DEFAULT_AGENT_CLI_TIMEOUT_SECONDS = 180
-_DEFAULT_GOOGLE_API_MODEL = "gemini-3.5-flash-lite"
+_DEFAULT_GOOGLE_API_MODEL = DEFAULT_GOOGLE_MODEL_NAME
 _DEFAULT_PRIMARY_PROVIDER = "agy_cli"
 _DEFAULT_FALLBACK_PROVIDER = "google_api"
 

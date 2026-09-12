@@ -446,17 +446,29 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
       flag: 'x-goog-api-key',
       description: '구글 클라우드 계정 사용 권한을 증명하는 비밀 보안 API 키로, 외부 노출 없이 안전하게 주입됩니다.',
     })
-    if (span.inputs?.attached_document) {
-      const docName = String(span.inputs.attached_document).split(/[/\\]/).pop() || String(span.inputs.attached_document)
+
+    // 멀티모달 첨부 파일 칩 (inlineData Base64 PDF)
+    const rawAttached =
+      span.inputs?.attached_document ||
+      span.inputs?.filename ||
+      span.inputs?.document_title ||
+      (() => {
+        const m = command.match(/<BASE64_(?:ENCODED_BINARY|PDF):\s*([^>]+)>/i)
+        return m ? m[1].trim() : null
+      })() ||
+      'source.pdf'
+
+    if (rawAttached) {
+      const docName = String(rawAttached).split(/[/\\]/).pop() || String(rawAttached)
       chips.push({
-        key: 'attached-doc',
-        label: 'ATTACHED-DOC',
-        value: docName,
-        fullValue: String(span.inputs.attached_document),
-        color: 'emerald',
+        key: 'inline-data',
+        label: 'INLINE-DATA',
+        value: `application/pdf (${docName})`,
+        fullValue: `parts.inlineData: application/pdf (${rawAttached})`,
+        color: 'rose',
         icon: 'file',
-        flag: 'documentContext',
-        description: 'AI가 소설 전체 맥락을 직접 읽고 분석할 수 있도록 프롬프트와 함께 컨텍스트로 전달한 원본 문서 파일입니다.',
+        flag: 'parts.inlineData',
+        description: `Google Gemini 모델이 시각적 레이아웃과 서식을 직접 볼 수 있도록 Base64 바이너리로 인코딩하여 parts.inlineData로 실시간 동봉한 원본 문서 파일(${docName})입니다.`,
       })
     }
     return chips
@@ -616,17 +628,21 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
   }
 
   // Attached Doc
-  if (span.inputs?.attached_document) {
-    const docName = String(span.inputs.attached_document).split(/[/\\]/).pop() || String(span.inputs.attached_document)
+  const cliAttached =
+    span.inputs?.attached_document ||
+    span.inputs?.filename ||
+    span.inputs?.document_title
+  if (cliAttached) {
+    const docName = String(cliAttached).split(/[/\\]/).pop() || String(cliAttached)
     chips.push({
       key: 'attached-doc',
       label: 'ATTACHED-DOC',
       value: docName,
-      fullValue: String(span.inputs.attached_document),
+      fullValue: String(cliAttached),
       color: 'emerald',
       icon: 'file',
       flag: `--attached-doc ${docName}`,
-      description: 'AI가 소설 전체 흐름을 직접 읽고 분석할 수 있도록 프롬프트와 함께 컨텍스트로 전달한 원본 문서 파일입니다.',
+      description: 'AI가 문서 원문의 시각적 레이아웃과 계층 구조를 분석할 수 있도록 프롬프트에 기하 컨텍스트와 함께 연계된 대상 문서 파일입니다.',
     })
   }
 

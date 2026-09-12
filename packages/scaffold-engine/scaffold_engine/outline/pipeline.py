@@ -164,7 +164,6 @@ class OutlinePipeline:
             )
 
         # 3. 통합 프롬프트 빌드
-        ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
         with collector.step(
             "PromptAssembly",
             span_type=SpanType.CHAIN,
@@ -180,11 +179,13 @@ class OutlinePipeline:
                 f"[분석 대상 원본 문서]\n"
                 f"- 파일명: {doc_ctx['filename']}\n"
                 f"- 원본 파일 경로: {resolved_file_path}\n"
-                f"- 총 페이지: {doc_ctx['total_pages']}페이지\n"
-                f"{ctx_file_info}\n"
-                f"[중요 지침: 3중 멀티모달 컨텍스트 활용]\n"
-                f"1. [시각적 비전 (PDF 직접 열람)]: 반드시 위 원본 파일 경로('{resolved_file_path}')의 문서를 직접 열람(view/inspect)하여, 전반적인 시각 레이아웃(여백, 밑줄, 박스 테두리, 심미적 위계, 표 내부 구획 및 차수 구분)을 확인하세요.\n"
-                f"2. [실측 표(Table) 구조 메타 & 타이포그래피]: 아래 제공된 각 페이지별 실측 표 규격(행x열, 위치)과 폰트 크기 블록을 바탕으로 상위 대주제와 부모 표 구획의 경계를 파악하세요.\n"
+                f"- 총 페이지: {doc_ctx['total_pages']}페이지\n\n"
+                f"[중요 지침: 실측 기하 메타데이터 및 멀티모달 컨텍스트 활용]\n"
+                f"1. [시각적 비전 (PDF 직접 열람)]: 환경에서 도구(view/inspect)가 제공되는 경우 위 원본 파일 경로('{resolved_file_path}')를 직접 확인하여 전체적인 시각 레이아웃(여백, 박스 테두리, 심미적 위계, 서식 표 구획)을 파악하세요.\n"
+                f"2. [실측 기하 메타데이터 엄격 바인딩 (핵심)]: 아래 제공된 표(Table), 미디어(Media), 그리고 [3. 실측 텍스트 블록 기하 메타데이터]의 각 블록 '상대좌표=[ymin, xmin, ymax, xmax]'는 문서 엔진이 정밀 측정한 0~1000 정규화 좌표입니다.\n"
+                f"   - 좌표(box_2d)를 절대로 임의로 추측(Hallucination)하지 마십시오.\n"
+                f"   - 목차 노드는 해당 라벨/헤더의 실측 블록 상대좌표를, elements는 값/내용이 위치한 실측 블록 상대좌표를 직접 바인딩하거나 여러 줄인 경우 해당 블록들을 온전히 감싸도록 병합(Union)하여 지정해야 합니다.\n"
+                f"   - 특히 문서 최하단의 유의사항, 문의처/푸터(Contact/Notice/Footer), 서명란 등은 아래 실측 목록 하단(Y: 800~1000 범위)에 위치한 블록 상대좌표를 엄격히 참조하여 실제 위치에 정확히 일치시키십시오.\n"
                 f"3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.\n\n"
                 f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
                 f"{doc_ctx['context_text']}\n"

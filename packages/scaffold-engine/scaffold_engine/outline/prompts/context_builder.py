@@ -11,7 +11,7 @@ except ImportError:
 class DocumentContextBuilder:
     """PDF 원본으로부터 표 구조 메타, 타이포그래피 블록, 원문 텍스트 전문을 추출하고 파일로 영속화합니다."""
 
-    def __init__(self, max_text_blocks_per_page: int = 5) -> None:
+    def __init__(self, max_text_blocks_per_page: Optional[int] = None) -> None:
         self.max_text_blocks_per_page = max_text_blocks_per_page
 
     def build_context(
@@ -86,7 +86,7 @@ class DocumentContextBuilder:
             except Exception:
                 pass
 
-            # 3. 주요 타이포그래피 블록 (폰트 크기 및 위치 — 헤딩/섹션 구조 후보 선별)
+            # 3. 실측 텍스트 블록 기하 메타데이터 (정규화 좌표 [ymin, xmin, ymax, xmax] 0~1000 전수 추출)
             raw_blocks = page.get_text("dict").get("blocks", [])
             text_blocks: List[Dict[str, Any]] = []
             for b in raw_blocks:
@@ -108,13 +108,16 @@ class DocumentContextBuilder:
                         })
 
             if text_blocks:
-                sorted_blocks = sorted(text_blocks, key=lambda x: x["size"], reverse=True)
-                selected_blocks = sorted_blocks[: self.max_text_blocks_per_page]
-                selected_blocks.sort(key=lambda x: (x["norm_bbox"][0], x["norm_bbox"][1]))
+                # 위에서 아래(Ymin), 왼쪽에서 오른쪽(Xmin) 읽기 순서대로 정렬
+                text_blocks.sort(key=lambda x: (x["norm_bbox"][0], x["norm_bbox"][1]))
+                selected_blocks = text_blocks
+                if self.max_text_blocks_per_page is not None and self.max_text_blocks_per_page > 0:
+                    if len(text_blocks) > self.max_text_blocks_per_page:
+                        selected_blocks = text_blocks[: self.max_text_blocks_per_page]
 
-                summary_lines.append("[3. 주요 타이포그래피 블록 (폰트 크기 및 위치)]")
-                for b in selected_blocks:
-                    summary_lines.append(f"- (폰트:{b['size']}, 위치:{b['norm_bbox']}) {b['text']}")
+                summary_lines.append("[3. 실측 텍스트 블록 기하 메타데이터 (정규화 좌표 [ymin, xmin, ymax, xmax] 0~1000)]")
+                for idx, b in enumerate(selected_blocks, 1):
+                    summary_lines.append(f"- [블록 {idx}] 상대좌표={b['norm_bbox']}, 폰트크기={b['size']}pt: {b['text']}")
                 summary_lines.append("")
 
             # 4. 페이지 원문 텍스트 전문 (연속 텍스트 흐름 — 100% 무손실 원문 전문)

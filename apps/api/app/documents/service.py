@@ -1,12 +1,12 @@
 """documents 도메인의 얇은 진입점.
 
-비즈니스 로직은 `use_cases/` 가 갖는다. 이 계층이 하는 일은 세 가지뿐이다.
+비즈니스 로직은 `use_cases/` 및 `agents/` 가 갖는다. 이 계층이 하는 일은 세 가지뿐이다.
 
 1. 요청이 준 식별자(`docId` 또는 레거시 `filename`)를 `doc_id` 로 정규화한다.
-2. 알맞은 유스케이스로 넘긴다.
-3. 재개 가능한 유스케이스를 Agent Runtime 에 등록한다.
+2. 알맞은 유스케이스나 에이전트로 넘긴다.
+3. 재개 가능한 유스케이스/에이전트를 Agent Runtime 에 등록한다.
 
-여기에 조건 분기나 저장 경로가 다시 쌓이기 시작하면, 그것은 유스케이스로 내려가야
+여기에 조건 분기나 저장 경로가 다시 쌓이기 시작하면, 그것은 아래로 내려가야
 할 로직이 올라온 것이다.
 """
 from __future__ import annotations
@@ -17,22 +17,24 @@ from typing import Any
 
 from app.core.agent_runtime import AgentRunInput, AgentRuntime, ApprovalService
 
+from .agents import (
+    ExtractOutlineUseCase,
+    GenerateScaffoldUseCase,
+)
+from .experimental import ScanDocumentSegmentsUseCase
 from .models import DocumentMeta
 from .use_cases import (
     DeleteDocumentUseCase,
-    ExtractOutlineUseCase,
-    GenerateScaffoldUseCase,
     GetDocumentFileUseCase,
     ListDocumentArtifactsUseCase,
     RegisterDocumentUseCase,
-    ScanDocumentSegmentsUseCase,
 )
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentService:
-    """라우터와 유스케이스 사이의 얇은 경계."""
+    """라우터와 유스케이스/에이전트 사이의 얇은 경계."""
 
     def __init__(
         self,

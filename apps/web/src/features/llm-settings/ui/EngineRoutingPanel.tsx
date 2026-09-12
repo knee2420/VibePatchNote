@@ -28,9 +28,20 @@ export function EngineRoutingPanel({ onNavigateToGoogleTab }: EngineRoutingPanel
     savePolicy,
   } = useEngineRoutingSettings();
 
-  // 사용 가능한 모델 목록 필터링
-  const googleModels = runtime?.models.filter((m) => m.provider === 'google_api' || m.provider === 'google-api') ?? [];
-  const cliModels = runtime?.models.filter((m) => m.provider === 'agy_cli' || m.provider === 'agy-cli') ?? [];
+  // 사용 가능한 모델 목록 필터링 (동일 id 모델 중복 렌더링 방어)
+  const filterAndDeduplicate = (providerMatches: (prov: string) => boolean) => {
+    const seen = new Set<string>();
+    return (runtime?.models ?? [])
+      .filter((m) => providerMatches(m.provider))
+      .filter((m) => {
+        if (seen.has(m.id)) return false;
+        seen.add(m.id);
+        return true;
+      });
+  };
+
+  const googleModels = filterAndDeduplicate((p) => p === 'google_api' || p === 'google-api');
+  const cliModels = filterAndDeduplicate((p) => p === 'agy_cli' || p === 'agy-cli');
 
   const primaryModelChoices = form.primaryProvider === 'google-api' ? googleModels : cliModels;
   const fallbackModelChoices = form.fallbackProvider === 'google-api' ? googleModels : cliModels;

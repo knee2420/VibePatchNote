@@ -44,6 +44,8 @@ type = "forbidden"
 allow_indirect_imports = true
 source_modules = [
     "app.documents.use_cases",
+    "app.documents.agents",
+    "app.documents.experimental",
     "app.documents.service",
     "app.scaffolds.service",
     "app.workspaces.service",
@@ -56,6 +58,8 @@ type = "forbidden"
 source_modules = [
     "app.documents.service",
     "app.documents.use_cases",
+    "app.documents.agents",
+    "app.documents.experimental",
     "app.documents.adapters",
 ]
 forbidden_modules = ["app.workspaces", "app.scaffolds"]

@@ -216,7 +216,7 @@ app/<domain>/
 | 페이지 조합 | `pages/editor/ui/EditorPage.tsx` |
 | API 라우터 | `apps/api/app/documents/router.py` |
 | 유스케이스 (일반) | `documents/use_cases/register_document.py` |
-| 유스케이스 (Agent) | `documents/use_cases/extract_outline.py` |
+| Agent | `documents/agents/extract_outline.py` |
 | 포트·어댑터 | `documents/ports.py`, `documents/adapters/` |
 | Agent 정의 | `documents/agents/outline_analysis_agent.py` |
 | 실행 상태·재개 | `apps/api/app/core/agent_runtime/` |

@@ -63,8 +63,8 @@ function isFileName(val?: string | null): boolean {
 }
 
 const KNOWN_FILE_PATHS: Record<string, string> = {
-  'extract_outline.py': 'apps/api/app/documents/use_cases/extract_outline.py',
-  'generate_scaffold.py': 'apps/api/app/documents/use_cases/generate_scaffold.py',
+  'extract_outline.py': 'apps/api/app/documents/agents/extract_outline.py',
+  'generate_scaffold.py': 'apps/api/app/documents/agents/generate_scaffold.py',
   'local_document_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
   'local_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
   'fallback.py': 'apps/api/app/core/llm/fallback.py',
@@ -269,15 +269,15 @@ function buildTreeForSpan(
   if (name.includes('cache') || name.includes('head')) {
     nodes.push({
       id: `${span.span_id}-cache-file`,
-      name: 'apps/api/app/documents/use_cases/extract_outline.py',
+      name: 'apps/api/app/documents/agents/extract_outline.py',
       type: 'file',
-      filePath: 'apps/api/app/documents/use_cases/extract_outline.py',
+      filePath: 'apps/api/app/documents/agents/extract_outline.py',
       children: [
         {
           id: `${span.span_id}-fn-extract`,
           name: 'extract_outline(doc_id: str, ...)',
           type: 'function',
-          filePath: 'apps/api/app/documents/use_cases/extract_outline.py',
+          filePath: 'apps/api/app/documents/agents/extract_outline.py',
           symbol: 'extract_outline',
         },
       ],

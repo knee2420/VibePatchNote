@@ -51,7 +51,10 @@ class LocalAgentRunRepository:
         run = fold(run_id, self._read_events(run_dir))
         if run is None:  # 방금 썼으므로 정상 경로에서는 도달하지 않는다.
             raise RuntimeError(f"Run history vanished right after append: {run_id}")
-        write_json(run_dir / SNAPSHOT_FILE, run.model_dump(mode="json"))
+        try:
+            write_json(run_dir / SNAPSHOT_FILE, run.model_dump(mode="json"))
+        except OSError as exc:
+            logger.warning("[AgentRuns] 스냅샷 기록 일시 실패(이력에서 복원 가능, 무해함) %s: %s", run_id, exc)
         return run
 
     def get(self, run_id: str) -> AgentRun | None:

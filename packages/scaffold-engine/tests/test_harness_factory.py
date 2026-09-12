@@ -64,3 +64,19 @@ def test_google_adapter_structured_output_mock(monkeypatch) -> None:
     assert res.structured_output == {"test": "ok"}
     assert res.input_tokens == 10
     assert res.output_tokens == 5
+
+
+def test_agy_isolated_source_dir_lifecycle(tmp_path: Path) -> None:
+    source_file = tmp_path / "sample.pdf"
+    source_file.write_bytes(b"%PDF-dummy")
+
+    iso_dir = AgyCliHarness._prepare_isolated_source_dir(source_file)
+    assert iso_dir is not None
+    iso_path = Path(iso_dir)
+    assert iso_path.exists()
+    assert (iso_path / "sample.pdf").exists()
+    assert (iso_path / "sample.pdf").read_bytes() == b"%PDF-dummy"
+
+    AgyCliHarness._cleanup_isolated_dir(iso_dir)
+    assert not iso_path.exists()
+

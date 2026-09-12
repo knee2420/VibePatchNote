@@ -14,7 +14,7 @@ description: "사용자가 LLM 이 개입하는 백엔드 기능(아웃라인·�
 > 3. [`.agents/rules/60-data/rule.md`](../../rules/60-data/rule.md) — 산출물·실행 상태·원장을 어디에 둘지
 > 4. [`.agents/rules/50-develop/construct/rule.md`](../../rules/50-develop/construct/rule.md) — 추가 절차(§6 Agent, §7 공급자)
 >
-> 정본 참조 구현: `apps/api/app/documents/use_cases/extract_outline.py`
+> 정본 참조 구현: `apps/api/app/documents/agents/extract_outline.py`
 
 ---
 

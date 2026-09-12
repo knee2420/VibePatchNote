@@ -14,6 +14,7 @@ import logging
 import os
 import tempfile
 import threading
+import time
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
@@ -28,6 +29,18 @@ def _lock_for(path: Path) -> threading.Lock:
     key = path.resolve()
     with _path_locks_guard:
         return _path_locks.setdefault(key, threading.Lock())
+
+
+def _replace_with_retry(src: Path, dst: Path, max_attempts: int = 6) -> None:
+    """Windows 에서 파일 읽기 락(WinError 5, 32)으로 인한 교체 실패를 지수 백오프로 재시도한다."""
+    for attempt in range(max_attempts):
+        try:
+            os.replace(src, dst)
+            return
+        except PermissionError:
+            if attempt == max_attempts - 1:
+                raise
+            time.sleep(0.01 * (2**attempt))
 
 
 def write_json(path: Path, payload: Any) -> None:
@@ -48,7 +61,7 @@ def write_json(path: Path, payload: Any) -> None:
                 json.dump(payload, handle, ensure_ascii=False, indent=2)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(temporary, path)
+            _replace_with_retry(temporary, path)
         finally:
             if temporary.exists():
                 temporary.unlink(missing_ok=True)
@@ -58,8 +71,12 @@ def read_json(path: Path, default: Any = None) -> Any:
     """JSON 을 읽는다. 없거나 깨졌으면 기본값을 돌려준다."""
     if not path.exists():
         return default
+    lock = _lock_for(path)
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        with lock:
+            if not path.exists():
+                return default
+            return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         logger.warning("[storage] 손상된 JSON 을 건너뜁니다 (%s): %s", path, exc)
         return default

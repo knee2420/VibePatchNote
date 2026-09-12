@@ -6,29 +6,19 @@
 - 윈도우 UTF-8 입출력 강제 / `CREATE_NO_WINDOW` 로 콘솔 창 억제
 - `--json-schema` 로 구조화 출력 강제 (단, 항상 지켜지지는 않으므로 파서가 방어)
 
-**전송 방식: stdin NDJSON (`--input-format stream-json`).**
+**전송 방식: stdin 파일 스트림 (`--output-format json`).**
 
 프롬프트를 `-p <prompt>` 로 명령줄에 실으면 윈도우 32KB 명령줄 한계에 걸려
-대형 문서 컨텍스트에서 `WinError 206` 으로 죽는다. `-p` 는 stdin 을 읽지 않으므로
-(값을 비우면 "empty prompt" 에러를 뱉는다) 유일한 우회로가 stream-json 입력이다.
-
-실측 확인 (2026-09-08, agy.exe):
-
-- 입력: `{"event":"user","message":{"role":"user","content":[{"type":"text","text":...}]}}` 한 줄.
-  `event` 필드가 없으면 CLI 가 거부한다.
-- 출력: NDJSON. 마지막 `{"event":"result","result":{...}}` 의 `result` 가
-  `--output-format json` 단일 엔벨로프와 **동일한 형태**(status/response/usage/...)다.
-- `--json-schema` 병용 시 `result.structured_output` 에 스키마 준수 객체가 담긴다.
-  `result.response` 쪽에는 `toolAction` 등 부수 필드가 섞이므로 structured_output 을 우선한다.
-
-새 벤더를 붙이려면 이 파일을 복제하지 말고 `BaseLlmHarness` 를 구현한 클래스를
-`harness/` 에 추가한 뒤 `HarnessFactory.register(provider, builder)` 로 등록한다.
+대형 문서 컨텍스트에서 `WinError 206` 으로 죽는다.
+따라서 프롬프트는 텍스트 파일(.txt)로 저장한 뒤 stdin 파일 스트림(`stdin=f`)으로 공급하고,
+출력은 `--output-format json` 단일 엔벨로프로 회수한다 (`stream-json` 미사용).
 """
 from __future__ import annotations
 
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -52,17 +42,6 @@ CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
 DEFAULT_MODEL = DEFAULT_MODEL_NAME
 DEFAULT_TIMEOUT_SECONDS = 180
-
-
-def _stdin_envelope(prompt: str) -> str:
-    """stream-json 입력 한 줄을 만든다."""
-    return json.dumps(
-        {
-            "event": "user",
-            "message": {"role": "user", "content": [{"type": "text", "text": prompt}]},
-        },
-        ensure_ascii=False,
-    ) + "\n"
 
 
 def _extract_result_envelope(stdout: str) -> Optional[Dict[str, Any]]:
@@ -125,8 +104,7 @@ class AgyCliHarness(BaseLlmHarness):
         cmd = [
             self.executable,
             "--model", target_model,
-            "--input-format", "stream-json",
-            "--output-format", "stream-json",
+            "--output-format", "json",
             "--dangerously-skip-permissions",
             "--disable-slash-commands",
         ]
@@ -137,6 +115,12 @@ class AgyCliHarness(BaseLlmHarness):
         if resolved_effort:
             cmd.extend(["--effort", resolved_effort])
 
+        isolated_dir: Optional[str] = None
+        if file_path:
+            isolated_dir = self._prepare_isolated_source_dir(file_path)
+            if isolated_dir:
+                cmd.extend(["--add-dir", isolated_dir])
+
         schema_file, is_temp_schema = self._resolve_schema_file(schema_path, json_schema)
         if schema_file:
             cmd.extend(["--json-schema", schema_file])
@@ -145,17 +129,17 @@ class AgyCliHarness(BaseLlmHarness):
 
         # 호출이 길게 매달릴 수 있으므로 시작 시점도 남긴다(행 진단용).
         logger.info(
-            "[agy] 호출 시작 model=%s prompt=%d자 schema=%s timeout=%ds",
-            target_model, len(prompt), bool(schema_file), timeout_sec,
+            "[agy] 호출 시작 model=%s prompt=%d자 schema=%s timeout=%ds isolated_source=%s",
+            target_model, len(prompt), bool(schema_file), timeout_sec, bool(isolated_dir),
         )
 
         prompt_file = None
         t0 = time.time()
         try:
-            # 프롬프트를 디스크 파일로 먼저 영속화하여 던짐 (사용자 요청: 파일 기반 전달)
+            # 프롬프트를 디스크 파일(txt)로 영속화하여 stdin으로 전달 (stream-json 미사용, 순수 파일 스트림)
             temp_dir = Path(tempfile.gettempdir())
-            prompt_file = temp_dir / f"agy_prompt_{int(time.time() * 1000)}.ndjson"
-            prompt_file.write_text(_stdin_envelope(prompt), encoding="utf-8")
+            prompt_file = temp_dir / f"agy_prompt_{int(time.time() * 1000)}.txt"
+            prompt_file.write_text(prompt, encoding="utf-8")
 
             with open(prompt_file, "r", encoding="utf-8") as stdin_f:
                 res = subprocess.run(
@@ -203,6 +187,7 @@ class AgyCliHarness(BaseLlmHarness):
             )
         finally:
             self._cleanup_schema(schema_file, is_temp_schema)
+            self._cleanup_isolated_dir(isolated_dir)
             if prompt_file and prompt_file.exists():
                 try:
                     prompt_file.unlink()
@@ -268,16 +253,61 @@ class AgyCliHarness(BaseLlmHarness):
             error=envelope.get("error"),
             telemetry_metadata={
                 "provider": spec.provider,
-                "transport": "stream-json/stdin",
+                "transport": "text-file/stdin (--output-format json)",
                 "effort_flag": resolved_effort,
                 "prompt_chars": len(prompt),
                 "wall_seconds": elapsed,
                 "command": cmd,
                 "raw_command": " ".join(f'"{c}"' if " " in str(c) else str(c) for c in cmd),
+                "isolated_source_dir": isolated_dir,
+                "file_path": str(file_path) if file_path else None,
             },
         )
 
     # --- 내부 ---
+
+    @staticmethod
+    def _prepare_isolated_source_dir(file_path: Union[str, Path]) -> Optional[str]:
+        """단일 source 파일만 존재하는 격리된 디렉터리를 구성하여 --add-dir에 넘긴다.
+
+        기존 원본 폴더(doc-xxx)에는 artifacts/ 등 과거 산출물이 함께 들어있어,
+        해당 폴더 전체를 --add-dir로 넘기면 CLI 에이전트가 과거 산출물을 치팅하거나
+        불필요한 인덱싱으로 인풋 토큰이 폭증한다.
+
+        따라서 source 파일만 단독으로 복사(또는 하드링크)한 임시 디렉터리를 생성하여
+        순수 원본 문서만 워크스페이스에 격리 노출시킨다.
+        """
+        src = Path(file_path).resolve()
+        if not src.exists():
+            return None
+
+        if src.is_dir():
+            return str(src)
+
+        iso_dir = Path(tempfile.mkdtemp(prefix="agy_source_iso_"))
+        target = iso_dir / src.name
+        try:
+            os.link(src, target)
+        except Exception:
+            try:
+                shutil.copy2(src, target)
+            except Exception as e:
+                logger.warning("[agy] 격리 source 디렉터리 복사 실패: %s", e)
+                try:
+                    shutil.rmtree(iso_dir, ignore_errors=True)
+                except Exception:
+                    pass
+                return None
+
+        return str(iso_dir)
+
+    @staticmethod
+    def _cleanup_isolated_dir(isolated_dir: Optional[str]) -> None:
+        if isolated_dir and os.path.exists(isolated_dir):
+            try:
+                shutil.rmtree(isolated_dir, ignore_errors=True)
+            except Exception:
+                pass
 
     @staticmethod
     def _resolve_schema_file(

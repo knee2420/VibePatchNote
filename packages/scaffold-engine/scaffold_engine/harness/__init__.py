@@ -25,6 +25,8 @@ from .gemini_client import GeminiAdapter, GeminiApiHarness, GoogleGenAiHarness
 from .gemma_client import LocalGemmaHarness
 from .parsing import parse_json_payload
 from .registry import (
+    DEFAULT_CLI_MODEL_NAME,
+    DEFAULT_GOOGLE_MODEL_NAME,
     DEFAULT_MODEL_NAME,
     EFFORT_SUFFIXES,
     MODEL_REGISTRY,
@@ -39,6 +41,8 @@ __all__ = [
     "AgyHarness",
     "BaseLlmHarness",
     "CLIExecutionResult",
+    "DEFAULT_CLI_MODEL_NAME",
+    "DEFAULT_GOOGLE_MODEL_NAME",
     "DEFAULT_MODEL",
     "DEFAULT_MODEL_NAME",
     "DEFAULT_TIMEOUT_SECONDS",

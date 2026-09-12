@@ -82,7 +82,7 @@ class DocumentArtifactRepository(Protocol):    # LLM 산출물 → data/
 class DocumentCacheRepository(Protocol):       # 결정적 파생 → cache/
     def context_dir(self, doc_id: str) -> Path: ...
 
-# use_cases/extract_outline.py — 계약만 받는다. 구체 클래스를 타입으로 받지 않는다
+# agents/extract_outline.py — 계약만 받는다. 구체 클래스를 타입으로 받지 않는다
 class ExtractOutlineUseCase:
     def __init__(self, source: DocumentSourceRepository,
                  artifacts: DocumentArtifactRepository,

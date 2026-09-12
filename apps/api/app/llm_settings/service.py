@@ -54,27 +54,31 @@ class LlmSettingsService:
 
     def runtime_dashboard(self) -> dict[str, object]:
         """키 원문 없이 현재 실행 정책과 모델 카탈로그를 한 화면 계약으로 제공한다."""
-        models = [
-            {
+        known_ids = set()
+        models = []
+        for spec in MODEL_REGISTRY.values():
+            known_ids.add(spec.name)
+            prov = "google-api" if spec.provider in ("google_api", "google-api") else ("agy-cli" if spec.provider in ("agy_cli", "agy-cli") else spec.provider)
+            models.append({
                 "id": spec.name,
                 "label": spec.display_name or spec.name,
-                "provider": spec.provider,
+                "provider": prov,
                 "inputTokenLimit": spec.max_input_tokens,
                 "outputTokenLimit": spec.max_output_tokens,
                 "supportsStructuredOutput": spec.supports_structured_schema,
-            }
-            for spec in MODEL_REGISTRY.values()
-        ]
-        # Google의 실제 허용 모델은 키 권한/프로젝트에 따라 달라진다. API key만으로
-        # 남은 호출 수를 신뢰성 있게 읽을 수 없으므로 관측 가능한 값만 명시한다.
-        models.append({
-            "id": settings.google_api_model,
-            "label": f"Google API · {settings.google_api_model}",
-            "provider": "google-api",
-            "inputTokenLimit": None,
-            "outputTokenLimit": None,
-            "supportsStructuredOutput": True,
-        })
+            })
+
+        # 환경 변수나 커스텀 설정으로 레지스트리에 없는 새 모델이 지정된 경우에만 추가
+        if settings.google_api_model and settings.google_api_model not in known_ids:
+            models.append({
+                "id": settings.google_api_model,
+                "label": f"Google API · {settings.google_api_model}",
+                "provider": "google-api",
+                "inputTokenLimit": None,
+                "outputTokenLimit": None,
+                "supportsStructuredOutput": True,
+            })
+            known_ids.add(settings.google_api_model)
         is_google_primary = settings.primary_provider in ("google_api", "google-api")
         primary_provider_id = "google-api" if is_google_primary else PRIMARY_PROVIDER_ID
         fallback_provider_id = PRIMARY_PROVIDER_ID if is_google_primary else "google-api"

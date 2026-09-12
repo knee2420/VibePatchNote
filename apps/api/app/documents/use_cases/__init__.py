@@ -10,13 +10,13 @@
   `data/` 에 provenance 와 함께 아티팩트로 커밋한다.
   `extract_outline` `scan_document_segments` `generate_scaffold`
 """
+from ..agents.extract_outline import ExtractOutlineUseCase
+from ..agents.generate_scaffold import GenerateScaffoldUseCase
+from ..experimental.scan_document_segments import ScanDocumentSegmentsUseCase
 from .delete_document import DeleteDocumentUseCase
-from .extract_outline import ExtractOutlineUseCase
-from .generate_scaffold import GenerateScaffoldUseCase
 from .get_document_file import GetDocumentFileUseCase
 from .list_artifacts import ListDocumentArtifactsUseCase
 from .register_document import RegisterDocumentUseCase
-from .scan_document_segments import ScanDocumentSegmentsUseCase
 
 __all__ = [
     "RegisterDocumentUseCase",

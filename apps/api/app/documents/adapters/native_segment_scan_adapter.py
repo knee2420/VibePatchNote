@@ -14,4 +14,4 @@ class EngineSegmentScanAdapter:
         self._runner = runner
 
     async def scan(self, prompt: str) -> dict[str, Any] | None:
-        return await asyncio.to_thread(self._runner.run, prompt)
+        return await asyncio.to_thread(self._runner.run, prompt, list_key="segments")

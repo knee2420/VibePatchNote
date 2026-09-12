@@ -19,11 +19,11 @@ export function useEngineRoutingSettings() {
   const [runtime, setRuntime] = useState<RuntimeDashboard>();
   const [form, setForm] = useState<EngineRoutingFormState>({
     primaryProvider: 'google-api',
-    primaryModel: 'gemini-3.5-flash',
+    primaryModel: '',
     primaryTimeoutSeconds: 180,
     fallbackEnabled: true,
     fallbackProvider: 'agy-cli',
-    fallbackModel: 'gemini-3.8-flash-low',
+    fallbackModel: '',
     fallbackTimeoutSeconds: 180,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -47,11 +47,11 @@ export function useEngineRoutingSettings() {
 
       setForm({
         primaryProvider,
-        primaryModel: nextRuntime.policy.primaryModel || (isGooglePrimary ? 'gemini-3.5-flash' : 'gemini-3.8-flash-low'),
+        primaryModel: nextRuntime.policy.primaryModel || '',
         primaryTimeoutSeconds: nextRuntime.policy.primaryTimeoutSeconds || 180,
         fallbackEnabled: Boolean(nextRuntime.policy.fallbackModel),
         fallbackProvider,
-        fallbackModel: nextRuntime.policy.fallbackModel || (isGooglePrimary ? 'gemini-3.8-flash-low' : 'gemini-3.5-flash'),
+        fallbackModel: nextRuntime.policy.fallbackModel || '',
         fallbackTimeoutSeconds: nextRuntime.policy.fallbackTimeoutSeconds || 180,
       });
     } catch {
@@ -69,16 +69,19 @@ export function useEngineRoutingSettings() {
     setForm((prev) => {
       if (prev.primaryProvider === provider) return prev;
       const newFallbackProvider: EngineProviderId = provider === 'google-api' ? 'agy-cli' : 'google-api';
+      const targetModels = runtime?.models.filter((m) => m.provider === provider) ?? [];
+      const fallbackModels = runtime?.models.filter((m) => m.provider === newFallbackProvider) ?? [];
+
       return {
         ...prev,
         primaryProvider: provider,
-        primaryModel: provider === 'google-api' ? 'gemini-3.5-flash' : 'gemini-3.8-flash-low',
+        primaryModel: targetModels[0]?.id || prev.primaryModel,
         fallbackProvider: newFallbackProvider,
-        fallbackModel: newFallbackProvider === 'google-api' ? 'gemini-3.5-flash' : 'gemini-3.8-flash-low',
+        fallbackModel: fallbackModels[0]?.id || prev.fallbackModel,
       };
     });
     setMessage('');
-  }, []);
+  }, [runtime]);
 
   const updatePrimaryModel = useCallback((model: string) => {
     setForm((prev) => ({ ...prev, primaryModel: model }));

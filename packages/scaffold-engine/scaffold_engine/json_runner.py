@@ -12,7 +12,7 @@ class JsonPromptRunner:
     def __init__(self, harness: BaseLlmHarness) -> None:
         self._harness = harness
 
-    def run(self, prompt: str) -> dict[str, Any] | None:
+    def run(self, prompt: str, list_key: str = "__engine_payload__") -> dict[str, Any] | None:
         if not prompt.strip():
             raise ValueError("JsonPromptRunner requires a non-empty prompt.")
-        return self._harness.run_json(prompt, list_key="__engine_payload__")
+        return self._harness.run_json(prompt, list_key=list_key)

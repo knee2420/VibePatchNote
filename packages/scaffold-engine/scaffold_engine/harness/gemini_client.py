@@ -29,6 +29,7 @@ from .base import (
     BaseLlmHarness,
     LlmExecutionResult,
 )
+from .registry import DEFAULT_GOOGLE_MODEL_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -139,7 +140,7 @@ class GoogleGenAiHarness(BaseLlmHarness):
 
     def __init__(
         self,
-        model: str = "gemini-3.5-flash",
+        model: str = DEFAULT_GOOGLE_MODEL_NAME,
         api_key: Optional[str] = None,
         timeout_seconds: int = 180,
     ) -> None:
