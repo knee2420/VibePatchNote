@@ -11,12 +11,20 @@
 **Turborepo 모노레포**입니다. 프론트엔드는 **FSD(Feature-Sliced Design)**, 백엔드는 **도메인 패키지 구조**를 따릅니다.
 
 ```text
-apps/web    @vibe/web              React 19 + Vite + Tailwind v4 + React Flow + Tiptap
-apps/api    @vibe/api              FastAPI + Agent Runtime
+apps/web       @vibe/web           React 19 + Vite + Tailwind v4 + React Flow + Tiptap
+apps/api       @vibe/api           FastAPI + Agent Runtime
+apps/inspector @vibe/inspector     관측 콘솔 (:5174). 읽기 전용, FSD 아님
 packages/scaffold-engine           호스트 비의존 문서 스캐폴딩 엔진
 packages/document-viewer           호스트 비의존 문서 뷰어 엔진
+packages/agent-telemetry           호스트 비의존 관측 계약 (Span·Attempt·Snapshot)
 packages/config                    공통 TypeScript 설정
 ```
+
+> `apps/inspector` 는 내부 관측 도구라 FSD 레이어를 쓰지 않는다. 대신
+> **백엔드 계약에서 타입을 생성**해 계약 이탈을 막는다
+> ([`60-data/observability.md`](./.agents/rules/60-data/observability.md) §5).
+> FSD 적용 여부는 열린 결정이다
+> ([로드맵 §6](./workbench/06.agent_observability/06.abstraction_roadmap.md)).
 
 런타임 데이터는 수명주기 등급으로 나뉩니다. **디렉터리 이름이 곧 취급 방식입니다.**
 

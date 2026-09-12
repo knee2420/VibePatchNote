@@ -5,48 +5,8 @@
  */
 
 import type { SpanRecordView } from '../types'
+import { deriveDataFlow, isFileName } from '../lib/dataFlow'
 import { asText } from '../lib/payload'
-
-function isFileName(val?: string | null): boolean {
-  if (!val) return false
-  const lower = val.toLowerCase()
-  return (
-    lower.endsWith('.pdf') ||
-    lower.endsWith('.docx') ||
-    lower.endsWith('.xlsx') ||
-    lower.endsWith('.txt') ||
-    lower.endsWith('.hwp') ||
-    lower.endsWith('.hwpx') ||
-    lower.endsWith('.json') ||
-    lower.endsWith('.md')
-  )
-}
-
-function deriveDataFlow(span: SpanRecordView): { in: string | null; out: string | null; via: string[] } {
-  let dataIn = span.data_in || null
-  let dataOut = span.data_out || null
-  const dataVia = span.data_via && span.data_via.length > 0 ? span.data_via : []
-
-  if (!dataIn && span.inputs) {
-    if (span.inputs.filename) dataIn = String(span.inputs.filename)
-    else if (span.inputs.file_name) dataIn = String(span.inputs.file_name)
-    else if (span.inputs.prompt_chars) dataIn = `Prompt (${Number(span.inputs.prompt_chars).toLocaleString()} chars)`
-    else if (span.inputs.instructions_chars || span.inputs.dynamic_context_chars) dataIn = 'DocumentContext + Instructions'
-    else if (span.name.includes('Validation')) dataIn = 'Structured JSON'
-    else if (span.name.includes('Commit')) dataIn = 'OutlineDocument'
-    else if (span.inputs.docId) dataIn = `docId: ${span.inputs.docId}`
-  }
-
-  if (!dataOut && span.outputs) {
-    if (span.outputs.context_chars) dataOut = `DocumentContext (${Number(span.outputs.context_chars).toLocaleString()} chars)`
-    else if (span.outputs.total_prompt_chars) dataOut = `Prompt String (${Number(span.outputs.total_prompt_chars).toLocaleString()} chars)`
-    else if (span.outputs.outlines_count !== undefined) dataOut = `OutlineDocument (${span.outputs.outlines_count} nodes)`
-    else if (span.outputs.has_structured_output) dataOut = 'Structured JSON'
-    else if (span.outputs.artifactId) dataOut = `artifact-${String(span.outputs.artifactId).slice(0, 8)}.json`
-  }
-
-  return { in: dataIn, out: dataOut, via: dataVia }
-}
 
 function labelIn(val: string | null): string {
   if (!val) return '(없음)'

@@ -39,6 +39,7 @@ import { oneDark } from '@codemirror/theme-one-dark'
 import { fetchSourceCode } from '../api'
 import type { CompareItem, SourceCodeResponse, SpanRecordView, SpanSource } from '../types'
 import { textOf } from '../lib/payload'
+import { isFileName } from '../lib/dataFlow'
 
 interface PipelineTreeViewProps {
   readonly span: SpanRecordView
@@ -64,12 +65,6 @@ export interface PipelineTreeNode {
   /** 조회 없이 바로 보여줄 내용 (프롬프트·모델 사양 등). */
   readonly directContent?: string
   readonly children?: readonly PipelineTreeNode[]
-}
-
-function isFileName(val?: string | null): boolean {
-  if (!val) return false
-  const lower = val.toLowerCase()
-  return ['.pdf', '.docx', '.xlsx', '.txt', '.hwp', '.hwpx'].some((ext) => lower.endsWith(ext))
 }
 
 /** `scaffold_engine.outline.pipeline` → `pipeline` */
