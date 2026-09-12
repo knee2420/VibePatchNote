@@ -1,5 +1,6 @@
 """Inspector 엔드포인트 및 서비스 단위 테스트."""
 import json
+import shutil
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -43,8 +44,9 @@ def test_inspector_runs_and_detail(observability_runs: list[str]):
     target = next((r for r in runs if r["run_id"] == run_id), None)
     assert target is not None, f"{run_id} 가 목록에 없습니다"
 
-    # 생산자가 실제로 쓰는 값이다. 대문자로 오지 않는다.
-    assert target["status"] == "success"
+    # run 의 상태는 생애주기 어휘(RunStatus)다. 스팬의 'success' 와 다르며,
+    # 둘은 서로 다른 개념이라 통합하지 않는다 (observability.md §3-1).
+    assert target["status"] == "completed"
     assert target["total_duration_ms"] > 0
     assert target["total_tokens"] > 0
 
@@ -140,36 +142,99 @@ def test_ingest_pipeline_telemetry_resolves_target_name(tmp_path: Path):
             shutil.rmtree(run_dir, ignore_errors=True)
 
 
-def test_inspector_provider_resolution_for_cli_model(tmp_path: Path):
-    """primary_provider가 비어 있어도 3.8-flash-low 같은 CLI 모델은 agy_cli로 매핑되는지 검증."""
+def test_provider_is_recorded_not_guessed(tmp_path: Path):
+    """공급자는 기록된 것만 쓴다. 모델명으로 추측하지 않는다.
+
+    예전에는 `"low" in model_name` 이면 agy_cli 라고 단정했다. 조회 계층이
+    도메인 지식을 갖기 시작하면 새 모델이 늘 때마다 elif 가 늘어나고,
+    틀려도 아무도 모른다 (observability.md §4).
+    """
     runs_dir = settings.storage.runs
-    test_run_id = "test-run-cli-model-003"
-    run_dir = runs_dir / test_run_id
+    run_id = "test-run-no-provider"
+    run_dir = runs_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        meta_data = {
-            "run_id": test_run_id,
-            "task_name": "outline_extraction",
-            "doc_id": "doc_test_cli",
-            "status": "SUCCESS",
-            "duration_ms": 1000.0,
-            "primary_provider": None,
-            "primary_model": "gemini-3.8-flash-low",
-            "total_tokens": 500,
-        }
-        (run_dir / "meta.json").write_text(json.dumps(meta_data), encoding="utf-8")
+        (run_dir / "meta.json").write_text(
+            json.dumps(
+                {
+                    "run_id": run_id,
+                    "status": "success",
+                    "start_time": "2026-09-11T00:00:00+00:00",
+                    "primary_provider": None,
+                    "primary_model": "gemini-3.8-flash-low",
+                }
+            ),
+            encoding="utf-8",
+        )
 
-        resp = client.get("/api/v1/inspector/runs")
-        assert resp.status_code == 200
-        found = next((r for r in resp.json() if r.get("run_id") == test_run_id), None)
-        assert found is not None
-        assert found["primary_provider"] == "agy_cli"
-
+        found = next(
+            r for r in client.get("/api/v1/inspector/runs").json() if r["run_id"] == run_id
+        )
+        # 모델은 기록돼 있으니 그대로 나온다.
+        assert found["primary_model"] == "gemini-3.8-flash-low"
+        # 공급자는 기록되지 않았다. 지어내지 않는다.
+        assert found["primary_provider"] is None
     finally:
-        if run_dir.exists():
-            import shutil
-            shutil.rmtree(run_dir, ignore_errors=True)
+        shutil.rmtree(run_dir, ignore_errors=True)
+
+
+def test_run_list_covers_uninstrumented_runs(observability_runs: list[str]):
+    """`meta.json` 이 없는 run 도 목록에 뜬다.
+
+    목록의 정본은 `events.jsonl` 이다 (observability.md §2-1). 예전에는
+    `meta.json` 있는 디렉터리만 올려서 54건 중 37건이 화면에서 사라졌고,
+    그중에 TIMEOUT 과 FAILED 가 있었다.
+    """
+    run_dir = settings.storage.runs / FIXTURE_RUN_EVENTS_ONLY
+    assert (run_dir / "events.jsonl").exists()
+    assert not (run_dir / "meta.json").exists(), "이 픽스처는 meta 가 없어야 합니다"
+
+    runs = client.get("/api/v1/inspector/runs").json()
+    found = next((r for r in runs if r["run_id"] == FIXTURE_RUN_EVENTS_ONLY), None)
+
+    assert found is not None, "계측되지 않은 run 이 목록에서 빠졌습니다"
+    assert found["status"] == "completed"
+    assert found["created_at"], "생애주기에서 시작 시각을 얻어야 합니다"
+
+
+def test_run_list_uses_one_status_vocabulary(observability_runs: list[str]):
+    """목록 안에 두 어휘가 섞이지 않는다.
+
+    `events.jsonl` 이 있는 run 은 `completed`, 텔레메트리만 있는 run 은
+    `success` 로 나오던 시기가 있었다. 소비자가 양쪽을 모두 비교해야 하고,
+    한쪽만 맞추면 나머지가 전부 실패로 그려진다 (observability.md §3-1).
+    """
+    run_statuses = {"queued", "running", "completed", "failed",
+                    "waiting_for_configuration", "waiting_for_approval", "unknown"}
+    for row in client.get("/api/v1/inspector/runs").json():
+        assert row["status"] in run_statuses, (
+            f"{row['run_id']} 의 상태 {row['status']!r} 가 run 어휘가 아닙니다"
+        )
+
+
+def test_telemetry_only_run_is_translated_to_run_vocabulary(observability_runs: list[str]):
+    """`events.jsonl` 없이 텔레메트리만 있는 run 도 run 어휘로 나온다."""
+    run_dir = settings.storage.runs / FIXTURE_RUN_WITH_ATTEMPTS
+    assert not (run_dir / "events.jsonl").exists()
+    assert json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))["status"] == "success"
+
+    row = next(
+        r for r in client.get("/api/v1/inspector/runs").json()
+        if r["run_id"] == FIXTURE_RUN_WITH_ATTEMPTS
+    )
+    assert row["status"] == "completed"
+
+
+def test_run_without_ledger_still_lists(observability_runs: list[str]):
+    """단계 상세의 부재는 오류가 아니라 정상 상태다 (observability.md §2-3)."""
+    runs = {r["run_id"]: r for r in client.get("/api/v1/inspector/runs").json()}
+
+    uninstrumented = runs[FIXTURE_RUN_EVENTS_ONLY]
+    assert uninstrumented["has_span_detail"] is False
+
+    instrumented = runs[FIXTURE_RUN_FULL]
+    assert instrumented["has_span_detail"] is True
 
 
 def test_inspector_source_code_resolution():

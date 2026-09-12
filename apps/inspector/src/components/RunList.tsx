@@ -17,7 +17,8 @@ import {
   Trash2,
 } from 'lucide-react'
 
-import type { RunSummary } from '../types'
+import type { RunSummary, StatusTone } from '../types'
+import { statusTone } from '../types'
 
 interface RunListProps {
   readonly runs: readonly RunSummary[]
@@ -31,6 +32,21 @@ interface RunListProps {
   readonly compareSlotAId?: string | null
   readonly compareSlotBId?: string | null
   readonly onPickCompareItem?: (item: import('../types').CompareItem) => void
+}
+
+const RUN_TONE_STYLE: Record<StatusTone, string> = {
+  ok: 'bg-[rgba(46,160,67,0.15)] text-[#3fb950] border-[rgba(46,160,67,0.3)]',
+  fail: 'bg-[rgba(248,81,73,0.15)] text-[#f85149] border-[rgba(248,81,73,0.3)]',
+  busy: 'bg-[rgba(88,166,255,0.15)] text-[#58a6ff] border-[rgba(88,166,255,0.3)]',
+  idle: 'bg-[#21262d] text-[#848d97] border-[#30363d]',
+}
+
+/** `waiting_*` 은 실패가 아니라 보류다. 실패로 그리면 사용자는 재시도만 반복한다. */
+const RUN_TONE_LABEL: Record<StatusTone, string> = {
+  ok: 'OK',
+  fail: 'FAIL',
+  busy: 'RUN',
+  idle: '대기',
 }
 
 function formatDateTime(isoString: string): string {
@@ -236,7 +252,9 @@ export const RunList: React.FC<RunListProps> = ({
         ) : (
           runs.map((run) => {
             const isSelected = run.run_id === selectedRunId
-            const isSuccess = run.status?.toUpperCase() === 'SUCCESS'
+            // run 의 상태 어휘는 생애주기(`completed`)다. 스팬의 `success` 와 다르다.
+            // 문자열을 직접 비교하면 한쪽 어휘만 맞고 다른 쪽은 전부 실패로 그려진다.
+            const tone = statusTone(run.status)
             const displayLabel = getDisplayLabel(run)
             const targetName = getTargetName(run)
             const isDeleting = deletingId === run.run_id
@@ -297,15 +315,27 @@ export const RunList: React.FC<RunListProps> = ({
                       </div>
                     )}
 
-                    {isSuccess ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)] font-medium">
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border font-medium ${RUN_TONE_STYLE[tone]}`}
+                      title={run.status}
+                    >
+                      {tone === 'ok' ? (
                         <CheckCircle2 className="w-3 h-3" />
-                        OK
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)] font-medium">
+                      ) : tone === 'fail' ? (
                         <AlertCircle className="w-3 h-3" />
-                        FAIL
+                      ) : (
+                        <Clock className="w-3 h-3" />
+                      )}
+                      {RUN_TONE_LABEL[tone]}
+                    </span>
+
+                    {/* 단계 상세가 없는 run. 오류가 아니라 계측되지 않았을 뿐이다. */}
+                    {!run.has_span_detail && (
+                      <span
+                        className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#21262d] text-[#848d97] border border-[#30363d]"
+                        title="이 실행은 계측되지 않아 단계별 상세가 없습니다. 목록과 비용은 온전합니다."
+                      >
+                        상세 없음
                       </span>
                     )}
 

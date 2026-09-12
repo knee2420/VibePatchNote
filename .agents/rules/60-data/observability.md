@@ -190,8 +190,11 @@ USD 비용을 실제로 쓰려면 `ModelSpec` 에 단가 축을 추가하고 **�
 | 원장은 단일 스키마다 | `::test_ledger_migration_unifies_schema` | ✅ |
 | 마이그레이션은 멱등이다 | `::test_ledger_migration_is_idempotent` | ✅ |
 | 시도 기록은 계약을 따른다 | `test_inspector.py::test_attempt_records_follow_the_contract` | ✅ |
-| run 목록은 `events.jsonl` 에서 나온다 | `test_inspector.py::test_run_list_covers_uninstrumented_runs` | ⏳ A1 |
-| 상세 부재는 오류가 아니다 | `::test_run_without_ledger_still_lists` | ⏳ A1 |
+| run 목록은 `events.jsonl` 에서 나온다 | `test_inspector.py::test_run_list_covers_uninstrumented_runs` | ✅ |
+| 상세 부재는 오류가 아니다 | `::test_run_without_ledger_still_lists` | ✅ |
+| 목록의 상태 어휘는 하나다 | `::test_run_list_uses_one_status_vocabulary` | ✅ |
+| 텔레메트리 상태는 run 어휘로 옮긴다 | `::test_telemetry_only_run_is_translated_to_run_vocabulary` | ✅ |
+| 공급자는 기록된 것만 쓴다 | `::test_provider_is_recorded_not_guessed` | ✅ |
 
 **TS 타입 수기 작성 금지**가 이 목록에서 가장 중요하다. 예전 `apps/inspector/src/types.ts`
 는 손으로 베낀 것이었고, 그래서 `ModelAttemptRecord` 가 백엔드와 필드 하나도 맞지
