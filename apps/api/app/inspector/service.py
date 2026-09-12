@@ -8,6 +8,8 @@ import shutil
 from pathlib import Path
 from typing import Any, Optional
 
+from agent_telemetry.contracts import SpanUsage, usage_to_product_dict
+
 from app.core.config import settings
 from app.core.storage.paths import safe_segment
 from app.inspector.schemas import (
@@ -19,6 +21,29 @@ from app.inspector.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _usage_of(meta: dict[str, Any]) -> dict[str, int]:
+    """`meta.json` 의 사용량을 **제품 어휘** 딕셔너리로 돌려준다.
+
+    호출부가 `meta.get("prompt_tokens")` 처럼 남의 어휘를 직접 추측하면
+    호출부 수만큼 틀릴 기회가 생긴다 — 실제로 그래서 토큰·캐시가 전부 0 으로
+    표시됐다. 어휘 변환은 `agent_telemetry.contracts.usage` 한 곳만 안다.
+
+    정본: `.agents/rules/60-data/observability.md` §3-2
+    """
+    raw = meta.get("usage")
+    if isinstance(raw, dict) and raw:
+        # 생산자가 쓴 공급자 어휘 블록. 이것이 정상 경로다.
+        span_usage = SpanUsage.model_validate(raw)
+    else:
+        # `usage` 블록이 없던 시절의 run. 평면 키에서 복원한다.
+        span_usage = SpanUsage(
+            prompt_tokens=int(meta.get("prompt_tokens") or 0),
+            completion_tokens=int(meta.get("completion_tokens") or 0),
+            total_tokens=int(meta.get("total_tokens") or 0),
+        )
+    return usage_to_product_dict(span_usage)
 
 
 class InspectorService:
@@ -45,7 +70,7 @@ class InspectorService:
                 if doc_id and run_doc_id != doc_id:
                     continue
 
-                usage = meta.get("usage", {})
+                usage = _usage_of(meta)
                 spans = meta.get("spans", [])
                 snapshots = meta.get("snapshots", {})
 
@@ -149,17 +174,20 @@ class InspectorService:
                         doc_id=run_doc_id,
                         status=meta.get("status", "UNKNOWN"),
                         total_duration_ms=float(meta.get("duration_ms") or meta.get("total_latency_ms") or 0.0),
-                        total_tokens=int(usage.get("total_tokens") or meta.get("total_tokens") or 0),
-                        input_tokens=int(usage.get("input_tokens") or meta.get("prompt_tokens") or 0),
-                        output_tokens=int(usage.get("output_tokens") or meta.get("completion_tokens") or 0),
-                        thinking_tokens=int(usage.get("thinking_tokens", 0)),
-                        cache_read_tokens=int(usage.get("cache_read_tokens", 0)),
-                        cost_usd=float(usage.get("cost_usd", 0.0)),
+                        total_tokens=usage["total_tokens"],
+                        input_tokens=usage["input_tokens"],
+                        output_tokens=usage["output_tokens"],
+                        thinking_tokens=usage["thinking_tokens"],
+                        cache_read_tokens=usage["cache_read_tokens"],
+                        # ModelSpec 에 단가 축이 없어 USD 비용은 시스템 어디에도 없다.
+                        # 0.0 으로 내보내면 "무료"라는 거짓말이 된다.
+                        cost_usd=None,
                         created_at=meta.get("start_time", ""),
                         primary_provider=prov,
                         primary_model=mod,
                         spans_count=int(meta.get("spans_count") or len(spans)),
                         snapshots_count=int(meta.get("snapshots_count") or snapshots_count),
+                        has_span_detail=(run_path / "ledger.jsonl").exists(),
                     )
                 )
             except Exception as e:

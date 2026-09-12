@@ -15,6 +15,8 @@ from agent_telemetry.contracts import (
     SpanType,
     SpanUsage,
     StageSnapshotRecord,
+    usage_from_product_dict,
+    usage_to_product_dict,
 )
 
 __all__ = [
@@ -33,4 +35,6 @@ __all__ = [
     "FallbackChainSummary",
     "StageSnapshotRecord",
     "PipelineTelemetry",
+    "usage_to_product_dict",
+    "usage_from_product_dict",
 ]

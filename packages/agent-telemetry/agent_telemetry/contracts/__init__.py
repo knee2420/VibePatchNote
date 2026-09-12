@@ -10,7 +10,11 @@ from agent_telemetry.contracts.metadata import SpanError, SpanMetadata
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
 from agent_telemetry.contracts.span import SpanRecord
 from agent_telemetry.contracts.telemetry import PipelineTelemetry
-from agent_telemetry.contracts.usage import SpanUsage
+from agent_telemetry.contracts.usage import (
+    SpanUsage,
+    usage_from_product_dict,
+    usage_to_product_dict,
+)
 
 __all__ = [
     "SpanType",
@@ -26,4 +30,6 @@ __all__ = [
     "FallbackChainSummary",
     "StageSnapshotRecord",
     "PipelineTelemetry",
+    "usage_to_product_dict",
+    "usage_from_product_dict",
 ]

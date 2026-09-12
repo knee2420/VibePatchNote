@@ -17,7 +17,8 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react'
-import type { CompareItem, SpanPhase, SpanRecord, SpanType } from '../types'
+import type { CompareItem, SpanPhase, SpanRecordView, SpanType } from '../types'
+import { hasFallback } from '../types'
 import { generateWorkflowTraceText } from '../utils/workflowTrace'
 import { PipelineTreeView } from './PipelineTreeView'
 
@@ -25,7 +26,7 @@ interface RunTimelineProps {
   runId?: string
   runLabel?: string
   primaryModel?: string | null
-  spans: SpanRecord[]
+  spans: SpanRecordView[]
   selectedSpanId: string | null
   onSelectSpan: (spanId: string) => void
   totalDurationMs: number
@@ -35,6 +36,8 @@ interface RunTimelineProps {
   onPickCompareItem?: (item: CompareItem) => void
 }
 
+// `workflow` · `custom` 은 프론트가 지어낸 유형이었다. 백엔드 `SpanType` 열거형에
+// 없으므로 생산자가 방출할 수 없고, 따라서 해당 분기는 영원히 죽은 코드였다.
 function getSpanIcon(type: SpanType) {
   switch (type) {
     case 'llm':
@@ -45,7 +48,7 @@ function getSpanIcon(type: SpanType) {
       return <Layers className="w-4 h-4 text-blue-400" />
     case 'parser':
       return <Braces className="w-4 h-4 text-emerald-400" />
-    case 'workflow':
+    case 'pipeline':
       return <Cpu className="w-4 h-4 text-cyan-400" />
     default:
       return <Zap className="w-4 h-4 text-slate-400" />
@@ -54,18 +57,16 @@ function getSpanIcon(type: SpanType) {
 
 function getSpanTypeBadge(type: SpanType) {
   const styles: Record<SpanType, string> = {
-    workflow: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
     pipeline: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
     chain: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     llm: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     tool: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     parser: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    custom: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
   }
   return (
     <span
       className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase font-medium ${
-        styles[type] || styles.custom
+        styles[type] ?? 'bg-slate-500/10 text-slate-400 border-slate-500/20'
       }`}
     >
       {type}
@@ -73,7 +74,7 @@ function getSpanTypeBadge(type: SpanType) {
   )
 }
 
-function inferPhase(span: SpanRecord, allSortedSpans: SpanRecord[]): SpanPhase {
+function inferPhase(span: SpanRecordView, allSortedSpans: SpanRecordView[]): SpanPhase {
   if (span.phase) return span.phase
   if (span.span_type === 'llm' || span.name.toLowerCase().startsWith('llm:')) {
     return 'llm'
@@ -99,7 +100,7 @@ function isFileName(val?: string | null): boolean {
   )
 }
 
-function deriveDataFlow(span: SpanRecord): { in: string | null; out: string | null; via: string[] } {
+function deriveDataFlow(span: SpanRecordView): { in: string | null; out: string | null; via: string[] } {
   let dataIn = span.data_in || null
   let dataOut = span.data_out || null
   const dataVia = span.data_via && span.data_via.length > 0 ? span.data_via : []
@@ -167,8 +168,9 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
     const isSelected = span.span_id === selectedSpanId
     const isTreeExpanded = Boolean(expandedSpanIds[span.span_id])
     const flow = deriveDataFlow(span)
-    const hasFallback =
-      span.status === 'FALLBACK_TRIGGERED' || (span.attempts && span.attempts.length > 1)
+    // 폴백은 상태값이 아니라 "시도가 2회 이상"이라는 사실이다.
+    // 예전에는 백엔드에 존재하지 않는 'FALLBACK_TRIGGERED' 와 비교하고 있었다.
+    const fellBack = hasFallback(span)
 
     // 한글 명칭 우선 노출 (fallback: span.name)
     const mainTitle = span.display_label || span.name
@@ -201,7 +203,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
                   {mainTitle}
                 </span>
                 {getSpanTypeBadge(span.span_type)}
-                {hasFallback && (
+                {fellBack && (
                   <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[rgba(210,153,34,0.15)] text-[#d29922] border border-[rgba(210,153,34,0.3)] font-medium">
                     <AlertTriangle className="w-3 h-3" />
                     자동 폴백 전환

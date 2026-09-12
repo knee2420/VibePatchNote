@@ -7,12 +7,14 @@ import {
 } from 'lucide-react'
 import { deleteRun, fetchRunDetail, fetchRuns } from './api'
 import { CompareDock } from './components/CompareDock'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { MatrixViewer } from './components/MatrixViewer'
 import { RunCompareView } from './components/RunCompareView'
 import { RunList } from './components/RunList'
 import { RunTimeline } from './components/RunTimeline'
 import { SpanDetail } from './components/SpanDetail'
-import type { CompareItem, RunDetail, RunSummary, SpanRecord } from './types'
+import type { CompareItem, RunDetail, RunSummary, SpanRecordView } from './types'
+import { numberOf } from './lib/payload'
 
 type NavTab = 'runs' | 'compare' | 'matrix'
 
@@ -162,7 +164,7 @@ export const App: React.FC = () => {
     loadDetail()
   }, [selectedRunId])
 
-  const selectedSpan: SpanRecord | null =
+  const selectedSpan: SpanRecordView | null =
     runDetail?.spans.find((s) => s.span_id === selectedSpanId) || null
 
   return (
@@ -281,6 +283,7 @@ export const App: React.FC = () => {
 
             {runDetail ? (
               <>
+                <ErrorBoundary label="실행 워터폴">
                 <RunTimeline
                   runId={selectedRunId || undefined}
                   runLabel={runs.find((r) => r.run_id === selectedRunId)?.workflow_label || runs.find((r) => r.run_id === selectedRunId)?.task_name || undefined}
@@ -288,12 +291,14 @@ export const App: React.FC = () => {
                   spans={runDetail.spans}
                   selectedSpanId={selectedSpanId}
                   onSelectSpan={(id) => setSelectedSpanId(id)}
-                  totalDurationMs={runDetail.meta.duration_ms || 0}
+                  totalDurationMs={numberOf(runDetail.meta, 'total_latency_ms', 'duration_ms') ?? 0}
                   isCompareMode={isCompareMode}
                   compareSlotAId={compareSlotA?.id || null}
                   compareSlotBId={compareSlotB?.id || null}
                   onPickCompareItem={handlePickCompareItem}
                 />
+                </ErrorBoundary>
+                <ErrorBoundary label="스팬 상세">
                 <SpanDetail
                   span={selectedSpan}
                   snapshots={runDetail.snapshots || {}}
@@ -302,6 +307,7 @@ export const App: React.FC = () => {
                   compareSlotBId={compareSlotB?.id || null}
                   onPickCompareItem={handlePickCompareItem}
                 />
+                </ErrorBoundary>
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-[#848d97] text-xs">
@@ -312,6 +318,7 @@ export const App: React.FC = () => {
         )}
 
         {navTab === 'compare' && (
+          <ErrorBoundary label="1:1 대조">
           <RunCompareView
             runs={runs}
             initialRunAId={compareRunAId}
@@ -330,9 +337,14 @@ export const App: React.FC = () => {
               setCompareSlotB(tmp)
             }}
           />
+          </ErrorBoundary>
         )}
 
-        {navTab === 'matrix' && <MatrixViewer />}
+        {navTab === 'matrix' && (
+          <ErrorBoundary label="엔진 매트릭스">
+            <MatrixViewer />
+          </ErrorBoundary>
+        )}
       </main>
     </div>
   )

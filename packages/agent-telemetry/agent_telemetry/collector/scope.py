@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 from agent_telemetry.contracts.attempt import ModelAttemptRecord
 from agent_telemetry.contracts.snapshot import StageSnapshotRecord
 from agent_telemetry.contracts.span import SpanRecord
+from agent_telemetry.contracts.usage import usage_from_product_dict
 
 
 class StepScope:
@@ -63,19 +64,45 @@ class StepScope:
             self.span.data_via = list(data_via)
 
     def attach_harness_result(self, exec_res: Any) -> None:
-        """LLM 하네스 실행 결과(토큰, attempts, CLI 메타)를 스팬에 결합"""
+        """LLM 하네스 실행 결과(토큰, attempts, CLI 메타)를 스팬에 결합.
+
+        하네스(`LlmExecutionResult`)는 제품 어휘(`input_tokens` ...)를 쓰고
+        스팬은 공급자 어휘(`prompt_tokens` ...)를 쓴다. 변환은 손으로 하지 않고
+        `usage_from_product_dict` 하나만 거친다 — 예전에 여기서 손으로 매핑하다가
+        `cache_read_tokens` 를 통째로 흘렸다.
+        """
         # tokens
         tokens = getattr(exec_res, "tokens", None)
         if isinstance(tokens, dict):
-            self.span.usage.prompt_tokens = tokens.get("input", 0)
-            self.span.usage.completion_tokens = tokens.get("output", 0)
-            self.span.usage.reasoning_tokens = tokens.get("thinking")
-            self.span.usage.total_tokens = tokens.get("total", 0)
+            product = {
+                "input_tokens": tokens.get("input", 0),
+                "output_tokens": tokens.get("output", 0),
+                "thinking_tokens": tokens.get("thinking") or 0,
+                "cache_read_tokens": tokens.get("cache_read", 0),
+                "total_tokens": tokens.get("total", 0),
+            }
         elif hasattr(exec_res, "input_tokens"):
-            self.span.usage.prompt_tokens = getattr(exec_res, "input_tokens", 0)
-            self.span.usage.completion_tokens = getattr(exec_res, "output_tokens", 0)
-            self.span.usage.reasoning_tokens = getattr(exec_res, "thinking_tokens", None)
-            self.span.usage.total_tokens = getattr(exec_res, "total_tokens", 0)
+            product = {
+                key: getattr(exec_res, key, 0) or 0
+                for key in (
+                    "input_tokens",
+                    "output_tokens",
+                    "thinking_tokens",
+                    "cache_read_tokens",
+                    "total_tokens",
+                )
+            }
+        else:
+            product = None
+
+        if product is not None:
+            converted = usage_from_product_dict(product)
+            # latency 와 비용은 아래/바깥에서 채운다. 토큰 축만 덮어쓴다.
+            self.span.usage.prompt_tokens = converted.prompt_tokens
+            self.span.usage.completion_tokens = converted.completion_tokens
+            self.span.usage.reasoning_tokens = converted.reasoning_tokens
+            self.span.usage.cache_read_tokens = converted.cache_read_tokens
+            self.span.usage.total_tokens = converted.total_tokens
 
         # metadata
         meta = getattr(exec_res, "telemetry_metadata", {})

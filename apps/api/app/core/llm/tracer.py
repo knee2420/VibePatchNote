@@ -410,6 +410,11 @@ def ingest_pipeline_telemetry(
             "start_time": telemetry.start_time.isoformat(),
             "end_time": telemetry.end_time.isoformat() if telemetry.end_time else None,
             "total_latency_ms": telemetry.total_latency_ms,
+            # 합산 사용량 전체. 예전에는 total/prompt/completion 세 개만 평면으로
+            # 적어서 캐시·사고 토큰이 meta 에서 사라졌고, 소비자가 없는 `usage`
+            # 키를 읽다가 전부 0 을 표시했다. 공급자 어휘 그대로 통째로 남긴다.
+            "usage": telemetry.total_usage.model_dump(mode="json"),
+            # 아래 세 개는 하위 호환. 새 소비자는 `usage` 를 읽는다.
             "total_tokens": telemetry.total_usage.total_tokens,
             "prompt_tokens": telemetry.total_usage.prompt_tokens,
             "completion_tokens": telemetry.total_usage.completion_tokens,

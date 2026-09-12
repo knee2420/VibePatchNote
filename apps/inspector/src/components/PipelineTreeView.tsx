@@ -26,10 +26,10 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 
 import { fetchSourceCode } from '../api'
-import type { CompareItem, SourceCodeResponse, SpanRecord } from '../types'
+import type { CompareItem, SourceCodeResponse, SpanRecordView } from '../types'
 
 interface PipelineTreeViewProps {
-  readonly span: SpanRecord
+  readonly span: SpanRecordView
   readonly dataIn: string | null
   readonly dataOut: string | null
   readonly dataVia: readonly string[]
@@ -159,7 +159,7 @@ function parseViaItem(item: string): ParsedVia {
  * 스팬의 data_via를 우선 동적 파싱하여 FLOW와 100% 일치하는 계층형 트리를 생성합니다.
  */
 function buildTreeForSpan(
-  span: SpanRecord,
+  span: SpanRecordView,
   dataVia: readonly string[]
 ): PipelineTreeNode[] {
   const nodes: PipelineTreeNode[] = []

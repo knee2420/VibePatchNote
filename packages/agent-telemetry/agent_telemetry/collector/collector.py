@@ -151,6 +151,7 @@ class StepCollector:
             total_usage.completion_tokens += sp.usage.completion_tokens
             if sp.usage.reasoning_tokens:
                 total_usage.reasoning_tokens = (total_usage.reasoning_tokens or 0) + sp.usage.reasoning_tokens
+            total_usage.cache_read_tokens += sp.usage.cache_read_tokens
             total_usage.total_tokens += sp.usage.total_tokens
 
         final_status = self.status

@@ -7,6 +7,11 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 from main import app
 
+# 픽스처 run 이름. 각각이 대표하는 상황은 fixtures/observability/README.md 참조.
+FIXTURE_RUN_FULL = "run-1a094630557-4e4f96ee"
+FIXTURE_RUN_WITH_ATTEMPTS = "run-contract-20260911-191719"
+FIXTURE_RUN_EVENTS_ONLY = "agent-5a0846d55d53"
+
 client = TestClient(app)
 
 
@@ -22,103 +27,74 @@ def test_inspector_matrix():
     assert any("gemini" in n.lower() or "gemma" in n.lower() for n in names)
 
 
-def test_inspector_runs_and_detail(tmp_path: Path):
-    runs_dir = settings.storage.runs
-    runs_dir.mkdir(parents=True, exist_ok=True)
+def test_inspector_runs_and_detail(observability_runs: list[str]):
+    """실제 생산자 출력(픽스처)으로 목록·상세·삭제를 검증한다.
 
-    test_run_id = "test-run-telemetry-001"
-    run_path = runs_dir / test_run_id
-    run_path.mkdir(parents=True, exist_ok=True)
+    예전 이 테스트는 손으로 지은 `{"status": "SUCCESS", "duration_ms": ...}` 를
+    썼다. 생산자는 그 키를 쓰지 않는다(`"status": "success"`, `"total_latency_ms"`).
+    그래서 테스트가 초록불인 채로 대소문자 불일치 버그가 살아남았다.
+    """
+    run_id = FIXTURE_RUN_FULL
 
-    try:
-        # meta.json 작성
-        meta_data = {
-            "run_id": test_run_id,
-            "task_name": "outline_extraction",
-            "doc_id": "doc_test_abc",
-            "status": "SUCCESS",
-            "duration_ms": 1250.5,
-            "start_time": "2026-09-11T12:00:00Z",
-            "primary_provider": "google_api",
-            "primary_model": "gemini-3.5-flash-lite",
-            "usage": {
-                "total_tokens": 1500,
-                "input_tokens": 1000,
-                "output_tokens": 500,
-                "cost_usd": 0.002,
-            },
-            "spans": [],
-        }
-        (run_path / "meta.json").write_text(json.dumps(meta_data), encoding="utf-8")
+    # 1. 목록 조회
+    list_resp = client.get("/api/v1/inspector/runs")
+    assert list_resp.status_code == 200
+    runs = list_resp.json()
+    target = next((r for r in runs if r["run_id"] == run_id), None)
+    assert target is not None, f"{run_id} 가 목록에 없습니다"
 
-        # ledger.jsonl 작성
-        span_1 = {
-            "span_id": "sp-1",
-            "dotted_order": "1",
-            "name": "context_build",
-            "span_type": "tool",
-            "duration_ms": 200.0,
-            "inputs": {"doc_id": "doc_test_abc"},
-            "outputs": {"context_length": 500},
-        }
-        span_2 = {
-            "span_id": "sp-2",
-            "dotted_order": "2",
-            "name": "llm_generate",
-            "span_type": "llm",
-            "duration_ms": 1050.5,
-            "inputs": {"prompt_preview": "Extract outline..."},
-            "outputs": {"title": "Test Chapter 1"},
-        }
-        ledger_content = f"{json.dumps(span_1)}\n{json.dumps(span_2)}\n"
-        (run_path / "ledger.jsonl").write_text(ledger_content, encoding="utf-8")
+    # 생산자가 실제로 쓰는 값이다. 대문자로 오지 않는다.
+    assert target["status"] == "success"
+    assert target["total_duration_ms"] > 0
+    assert target["total_tokens"] > 0
 
-        # snapshots.json 작성
-        snapshots_data = {
-            "context_build": {"markdown": "# Heading 1\nContent"},
-            "prompt_assembly": {"system": "You are outline extractor."},
-        }
-        (run_path / "snapshots.json").write_text(json.dumps(snapshots_data), encoding="utf-8")
+    # 모르는 값을 0 으로 내보내지 않는다 (observability.md §4).
+    assert target["cost_usd"] is None
 
-        # 1. 목록 조회
-        list_resp = client.get("/api/v1/inspector/runs")
-        assert list_resp.status_code == 200
-        runs = list_resp.json()
-        target = next((r for r in runs if r["run_id"] == test_run_id), None)
-        assert target is not None
-        assert target["task_name"] == "outline_extraction"
-        assert target["doc_id"] == "doc_test_abc"
-        assert target["total_tokens"] == 1500
-        assert target["snapshots_count"] == 2
+    # 2. 상세 조회 — 스팬이 계약대로 검증되어야 한다.
+    detail_resp = client.get(f"/api/v1/inspector/runs/{run_id}")
+    assert detail_resp.status_code == 200
+    detail = detail_resp.json()
+    assert detail["meta"]["run_id"] == run_id
+    assert len(detail["spans"]) > 0
 
-        # 2. 상세 조회
-        detail_resp = client.get(f"/api/v1/inspector/runs/{test_run_id}")
-        assert detail_resp.status_code == 200
-        detail = detail_resp.json()
-        assert detail["meta"]["run_id"] == test_run_id
-        assert len(detail["spans"]) == 2
-        assert detail["spans"][0]["name"] == "context_build"
-        assert "context_build" in detail["snapshots"]
+    for span in detail["spans"]:
+        assert span["status"] in {"pending", "running", "success", "failed", "skipped"}
+        assert span["span_type"] in {"pipeline", "chain", "llm", "tool", "parser"}
+        # 계약 필드가 실제로 실려 온다.
+        assert "duration_ms" in span
+        assert "usage" in span
 
-        # 3. 없는 ID 조회시 404
-        not_found_resp = client.get("/api/v1/inspector/runs/non-existent-run-id")
-        assert not_found_resp.status_code == 404
+    # 3. 없는 ID 조회시 404
+    assert client.get("/api/v1/inspector/runs/non-existent-run-id").status_code == 404
 
-        # 4. Run 삭제 검증
-        del_resp = client.delete(f"/api/v1/inspector/runs/{test_run_id}")
-        assert del_resp.status_code == 200
-        assert del_resp.json()["status"] == "DELETED"
-        assert not run_path.exists()
+    # 4. 삭제
+    del_resp = client.delete(f"/api/v1/inspector/runs/{run_id}")
+    assert del_resp.status_code == 200
+    assert del_resp.json()["status"] == "DELETED"
+    assert not (settings.storage.runs / run_id).exists()
 
-        # 5. 삭제된 후 재삭제시 404
-        del_again = client.delete(f"/api/v1/inspector/runs/{test_run_id}")
-        assert del_again.status_code == 404
+    # 5. 재삭제시 404
+    assert client.delete(f"/api/v1/inspector/runs/{run_id}").status_code == 404
 
-    finally:
-        # 테스트 후 정리
-        if run_path.exists():
-            import shutil
-            shutil.rmtree(run_path, ignore_errors=True)
+
+def test_attempt_records_follow_the_contract(observability_runs: list[str]):
+    """시도 기록은 계약(`ModelAttemptRecord`)의 필드명으로 온다.
+
+    프론트가 `model` · `duration_ms` · `input_tokens` · `cost_usd` 를 읽다가
+    TypeError 로 앱 전체를 백화면으로 만들었다. 계약에 있는 이름은 아래뿐이다.
+    """
+    detail = client.get(f"/api/v1/inspector/runs/{FIXTURE_RUN_WITH_ATTEMPTS}").json()
+    attempts = [att for span in detail["spans"] for att in span.get("attempts", [])]
+    assert attempts, "이 픽스처에는 attempt 기록이 있어야 합니다"
+
+    for att in attempts:
+        assert "model_name" in att and "model" not in att
+        assert "latency_ms" in att and "duration_ms" not in att
+        assert "usage" in att
+        assert "input_tokens" not in att
+        assert "cost_usd" not in att
+        assert att["status"] in {"pending", "running", "success", "failed", "skipped"}
 
 
 def test_ingest_pipeline_telemetry_resolves_target_name(tmp_path: Path):

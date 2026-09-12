@@ -4,7 +4,8 @@
  * GitHub Split Diff에서 1:1 대조하기에 최적화된 정형 텍스트로 생성합니다.
  */
 
-import type { SpanRecord } from '../types'
+import type { SpanRecordView } from '../types'
+import { asText } from '../lib/payload'
 
 function isFileName(val?: string | null): boolean {
   if (!val) return false
@@ -21,7 +22,7 @@ function isFileName(val?: string | null): boolean {
   )
 }
 
-function deriveDataFlow(span: SpanRecord): { in: string | null; out: string | null; via: string[] } {
+function deriveDataFlow(span: SpanRecordView): { in: string | null; out: string | null; via: string[] } {
   let dataIn = span.data_in || null
   let dataOut = span.data_out || null
   const dataVia = span.data_via && span.data_via.length > 0 ? span.data_via : []
@@ -74,7 +75,7 @@ export function generateWorkflowTraceText(params: {
   taskLabel?: string
   totalDurationMs: number
   primaryModel?: string | null
-  spans: readonly SpanRecord[]
+  spans: readonly SpanRecordView[]
 }): string {
   const { runId, taskLabel, totalDurationMs, primaryModel, spans } = params
 
@@ -104,7 +105,7 @@ export function generateWorkflowTraceText(params: {
 
     const flow = deriveDataFlow(span)
     const formattedIn = labelIn(flow.in)
-    const formattedVia = flow.via.length > 0 ? flow.via.join(' ➔ ') : (span.metadata?.source_file ? String(span.metadata.source_file) : 'core_pipeline')
+    const formattedVia = flow.via.length > 0 ? flow.via.join(' ➔ ') : (asText(span.metadata?.extra?.source_file) ?? 'core_pipeline')
     const formattedOut = labelOut(flow.out)
 
     lines.push(`  IN      : ${formattedIn}`)
@@ -116,11 +117,15 @@ export function generateWorkflowTraceText(params: {
     }
 
     if (span.span_type === 'llm' || span.usage?.total_tokens) {
-      const model = span.attempts?.[0]?.model || primaryModel || 'LLM'
+      // 계약상 필드명은 `model_name` 이다. 예전에는 `model` 을 읽어 항상 undefined 였다.
+      const model = span.attempts?.[0]?.model_name || primaryModel || 'LLM'
       const inTok = Number(span.usage?.prompt_tokens || 0).toLocaleString()
       const outTok = Number(span.usage?.completion_tokens || 0).toLocaleString()
+      const cacheTok = Number(span.usage?.cache_read_tokens || 0).toLocaleString()
       const totalTok = Number(span.usage?.total_tokens || 0).toLocaleString()
-      lines.push(`  LLM STAT: Model=${model} | Prompt=${inTok} tok | Output=${outTok} tok | Total=${totalTok} tok`)
+      lines.push(
+        `  LLM STAT: Model=${model} | Prompt=${inTok} tok | Output=${outTok} tok | Cache=${cacheTok} tok | Total=${totalTok} tok`
+      )
     }
 
     lines.push('')

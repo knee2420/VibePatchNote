@@ -3,7 +3,23 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+from agent_telemetry.contracts import ModelAttemptRecord, SpanRecord
 from pydantic import BaseModel, Field
+
+
+class InspectorSpanView(SpanRecord):
+    """스팬 + 읽기 시점 조인.
+
+    `attempts` 는 원장에서 별도 이벤트(`event_type: "attempt"`)로 저장된다.
+    스팬 계약에 넣지 않는 이유는 계약이 **기록 시점의 사실**만 담아야 하기
+    때문이다. 다만 조회할 때는 LLM 스팬에 붙여 주는 편이 쓰기 좋으므로,
+    그 조인을 암묵적으로 dict 에 밀어 넣지 않고 여기서 타입으로 선언한다.
+    """
+
+    attempts: list[ModelAttemptRecord] = Field(
+        default_factory=list,
+        description="이 스팬에 귀속된 모델 호출 시도 목록 (원장에서 조인)",
+    )
 
 
 class RunSummaryResponse(BaseModel):
@@ -17,23 +33,30 @@ class RunSummaryResponse(BaseModel):
     doc_id: Optional[str] = None
     status: str
     total_duration_ms: float = 0.0
+    # 토큰은 제품 어휘(RunCost)를 쓴다. 공급자 어휘(SpanUsage)와의 변환은
+    # agent_telemetry.contracts.usage 의 함수 한 쌍만 수행한다.
     total_tokens: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
     thinking_tokens: int = 0
     cache_read_tokens: int = 0
-    cost_usd: float = 0.0
+    # 모르는 값을 0 으로 쓰지 않는다. 0 은 "무료"로 읽힌다. ModelSpec 에 단가 축이
+    # 없는 한 시스템 어디에도 USD 비용은 존재하지 않는다.
+    cost_usd: Optional[float] = None
     created_at: str
     primary_provider: Optional[str] = None
     primary_model: Optional[str] = None
     spans_count: int = 0
     snapshots_count: int = 0
+    # 단계 상세(ledger.jsonl)의 유무. 부재는 오류가 아니라 정상 상태다 —
+    # 계측되지 않은 파이프라인의 run 도 목록과 비용은 온전해야 한다.
+    has_span_detail: bool = False
 
 
 class RunDetailResponse(BaseModel):
     """실행(Run)의 전체 원장 및 스냅샷 상세."""
     meta: dict[str, Any]
-    spans: list[dict[str, Any]] = Field(default_factory=list)
+    spans: list[InspectorSpanView] = Field(default_factory=list)
     snapshots: dict[str, Any] = Field(default_factory=dict)
 
 

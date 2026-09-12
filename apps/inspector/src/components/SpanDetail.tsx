@@ -34,10 +34,32 @@ import { json } from '@codemirror/lang-json'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 
-import type { CompareItem, SpanRecord } from '../types'
+import type { CompareItem, SpanRecordView } from '../types'
+import { hasFallback, statusTone } from '../types'
+import type { StatusTone } from '../types'
+import { asRecord, asText, commandOf, textOf } from '../lib/payload'
+
+/**
+ * 상태 색은 `statusTone` 을 거친 뒤에만 고른다.
+ * 저장된 상태는 소문자다 — 예전에는 `=== 'SUCCESS'` 로 비교해서 성공한 스팬을
+ * 전부 실패 색으로 칠했다. (`.agents/rules/60-data/observability.md` §3-1)
+ */
+const TONE_DOT: Record<StatusTone, string> = {
+  ok: 'bg-[#3fb950]',
+  fail: 'bg-[#f85149]',
+  busy: 'bg-[#58a6ff] animate-pulse',
+  idle: 'bg-[#848d97]',
+}
+
+const TONE_PILL: Record<StatusTone, string> = {
+  ok: 'bg-[rgba(46,160,67,0.15)] text-[#3fb950] border-[rgba(46,160,67,0.3)]',
+  fail: 'bg-[rgba(248,81,73,0.15)] text-[#f85149] border-[rgba(248,81,73,0.3)]',
+  busy: 'bg-[rgba(88,166,255,0.15)] text-[#58a6ff] border-[rgba(88,166,255,0.3)]',
+  idle: 'bg-[#21262d] text-[#848d97] border-[#30363d]',
+}
 
 interface SpanDetailProps {
-  readonly span: SpanRecord | null
+  readonly span: SpanRecordView | null
   readonly snapshots?: Record<string, unknown>
   readonly isCompareMode?: boolean
   readonly compareSlotAId?: string | null
@@ -358,11 +380,13 @@ interface SpanMetadataPayload {
   readonly [key: string]: unknown
 }
 
-function getSpanMetadata(span: SpanRecord | null): SpanMetadataPayload {
-  if (!span?.metadata || typeof span.metadata !== 'object') {
-    return {}
+function getSpanMetadata(span: SpanRecordView | null): SpanMetadataPayload {
+  // `SpanMetadata` 는 계약 타입이라 인덱스 시그니처가 없다. 임의 키는 `extra` 안에 산다.
+  const meta = asRecord(span?.metadata)
+  return {
+    model_name: asText(meta.model_name) ?? undefined,
+    extra: asRecord(meta.extra) as SpanLlmExtra,
   }
-  return span.metadata as SpanMetadataPayload
 }
 
 interface CliSettingChip {
@@ -376,17 +400,17 @@ interface CliSettingChip {
   readonly description: string
 }
 
-function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
+function parseLlmSettings(command: string, span: SpanRecordView): CliSettingChip[] {
   const chips: CliSettingChip[] = []
   const meta = getSpanMetadata(span)
   const isApi =
     command.startsWith('curl') ||
     meta.extra?.provider === 'google_api' ||
-    span.inputs?.provider === 'google_api'
+    textOf(span.inputs, 'provider') === 'google_api'
 
   if (isApi) {
     const model =
-      span.inputs?.target_model ||
+      textOf(span.inputs, 'target_model') ||
       meta.model_name ||
       span.name.replace(/^llm:/i, '').split(' ')[0] ||
       'gemini-3.8-flash-low'
@@ -431,7 +455,7 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
       key: 'schema',
       label: 'SCHEMA',
       value: 'outline_schema.json',
-      fullValue: span.inputs?.schema_file || 'outline_schema.json',
+      fullValue: textOf(span.inputs, 'schema_file') ?? 'outline_schema.json',
       color: 'indigo',
       icon: 'schema',
       flag: 'responseSchema',
@@ -449,9 +473,7 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
 
     // 멀티모달 첨부 파일 칩 (inlineData Base64 PDF)
     const rawAttached =
-      span.inputs?.attached_document ||
-      span.inputs?.filename ||
-      span.inputs?.document_title ||
+      textOf(span.inputs, 'attached_document', 'filename', 'document_title') ||
       (() => {
         const m = command.match(/<BASE64_(?:ENCODED_BINARY|PDF):\s*([^>]+)>/i)
         return m ? m[1].trim() : null
@@ -478,13 +500,13 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
   const normalized = command.replace(/\\\n/g, ' ').replace(/\s+/g, ' ')
   const tokens = normalized.split(' ').filter(Boolean)
 
-  let modelVal = span.inputs?.target_model || meta.model_name
+  let modelVal = textOf(span.inputs, 'target_model') ?? meta.model_name ?? ''
   let inputFormat = ''
   let outputFormat = 'json'
-  let effortVal = span.inputs?.effort || meta.extra?.effort_flag
+  let effortVal = textOf(span.inputs, 'effort') ?? asText(meta.extra?.effort_flag) ?? ''
   let skipPermissions = false
   let disableSlash = false
-  let schemaPath = span.inputs?.schema_file || ''
+  let schemaPath = textOf(span.inputs, 'schema_file') ?? ''
   let conversationId = ''
   let addDir = ''
 
@@ -658,10 +680,7 @@ function parseLlmSettings(command: string, span: SpanRecord): CliSettingChip[] {
   }
 
   // Attached Doc
-  const cliAttached =
-    span.inputs?.attached_document ||
-    span.inputs?.filename ||
-    span.inputs?.document_title
+  const cliAttached = textOf(span.inputs, 'attached_document', 'filename', 'document_title')
   if (cliAttached) {
     const docName = String(cliAttached).split(/[/\\]/).pop() || String(cliAttached)
     chips.push({
@@ -732,7 +751,7 @@ const CHIP_STYLES: Record<CliSettingChip['color'], { bg: string; border: string;
 
 interface LlmExecutionCommandCardProps {
   readonly command: string
-  readonly span: SpanRecord
+  readonly span: SpanRecordView
   readonly onOpenModal: (
     title: string,
     content: string,
@@ -763,7 +782,7 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
   const isApi =
     command.startsWith('curl') ||
     meta.extra?.provider === 'google_api' ||
-    span.inputs?.provider === 'google_api'
+    textOf(span.inputs, 'provider') === 'google_api'
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -1107,32 +1126,26 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
   const resolvedExecutionCommand = useMemo(() => {
     if (!span || !isLlmSpan) return null
 
-    // 1. inputs에 명시된 execution_command / cli_command / command
-    if (span.inputs?.execution_command) return formatCommand(String(span.inputs.execution_command))
-    if (span.inputs?.cli_command) return formatCommand(String(span.inputs.cli_command))
-    if (span.inputs?.command) {
-      const c = span.inputs.command
-      return formatCommand(Array.isArray(c) ? c.join(' ') : String(c))
+    // 1. inputs 에 명시된 명령어. 계약상 `cli_command` 는 List[str] 이고
+    //    나머지는 문자열이라, 모양 판정은 commandOf 하나가 맡는다.
+    for (const key of ['execution_command', 'cli_command', 'command'] as const) {
+      const found = commandOf(span.inputs?.[key])
+      if (found) return formatCommand(found)
     }
 
-    // 2. attempts의 raw_command
-    if (span.attempts && span.attempts.length > 0) {
-      const att = span.attempts[0]
-      if (att.raw_command) return formatCommand(att.raw_command)
-    }
+    // 2. attempts 에는 명령어가 없다 (계약 확인). CLI 인자는 metadata 가 갖는다.
 
-    // 3. metadata.extra의 raw_command / command
+    // 3. metadata.extra 의 raw_command / command
     const meta = getSpanMetadata(span)
     const extra = meta.extra || {}
-    if (extra.raw_command) return formatCommand(String(extra.raw_command))
-    if (extra.command) {
-      const c = extra.command
-      return formatCommand(Array.isArray(c) ? c.join(' ') : String(c))
+    for (const key of ['raw_command', 'command'] as const) {
+      const found = commandOf(extra[key])
+      if (found) return formatCommand(found)
     }
 
     // 4. LLM 스팬 복원 (모델명과 스키마 파일 바탕으로 완벽 재현)
     const model =
-      span.inputs?.target_model ||
+      textOf(span.inputs, 'target_model') ||
       meta.model_name ||
       span.name.replace(/^llm:/i, '').split(' ')[0] ||
       'gemini-3.8-flash-low'
@@ -1198,8 +1211,10 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
     )
   }
 
-  const attempts = span.attempts || []
+  const attempts = span.attempts ?? []
   const hasAttempts = attempts.length > 0
+  const tone = statusTone(span.status)
+  const fellBack = hasFallback(span)
 
   return (
     <div className="w-[420px] lg:w-[540px] xl:w-[600px] shrink-0 flex flex-col h-full bg-[#0d1117] border-l border-[#30363d] relative">
@@ -1207,30 +1222,17 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
       <div className="p-3.5 border-b border-[#30363d] bg-[#161b22] shadow-sm">
         <div className="flex items-center justify-between mb-1.5 gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span
-              className={`w-2 h-2 rounded-full shrink-0 ${
-                span.status === 'SUCCESS'
-                  ? 'bg-[#3fb950]'
-                  : span.status === 'FALLBACK_TRIGGERED'
-                  ? 'bg-[#d29922]'
-                  : 'bg-[#f85149]'
-              }`}
-            />
+            <span className={`w-2 h-2 rounded-full shrink-0 ${TONE_DOT[tone]}`} />
             <span className="font-mono text-sm font-semibold text-[#e6edf3] truncate" title={span.name}>
               {span.name}
             </span>
           </div>
 
           <span
-            className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 border ${
-              span.status === 'SUCCESS'
-                ? 'bg-[rgba(46,160,67,0.15)] text-[#3fb950] border-[rgba(46,160,67,0.3)]'
-                : span.status === 'FALLBACK_TRIGGERED'
-                ? 'bg-[rgba(210,153,34,0.15)] text-[#d29922] border-[rgba(210,153,34,0.3)]'
-                : 'bg-[rgba(248,81,73,0.15)] text-[#f85149] border-[rgba(248,81,73,0.3)]'
-            }`}
+            className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 border uppercase ${TONE_PILL[tone]}`}
           >
             {span.status}
+            {fellBack && <span className="ml-1 normal-case">· 폴백 {attempts.length}회</span>}
           </span>
         </div>
 
@@ -1310,10 +1312,10 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
                   <span>실행 에러: {span.error.code}</span>
                 </div>
                 <div className="text-[11px] break-words leading-relaxed text-[#e6edf3]">{span.error.message}</div>
-                {span.error.traceback && (
+                {span.error.stack_trace && (
                   <VirtualCodeCard
                     title="Error Traceback"
-                    data={span.error.traceback}
+                    data={span.error.stack_trace}
                     defaultHeight="160px"
                     badgeLabel="TRACEBACK"
                     onOpenModal={handleOpenModal}
@@ -1516,69 +1518,109 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({
         {/* 시도 이력(Attempts) 탭 */}
         {activeTab === 'attempts' && (
           <div className="space-y-3">
-            {attempts.map((att) => (
-              <div key={att.attempt_index} className="p-3 rounded-md border border-[#30363d] bg-[#161b22] space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-[#e6edf3] text-xs">
-                    시도 #{att.attempt_index + 1}: {att.provider}
-                  </span>
-                  {att.status === 'SUCCESS' ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[rgba(46,160,67,0.15)] text-[#3fb950] border border-[rgba(46,160,67,0.3)]">
-                      <CheckCircle2 className="w-3 h-3" />
-                      SUCCESS
+            {attempts.map((att) => {
+              // 계약(`ModelAttemptRecord`)의 필드만 읽는다. 예전 이 블록은
+              // `att.duration_ms` · `att.input_tokens` · `att.cost_usd` 처럼
+              // 존재하지 않는 필드를 읽어 TypeError 를 냈고, ErrorBoundary 가
+              // 없어 앱 전체가 백화면이 됐다.
+              const attTone = statusTone(att.status)
+              const usage = att.usage
+              const promptTok = usage?.prompt_tokens ?? 0
+              const completionTok = usage?.completion_tokens ?? 0
+              const cacheTok = usage?.cache_read_tokens ?? 0
+              const costUsd = usage?.estimated_cost_usd ?? null
+
+              return (
+                <div key={att.attempt_index} className="p-3 rounded-md border border-[#30363d] bg-[#161b22] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-[#e6edf3] text-xs">
+                      시도 #{att.attempt_index}: {att.provider}
                     </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-[rgba(248,81,73,0.15)] text-[#f85149] border border-[rgba(248,81,73,0.3)]">
-                      <AlertCircle className="w-3 h-3" />
-                      FAILED
+                    <span
+                      className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border uppercase ${TONE_PILL[attTone]}`}
+                    >
+                      {attTone === 'ok' ? (
+                        <CheckCircle2 className="w-3 h-3" />
+                      ) : (
+                        <AlertCircle className="w-3 h-3" />
+                      )}
+                      {att.status}
                     </span>
+                  </div>
+
+                  <div className="text-[11px] text-[#848d97] grid grid-cols-2 gap-2 bg-[#0d1117] p-2 rounded border border-[#30363d]">
+                    <div>
+                      모델: <span className="text-[#e6edf3] font-mono">{att.model_name}</span>
+                    </div>
+                    <div>
+                      지연시간: <span className="text-[#58a6ff] font-mono">{(att.latency_ms ?? 0).toFixed(1)}ms</span>
+                    </div>
+                    <div>
+                      프로토콜: <span className="text-[#e6edf3] font-mono">{att.execution_protocol}</span>
+                    </div>
+                    <div>
+                      {/* 모르는 값을 0 으로 쓰지 않는다. 0 은 "무료"로 읽힌다. */}
+                      비용:{' '}
+                      {costUsd === null ? (
+                        <span className="text-[#848d97] font-mono" title="ModelSpec 에 단가 축이 없어 계산되지 않습니다">
+                          미집계
+                        </span>
+                      ) : (
+                        <span className="text-[#3fb950] font-mono">${costUsd.toFixed(4)}</span>
+                      )}
+                    </div>
+                    <div className="col-span-2">
+                      토큰수:{' '}
+                      <span className="text-[#e6edf3] font-mono">
+                        입 {promptTok.toLocaleString()} · 출 {completionTok.toLocaleString()}
+                        {cacheTok > 0 && <> · 캐시 {cacheTok.toLocaleString()}</>} (총{' '}
+                        {(usage?.total_tokens ?? promptTok + completionTok).toLocaleString()} tok)
+                      </span>
+                    </div>
+                  </div>
+
+                  {att.error && (
+                    <div className="text-[11px] text-[#f85149] p-2 rounded bg-[rgba(248,81,73,0.1)] border border-[rgba(248,81,73,0.3)] space-y-1">
+                      <div>
+                        <span className="font-semibold">{att.error.code}</span>
+                        {att.error.failure_reason && <> · {att.error.failure_reason}</>}
+                      </div>
+                      <div className="text-[#e6edf3] break-words leading-relaxed">{att.error.message}</div>
+                    </div>
+                  )}
+
+                  {att.request_prompt && (
+                    <VirtualCodeCard
+                      title="Request Prompt"
+                      data={att.request_prompt}
+                      defaultHeight="140px"
+                      badgeLabel="PROMPT"
+                      onOpenModal={handleOpenModal}
+                    />
+                  )}
+
+                  {att.raw_response && (
+                    <VirtualCodeCard
+                      title="Raw Response"
+                      data={att.raw_response}
+                      defaultHeight="140px"
+                      badgeLabel="RAW RESPONSE"
+                      onOpenModal={handleOpenModal}
+                    />
+                  )}
+
+                  {att.error?.stderr && (
+                    <VirtualCodeCard
+                      title="Stderr Output"
+                      data={att.error.stderr}
+                      defaultHeight="140px"
+                      badgeLabel="STDERR"
+                      onOpenModal={handleOpenModal}
+                    />
                   )}
                 </div>
-
-                <div className="text-[11px] text-[#848d97] grid grid-cols-2 gap-2 bg-[#0d1117] p-2 rounded border border-[#30363d]">
-                  <div>
-                    모델: <span className="text-[#e6edf3] font-mono">{att.model}</span>
-                  </div>
-                  <div>
-                    지연시간: <span className="text-[#58a6ff] font-mono">{att.duration_ms.toFixed(1)}ms</span>
-                  </div>
-                  <div>
-                    토큰수:{' '}
-                    <span className="text-[#e6edf3] font-mono">
-                      입 {att.input_tokens.toLocaleString()} · 출 {att.output_tokens.toLocaleString()} (총 {(att.input_tokens + att.output_tokens).toLocaleString()} tok)
-                    </span>
-                  </div>
-                  <div>
-                    비용: <span className="text-[#3fb950] font-mono">${att.cost_usd.toFixed(4)}</span>
-                  </div>
-                </div>
-
-                {att.failure_reason && (
-                  <div className="text-[11px] text-[#f85149] p-2 rounded bg-[rgba(248,81,73,0.1)] border border-[rgba(248,81,73,0.3)]">
-                    원인: {att.failure_reason}
-                  </div>
-                )}
-
-                {att.raw_command && (
-                  <VirtualCodeCard
-                    title="Raw CLI Command"
-                    data={att.raw_command}
-                    defaultHeight="120px"
-                    onOpenModal={handleOpenModal}
-                  />
-                )}
-
-                {att.stderr_sample && (
-                  <VirtualCodeCard
-                    title="Stderr Output"
-                    data={att.stderr_sample}
-                    defaultHeight="140px"
-                    badgeLabel="STDERR"
-                    onOpenModal={handleOpenModal}
-                  />
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
 

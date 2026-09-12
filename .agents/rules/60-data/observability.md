@@ -112,22 +112,36 @@ SpanStatus  pending · running · success · failed · skipped
 > `FALLBACK_TRIGGERED` 는 상태가 아니라 **시도가 2회 이상이라는 사실**이다.
 > `len(attempts) > 1` 로 유도한다. 상태 열거형에 넣지 않는다.
 
-### 3-2. 토큰 — `SpanUsage` 로 수렴한다
+### 3-2. 토큰 — 두 어휘를 인정하고, 변환은 한 곳에만 둔다
 
-| 정본 (`SpanUsage`) | 폐기 (`RunCost`) |
-| --- | --- |
-| `prompt_tokens` | `input_tokens` |
-| `completion_tokens` | `output_tokens` |
-| `reasoning_tokens` | `thinking_tokens` |
-| `cache_read_tokens` **(신규)** | `cache_read_tokens` |
-| `total_tokens` | `total_tokens` |
+두 이름이 존재하는 것 자체는 버그가 아니다. 경계가 다르다.
 
-`SpanUsage` 를 택하는 이유는 사양서가 이미 그것을 SSOT 로 선언했고, 공급자
-응답의 원어에 가깝기 때문이다. `cache_read_tokens` 만 `SpanUsage` 에 없으므로
-추가한다. `RunCost` 는 `SpanUsage` 로 흡수하고 별도 타입으로 남기지 않는다.
+| | `SpanUsage` | `RunCost` |
+| --- | --- | --- |
+| 경계 | 공급자·텔레메트리 | 제품·정산 |
+| 근거 | LLM API 응답의 원어 | 사용자·원장이 쓰는 말 |
+| 필드 | `prompt_tokens` · `completion_tokens` · `reasoning_tokens` · `cache_read_tokens` | `input_tokens` · `output_tokens` · `thinking_tokens` · `cache_read_tokens` |
 
-저장된 원장의 필드명 변경은 **읽기 시점 폴백이 아니라 마이그레이션**으로 처리한다
-(`rule.md` §5 — *"❌ 읽기 시점 자동 승격"*).
+실제 버그는 **변환이 암묵적이었다는 것**이다. `InspectorService` 가
+`SpanUsage` 모양의 데이터를 `RunCost` 키로 읽으려다 전부 0 이 되었다.
+호출부마다 손으로 매핑하면 호출부 수만큼 틀릴 기회가 생긴다.
+
+```text
+❌ usage.get("input_tokens")        호출부가 남의 어휘를 추측한다
+✅ to_run_cost(span_usage)          변환 함수 하나. 테스트가 무손실을 고정한다
+```
+
+**규칙**
+
+1. 변환 함수는 **한 곳에만** 존재한다. 호출부에서 `dict.get()` 으로 필드명을 바꾸지 않는다
+2. 변환은 **무손실**이어야 한다. 그래서 `SpanUsage` 에 `cache_read_tokens` 를 추가한다 —
+   없으면 캐시 토큰이 변환에서 사라진다
+3. `RunCost` 의 필드명은 바꾸지 않는다. `documents/schemas.py` 의 `RunCostView` 를 거쳐
+   `apps/web` 이 소비하는 **살아있는 계약**이다. 관측 도구 하나를 고치려고
+   제품 API 를 깨지 않는다
+
+저장된 원장의 스키마 통일(camelCase → snake_case)은 **읽기 시점 폴백이 아니라
+마이그레이션**으로 처리한다 (`rule.md` §5 — *"❌ 읽기 시점 자동 승격"*).
 
 ---
 
@@ -159,23 +173,40 @@ USD 비용을 실제로 쓰려면 `ModelSpec` 에 단가 축을 추가하고 **�
 ## 5. 강제 수단
 
 > `README.md` — *"문서만 있고 강제 수단이 없는 규칙은 지켜지지 않는다."*
-> 이 문서의 규칙 중 **현재 강제되는 것은 하나도 없다.** 아래는 붙여야 할 목록이다.
+
+검증은 전부 `apps/api/tests/test_observability_contract.py` 에 있다.
+픽스처는 **실제 생산자 출력**이다 (`tests/fixtures/observability/README.md`).
 
 | 규칙 | 검증 | 상태 |
 | --- | --- | --- |
-| run 목록은 `events.jsonl` 에서 나온다 | `test_inspector.py::test_run_list_covers_uninstrumented_runs` | 미작성 |
-| 상세 부재는 오류가 아니다 | `::test_run_without_ledger_still_lists` | 미작성 |
-| 저장된 상태는 소문자다 | `test_storage_lifecycle.py::test_status_vocabulary_is_lowercase` | 미작성 |
-| 토큰 필드명은 `SpanUsage` 하나다 | `::test_token_vocabulary_is_single` | 미작성 |
-| 모르는 비용은 null 이다 | `::test_unknown_cost_is_null_not_zero` | 미작성 |
-| 원장은 단일 스키마다 | `::test_ledger_has_one_schema` | 미작성 |
-| TS 타입은 Python 계약에서 생성된다 | 생성물과 커밋본의 diff 를 CI 가 비교 | 미구축 |
+| 상태 어휘는 소문자다 | `::test_status_vocabulary_is_lowercase` | ✅ |
+| 저장된 상태도 소문자다 | `::test_stored_span_status_is_lowercase` | ✅ |
+| 폴백은 상태가 아니다 | `::test_fallback_is_not_a_status` | ✅ |
+| 토큰 변환은 무손실이다 | `::test_usage_conversion_is_lossless` | ✅ |
+| 합계는 구성요소에서 파생된다 | `::test_total_tokens_is_derived_when_provider_omits_it` | ✅ |
+| 모르는 비용은 null 이다 | `::test_unknown_cost_is_null_not_zero` | ✅ |
+| 단가 축이 생기면 알려준다 | `::test_model_registry_has_no_price_axis` | ✅ |
+| TS 타입은 계약에서 생성된다 | `::test_generated_types_match_contracts` | ✅ |
+| 원장은 단일 스키마다 | `::test_ledger_migration_unifies_schema` | ✅ |
+| 마이그레이션은 멱등이다 | `::test_ledger_migration_is_idempotent` | ✅ |
+| 시도 기록은 계약을 따른다 | `test_inspector.py::test_attempt_records_follow_the_contract` | ✅ |
+| run 목록은 `events.jsonl` 에서 나온다 | `test_inspector.py::test_run_list_covers_uninstrumented_runs` | ⏳ A1 |
+| 상세 부재는 오류가 아니다 | `::test_run_without_ledger_still_lists` | ⏳ A1 |
 
-**TS 타입 수기 작성 금지**가 이 목록에서 가장 중요하다. `apps/inspector/src/types.ts`
-는 손으로 베낀 것이고, 그래서 `ModelAttemptRecord` 가 백엔드와 필드 하나도 맞지
-않는다(`model` vs `model_name`, `duration_ms` vs `latency_ms`, 없는
-`input_tokens`·`cost_usd`·`raw_command`). 타입 검사는 통과한다 — 양쪽이 서로를
-모르기 때문이다. 이행 계획은
+**TS 타입 수기 작성 금지**가 이 목록에서 가장 중요하다. 예전 `apps/inspector/src/types.ts`
+는 손으로 베낀 것이었고, 그래서 `ModelAttemptRecord` 가 백엔드와 필드 하나도 맞지
+않았다(`model` vs `model_name`, `duration_ms` vs `latency_ms`, 없는
+`input_tokens`·`cost_usd`·`raw_command`). 타입 검사는 통과했다 — 양쪽이 서로를
+몰랐기 때문이다.
+
+이제 타입은 `apps/api/scripts/generate_inspector_types.py` 가 만든다.
+
+```bash
+python apps/api/scripts/generate_inspector_types.py           # 생성
+python apps/api/scripts/generate_inspector_types.py --check   # 게이트
+```
+
+이행 계획은
 [`workbench/06.agent_observability/06.abstraction_roadmap.md`](../../../workbench/06.agent_observability/06.abstraction_roadmap.md).
 
 ---
