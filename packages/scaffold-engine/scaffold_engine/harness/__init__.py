@@ -1,40 +1,41 @@
-"""LLM 하네스 계약 · 모델 레지스트리 · 구현체 모음.
+"""Scaffold Engine — LLM Harness Re-export (Backed by llm_driver package).
 
-이 패키지가 LLM 계약의 **정본(SSOT)** 이다. 호스트 앱(`apps/api`)은 계약을 다시
-정의하지 말고 여기서 가져다 쓰고, 호스트 고유의 것(설정 주입, 감사 로그, 자체 어댑터)만
-자기 쪽에 둔다.
-
-- `registry` — 모델 프로필 카탈로그와 effort 판정
-- `base` — 실행 결과 엔벨로프 + 어댑터 추상 계약
-- `agy_client` — Antigravity CLI 어댑터
-- `factory` — 프로바이더별 어댑터 라우팅 (호스트 확장 지점)
+LLM 실행 계약의 SSOT는 모노레포 독립 패키지인 `llm_driver`(`packages/llm-driver`)입니다.
+이 모듈은 하위 호환성을 위해 `llm_driver`의 계약과 어댑터를 그대로 re-export합니다.
 """
-from .agy_client import DEFAULT_MODEL, DEFAULT_TIMEOUT_SECONDS, AgyCliHarness, AgyHarness
-from .base import (
+from __future__ import annotations
+
+from llm_driver import (
+    AgyCliHarness,
+    BaseLlmHarness,
+    CLIExecutionResult,
+    DEFAULT_CLI_MODEL_NAME,
+    DEFAULT_GOOGLE_MODEL_NAME,
+    DEFAULT_MODEL_NAME,
+    EFFORT_SUFFIXES,
+    GoogleGenAiHarness,
+    HarnessFactory,
+    LlmExecutionResult,
+    LocalGemmaHarness,
+    MODEL_REGISTRY,
+    ModelSpec,
     STATUS_ERROR,
     STATUS_FAILED,
     STATUS_PARSE_ERROR,
     STATUS_SUCCESS,
     STATUS_TIMEOUT,
-    BaseLlmHarness,
-    CLIExecutionResult,
-    LlmExecutionResult,
-)
-from .factory import HarnessFactory, UnsupportedProviderError
-from .gemini_client import GeminiAdapter, GeminiApiHarness, GoogleGenAiHarness
-from .gemma_client import LocalGemmaHarness
-from .parsing import parse_json_payload
-from .registry import (
-    DEFAULT_CLI_MODEL_NAME,
-    DEFAULT_GOOGLE_MODEL_NAME,
-    DEFAULT_MODEL_NAME,
-    EFFORT_SUFFIXES,
-    MODEL_REGISTRY,
-    ModelSpec,
+    UnsupportedProviderError,
     get_model_spec,
+    parse_json_payload,
     register_model_spec,
     resolve_effort,
 )
+from llm_driver.adapters.agy_cli import DEFAULT_MODEL, DEFAULT_TIMEOUT_SECONDS
+
+# 하위 호환용 별칭
+AgyHarness = AgyCliHarness
+GeminiAdapter = GoogleGenAiHarness
+GeminiApiHarness = GoogleGenAiHarness
 
 __all__ = [
     "AgyCliHarness",

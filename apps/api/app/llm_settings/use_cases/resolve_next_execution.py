@@ -4,9 +4,9 @@ from __future__ import annotations
 import shutil
 from typing import Any, Optional
 
+from llm_driver import PRIMARY_PROVIDER_ID, remaining_text
+
 from app.core.config import settings
-from app.core.llm.fallback import PRIMARY_PROVIDER_ID
-from app.core.llm.provider_state import remaining_text
 
 from ..ports import CliAvailabilityPort, CredentialStorePort, ProviderStatePort
 

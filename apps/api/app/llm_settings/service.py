@@ -3,7 +3,7 @@ from __future__ import annotations
 import shutil  # noqa: F401 - re-exported for test backward compatibility
 from typing import Any, Optional
 
-from scaffold_engine.harness import MODEL_REGISTRY
+from llm_driver import MODEL_REGISTRY
 
 from app.core.config import settings
 

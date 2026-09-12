@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
-from scaffold_engine.harness import AgyCliHarness, AgyHarness
+from llm_driver import AgyCliHarness
+from llm_driver.adapters.agy_cli import AgyCliHarness as AgyHarness
 
 __all__ = ["AgyCliHarness", "AgyHarness"]

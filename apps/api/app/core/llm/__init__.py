@@ -1,16 +1,9 @@
 """백엔드 공통 LLM 진입점 (core/llm).
 
-**계약의 정본은 `scaffold_engine.harness` 다.** 이 패키지는 그 계약을 다시 정의하지 않고
-그대로 재수출하며, 호스트에만 있는 것 세 가지를 얹는다:
-
-1. 설정 주입 — `settings.agent_cli_bin` / `agent_cli_model` / `agent_cli_timeout_seconds`
-2. 프로바이더 확장 — 로컬 서빙 / SDK 직결 어댑터를 팩토리에 등록
-3. 관측 — 원장(`data/ledger/`)과 디버그 트레이스(`state/log/traces/`)
-
-의존 방향은 `apps/api → packages/scaffold-engine` 한쪽뿐이다(P1). 엔진이 이 패키지를
-import 하는 일은 없어야 한다.
+계약의 정본은 독립 모노레포 패키지인 `llm_driver`(`packages/llm-driver`)입니다.
+이 패키지는 `llm_driver`의 핵심 계약을 재수출하며, 호스트 고유의 것(DI 조립, 원장/트레이스 파일 저장소)을 얹습니다.
 """
-from scaffold_engine.harness import (
+from llm_driver import (
     DEFAULT_MODEL_NAME,
     MODEL_REGISTRY,
     BaseLlmHarness,

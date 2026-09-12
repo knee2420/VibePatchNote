@@ -20,6 +20,7 @@ apps/web       @vibe/web           React 19 + Vite + Tailwind v4 + React Flow + 
 apps/api       @vibe/api           FastAPI + Agent Runtime
 apps/inspector @vibe/inspector     관측 콘솔 (:5174). 읽기 전용, FSD 아님
 packages/agent-runtime             호스트 비의존 Agent 실행 생명주기 및 승인 엔진
+packages/llm-driver                호스트 비의존 다중 LLM 하네스 및 지능형 폴백 엔진
 packages/scaffold-engine           호스트 비의존 문서 스캐폴딩 엔진
 packages/document-viewer           호스트 비의존 문서 뷰어 엔진
 packages/agent-telemetry           호스트 비의존 관측 계약 (Span·Attempt·Snapshot)

@@ -5,6 +5,6 @@
 """
 from __future__ import annotations
 
-from scaffold_engine.harness import LocalGemmaHarness
+from llm_driver import LocalGemmaHarness
 
 __all__ = ["LocalGemmaHarness"]

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-driver"
+version = "0.1.0"
+description = "Pure Host-independent Multi-Provider LLM Harness, Resilient Fallback & Availability Kernel"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "VibePatchNote Team" }
+]
+dependencies = [
+    "pydantic>=2.7.0",
+]

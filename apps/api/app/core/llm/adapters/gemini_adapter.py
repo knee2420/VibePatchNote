@@ -5,14 +5,10 @@
 """
 from __future__ import annotations
 
-import scaffold_engine.harness.gemini_client as _gemini_client
-from scaffold_engine.harness import (
-    GeminiAdapter,
-    GeminiApiHarness,
-    GoogleGenAiHarness,
-)
+import requests
+from llm_driver import GoogleGenAiHarness
 
-# 하위 호환 및 테스트 모킹 지원을 위한 requests 참조 노출
-requests = _gemini_client.requests
+GeminiAdapter = GoogleGenAiHarness
+GeminiApiHarness = GoogleGenAiHarness
 
 __all__ = ["GoogleGenAiHarness", "GeminiAdapter", "GeminiApiHarness", "requests"]
