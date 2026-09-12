@@ -9,10 +9,9 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Literal
 
+from agent_runtime import RunCost
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
-
-from app.core.agent_runtime import RunCost
 
 # LLM 이 만들어 낸 산출물의 종류. 결정적 파생(cache/)은 여기에 오지 않는다.
 ArtifactKind = Literal["outline", "segments"]

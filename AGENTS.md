@@ -3,6 +3,11 @@
 > ## ⛔ 코드를 쓰기 전에 반드시 [`.agents/rules/00-core/rule.md`](./.agents/rules/00-core/rule.md) 를 읽으십시오.
 >
 > 이 파일은 요약본입니다. 판단이 필요한 순간에는 위 문서가 정본입니다.
+>
+> ### ⛔ [도메인 정체성 및 상위 경로명 절대 규칙]
+> - 상위 디렉터리 경로명(`WebNovelAssistant` 등)은 단순 상위 폴더명일 뿐이며, 본 프로젝트(`VibePatchNote`)의 비즈니스 도메인과 **전혀(1도) 관련이 없습니다.**
+> - 본 프로젝트는 웹소설/스토리 창작 서비스가 아니며, **범용 문서 빌더/스캐폴딩 엔진, 리치 텍스트·캔버스 시각화, 그리고 도메인 중립(Domain-Agnostic) Agent 런타임 및 관측 시스템**입니다.
+> - 에이전트는 설명, 예시, 비유, 도메인 로직 설계 시 '웹소설', '소설', '시나리오' 등의 용어나 맥락을 **절대 사용하지 마십시오.**
 
 ---
 
@@ -14,6 +19,7 @@
 apps/web       @vibe/web           React 19 + Vite + Tailwind v4 + React Flow + Tiptap
 apps/api       @vibe/api           FastAPI + Agent Runtime
 apps/inspector @vibe/inspector     관측 콘솔 (:5174). 읽기 전용, FSD 아님
+packages/agent-runtime             호스트 비의존 Agent 실행 생명주기 및 승인 엔진
 packages/scaffold-engine           호스트 비의존 문서 스캐폴딩 엔진
 packages/document-viewer           호스트 비의존 문서 뷰어 엔진
 packages/agent-telemetry           호스트 비의존 관측 계약 (Span·Attempt·Snapshot)

@@ -13,7 +13,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
+from agent_runtime import AgentRunInput, AgentRuntime, current_run_id
+
 from app.core.storage import ARTIFACT_PREFIX, new_id
 
 from ..models import ArtifactProvenance, DocumentMeta

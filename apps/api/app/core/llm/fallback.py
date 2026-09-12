@@ -5,13 +5,13 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
+from agent_runtime import report_progress
 from scaffold_engine.harness import (
     AgyCliHarness,
     BaseLlmHarness,
     LlmExecutionResult,
 )
 
-from app.core.agent_runtime import report_progress
 from app.core.config import settings
 
 from .adapters import GoogleGenAiHarness

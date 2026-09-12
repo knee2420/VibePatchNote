@@ -9,12 +9,12 @@ import asyncio
 import logging
 from typing import Any
 
+from agent_runtime import AgentRunInput, current_run_id
 from scaffold_engine import ScaffoldExtractResult, ScaffoldPipeline
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime, current_run_id
 from app.core.llm import BaseLlmHarness, ingest_pipeline_telemetry
 
-from ..ports import DocumentSourceRepository, ScaffoldArchivePort
+from ..ports import AgentRuntimePort, DocumentSourceRepository, ScaffoldArchivePort
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class GenerateScaffoldUseCase:
         self,
         source: DocumentSourceRepository,
         scaffolds: ScaffoldArchivePort,
-        agent_runtime: AgentRuntime,
+        agent_runtime: AgentRuntimePort,
         llm_harness: BaseLlmHarness,
     ) -> None:
         self._source = source

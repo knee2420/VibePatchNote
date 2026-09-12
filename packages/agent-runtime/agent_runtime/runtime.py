@@ -12,14 +12,13 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, TypeVar
 
-from app.core.storage import RUN_PREFIX, new_id
-
 from .approval import ApprovalService
 from .events import AgentRunEvent
 from .models import AgentRun, AgentRunInput, RunCost
 from .policy import DEFAULT_RETRY_POLICY, RetryPolicy
 from .ports import AgentRunRepository, LedgerPort
 from .progress import bind_progress
+from .utils import RUN_PREFIX, new_id
 
 logger = logging.getLogger(__name__)
 

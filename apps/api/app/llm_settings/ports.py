@@ -1,5 +1,34 @@
-"""LLM 설정 도메인이 외부 저장소에 요구하는 계약."""
-from typing import Protocol
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Protocol
+
+
+class CredentialStorePort(Protocol):
+    """Google API 키 등 보안 자격증명 저장소 계약."""
+
+    def get_google_api_key(self) -> str | None: ...
+    def set_google_api_key(self, api_key: str) -> None: ...
+    def delete_google_api_key(self) -> None: ...
+
+
+class ProviderStatePort(Protocol):
+    """공급자별 일시적 사용 불가(레이트 리밋/차단) 상태 조회 계약."""
+
+    def blocked_until(self, provider_id: str) -> datetime | None: ...
+    def block_reason(self, provider_id: str) -> str | None: ...
+
+
+class CliAvailabilityPort(Protocol):
+    """CLI 쿼터 잔여 여부 확인 계약."""
+
+    def check(self, model: str) -> Any: ...
+
+
+class AgyStatusSnapshotPort(Protocol):
+    """AGY CLI 상태 스냅샷 조회 계약."""
+
+    def read(self) -> dict[str, Any] | None: ...
 
 
 class RuntimePolicyRepository(Protocol):

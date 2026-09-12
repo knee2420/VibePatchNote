@@ -9,16 +9,16 @@
 """
 from pathlib import Path
 
-from dependency_injector import containers, providers
-from scaffold_engine import JsonPromptRunner
-
-from app.core.agent_runtime import (
+from agent_runtime import (
     AgentRuntime,
     ApprovalService,
     LocalAgentRunRepository,
     LocalAgreementRepository,
     LocalLedger,
 )
+from dependency_injector import containers, providers
+from scaffold_engine import JsonPromptRunner
+
 from app.core.config import settings
 from app.core.llm import (
     AgyStatusSnapshot,
@@ -55,7 +55,12 @@ from app.llm_settings.adapters import (
     LocalRuntimePolicyRepository,
 )
 from app.llm_settings.service import LlmSettingsService
-from app.llm_settings.use_cases import ReadGoogleProjectUsageUseCase
+from app.llm_settings.use_cases import (
+    ReadGoogleProjectUsageUseCase,
+    ResolveNextExecutionUseCase,
+    UpdateRuntimePolicyUseCase,
+)
+from app.runtime.service import RuntimeService
 from app.scaffolds.adapters.local_scaffold_repository import LocalScaffoldRepository
 from app.scaffolds.service import ScaffoldArchiveService
 from app.workspaces.adapters.local_workspace_repository import LocalWorkspaceRepository
@@ -98,6 +103,17 @@ class Container(containers.DeclarativeContainer):
     read_google_project_usage = providers.Factory(
         ReadGoogleProjectUsageUseCase, quotas=google_quota_reader, models=google_model_catalog
     )
+    resolve_next_execution = providers.Factory(
+        ResolveNextExecutionUseCase,
+        credentials=credential_store,
+        provider_state=provider_state,
+        cli_availability=cli_quota_availability,
+    )
+    update_runtime_policy = providers.Factory(
+        UpdateRuntimePolicyUseCase,
+        credentials=credential_store,
+        runtime_policy=runtime_policy_repository,
+    )
     llm_manager = providers.Singleton(
         LlmManager,
         credentials=credential_store,
@@ -122,6 +138,8 @@ class Container(containers.DeclarativeContainer):
         google_quotas=google_quota_reader,
         google_usage=read_google_project_usage,
         cli_availability=cli_quota_availability,
+        resolve_next_execution=resolve_next_execution,
+        update_policy_uc=update_runtime_policy,
     )
 
     # --- [2 Runtime] · [B Agreement] · [A Observation] ---------------------
@@ -138,6 +156,11 @@ class Container(containers.DeclarativeContainer):
         runs=agent_run_repository,
         approvals=approval_service,
         ledger=ledger,
+    )
+    runtime_service = providers.Factory(
+        RuntimeService,
+        agent_runtime=agent_runtime,
+        approvals=approval_service,
     )
     execution_recorder = providers.Singleton(LedgerExecutionRecorder, ledger=ledger)
 

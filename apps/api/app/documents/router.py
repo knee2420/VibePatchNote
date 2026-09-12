@@ -242,10 +242,10 @@ async def start_scaffold_wireframe(
         raise _document_http_error(exc) from exc
 
 
-# --- 실행 상태 ---------------------------------------------------------------
+# --- 실행 상태 (과도기/하위호환: 정본은 /api/v1/runtime) ----------------------------
 
 
-@router.get("/runs/{run_id}", response_model=RunResponse)
+@router.get("/runs/{run_id}", response_model=RunResponse, deprecated=True)
 @inject
 async def get_run(run_id: str, service: DocumentServiceDep):
     result = service.get_run(run_id)
@@ -254,7 +254,7 @@ async def get_run(run_id: str, service: DocumentServiceDep):
     return RunResponse(**result)
 
 
-@router.post("/runs/{run_id}/resume", response_model=RunAccepted, status_code=202)
+@router.post("/runs/{run_id}/resume", response_model=RunAccepted, status_code=202, deprecated=True)
 @inject
 async def resume_run(run_id: str, service: DocumentServiceDep):
     """끊기거나 보류된 실행을 입력 스냅샷으로 이어서 실행합니다."""
@@ -267,24 +267,24 @@ async def resume_run(run_id: str, service: DocumentServiceDep):
 @router.get("/outline/runs/{run_id}", response_model=RunResponse, deprecated=True)
 @inject
 async def get_outline_run(run_id: str, service: DocumentServiceDep):
-    """(과도기) 아웃라인 전용 실행 조회. 새 클라이언트는 `/runs/{run_id}` 를 씁니다."""
+    """(과도기) 아웃라인 전용 실행 조회. 새 클라이언트는 `/api/v1/runtime/runs/{run_id}` 를 씁니다."""
     result = service.get_run(run_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Agent run was not found")
     return RunResponse(**result)
 
 
-# --- 사용자 동의 -------------------------------------------------------------
+# --- 사용자 동의 (과도기/하위호환: 정본은 /api/v1/runtime) ------------------------
 
 
-@router.get("/agreements/pending", response_model=list[AgreementView])
+@router.get("/agreements/pending", response_model=list[AgreementView], deprecated=True)
 @inject
 async def list_pending_agreements(service: DocumentServiceDep):
     """사람의 결정을 기다리는 항목. 재시작을 넘어 살아남습니다."""
     return [AgreementView(**item) for item in service.list_pending_agreements()]
 
 
-@router.post("/agreements/{agreement_id}", response_model=AgreementView)
+@router.post("/agreements/{agreement_id}", response_model=AgreementView, deprecated=True)
 @inject
 async def decide_agreement(
     agreement_id: str, decision: AgreementDecision, service: DocumentServiceDep

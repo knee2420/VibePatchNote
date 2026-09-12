@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.agent_runtime import DEFAULT_RETRY_POLICY
+from agent_runtime import DEFAULT_RETRY_POLICY
 
 # 사람이 무언가를 설정해야 풀리는 실패에 붙는 행동 지시.
 CONFIGURE_GOOGLE_API = "configure_google_api"

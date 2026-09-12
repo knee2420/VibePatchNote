@@ -10,6 +10,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Optional
 
+from agent_runtime import LocalAgentRunRepository
 from agent_telemetry.contracts import (
     SpanSource,
     SpanUsage,
@@ -19,7 +20,6 @@ from agent_telemetry.contracts import (
 )
 from pydantic import ValidationError
 
-from app.core.agent_runtime.repository import LocalAgentRunRepository
 from app.core.config import settings
 from app.core.storage.paths import safe_segment
 from app.core.storage.payloads import read_payload

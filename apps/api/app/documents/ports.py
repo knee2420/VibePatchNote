@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Awaitable, Callable, Protocol
 
 from .models import ArtifactKind, ArtifactProvenance, DocumentMeta
 
@@ -94,3 +94,17 @@ class ScaffoldArchivePort(Protocol):
     def archive_scaffold(self, doc_id: str, source_path: Path, result: Any) -> Any: ...
 
     def delete_for_document(self, doc_id: str) -> int: ...
+
+
+class AgentRuntimePort(Protocol):
+    """documents 유스케이스가 Agent 실행과 상태 추적에 요구하는 런타임 계약."""
+
+    async def execute(
+        self,
+        agent_name: str,
+        operation: Callable[[], Awaitable[Any]],
+        *,
+        trace_id: str | None = None,
+        doc_id: str | None = None,
+        run_input: Any = None,
+    ) -> tuple[Any, Any]: ...

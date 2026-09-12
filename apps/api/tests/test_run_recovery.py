@@ -9,18 +9,19 @@ import asyncio
 from pathlib import Path
 
 import pytest
-
-from app.core.agent_runtime import (
+from agent_runtime import (
     INTERRUPTED_CODE,
     AgentRunEvent,
     AgentRuntime,
     ApprovalService,
+    LedgerEntry,
     LocalAgentRunRepository,
     LocalAgreementRepository,
     LocalLedger,
+    RunCost,
     report_progress,
 )
-from app.core.agent_runtime.models import LedgerEntry, RunCost
+
 from app.core.storage import StorageRoots
 
 
@@ -102,7 +103,7 @@ def test_agreement_outlives_the_process(roots: StorageRoots) -> None:
 
 def test_resume_needs_a_registered_use_case(runtime: AgentRuntime) -> None:
     """재개는 클로저가 아니라 '이름 + 입력 스냅샷'으로만 가능하다."""
-    from app.core.agent_runtime import AgentRunInput
+    from agent_runtime import AgentRunInput
 
     calls: list[str] = []
 

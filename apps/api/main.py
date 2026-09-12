@@ -6,8 +6,10 @@ from pathlib import Path
 
 # 모노레포 패키지(packages/scaffold-engine 등) 자동 로드 보장
 _PACKAGES_DIR = Path(__file__).resolve().parents[2] / "packages"
-if str(_PACKAGES_DIR / "scaffold-engine") not in sys.path:
-    sys.path.insert(0, str(_PACKAGES_DIR / "scaffold-engine"))
+for _pkg in ("scaffold-engine", "agent-runtime", "agent-telemetry"):
+    _pkg_path = str(_PACKAGES_DIR / _pkg)
+    if _pkg_path not in sys.path:
+        sys.path.insert(0, _pkg_path)
 
 from app.core.config import settings
 from app.core.logging_config import setup_logging
@@ -29,6 +31,7 @@ from app.core.storage import STORAGE_VERSION
 from app.documents import router as documents_router
 from app.inspector import router as inspector_router
 from app.llm_settings import router as llm_settings_router
+from app.runtime import router as runtime_router
 from app.scaffolds import router as scaffolds_router
 from app.workspaces import router as workspaces_router
 
@@ -93,7 +96,7 @@ app = FastAPI(
 
 # 객체 그래프는 Container 한 곳에서 조립하고, 라우터에서만 FastAPI 의존성으로 꺼낸다.
 container = Container()
-container.wire(modules=[documents_router, scaffolds_router, workspaces_router, llm_settings_router, inspector_router])
+container.wire(modules=[documents_router, scaffolds_router, workspaces_router, llm_settings_router, inspector_router, runtime_router])
 app.container = container
 
 
@@ -143,6 +146,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Documents & Agents"])
+app.include_router(runtime_router.router, prefix="/api/v1/runtime", tags=["Agent Runtime"])
 app.include_router(inspector_router.router, prefix="/api/v1/inspector", tags=["Observability & Inspector"])
 app.include_router(llm_settings_router.router, prefix="/api/v1/llm-settings", tags=["LLM Settings"])
 app.include_router(scaffolds_router.router, prefix="/api/v1/scaffolds", tags=["Scaffolds & Vision Archives"])

@@ -8,10 +8,9 @@ from __future__ import annotations
 
 from typing import Literal
 
-from app.core.storage import AGREEMENT_PREFIX, new_id
-
 from .models import Agreement
 from .ports import AgreementRepository
+from .utils import AGREEMENT_PREFIX, new_id
 
 AgreementKind = Literal["configure_google_api", "confirm_cost", "resume_run"]
 

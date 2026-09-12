@@ -16,19 +16,20 @@ include_external_packages = true
 name = "Core must not import domains"
 type = "forbidden"
 source_modules = ["app.core"]
-forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces", "app.llm_settings"]
+forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces", "app.llm_settings", "app.runtime"]
 
 # Agent Runtime 은 실행의 생애주기만 안다. 문서·PDF·프롬프트를 알기 시작하면
 # 다른 도메인이 이 런타임을 재사용할 수 없게 된다.
 [[tool.importlinter.contracts]]
 name = "Agent Runtime is domain agnostic"
 type = "forbidden"
-source_modules = ["app.core.agent_runtime"]
+source_modules = ["agent_runtime"]
 forbidden_modules = [
     "app.documents",
     "app.scaffolds",
     "app.workspaces",
     "app.llm_settings",
+    "app.runtime",
     "app.core.config",
     "scaffold_engine",
 ]

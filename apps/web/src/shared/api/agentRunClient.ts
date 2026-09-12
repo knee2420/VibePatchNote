@@ -11,7 +11,7 @@ import { httpClient } from './httpClient';
  * 여기에는 **프로토콜만** 둡니다. 상태 표현·재개 UI 같은 도메인 판단은
  * `entities/agent-run` 이 갖습니다.
  */
-const BASE_PATH = '/api/v1/documents';
+const BASE_PATH = '/api/v1/runtime';
 
 const POLL_INTERVAL_MS = 1000;
 

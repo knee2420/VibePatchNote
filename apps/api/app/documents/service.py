@@ -15,7 +15,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from app.core.agent_runtime import AgentRunInput, AgentRuntime, ApprovalService
+from agent_runtime import AgentRunInput, AgentRuntime, ApprovalService
 
 from .agents import (
     ExtractOutlineUseCase,
