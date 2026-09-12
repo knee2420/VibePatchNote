@@ -69,7 +69,7 @@ def test_pipeline_emits_valid_agent_telemetry(tmp_path: Path):
     span_names = [s.name for s in pipe_telemetry.spans]
     assert "DocumentContextBuilder" in span_names
     assert "PromptAssembly" in span_names
-    assert any(s.startswith("LLM:") for s in span_names)
+    assert "LlmInference" in span_names or any(s.startswith("LLM:") for s in span_names)
     assert "OutlineSchemaValidation" in span_names
 
     for sp in pipe_telemetry.spans:
@@ -77,7 +77,9 @@ def test_pipeline_emits_valid_agent_telemetry(tmp_path: Path):
         assert sp.usage.latency_ms >= 0.0
 
     # 3. 입출력 데이터 완전성 검증
-    llm_span = next(s for s in pipe_telemetry.spans if s.name.startswith("LLM:"))
+    llm_span = next(
+        s for s in pipe_telemetry.spans if s.name == "LlmInference" or s.name.startswith("LLM:")
+    )
     assert "execution_command" in llm_span.inputs
     assert "prompt" in llm_span.inputs
     assert "raw_response" in llm_span.outputs

@@ -28,7 +28,7 @@ def observability_runs() -> list[str]:
         dst = runs_dir / src.name
         if dst.exists():
             shutil.rmtree(dst, ignore_errors=True)
-        shutil.copytree(src, dst)
+        shutil.copytree(src, dst, dirs_exist_ok=True)
         copied.append(src.name)
 
     try:

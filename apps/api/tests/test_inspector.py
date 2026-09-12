@@ -190,7 +190,7 @@ def test_run_list_covers_uninstrumented_runs(observability_runs: list[str]):
     assert (run_dir / "events.jsonl").exists()
     assert not (run_dir / "meta.json").exists(), "이 픽스처는 meta 가 없어야 합니다"
 
-    runs = client.get("/api/v1/inspector/runs").json()
+    runs = client.get("/api/v1/inspector/runs?limit=200").json()
     found = next((r for r in runs if r["run_id"] == FIXTURE_RUN_EVENTS_ONLY), None)
 
     assert found is not None, "계측되지 않은 run 이 목록에서 빠졌습니다"
@@ -207,7 +207,7 @@ def test_run_list_uses_one_status_vocabulary(observability_runs: list[str]):
     """
     run_statuses = {"queued", "running", "completed", "failed",
                     "waiting_for_configuration", "waiting_for_approval", "unknown"}
-    for row in client.get("/api/v1/inspector/runs").json():
+    for row in client.get("/api/v1/inspector/runs?limit=200").json():
         assert row["status"] in run_statuses, (
             f"{row['run_id']} 의 상태 {row['status']!r} 가 run 어휘가 아닙니다"
         )
@@ -220,7 +220,7 @@ def test_telemetry_only_run_is_translated_to_run_vocabulary(observability_runs: 
     assert json.loads((run_dir / "meta.json").read_text(encoding="utf-8"))["status"] == "success"
 
     row = next(
-        r for r in client.get("/api/v1/inspector/runs").json()
+        r for r in client.get("/api/v1/inspector/runs?limit=200").json()
         if r["run_id"] == FIXTURE_RUN_WITH_ATTEMPTS
     )
     assert row["status"] == "completed"
@@ -228,7 +228,7 @@ def test_telemetry_only_run_is_translated_to_run_vocabulary(observability_runs: 
 
 def test_run_without_ledger_still_lists(observability_runs: list[str]):
     """단계 상세의 부재는 오류가 아니라 정상 상태다 (observability.md §2-3)."""
-    runs = {r["run_id"]: r for r in client.get("/api/v1/inspector/runs").json()}
+    runs = {r["run_id"]: r for r in client.get("/api/v1/inspector/runs?limit=200").json()}
 
     uninstrumented = runs[FIXTURE_RUN_EVENTS_ONLY]
     assert uninstrumented["has_span_detail"] is False
