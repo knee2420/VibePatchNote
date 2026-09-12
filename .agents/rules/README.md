@@ -20,7 +20,7 @@
 | 30 | [`30-workflow/`](./30-workflow/) | 작업 절차 | 패키지 큐레이션, 워크플로우 원칙 |
 | 40 | [`40-workbench/`](./40-workbench/) | 산출물 관리 | `workbench/` 하위 디렉터리 운용 규칙 |
 | 50 | [`50-develop/`](./50-develop/) | 실무 컨벤션·노하우 | 프론트/백엔드 세부 컨벤션, 트러블슈팅 |
-| 60 | [`60-data/`](./60-data/) | **런타임 데이터 관리** | 수명주기 등급(config/data/cache/state), 아티팩트·실행상태·원장, 마이그레이션 |
+| 60 | [`60-data/`](./60-data/) | **런타임 데이터 관리** | 수명주기 등급(config/data/cache/state), 아티팩트·실행상태·원장, 마이그레이션<br>· [`observability.md`](./60-data/observability.md) — 관측 기록 3층의 소유 범위와 단일 어휘 |
 
 ---
 

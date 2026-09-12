@@ -189,7 +189,7 @@ data/knowledge/documents/{doc_id}/artifacts/outline/
 **근거**: Temporal / Step Functions 의 durable execution, Event Sourcing (Fowler).
 **강제 수단**: `tests/test_run_recovery.py`
 
-### 4-7. 관측은 두 갈래다
+### 4-7. 관측은 두 갈래다 → **세 갈래다**
 
 | | 위치 | 성격 | 보존 |
 |---|---|---|---|
@@ -200,6 +200,11 @@ data/knowledge/documents/{doc_id}/artifacts/outline/
 보존정책이 부팅 시 일괄 정리한다.
 
 **근거**: OpenTelemetry 의 metrics vs traces / Twelve-Factor XI.
+
+> ⚠️ **이 항목은 더 이상 완전하지 않다.** 텔레메트리 스팬(`data/runs/{id}/ledger.jsonl`)이
+> 세 번째 갈래로 들어왔고, 소유 경계를 정한 문서가 없어 실행 상태·스팬 상세·원장이
+> 같은 개념에 세 어휘를 쓰게 되었다. 세 층의 소유 범위와 단일 어휘는
+> [`observability.md`](./observability.md) 가 정본이다.
 
 ### 4-8. 삭제는 연쇄한다
 

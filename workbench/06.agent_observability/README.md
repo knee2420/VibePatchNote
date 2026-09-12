@@ -19,3 +19,10 @@
 3. **[03.data_contracts.md](./03.data_contracts.md)**: 데이터 모델링 및 스키마 명세서 (Pydantic v2 & TypeScript SSOT, Span/Attempt/Snapshot 데이터 계약)
 4. **[04.standard_interfaces.md](./04.standard_interfaces.md)**: 표준 인터페이스 명세서 (독립 패키지 `packages/agent-telemetry` 아키텍처, StepCollector, BaseLlmHarness, SSE 프로토콜)
 5. **[05.inspector_app_architecture.md](./05.inspector_app_architecture.md)**: 독립 Inspector 앱 아키텍처 및 런타임 규격서 (방안 B: `@vibe/inspector` 독립 터미널 구동 및 Client-to-Host 통신 규격)
+6. **[06.abstraction_roadmap.md](./06.abstraction_roadmap.md)**: 추상화 이행 로드맵 (구현 실측 감사, 사양 대비 이탈 목록, `A0~A5` 단계별 이행 계획)
+
+> **1~5 는 사양(무엇을 만들 것인가), 6 은 이행 계획(무엇이 어긋났고 어떻게 되돌릴 것인가)이다.**
+> 구현이 사양을 어긴 지점이 발견되면 **사양이 아니라 구현을 고친다.** 사양을 바꿔야 한다고
+> 판단되면 1~5 를 먼저 개정하고 6 에 근거를 남긴다.
+>
+> 관측 데이터의 저장 위치·소유 경계·어휘는 [`.agents/rules/60-data/observability.md`](../../.agents/rules/60-data/observability.md) 가 정본이다.

@@ -1,0 +1,8 @@
+{
+  "use_case": "documents.extract_outline",
+  "doc_id": "doc-1a0897501c4-45f9155b",
+  "payload": {
+    "docId": "doc-1a0897501c4-45f9155b",
+    "forceRefresh": true
+  }
+}

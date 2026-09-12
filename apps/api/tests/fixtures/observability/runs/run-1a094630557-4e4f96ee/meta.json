@@ -1,0 +1,30 @@
+{
+  "run_id": "run-1a094630557-4e4f96ee",
+  "doc_id": "doc-1a0897501c4-45f9155b",
+  "domain": "documents",
+  "workflow_name": "documents.extract_outline",
+  "workflow_label": "문서 목차 추출",
+  "target_name": "Atticus LLC_ Invoice 000081709.pdf",
+  "primary_provider": "google_api",
+  "primary_model": "gemini-3.5-flash-lite",
+  "pipeline_name": "OutlinePipeline",
+  "status": "success",
+  "start_time": "2026-09-12T06:51:52.615425+00:00",
+  "end_time": "2026-09-12T06:51:58.762967+00:00",
+  "total_latency_ms": 6147.54,
+  "total_tokens": 0,
+  "prompt_tokens": 4798,
+  "completion_tokens": 1692,
+  "spans_count": 8,
+  "snapshots_count": 3,
+  "attempts_count": 0,
+  "provenance": {
+    "engine_version": "0.1.0",
+    "pipeline": "outline",
+    "model": "gemini-3.5-flash-lite",
+    "effort": null,
+    "prompt_hash": "e326164dd1695a7e",
+    "schema_hash": "50e68ddd8fcd3300",
+    "extra": {}
+  }
+}
