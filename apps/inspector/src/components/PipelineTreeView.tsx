@@ -26,13 +26,17 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 
 import { fetchSourceCode } from '../api'
-import type { SourceCodeResponse, SpanRecord } from '../types'
+import type { CompareItem, SourceCodeResponse, SpanRecord } from '../types'
 
 interface PipelineTreeViewProps {
   readonly span: SpanRecord
   readonly dataIn: string | null
   readonly dataOut: string | null
   readonly dataVia: readonly string[]
+  readonly isCompareMode?: boolean
+  readonly compareSlotAId?: string | null
+  readonly compareSlotBId?: string | null
+  readonly onPickCompareItem?: (item: CompareItem) => void
 }
 
 export interface PipelineTreeNode {
@@ -310,6 +314,10 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
   span,
   dataIn,
   dataVia,
+  isCompareMode = false,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
 }) => {
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({})
   const [sources, setSources] = useState<Record<string, SourceCodeResponse>>({})
@@ -474,26 +482,67 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
                 )}
               </div>
 
-              {contentToShow && (
-                <button
-                  type="button"
-                  onClick={(e) => handleCopyCode(node.id, contentToShow, e)}
-                  className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition-colors cursor-pointer"
-                  title="코드 복사"
-                >
-                  {copiedNodeId === node.id ? (
-                    <>
-                      <Check className="w-3 h-3 text-emerald-400" />
-                      <span className="text-emerald-400">복사됨</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3 h-3 text-slate-400" />
-                      <span>복사</span>
-                    </>
-                  )}
-                </button>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {isCompareMode && contentToShow && (
+                  <div>
+                    {compareSlotAId === `code:${node.id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                        🅰️ 픽됨
+                      </span>
+                    ) : compareSlotBId === `code:${node.id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                        🅱️ 픽됨
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onPickCompareItem?.({
+                            id: `code:${node.id}`,
+                            type: 'code',
+                            title: `[Code] ${node.name}`,
+                            subtitle: sourceData?.file_path || node.filePath || 'Inline Prompt',
+                            content: contentToShow,
+                            language:
+                              sourceData?.language === 'markdown' || node.type === 'prompt'
+                                ? 'markdown'
+                                : sourceData?.language === 'json'
+                                ? 'json'
+                                : 'python',
+                            spanId: span.span_id,
+                          })
+                        }}
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        title="이 소스코드를 Compare 슬롯에 추가"
+                      >
+                        + Compare
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {contentToShow && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleCopyCode(node.id, contentToShow, e)}
+                    className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition-colors cursor-pointer"
+                    title="코드 복사"
+                  >
+                    {copiedNodeId === node.id ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        <span className="text-emerald-400">복사됨</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3 text-slate-400" />
+                        <span>복사</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* 코드 본문 */}

@@ -301,8 +301,20 @@ class ExtractOutlineUseCase:
                             "data_via": ["extract_outline.py (_commit)", "local_document_artifact_repository.py (LocalDocumentArtifactRepository.commit)"],
                             "start_time": now_dt.isoformat(),
                             "end_time": now_dt.isoformat(),
-                            "inputs": {"docId": doc_id, "kind": KIND, "cost": {"total_tokens": cost.total_tokens}, "provenance": provenance.model_dump(mode="json")},
-                            "outputs": {"artifactId": provenance.artifact_id, "head": "HEAD.json", "committed_files": ["outline.json", "elements.json", "outline.md", "provenance.json"]},
+                            "inputs": {
+                                "docId": doc_id,
+                                "kind": KIND,
+                                "cost": {"total_tokens": cost.total_tokens},
+                                "provenance": provenance.model_dump(mode="json"),
+                                "markdown_outline": getattr(document, "markdown_outline", ""),
+                            },
+                            "outputs": {
+                                "artifactId": provenance.artifact_id,
+                                "head": "HEAD.json",
+                                "committed_files": ["outline.json", "elements.json", "outline.md", "provenance.json"],
+                                "markdown_outline": getattr(document, "markdown_outline", ""),
+                                "outlines": [n.model_dump(mode="json") for n in getattr(document, "outlines", [])],
+                            },
                             "usage": {"latency_ms": 2.0, "total_tokens": 0, "prompt_tokens": 0, "completion_tokens": 0},
                             "duration_ms": 2.0,
                         }

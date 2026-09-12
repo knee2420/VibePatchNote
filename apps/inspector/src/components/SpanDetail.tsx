@@ -34,14 +34,18 @@ import { json } from '@codemirror/lang-json'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 
-import type { SpanRecord } from '../types'
+import type { CompareItem, SpanRecord } from '../types'
 
 interface SpanDetailProps {
   readonly span: SpanRecord | null
-  readonly snapshots: Record<string, unknown>
+  readonly snapshots?: Record<string, unknown>
+  readonly isCompareMode?: boolean
+  readonly compareSlotAId?: string | null
+  readonly compareSlotBId?: string | null
+  readonly onPickCompareItem?: (item: CompareItem) => void
 }
 
-type TabType = 'io' | 'attempts' | 'snapshots' | 'raw'
+type TabType = 'io' | 'attempts' | 'raw'
 
 interface ModalViewerState {
   readonly isOpen: boolean
@@ -60,6 +64,11 @@ interface VirtualCodeCardProps {
   readonly data: unknown
   readonly defaultHeight?: string
   readonly badgeLabel?: string
+  readonly isCompareMode?: boolean
+  readonly compareSlotAId?: string | null
+  readonly compareSlotBId?: string | null
+  readonly onPickCompareItem?: (item: CompareItem) => void
+  readonly cardId?: string
   readonly onOpenModal: (
     title: string,
     content: string,
@@ -73,6 +82,11 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
   data,
   defaultHeight = '240px',
   badgeLabel,
+  isCompareMode = false,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
+  cardId,
   onOpenModal,
 }) => {
   const [copied, setCopied] = useState(false)
@@ -125,6 +139,10 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const effectiveCardId = cardId || `card:${title}`
+  const isSlotA = compareSlotAId === effectiveCardId
+  const isSlotB = compareSlotBId === effectiveCardId
+
   return (
     <div className="rounded-lg border border-slate-800/90 bg-[#080d1a] shadow-lg overflow-hidden flex flex-col transition-all hover:border-slate-700/80">
       {/* 카드 상단 툴바 헤더 */}
@@ -158,6 +176,39 @@ const VirtualCodeCard: React.FC<VirtualCodeCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Compare 모드일 때 픽 버튼 */}
+          {isCompareMode && textValue && (
+            <div>
+              {isSlotA ? (
+                <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                  🅰️ 픽됨
+                </span>
+              ) : isSlotB ? (
+                <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                  🅱️ 픽됨
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onPickCompareItem?.({
+                      id: effectiveCardId,
+                      type: language === 'markdown' ? 'inputs' : 'json',
+                      title,
+                      subtitle: `${language.toUpperCase()} (${charCount.toLocaleString()}자)`,
+                      content: textValue,
+                      language,
+                    })
+                  }}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                  title="이 카드를 Compare 슬롯에 추가"
+                >
+                  + Compare
+                </button>
+              )}
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleCopy}
@@ -642,12 +693,20 @@ interface LlmExecutionCommandCardProps {
     language: 'markdown' | 'json' | 'text',
     charCount: number
   ) => void
+  readonly isCompareMode?: boolean
+  readonly compareSlotAId?: string | null
+  readonly compareSlotBId?: string | null
+  readonly onPickCompareItem?: (item: CompareItem) => void
 }
 
 const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
   command,
   span,
   onOpenModal,
+  isCompareMode,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
 }) => {
   const [copied, setCopied] = useState(false)
   const [showRawCommand, setShowRawCommand] = useState(true)
@@ -707,6 +766,39 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
+          {isCompareMode && (
+            <div>
+              {compareSlotAId === `command:${span.span_id}` ? (
+                <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                  🅰️ 픽됨
+                </span>
+              ) : compareSlotBId === `command:${span.span_id}` ? (
+                <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                  🅱️ 픽됨
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onPickCompareItem?.({
+                      id: `command:${span.span_id}`,
+                      type: 'inputs',
+                      title: `[Command] ${span.display_label || span.name}`,
+                      subtitle: span.span_id,
+                      content: command,
+                      language: 'text',
+                      spanId: span.span_id,
+                    })
+                  }}
+                  className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                  title="이 실행 명령어 전문을 Compare 슬롯에 추가"
+                >
+                  + Compare
+                </button>
+              )}
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleCopy}
@@ -863,7 +955,13 @@ const LlmExecutionCommandCard: React.FC<LlmExecutionCommandCardProps> = ({
   )
 }
 
-export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
+export const SpanDetail: React.FC<SpanDetailProps> = ({
+  span,
+  isCompareMode = false,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
+}) => {
   const [activeTab, setActiveTab] = useState<TabType>('io')
   const [modalViewer, setModalViewer] = useState<ModalViewerState>({
     isOpen: false,
@@ -1036,9 +1134,6 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
 
   const attempts = span.attempts || []
   const hasAttempts = attempts.length > 0
-  const matchingSnapshotKeys = Object.keys(snapshots).filter(
-    (k) => span.name.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(span.name.toLowerCase())
-  )
 
   return (
     <div className="w-[420px] lg:w-[540px] xl:w-[600px] shrink-0 flex flex-col h-full bg-[#070b14] border-l border-slate-800 shadow-2xl relative">
@@ -1123,18 +1218,6 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={() => setActiveTab('snapshots')}
-          className={`flex items-center gap-1.5 px-3 py-2.5 border-b-2 font-medium transition-all cursor-pointer ${
-            activeTab === 'snapshots'
-              ? 'border-cyan-400 text-cyan-300 bg-cyan-950/20'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Snapshots ({Object.keys(snapshots).length})</span>
-        </button>
 
         <button
           type="button"
@@ -1176,9 +1259,73 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
 
             {/* INPUTS 섹션 */}
             <div className="space-y-3">
-              <div className="text-[11px] font-semibold text-sky-400 flex items-center gap-1.5 border-b border-slate-800/80 pb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
-                <span>INPUTS (입력 데이터)</span>
+              <div className="text-[11px] font-semibold text-sky-400 flex items-center justify-between border-b border-slate-800/80 pb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                  <span>INPUTS (입력 데이터)</span>
+                </div>
+
+                {isCompareMode && (
+                  <div>
+                    {compareSlotAId === `inputs:${span.span_id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                        🅰️ 픽됨
+                      </span>
+                    ) : compareSlotBId === `inputs:${span.span_id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                        🅱️ 픽됨
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          let contentStr: string
+                          if (isLlmSpan) {
+                            const chips = parseLlmSettings(resolvedExecutionCommand || '', span)
+                            const settingsSummary: Record<string, string> = {}
+                            chips.forEach((c) => {
+                              settingsSummary[c.label || c.key] = c.value
+                            })
+
+                            const meta = getSpanMetadata(span)
+                            const payload: Record<string, unknown> = {
+                              execution_settings: {
+                                provider:
+                                  span.inputs?.provider ||
+                                  meta.extra?.provider ||
+                                  (resolvedExecutionCommand?.startsWith('curl') ? 'google_api' : 'agy_cli'),
+                                model:
+                                  span.inputs?.target_model ||
+                                  meta.model_name ||
+                                  span.name.replace(/^llm:/i, '').split(' ')[0],
+                                flags: settingsSummary,
+                                command: resolvedExecutionCommand,
+                              },
+                              ...span.inputs,
+                            }
+                            contentStr = JSON.stringify(payload, null, 2)
+                          } else {
+                            contentStr = JSON.stringify(span.inputs || {}, null, 2)
+                          }
+
+                          onPickCompareItem?.({
+                            id: `inputs:${span.span_id}`,
+                            type: 'inputs',
+                            title: `[Inputs] ${span.display_label || span.name}`,
+                            subtitle: span.span_id,
+                            content: contentStr,
+                            language: 'json',
+                            spanId: span.span_id,
+                          })
+                        }}
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        title="이 스팬의 전체 INPUTS (설정값·명령어·프롬프트)를 Compare 슬롯에 추가"
+                      >
+                        + Compare
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 1. LLM 스팬 실행 명령어 & 설정 칩 (CLI / API Configuration) 전용 최우선 카드 */}
@@ -1187,6 +1334,10 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
                   command={resolvedExecutionCommand}
                   span={span}
                   onOpenModal={handleOpenModal}
+                  isCompareMode={isCompareMode}
+                  compareSlotAId={compareSlotAId}
+                  compareSlotBId={compareSlotBId}
+                  onPickCompareItem={onPickCompareItem}
                 />
               )}
 
@@ -1197,10 +1348,15 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
               {Object.entries(largeInputs).map(([k, v]) => (
                 <VirtualCodeCard
                   key={k}
+                  cardId={`input:${span.span_id}:${k}`}
                   title={`Input: ${k}`}
                   data={v}
                   defaultHeight="220px"
                   badgeLabel={getBadgeLabel(k)}
+                  isCompareMode={isCompareMode}
+                  compareSlotAId={compareSlotAId}
+                  compareSlotBId={compareSlotBId}
+                  onPickCompareItem={onPickCompareItem}
                   onOpenModal={handleOpenModal}
                 />
               ))}
@@ -1212,9 +1368,59 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
 
             {/* OUTPUTS 섹션 */}
             <div className="space-y-2 pt-2">
-              <div className="text-[11px] font-semibold text-emerald-400 flex items-center gap-1.5 border-b border-slate-800/80 pb-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span>OUTPUTS (산출물 및 전문 실측)</span>
+              <div className="text-[11px] font-semibold text-emerald-400 flex items-center justify-between border-b border-slate-800/80 pb-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  <span>OUTPUTS (산출물 및 전문 실측)</span>
+                </div>
+
+                {isCompareMode && (
+                  <div>
+                    {compareSlotAId === `outputs:${span.span_id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                        🅰️ 픽됨
+                      </span>
+                    ) : compareSlotBId === `outputs:${span.span_id}` ? (
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                        🅱️ 픽됨
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          let contentStr: string
+                          if (isLlmSpan) {
+                            const payload: Record<string, unknown> = {
+                              performance: {
+                                status: span.status,
+                                duration_ms: span.duration_ms,
+                                usage: span.usage,
+                              },
+                              ...span.outputs,
+                            }
+                            contentStr = JSON.stringify(payload, null, 2)
+                          } else {
+                            contentStr = JSON.stringify(span.outputs || {}, null, 2)
+                          }
+
+                          onPickCompareItem?.({
+                            id: `outputs:${span.span_id}`,
+                            type: 'outputs',
+                            title: `[Outputs] ${span.display_label || span.name}`,
+                            subtitle: span.span_id,
+                            content: contentStr,
+                            language: 'json',
+                            spanId: span.span_id,
+                          })
+                        }}
+                        className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm cursor-pointer"
+                        title="이 스팬의 전체 OUTPUTS를 Compare 슬롯에 추가"
+                      >
+                        + Compare
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {Object.keys(simpleOutputs).length > 0 && <SimplePropertiesGrid properties={simpleOutputs} />}
@@ -1222,10 +1428,15 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
               {Object.entries(largeOutputs).map(([k, v]) => (
                 <VirtualCodeCard
                   key={k}
+                  cardId={`output:${span.span_id}:${k}`}
                   title={`Output: ${k}`}
                   data={v}
                   defaultHeight="260px"
                   badgeLabel={getBadgeLabel(k)}
+                  isCompareMode={isCompareMode}
+                  compareSlotAId={compareSlotAId}
+                  compareSlotBId={compareSlotBId}
+                  onPickCompareItem={onPickCompareItem}
                   onOpenModal={handleOpenModal}
                 />
               ))}
@@ -1306,24 +1517,6 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
           </div>
         )}
 
-        {/* Snapshots 탭 (모두 가상화 CodeMirror 카드로 렌더링) */}
-        {activeTab === 'snapshots' && (
-          <div className="space-y-4">
-            {Object.entries(snapshots).map(([key, data]) => {
-              const isRelevant = matchingSnapshotKeys.includes(key)
-              return (
-                <VirtualCodeCard
-                  key={key}
-                  title={`Snapshot: ${key}`}
-                  data={data}
-                  defaultHeight="240px"
-                  badgeLabel={isRelevant ? 'RELEVANT' : undefined}
-                  onOpenModal={handleOpenModal}
-                />
-              )
-            })}
-          </div>
-        )}
 
         {/* Raw JSON 탭 (전체 스팬 레코드를 가상화 뷰어로 열람) */}
         {activeTab === 'raw' && (
@@ -1332,6 +1525,11 @@ export const SpanDetail: React.FC<SpanDetailProps> = ({ span, snapshots }) => {
             data={span}
             defaultHeight="520px"
             badgeLabel="RAW LEDGER"
+            cardId={`raw:${span.span_id}`}
+            isCompareMode={isCompareMode}
+            compareSlotAId={compareSlotAId}
+            compareSlotBId={compareSlotBId}
+            onPickCompareItem={onPickCompareItem}
             onOpenModal={handleOpenModal}
           />
         )}

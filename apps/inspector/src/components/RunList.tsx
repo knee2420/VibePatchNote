@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock,
   Coins,
+  GitCompare,
   RefreshCw,
   Trash2,
 } from 'lucide-react'
@@ -25,6 +26,11 @@ interface RunListProps {
   readonly onRefresh: () => void
   readonly onDeleteRun?: (runId: string) => Promise<void> | void
   readonly loading: boolean
+  readonly isCompareMode?: boolean
+  readonly onToggleCompareMode?: () => void
+  readonly compareSlotAId?: string | null
+  readonly compareSlotBId?: string | null
+  readonly onPickCompareItem?: (item: import('../types').CompareItem) => void
 }
 
 function formatDateTime(isoString: string): string {
@@ -144,6 +150,11 @@ export const RunList: React.FC<RunListProps> = ({
   onRefresh,
   onDeleteRun,
   loading,
+  isCompareMode = false,
+  onToggleCompareMode,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
 }) => {
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
 
@@ -162,24 +173,58 @@ export const RunList: React.FC<RunListProps> = ({
     }
   }
 
+  const handlePickRun = (e: React.MouseEvent, run: RunSummary) => {
+    e.stopPropagation()
+    if (!onPickCompareItem) return
+    onPickCompareItem({
+      id: `run:${run.run_id}`,
+      type: 'run',
+      title: `[Run] ${getDisplayLabel(run)}`,
+      subtitle: `${run.primary_model || 'Unknown model'} · ${run.run_id.slice(0, 8)}`,
+      content: JSON.stringify(run, null, 2),
+      language: 'json',
+      runId: run.run_id,
+    })
+  }
+
   return (
     <div className="flex flex-col h-full bg-[#0d1322] border-r border-slate-800/80 w-84 lg:w-92 shrink-0">
       {/* Header */}
-      <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-[#11192e]">
+      <div className="p-3 border-b border-slate-800 flex items-center justify-between bg-[#11192e]">
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4 text-cyan-400" />
           <h2 className="text-xs font-semibold tracking-wider text-slate-300 uppercase">
             Runs Ledger ({runs.length})
           </h2>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={loading}
-          className="p-1.5 hover:bg-slate-700/50 rounded text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
-          title="Refresh runs"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
-        </button>
+
+        <div className="flex items-center gap-1.5">
+          {/* Compare Mode Toggle Button */}
+          {onToggleCompareMode && (
+            <button
+              type="button"
+              onClick={onToggleCompareMode}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                isCompareMode
+                  ? 'bg-cyan-600 text-white shadow-md ring-1 ring-cyan-400 font-semibold'
+                  : 'bg-slate-800 text-slate-300 hover:text-cyan-300 hover:bg-slate-700'
+              }`}
+              title="화면 내 임의의 카드를 선택하여 GitHub Split Diff로 비교하는 모드 토글"
+            >
+              <GitCompare className="w-3.5 h-3.5" />
+              Compare
+            </button>
+          )}
+
+          <button
+            onClick={onRefresh}
+            disabled={loading}
+            className="p-1.5 hover:bg-slate-700/50 rounded text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50"
+            title="Refresh runs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-cyan-400' : ''}`} />
+          </button>
+        </div>
       </div>
 
       {/* Runs List */}
@@ -196,23 +241,29 @@ export const RunList: React.FC<RunListProps> = ({
             const targetName = getTargetName(run)
             const isDeleting = deletingId === run.run_id
 
+            // Compare 슬롯 등록 여부
+            const runItemId = `run:${run.run_id}`
+            const isSlotA = compareSlotAId === runItemId
+            const isSlotB = compareSlotBId === runItemId
+
             return (
               <div
                 key={run.run_id}
                 role="button"
                 tabIndex={0}
                 onClick={() => onSelectRun(run.run_id)}
-                className={`w-full text-left p-3.5 transition-colors border-l-2 cursor-pointer select-none group ${
+                className={`w-full text-left p-3.5 transition-colors border-l-2 cursor-pointer select-none group relative ${
                   isSelected
                     ? 'bg-cyan-950/25 border-cyan-500 text-slate-100'
                     : 'border-transparent hover:bg-slate-800/30 text-slate-400'
                 }`}
               >
-                {/* 1열: 도메인 뱃지 + 환경(CLI/API) 뱃지 + 실행 날짜/시각 + 상태 & 휴지통 */}
+                {/* 1열: 도메인 뱃지 + 환경 뱃지 + 실행 시각 + 상태 & Compare 픽 & 휴지통 */}
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {getDomainBadge(run.domain)}
                     {getProviderBadge(run.primary_provider)}
+
                     {run.created_at && (
                       <span className="flex items-center gap-1 text-[10px] text-slate-400 font-mono">
                         <Calendar className="w-2.5 h-2.5 text-slate-500" />
@@ -222,6 +273,30 @@ export const RunList: React.FC<RunListProps> = ({
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Compare 모드일 때 픽 버튼 */}
+                    {isCompareMode && (
+                      <div>
+                        {isSlotA ? (
+                          <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                            🅰️ 픽됨
+                          </span>
+                        ) : isSlotB ? (
+                          <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                            🅱️ 픽됨
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => handlePickRun(e, run)}
+                            className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm"
+                            title="이 Run을 Compare 슬롯에 추가"
+                          >
+                            + Compare
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     {isSuccess ? (
                       <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">
                         <CheckCircle2 className="w-3 h-3" />

@@ -110,3 +110,14 @@ export interface SourceCodeResponse {
   language: string
 }
 
+export interface CompareItem {
+  readonly id: string
+  readonly type: 'run' | 'span' | 'inputs' | 'outputs' | 'code' | 'json'
+  readonly title: string
+  readonly subtitle?: string
+  readonly content: string
+  readonly language: string
+  readonly runId?: string
+  readonly spanId?: string
+}
+

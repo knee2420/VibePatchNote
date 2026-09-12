@@ -2,19 +2,20 @@ import React, { useEffect, useState } from 'react'
 import {
   Activity,
   Cpu,
-  Eye,
+  GitCompare,
   Radio,
   Sparkles,
 } from 'lucide-react'
 import { deleteRun, fetchRunDetail, fetchRuns } from './api'
-import { DomainInspector } from './components/DomainInspector'
+import { CompareDock } from './components/CompareDock'
 import { MatrixViewer } from './components/MatrixViewer'
+import { RunCompareView } from './components/RunCompareView'
 import { RunList } from './components/RunList'
 import { RunTimeline } from './components/RunTimeline'
 import { SpanDetail } from './components/SpanDetail'
-import type { RunDetail, RunSummary, SpanRecord } from './types'
+import type { CompareItem, RunDetail, RunSummary, SpanRecord } from './types'
 
-type NavTab = 'runs' | 'domain' | 'matrix'
+type NavTab = 'runs' | 'compare' | 'matrix'
 
 export const App: React.FC = () => {
   const [navTab, setNavTab] = useState<NavTab>('runs')
@@ -24,6 +25,15 @@ export const App: React.FC = () => {
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // 1. Cross-Trace Run A / Run B 기본 ID
+  const [compareRunAId, setCompareRunAId] = useState<string | null>(null)
+  const [compareRunBId, setCompareRunBId] = useState<string | null>(null)
+
+  // 2. Universal Any-Card Compare 모드 및 2개 슬롯 (A / B)
+  const [isCompareMode, setIsCompareMode] = useState<boolean>(false)
+  const [compareSlotA, setCompareSlotA] = useState<CompareItem | null>(null)
+  const [compareSlotB, setCompareSlotB] = useState<CompareItem | null>(null)
+
   const loadRuns = async (retries = 2) => {
     setLoading(true)
     try {
@@ -31,6 +41,14 @@ export const App: React.FC = () => {
       setRuns(data)
       if (data.length > 0 && !selectedRunId) {
         setSelectedRunId(data[0].run_id)
+      }
+      // Compare용 기본 선택 (최신 2개 런이 있는 경우 자동 지정)
+      if (data.length >= 2) {
+        setCompareRunAId((prev) => prev ?? data[0].run_id)
+        setCompareRunBId((prev) => prev ?? data[1].run_id)
+      } else if (data.length === 1) {
+        setCompareRunAId((prev) => prev ?? data[0].run_id)
+        setCompareRunBId((prev) => prev ?? data[0].run_id)
       }
     } catch (err) {
       if (retries > 0) {
@@ -53,9 +71,37 @@ export const App: React.FC = () => {
       if (selectedRunId === runId) {
         setSelectedRunId(remaining.length > 0 ? remaining[0].run_id : null)
       }
+      if (compareRunAId === runId) {
+        setCompareRunAId(remaining.length > 0 ? remaining[0].run_id : null)
+      }
+      if (compareRunBId === runId) {
+        setCompareRunBId(remaining.length > 1 ? remaining[1].run_id : remaining[0]?.run_id || null)
+      }
     } catch (err) {
       console.error('Failed to delete run:', err)
       alert('실행 기록 삭제에 실패했습니다.')
+    }
+  }
+
+  // 카드 픽 핸들러 (임의의 카드를 슬롯 1 / 슬롯 2에 순서대로 등록)
+  const handlePickCompareItem = (item: CompareItem) => {
+    if (!compareSlotA) {
+      setCompareSlotA(item)
+    } else if (!compareSlotB) {
+      if (compareSlotA.id === item.id) {
+        // 동일 아이템 다시 클릭 시 슬롯 A 취소
+        setCompareSlotA(null)
+        return
+      }
+      setCompareSlotB(item)
+      // 2개 아이템이 모두 선택되면 400ms 후 자동으로 모드 완료 및 Compare 탭으로 이동!
+      setTimeout(() => {
+        setIsCompareMode(false)
+        setNavTab('compare')
+      }, 400)
+    } else {
+      // 둘 다 채워져 있을 때 새로 누르면 슬롯 B 교체
+      setCompareSlotB(item)
     }
   }
 
@@ -121,15 +167,18 @@ export const App: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setNavTab('domain')}
+              onClick={() => setNavTab('compare')}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                navTab === 'domain'
-                  ? 'bg-slate-800 text-cyan-300'
+                navTab === 'compare'
+                  ? 'bg-slate-800 text-cyan-300 ring-1 ring-cyan-500/40 font-semibold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`}
             >
-              <Eye className="w-3.5 h-3.5" />
-              Domain Vision
+              <GitCompare className="w-3.5 h-3.5 text-cyan-400" />
+              Run & Span Compare
+              {(compareSlotA || compareSlotB) && (
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse ml-0.5" />
+              )}
             </button>
 
             <button
@@ -147,12 +196,41 @@ export const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3 text-xs">
+          {/* Compare 모드 바로 켜기 토글 버튼 */}
+          <button
+            type="button"
+            onClick={() => setIsCompareMode((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+              isCompareMode
+                ? 'bg-cyan-600 text-white shadow-md ring-1 ring-cyan-400'
+                : 'bg-slate-800 text-slate-300 hover:text-cyan-300 hover:bg-slate-700'
+            }`}
+          >
+            <GitCompare className="w-3.5 h-3.5" />
+            {isCompareMode ? 'Compare 모드 ON' : 'Compare 모드'}
+          </button>
+
           <div className="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
             <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-            <span>API: 8000 (Connected)</span>
+            <span>API: 8000</span>
           </div>
         </div>
       </header>
+
+      {/* Universal Compare Selection Dock (Compare 모드 활성화 시 네비게이션 바로 아래 슬라이드인) */}
+      {isCompareMode && (
+        <CompareDock
+          slotA={compareSlotA}
+          slotB={compareSlotB}
+          onClearSlotA={() => setCompareSlotA(null)}
+          onClearSlotB={() => setCompareSlotB(null)}
+          onCloseCompareMode={() => setIsCompareMode(false)}
+          onOpenDiff={() => {
+            setIsCompareMode(false)
+            setNavTab('compare')
+          }}
+        />
+      )}
 
       {/* Main Workspace Area */}
       <main className="flex-1 flex overflow-hidden">
@@ -165,6 +243,11 @@ export const App: React.FC = () => {
               onRefresh={loadRuns}
               onDeleteRun={handleDeleteRun}
               loading={loading}
+              isCompareMode={isCompareMode}
+              onToggleCompareMode={() => setIsCompareMode((prev) => !prev)}
+              compareSlotAId={compareSlotA?.id || null}
+              compareSlotBId={compareSlotB?.id || null}
+              onPickCompareItem={handlePickCompareItem}
             />
 
             {runDetail ? (
@@ -174,10 +257,18 @@ export const App: React.FC = () => {
                   selectedSpanId={selectedSpanId}
                   onSelectSpan={(id) => setSelectedSpanId(id)}
                   totalDurationMs={runDetail.meta.duration_ms || 0}
+                  isCompareMode={isCompareMode}
+                  compareSlotAId={compareSlotA?.id || null}
+                  compareSlotBId={compareSlotB?.id || null}
+                  onPickCompareItem={handlePickCompareItem}
                 />
                 <SpanDetail
                   span={selectedSpan}
                   snapshots={runDetail.snapshots || {}}
+                  isCompareMode={isCompareMode}
+                  compareSlotAId={compareSlotA?.id || null}
+                  compareSlotBId={compareSlotB?.id || null}
+                  onPickCompareItem={handlePickCompareItem}
                 />
               </>
             ) : (
@@ -188,7 +279,21 @@ export const App: React.FC = () => {
           </>
         )}
 
-        {navTab === 'domain' && <DomainInspector runDetail={runDetail} />}
+        {navTab === 'compare' && (
+          <RunCompareView
+            runs={runs}
+            initialRunAId={compareRunAId}
+            initialRunBId={compareRunBId}
+            onSelectRunA={setCompareRunAId}
+            onSelectRunB={setCompareRunBId}
+            customSlotA={compareSlotA}
+            customSlotB={compareSlotB}
+            onClearCustomSlots={() => {
+              setCompareSlotA(null)
+              setCompareSlotB(null)
+            }}
+          />
+        )}
 
         {navTab === 'matrix' && <MatrixViewer />}
       </main>

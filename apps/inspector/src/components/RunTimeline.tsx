@@ -16,7 +16,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react'
-import type { SpanPhase, SpanRecord, SpanType } from '../types'
+import type { CompareItem, SpanPhase, SpanRecord, SpanType } from '../types'
 import { PipelineTreeView } from './PipelineTreeView'
 
 interface RunTimelineProps {
@@ -24,6 +24,10 @@ interface RunTimelineProps {
   selectedSpanId: string | null
   onSelectSpan: (spanId: string) => void
   totalDurationMs: number
+  isCompareMode?: boolean
+  compareSlotAId?: string | null
+  compareSlotBId?: string | null
+  onPickCompareItem?: (item: CompareItem) => void
 }
 
 function getSpanIcon(type: SpanType) {
@@ -122,6 +126,10 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
   selectedSpanId,
   onSelectSpan,
   totalDurationMs,
+  isCompareMode = false,
+  compareSlotAId,
+  compareSlotBId,
+  onPickCompareItem,
 }) => {
   const [expandedSpanIds, setExpandedSpanIds] = useState<Record<string, boolean>>({})
 
@@ -158,6 +166,11 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
     const mainTitle = span.display_label || span.name
     const subtitle = span.display_label ? span.name : null
 
+    // Compare 슬롯 등록 여부
+    const spanItemId = `span:${span.span_id}`
+    const isSlotA = compareSlotAId === spanItemId
+    const isSlotB = compareSlotBId === spanItemId
+
     return (
       <div
         key={span.span_id}
@@ -168,7 +181,7 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
             : 'bg-slate-900/70 border-slate-800/80 hover:border-slate-700 hover:bg-slate-850/80'
         }`}
       >
-        {/* 상단: 타이틀 + 뱃지 + 실행시간 */}
+        {/* 상단: 타이틀 + 뱃지 + 실행시간 + Compare 픽 버튼 */}
         <div className="flex items-start justify-between gap-2 mb-1.5">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="p-1 rounded bg-slate-800/80 border border-slate-700/60 shrink-0">
@@ -195,9 +208,50 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
             </div>
           </div>
 
-          <div className="text-right shrink-0">
+          <div className="text-right shrink-0 flex items-center gap-2">
+            {/* Compare 모드일 때 스팬 카드 픽 버튼 */}
+            {isCompareMode && (
+              <div>
+                {isSlotA ? (
+                  <span className="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[9px] font-mono font-bold">
+                    🅰️ 픽됨
+                  </span>
+                ) : isSlotB ? (
+                  <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[9px] font-mono font-bold">
+                    🅱️ 픽됨
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onPickCompareItem?.({
+                        id: spanItemId,
+                        type: 'span',
+                        title: `[Span] ${mainTitle}`,
+                        subtitle: `${span.span_type.toUpperCase()} · ${(
+                          (span.duration_ms || 0) / 1000
+                        ).toFixed(2)}s`,
+                        content: JSON.stringify(span, null, 2),
+                        language: 'json',
+                        spanId: span.span_id,
+                      })
+                    }}
+                    className="px-1.5 py-0.5 rounded text-[9px] font-medium bg-cyan-950/90 text-cyan-300 border border-cyan-700/60 hover:bg-cyan-900 transition-colors shadow-sm"
+                    title="이 스팬 카드를 Compare 슬롯에 추가"
+                  >
+                    + Compare
+                  </button>
+                )}
+              </div>
+            )}
+
             <span className="font-mono text-xs font-semibold text-slate-200">
-              {(span.duration_ms || 0).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ms
+              {(span.duration_ms || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}{' '}
+              ms
             </span>
           </div>
         </div>
@@ -334,6 +388,10 @@ export const RunTimeline: React.FC<RunTimelineProps> = ({
               dataIn={flow.in}
               dataOut={flow.out}
               dataVia={flow.via}
+              isCompareMode={isCompareMode}
+              compareSlotAId={compareSlotAId}
+              compareSlotBId={compareSlotBId}
+              onPickCompareItem={onPickCompareItem}
             />
           </div>
         )}
