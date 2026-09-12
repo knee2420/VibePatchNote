@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Inspector PipelineTreeView 컴포넌트
+ * 실행 스팬에 관여된 파이썬 파일, 클래스, 함수 심볼 및 프롬프트 트리를 파싱하고 소스 코드를 가상화 뷰어로 렌더링합니다.
+ * Google TypeScript Style Guide 규칙(readonly 불변성, JSDoc, 명시적 타입)을 준수합니다.
+ */
+
 import React, { useState } from 'react'
 import {
   Check,
@@ -14,24 +20,29 @@ import {
   Terminal,
   Zap,
 } from 'lucide-react'
+import CodeMirror from '@uiw/react-codemirror'
+import { json } from '@codemirror/lang-json'
+import { markdown } from '@codemirror/lang-markdown'
+import { oneDark } from '@codemirror/theme-one-dark'
+
 import { fetchSourceCode } from '../api'
 import type { SourceCodeResponse, SpanRecord } from '../types'
 
 interface PipelineTreeViewProps {
-  span: SpanRecord
-  dataIn: string | null
-  dataOut: string | null
-  dataVia: string[]
+  readonly span: SpanRecord
+  readonly dataIn: string | null
+  readonly dataOut: string | null
+  readonly dataVia: readonly string[]
 }
 
 export interface PipelineTreeNode {
-  id: string
-  name: string
-  type: 'file' | 'class' | 'function' | 'prompt'
-  filePath?: string
-  symbol?: string
-  directContent?: string // 스팬 자체에 있는 프롬프트 텍스트 등
-  children?: PipelineTreeNode[]
+  readonly id: string
+  readonly name: string
+  readonly type: 'file' | 'class' | 'function' | 'prompt'
+  readonly filePath?: string
+  readonly symbol?: string
+  readonly directContent?: string
+  readonly children?: readonly PipelineTreeNode[]
 }
 
 function isFileName(val?: string | null): boolean {
@@ -50,7 +61,8 @@ function isFileName(val?: string | null): boolean {
 const KNOWN_FILE_PATHS: Record<string, string> = {
   'extract_outline.py': 'apps/api/app/documents/use_cases/extract_outline.py',
   'generate_scaffold.py': 'apps/api/app/documents/use_cases/generate_scaffold.py',
-  'local_artifact_repository.py': 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+  'local_document_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
+  'local_artifact_repository.py': 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
   'fallback.py': 'apps/api/app/core/llm/fallback.py',
   'availability.py': 'apps/api/app/core/llm/availability.py',
   'policy_harness.py': 'apps/api/app/core/llm/policy_harness.py',
@@ -144,7 +156,7 @@ function parseViaItem(item: string): ParsedVia {
  */
 function buildTreeForSpan(
   span: SpanRecord,
-  dataVia: string[]
+  dataVia: readonly string[]
 ): PipelineTreeNode[] {
   const nodes: PipelineTreeNode[] = []
 
@@ -268,9 +280,9 @@ function buildTreeForSpan(
     })
     nodes.push({
       id: `${span.span_id}-repo-file`,
-      name: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+      name: 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
       type: 'file',
-      filePath: 'apps/api/app/scaffolds/adapters/local_artifact_repository.py',
+      filePath: 'apps/api/app/documents/adapters/local_document_artifact_repository.py',
     })
     return nodes
   }
@@ -485,9 +497,33 @@ export const PipelineTreeView: React.FC<PipelineTreeViewProps> = ({
             </div>
 
             {/* 코드 본문 */}
-            <div className="p-3 max-h-80 overflow-auto bg-[#070b14] text-xs font-mono text-slate-200 leading-relaxed whitespace-pre selection:bg-cyan-900 selection:text-cyan-100">
-              {contentToShow || (
-                <span className="text-slate-500 italic">코드를 불러오는 중이거나 코드가 비어 있습니다.</span>
+            <div className="bg-[#070b14] text-xs">
+              {contentToShow ? (
+                <CodeMirror
+                  value={contentToShow}
+                  height="260px"
+                  theme={oneDark}
+                  extensions={
+                    (sourceData?.language === 'markdown' || node.type === 'prompt')
+                      ? [markdown()]
+                      : sourceData?.language === 'json'
+                      ? [json()]
+                      : []
+                  }
+                  editable={false}
+                  readOnly={true}
+                  basicSetup={{
+                    lineNumbers: true,
+                    foldGutter: true,
+                    highlightActiveLineGutter: false,
+                    highlightActiveLine: false,
+                    searchKeymap: true,
+                  }}
+                />
+              ) : (
+                <div className="p-3 text-slate-500 italic">
+                  코드를 불러오는 중이거나 코드가 비어 있습니다.
+                </div>
               )}
             </div>
           </div>

@@ -295,6 +295,19 @@ class InspectorService:
         repo_root = settings.base_dir.parents[1].resolve()
         clean_path = file_path.strip().replace("\\", "/")
 
+        # 레거시 별칭 및 오타 매핑 보정
+        path_aliases = {
+            "local_artifact_repository.py": "apps/api/app/documents/adapters/local_document_artifact_repository.py",
+            "apps/api/app/scaffolds/adapters/local_artifact_repository.py": "apps/api/app/documents/adapters/local_document_artifact_repository.py",
+        }
+        if clean_path in path_aliases:
+            clean_path = path_aliases[clean_path]
+        elif Path(clean_path).name in path_aliases:
+            clean_path = path_aliases[Path(clean_path).name]
+
+        if symbol and "LocalArtifactRepository" in symbol:
+            symbol = symbol.replace("LocalArtifactRepository", "LocalDocumentArtifactRepository")
+
         # 1. 경로 후보군 수집
         raw_candidates = [
             repo_root / clean_path,

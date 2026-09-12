@@ -140,8 +140,14 @@ class OutlinePipeline:
                 )
             context_chars = len(doc_ctx.get("context_text", ""))
             pages_cnt = doc_ctx.get("total_pages", 1)
-            s_ctx.set_inputs({"filename": target_display_name, "total_pages": pages_cnt})
-            s_ctx.set_outputs({"context_chars": context_chars})
+            resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
+            s_ctx.set_inputs({"filename": target_display_name, "total_pages": pages_cnt, "resolved_path": resolved_file_path})
+            s_ctx.set_outputs({
+                "context_chars": context_chars,
+                "total_pages": pages_cnt,
+                "context_text": doc_ctx.get("context_text", ""),
+                "pages_meta": doc_ctx.get("pages_meta", []),
+            })
             s_ctx.set_label(
                 summary_pill=f"{pages_cnt}페이지 · 텍스트 {context_chars:,}자 실측",
                 data_out=f"DocumentContext ({context_chars:,}자)",
@@ -159,7 +165,6 @@ class OutlinePipeline:
 
         # 3. 통합 프롬프트 빌드
         ctx_file_info = f"- 로컬 컨텍스트 파일: {doc_ctx.get('context_file_path')}\n" if doc_ctx.get("context_file_path") else ""
-        resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
         with collector.step(
             "PromptAssembly",
             span_type=SpanType.CHAIN,
@@ -188,8 +193,14 @@ class OutlinePipeline:
                 f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오.\n"
                 f"좌표(box_2d) 지정 시, 목차 노드는 해당 라벨/헤더 텍스트 영역을, elements는 내용/본문 리스트/입력값/영수증 부착란 전체 사각 영역을 정확히 감싸도록 역할에 맞게 정밀 지정하십시오."
             )
-            s_prompt.set_inputs({"instructions_chars": len(instructions), "dynamic_context_chars": context_chars})
-            s_prompt.set_outputs({"total_prompt_chars": len(prompt)})
+            s_prompt.set_inputs({
+                "target_document": target_display_name,
+                "instructions_chars": len(instructions),
+                "dynamic_context_chars": context_chars,
+                "instructions": instructions,
+                "dynamic_context": doc_ctx.get("context_text", ""),
+            })
+            s_prompt.set_outputs({"total_prompt_chars": len(prompt), "prompt": prompt})
             s_prompt.set_label(
                 summary_pill=f"프롬프트 {len(prompt):,}자 구성",
                 data_out=f"Prompt String ({len(prompt):,}자)",
@@ -224,10 +235,50 @@ class OutlinePipeline:
             )
             actual_model = exec_res.model or target_model
             s_llm.attach_harness_result(exec_res)
-            s_llm.set_inputs({"prompt_chars": len(prompt), "prompt_snippet": prompt[:300]})
+
+            # CLI 또는 Direct API 체계에 따른 실제 실행 명령어 추출 및 조립
+            tel_meta = getattr(exec_res, "telemetry_metadata", {})
+            raw_command = tel_meta.get("raw_command")
+            if not raw_command and "command" in tel_meta:
+                c_list = tel_meta["command"]
+                raw_command = " ".join(f'"{c}"' if " " in str(c) else str(c) for c in c_list) if isinstance(c_list, list) else str(c_list)
+            if not raw_command:
+                prov = getattr(exec_res, "provider", "agy_cli")
+                if "api" in str(prov).lower():
+                    clean_m = re.sub(r"-(low|medium|high)$", "", actual_model)
+                    raw_command = (
+                        f'curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/{clean_m}:generateContent?key=$GOOGLE_API_KEY" \\\n'
+                        f'  -H "Content-Type: application/json" \\\n'
+                        f'  -d \'{{"generationConfig": {{"responseMimeType": "application/json"}}, "contents": [{{"role": "user", "parts": [...]}}]}}\''
+                    )
+                else:
+                    effort_arg = f" --effort {target_effort}" if target_effort else ""
+                    raw_command = (
+                        f'agy --model {actual_model}{effort_arg} --input-format stream-json --output-format stream-json '
+                        f'--dangerously-skip-permissions --disable-slash-commands --json-schema "{self.schema_path}"'
+                    )
+
+            s_llm.set_inputs({
+                "execution_command": raw_command,
+                "target_model": actual_model,
+                "provider": getattr(exec_res, "provider", "agy_cli"),
+                "effort": target_effort or "default",
+                "schema_file": str(self.schema_path),
+                "attached_document": target_display_name,
+                "prompt_chars": len(prompt),
+                "prompt": prompt,
+            })
             s_llm.set_outputs({
                 "has_structured_output": bool(exec_res.structured_output),
-                "raw_response_snippet": (exec_res.raw_response or "")[:300],
+                "tokens": {
+                    "input": exec_res.input_tokens,
+                    "output": exec_res.output_tokens,
+                    "thinking": exec_res.thinking_tokens or 0,
+                    "total": exec_res.total_tokens,
+                },
+                "duration_seconds": exec_res.duration_seconds,
+                "raw_response": exec_res.raw_response or "",
+                "structured_output": exec_res.structured_output,
             })
             harness_chain = [f"{self.harness.__class__.__name__}.run_structured"]
             if getattr(exec_res, "provider", None):
@@ -320,12 +371,32 @@ class OutlinePipeline:
             data_in="Structured JSON (Raw Response)",
             data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
         ) as s_val:
+            s_val.set_inputs({
+                "target_model": actual_model,
+                "schema_definition": Path(self.schema_path).name if self.schema_path else "outline_schema.json",
+                "raw_output": raw_output,
+            })
             try:
                 validated = OutlineOutput.model_validate(raw_output)
                 val_error = None
-                s_val.set_outputs({"outlines_count": len(validated.outlines)})
+
+                def _count_elems(items):
+                    c = 0
+                    for it in items:
+                        c += len(it.elements or [])
+                        if it.children:
+                            c += _count_elems(it.children)
+                    return c
+
+                total_elems = _count_elems(validated.outlines)
+                s_val.set_outputs({
+                    "is_valid": True,
+                    "outlines_count": len(validated.outlines),
+                    "total_elements": total_elems,
+                    "validated_tree": [n.model_dump(mode="json") for n in validated.outlines],
+                })
                 s_val.set_label(
-                    summary_pill=f"목차 노드 {len(validated.outlines)}건 무결성 통과",
+                    summary_pill=f"목차 노드 {len(validated.outlines)}건 · 요소 {total_elems}개 무결성 통과",
                     data_out=f"OutlineDocument (outlines: {len(validated.outlines)}건)",
                     data_via=["schema.py (OutlineOutput.model_validate)", "models.py (OutlineDocument.from_outline_output)"],
                 )
@@ -334,12 +405,14 @@ class OutlinePipeline:
                     stage_name="아웃라인 파싱 및 보정",
                     payload={
                         "outlines_count": len(validated.outlines),
+                        "total_elements": total_elems,
                         "is_valid": True,
                     },
                 )
             except Exception as ve:
                 validated, val_error = None, str(ve)
                 s_val.status = SpanStatus.FAILED
+                s_val.set_outputs({"is_valid": False, "error": val_error})
 
         if validated is None:
             logger.warning("[OutlinePipeline] Pydantic 역직렬화 실패 (%s)", val_error)

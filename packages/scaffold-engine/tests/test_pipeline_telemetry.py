@@ -76,6 +76,26 @@ def test_pipeline_emits_valid_agent_telemetry(tmp_path: Path):
         assert sp.dotted_order is not None
         assert sp.usage.latency_ms >= 0.0
 
+    # 3. 입출력 데이터 완전성 검증
+    llm_span = next(s for s in pipe_telemetry.spans if s.name.startswith("LLM:"))
+    assert "execution_command" in llm_span.inputs
+    assert "prompt" in llm_span.inputs
+    assert "raw_response" in llm_span.outputs
+    assert "structured_output" in llm_span.outputs
+
+    ctx_span = next(s for s in pipe_telemetry.spans if s.name == "DocumentContextBuilder")
+    assert "filename" in ctx_span.inputs
+    assert "context_text" in ctx_span.outputs
+
+    prompt_span = next(s for s in pipe_telemetry.spans if s.name == "PromptAssembly")
+    assert "instructions" in prompt_span.inputs
+    assert "prompt" in prompt_span.outputs
+
+    val_span = next(s for s in pipe_telemetry.spans if s.name == "OutlineSchemaValidation")
+    assert "raw_output" in val_span.inputs
+    assert "validated_tree" in val_span.outputs
+    assert val_span.outputs["is_valid"] is True
+
     print("PipelineTelemetry verification passed perfectly!")
 
 

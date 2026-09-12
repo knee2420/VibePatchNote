@@ -273,6 +273,7 @@ class AgyCliHarness(BaseLlmHarness):
                 "prompt_chars": len(prompt),
                 "wall_seconds": elapsed,
                 "command": cmd,
+                "raw_command": " ".join(f'"{c}"' if " " in str(c) else str(c) for c in cmd),
             },
         )
 

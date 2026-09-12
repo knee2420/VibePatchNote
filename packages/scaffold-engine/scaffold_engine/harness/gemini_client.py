@@ -256,8 +256,16 @@ class GoogleGenAiHarness(BaseLlmHarness):
             duration_seconds=duration,
             input_tokens=usage.get("promptTokenCount", 0),
             output_tokens=usage.get("candidatesTokenCount", 0),
-            total_tokens=usage.get("totalTokenCount", 0),
-            telemetry_metadata={"provider": "google_api", "fallback_used": False},
+            telemetry_metadata={
+                "provider": "google_api",
+                "fallback_used": False,
+                "api_endpoint": f"https://generativelanguage.googleapis.com/v1beta/models/{clean_model}:generateContent",
+                "raw_command": (
+                    f'curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/{clean_model}:generateContent?key=$GOOGLE_API_KEY" \\\n'
+                    f'  -H "Content-Type: application/json" \\\n'
+                    f'  -d \'{{"generationConfig": {json.dumps(generation_config)}, "contents": [{{"role": "user", "parts": [...]}}]}}\''
+                ),
+            },
         )
 
 

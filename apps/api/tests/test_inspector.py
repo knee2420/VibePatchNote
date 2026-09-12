@@ -194,3 +194,28 @@ def test_inspector_provider_resolution_for_cli_model(tmp_path: Path):
         if run_dir.exists():
             import shutil
             shutil.rmtree(run_dir, ignore_errors=True)
+
+
+def test_inspector_source_code_resolution():
+    """Inspector 소스 코드 조회 및 레거시 별칭 경로 자동 매핑 검증."""
+    # 1. 실제 파일명으로 조회
+    resp = client.get("/api/v1/inspector/source?file_path=local_document_artifact_repository.py")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "class LocalDocumentArtifactRepository" in data["content"]
+    assert data["language"] == "python"
+
+    # 2. 레거시(오타) 경로로 조회 시에도 alias 매핑되어 성공하는지 검증
+    legacy_resp = client.get("/api/v1/inspector/source?file_path=apps/api/app/scaffolds/adapters/local_artifact_repository.py")
+    assert legacy_resp.status_code == 200
+    legacy_data = legacy_resp.json()
+    assert "class LocalDocumentArtifactRepository" in legacy_data["content"]
+
+    # 3. 레거시 심볼 이름으로 조회 시에도 성공하는지 검증
+    symbol_resp = client.get(
+        "/api/v1/inspector/source?file_path=local_artifact_repository.py&symbol=LocalArtifactRepository"
+    )
+    assert symbol_resp.status_code == 200
+    symbol_data = symbol_resp.json()
+    assert "class LocalDocumentArtifactRepository" in symbol_data["content"]
+

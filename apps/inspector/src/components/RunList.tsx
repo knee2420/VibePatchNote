@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Inspector RunList 컴포넌트
+ * 실행 파이프라인 목록을 탐색하고 상태, 소요 시간, 입력/출력 토큰을 표시합니다.
+ * Google TypeScript Style Guide 규칙(readonly 불변성, JSDoc, 명시적 반환 타입)을 준수합니다.
+ */
+
 import React from 'react'
 import {
   Activity,
@@ -9,15 +15,16 @@ import {
   RefreshCw,
   Trash2,
 } from 'lucide-react'
+
 import type { RunSummary } from '../types'
 
 interface RunListProps {
-  runs: RunSummary[]
-  selectedRunId: string | null
-  onSelectRun: (runId: string) => void
-  onRefresh: () => void
-  onDeleteRun?: (runId: string) => Promise<void> | void
-  loading: boolean
+  readonly runs: readonly RunSummary[]
+  readonly selectedRunId: string | null
+  readonly onSelectRun: (runId: string) => void
+  readonly onRefresh: () => void
+  readonly onDeleteRun?: (runId: string) => Promise<void> | void
+  readonly loading: boolean
 }
 
 function formatDateTime(isoString: string): string {
@@ -35,7 +42,21 @@ function formatDateTime(isoString: string): string {
   }
 }
 
-function getProviderBadge(provider?: string | null) {
+function formatTokenCount(count: number): string {
+  if (!count) return '0'
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`
+  }
+  if (count >= 10_000) {
+    return `${(count / 1_000).toFixed(1)}k`
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}k`
+  }
+  return count.toLocaleString()
+}
+
+function getProviderBadge(provider?: string | null): React.ReactElement | null {
   if (!provider) return null
   const p = provider.toLowerCase()
   if (p.includes('cli') || p.includes('agy')) {
@@ -247,18 +268,39 @@ export const RunList: React.FC<RunListProps> = ({
                   ID: {run.run_id}
                 </div>
 
-                {/* 4열: 소요 시간(Latency) + 토큰량 + 모델 */}
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/50">
-                  <span className="flex items-center gap-1">
+                {/* 4열: 소요 시간(Latency) + 입력/출력 토큰량 분리 표시 + 모델 */}
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/50 gap-1.5">
+                  <span className="flex items-center gap-1 shrink-0" title={`총 소요 시간: ${(run.total_duration_ms / 1000).toFixed(2)}초`}>
                     <Clock className="w-3 h-3 text-slate-500" />
                     {(run.total_duration_ms / 1000).toFixed(2)}s
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Coins className="w-3 h-3 text-slate-500" />
-                    {run.total_tokens.toLocaleString()} tok
-                  </span>
+
+                  {/* 입력 / 출력 분리 토큰 표시 */}
+                  {run.input_tokens > 0 || run.output_tokens > 0 ? (
+                    <span
+                      className="flex items-center gap-1 font-mono text-[10px] bg-slate-900/80 px-1.5 py-0.5 rounded border border-slate-800 cursor-default truncate"
+                      title={`📥 입력(Prompt): ${run.input_tokens.toLocaleString()} tok\n📤 출력(Completion): ${run.output_tokens.toLocaleString()} tok\n🪙 총합(Total): ${run.total_tokens.toLocaleString()} tok`}
+                    >
+                      <span className="text-cyan-400 font-medium">
+                        입 <span className="font-semibold">{formatTokenCount(run.input_tokens)}</span>
+                      </span>
+                      <span className="text-slate-600">·</span>
+                      <span className="text-emerald-400 font-medium">
+                        출 <span className="font-semibold">{formatTokenCount(run.output_tokens)}</span>
+                      </span>
+                    </span>
+                  ) : run.total_tokens > 0 ? (
+                    <span
+                      className="flex items-center gap-1 font-mono text-[10px] text-slate-400"
+                      title={`총 토큰: ${run.total_tokens.toLocaleString()} tok`}
+                    >
+                      <Coins className="w-3 h-3 text-slate-500" />
+                      {formatTokenCount(run.total_tokens)} tok
+                    </span>
+                  ) : null}
+
                   {run.primary_model && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono truncate max-w-[100px]">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 font-mono truncate max-w-[90px] shrink-0">
                       {run.primary_model.replace('gemini-', '')}
                     </span>
                   )}
