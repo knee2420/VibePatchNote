@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from agent_runtime import report_progress
+from ..runtime.progress import report_progress
 
 from .adapters.agy_cli import AgyCliHarness
 from .adapters.gemini import GoogleGenAiHarness
@@ -34,7 +34,7 @@ def failure_code(result: LlmExecutionResult) -> str:
         return "QUOTA_EXHAUSTED"
     if "auth" in message or "unauthorized" in message or "api key" in message:
         return "AUTH_EXPIRED"
-    if result.status == "TIMEOUT" or "timeout" in message:
+    if result.status == "TIMEOUT" or ("timeout" in message and "usage of agy" not in message and "flags provided" not in message):
         return "PROVIDER_TIMEOUT"
     return "PROVIDER_UNAVAILABLE"
 
@@ -89,6 +89,10 @@ class FallbackLlmHarness(BaseLlmHarness):
         self._cli_timeout_seconds = cli_timeout_seconds or primary.timeout_seconds
         self._cli_executable = cli_executable or "agy"
 
+    @property
+    def primary_provider(self) -> str:
+        return self._primary_provider
+
     def run_structured(
         self,
         prompt: str,
@@ -116,8 +120,11 @@ class FallbackLlmHarness(BaseLlmHarness):
 
         is_google_primary = self._primary_provider in ("google_api", "google-api")
         if is_google_primary:
-            return self._run_google_primary(prompt, model=model, **call)
-        return self._run_cli_primary(prompt, model=model, **call)
+            res = self._run_google_primary(prompt, model=model, **call)
+        else:
+            res = self._run_cli_primary(prompt, model=model, **call)
+        self.last_result = res
+        return res
 
     def _run_cli_primary(self, prompt: str, *, model: Optional[str] = None, **call: Any) -> LlmExecutionResult:
         # 1. 이미 못 쓰는 것으로 확인된 공급자는 부르지 않는다.

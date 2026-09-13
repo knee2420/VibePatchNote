@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 class LlmHarness(Protocol):
     """LLM 호출 추상화. 구현체는 `harness/` 아래에 둔다."""
 
-    name: str
+    name: str = "default"
 
     def run_json(
         self,
@@ -24,6 +24,18 @@ class LlmHarness(Protocol):
         retry_hint: str = "",
     ) -> Optional[Dict[str, Any]]:
         """프롬프트를 실행하고 JSON 객체를 돌려준다. 실패 시 None."""
+        ...
+
+    def run_structured(
+        self,
+        prompt: str,
+        *,
+        json_schema: Optional[Dict[str, Any]] = None,
+        system_instruction: Optional[str] = None,
+        retries: int = 2,
+        **kwargs: Any,
+    ) -> Any:
+        """구조화된 스키마에 따라 LLM 추론 결과를 반환한다."""
         ...
 
 

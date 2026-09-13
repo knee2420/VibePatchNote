@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-driver"
+name = "agent-core"
 version = "0.1.0"
-description = "Pure Host-independent Multi-Provider LLM Harness, Resilient Fallback & Availability Kernel"
+description = "Pure Host-independent Agent Runtime & LLM Driver Kernel"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -14,3 +14,7 @@ authors = [
 dependencies = [
     "pydantic>=2.7.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_core*", "agent_runtime*", "llm_driver*"]

@@ -122,6 +122,7 @@ class AgyCliHarness(BaseLlmHarness):
         tmp_dir = Path(tempfile.mkdtemp(prefix="agy_harness_"))
         prompt_file = tmp_dir / "prompt.txt"
         schema_file_to_clean: Optional[Path] = None
+        isolated_source_dir: Optional[str] = None
 
         try:
             prompt_file.write_text(prompt, encoding="utf-8")
@@ -141,7 +142,7 @@ class AgyCliHarness(BaseLlmHarness):
                 self.cli_executable,
                 "--dangerously-skip-permissions",
                 "--output-format", "json",
-                "-m", target_model,
+                "--model", target_model,
             ]
             if chosen_effort:
                 cmd.extend(["--effort", chosen_effort])
@@ -150,7 +151,9 @@ class AgyCliHarness(BaseLlmHarness):
             if conversation_id:
                 cmd.extend(["-c", str(conversation_id)])
             if file_path:
-                cmd.extend(["--attach", str(Path(file_path).resolve())])
+                isolated_source_dir = self._prepare_isolated_source_dir(file_path)
+                if isolated_source_dir:
+                    cmd.extend(["--add-dir", isolated_source_dir])
 
             start_time = time.monotonic()
             logger.info("[AgyCliHarness] CLI 호출 시작: %s (model=%s)", " ".join(cmd[:6]), target_model)
@@ -290,6 +293,8 @@ class AgyCliHarness(BaseLlmHarness):
             )
 
         finally:
+            if isolated_source_dir:
+                self._cleanup_isolated_dir(isolated_source_dir)
             shutil.rmtree(tmp_dir, ignore_errors=True)
 
     @staticmethod

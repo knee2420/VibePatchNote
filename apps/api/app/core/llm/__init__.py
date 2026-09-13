@@ -1,9 +1,9 @@
 """백엔드 공통 LLM 진입점 (core/llm).
 
-계약의 정본은 독립 모노레포 패키지인 `llm_driver`(`packages/llm-driver`)입니다.
-이 패키지는 `llm_driver`의 핵심 계약을 재수출하며, 호스트 고유의 것(DI 조립, 원장/트레이스 파일 저장소)을 얹습니다.
+계약의 정본은 모노레포 패키지인 `agent_core.llm`(`packages/agent-core`)입니다.
+이 패키지는 `agent_core.llm`의 핵심 계약을 재수출하며, 호스트 고유의 것(DI 조립, 원장/트레이스 파일 저장소)을 얹습니다.
 """
-from llm_driver import (
+from agent_core.llm import (
     DEFAULT_MODEL_NAME,
     MODEL_REGISTRY,
     PRIMARY_PROVIDER_ID,

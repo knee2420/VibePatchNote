@@ -18,12 +18,12 @@ type = "forbidden"
 source_modules = ["app.core"]
 forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces", "app.llm_settings", "app.runtime"]
 
-# Agent Runtime 은 실행의 생애주기만 안다. 문서·PDF·프롬프트를 알기 시작하면
-# 다른 도메인이 이 런타임을 재사용할 수 없게 된다.
+# Agent Core(Runtime + LLM Driver)는 실행 생애주기와 다중 모델 커널을 담당한다.
+# 비즈니스 도메인(documents, scaffolds, workspaces)이나 문서 서식 엔진(scaffold_engine)을 알지 않는다.
 [[tool.importlinter.contracts]]
-name = "Agent Runtime is domain agnostic"
+name = "Agent Core is domain agnostic"
 type = "forbidden"
-source_modules = ["agent_runtime"]
+source_modules = ["agent_runtime", "llm_driver"]
 forbidden_modules = [
     "app.documents",
     "app.scaffolds",
@@ -34,20 +34,21 @@ forbidden_modules = [
     "scaffold_engine",
 ]
 
-# LLM Driver 는 순수 다중 공급자 하네스와 폴백 커널이다.
-# 특정 비즈니스 도메인이나 HTTP 프레임워크를 알지 않는다.
+# Scaffold Engine 은 순수 문서 스캐폴딩 엔진이다.
+# 에이전트 런타임이나 LLM 드라이버, 호스트 도메인을 직접 알지 않고 오직 LlmHarness 프로토콜만 안다.
 [[tool.importlinter.contracts]]
-name = "LLM Driver is domain agnostic"
+name = "Scaffold Engine is independent"
 type = "forbidden"
-source_modules = ["llm_driver"]
+source_modules = ["scaffold_engine"]
 forbidden_modules = [
+    "agent_runtime",
+    "llm_driver",
     "app.documents",
     "app.scaffolds",
     "app.workspaces",
     "app.llm_settings",
     "app.runtime",
-    "app.core.config",
-    "scaffold_engine",
+    "app.core",
 ]
 
 # 저장 경로를 전역으로 공개하면 누구나 어댑터를 건너뛰고 디스크에 직접 쓸 수 있다.

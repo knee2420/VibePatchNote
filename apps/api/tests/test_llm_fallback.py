@@ -64,7 +64,7 @@ def test_known_empty_cli_quota_skips_primary(monkeypatch) -> None:
         cli_availability=ExhaustedAvailability(),  # type: ignore[arg-type]
     )
     monkeypatch.setattr(
-        "llm_driver.fallback.GoogleGenAiHarness.run_structured",
+        "agent_core.llm.fallback.GoogleGenAiHarness.run_structured",
         lambda self, prompt, **kwargs: LlmExecutionResult(
             status="SUCCESS", model=self.model, structured_output={"ok": True}
         ),

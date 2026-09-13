@@ -35,6 +35,12 @@ class EngineScaffoldExtractAdapter:
         routed_engine = type(self._harness).__name__
         scope = current_scope()
         if scope:
+            scope.set_inputs({
+                "primary_provider": primary_provider,
+                "target_model": target_model,
+                "target_file": display_name,
+                "routing_policy": "primary_with_quota_fallback",
+            })
             scope.set_label(
                 summary_pill=f"쿼터 정상 · {target_model} 엔진 배정",
                 data_in=f"Policy: Primary={primary_provider}",

@@ -3,7 +3,7 @@ import json
 from typing import Any
 from pathlib import Path
 
-from scaffold_engine.harness import (
+from agent_core import (
     AgyCliHarness,
     GoogleGenAiHarness,
     HarnessFactory,
@@ -54,7 +54,7 @@ def test_google_adapter_structured_output_mock(monkeypatch) -> None:
         captured.update(kwargs)
         return DummyResponse()
 
-    import scaffold_engine.harness.gemini_client as gc
+    import agent_core.llm.adapters.gemini as gc
     monkeypatch.setattr(gc.requests, "post", dummy_post)
 
     adapter = GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-api-key")

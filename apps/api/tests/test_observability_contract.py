@@ -126,7 +126,7 @@ def test_unknown_cost_is_null_not_zero(observability_runs: list[str]) -> None:
 
 def test_model_registry_has_no_price_axis() -> None:
     """단가 축이 생기면 이 테스트가 깨진다 — 그때 비용 계산을 붙이라는 신호다."""
-    from scaffold_engine.harness import MODEL_REGISTRY
+    from agent_core import MODEL_REGISTRY
 
     spec = next(iter(MODEL_REGISTRY.values()))
     has_price = any("price" in f or "cost" in f for f in spec.__dataclass_fields__)

@@ -1,12 +1,24 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 from scaffold_engine.outline.pipeline import OutlinePipeline
-from scaffold_engine.harness.base import BaseLlmHarness, LlmExecutionResult
 from agent_telemetry.contracts import PipelineTelemetry
 
-class MockSuccessHarness(BaseLlmHarness):
+
+class MockExecutionResult:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.ok = kwargs.get("status") == "SUCCESS"
+        self.error = None
+        self.telemetry_metadata = {}
+
+
+class MockSuccessHarness:
+    name = "mock"
+    model = "gemini-3.5-flash"
+    primary_provider = "google_api"
+
     def run_structured(self, prompt, **kwargs):
-        return LlmExecutionResult(
+        return MockExecutionResult(
             status="SUCCESS",
             model="gemini-3.5-flash",
             structured_output={

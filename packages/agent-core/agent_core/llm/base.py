@@ -67,6 +67,11 @@ class BaseLlmHarness(ABC):
     ) -> None:
         self.model = model
         self.timeout_seconds = timeout_seconds
+        self.last_result: Optional[LlmExecutionResult] = None
+
+    @property
+    def primary_provider(self) -> str:
+        return self.name
 
     @abstractmethod
     def run_structured(
@@ -106,6 +111,7 @@ class BaseLlmHarness(ABC):
             file_path=file_path,
             **kwargs,
         )
+        self.last_result = res
         if not res.ok:
             raise RuntimeError(f"[{self.name}] LLM run_text 실패 ({res.status}): {res.error}")
         return res.raw_response
@@ -116,6 +122,7 @@ class BaseLlmHarness(ABC):
         *,
         schema_path: Optional[Union[str, Path]] = None,
         json_schema: Optional[Dict[str, Any]] = None,
+        schema: Optional[Dict[str, Any]] = None,
         list_key: str = "blocks",
         model: Optional[str] = None,
         effort: Optional[str] = None,
@@ -125,10 +132,11 @@ class BaseLlmHarness(ABC):
         **kwargs: Any,
     ) -> Dict[str, Any]:
         """JSON 객체를 회수한다. structured_output 우선, 실패 시 raw_response 관대 파싱."""
+        target_schema = json_schema or schema
         res = self.run_structured(
             prompt,
             schema_path=schema_path,
-            json_schema=json_schema,
+            json_schema=target_schema,
             model=model,
             effort=effort,
             conversation_id=conversation_id,
@@ -136,6 +144,7 @@ class BaseLlmHarness(ABC):
             file_path=file_path,
             **kwargs,
         )
+        self.last_result = res
         if not res.ok:
             raise RuntimeError(f"[{self.name}] LLM run_json 실패 ({res.status}): {res.error}")
 

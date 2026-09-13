@@ -168,7 +168,7 @@ class GoogleGenAiHarness(BaseLlmHarness):
                 telemetry_metadata={"provider": "google_api", "failure_code": "FALLBACK_NOT_CONFIGURED"},
             )
 
-        resolved_schema = json_schema
+        resolved_schema = json_schema or kwargs.get("schema")
         if resolved_schema is None and schema_path is not None:
             try:
                 resolved_schema = json.loads(Path(schema_path).read_text(encoding="utf-8"))

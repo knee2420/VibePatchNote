@@ -253,3 +253,71 @@ async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
     assert "ScaffoldArtifactCommit" in span_names
     assert len(telemetry.spans) == 5
 
+
+def test_scaffold_pipeline_records_usage_and_provider(tmp_path: Path) -> None:
+    """ScaffoldPipeline이 하네스 실행 결과의 토큰과 공급자/모델명을 텔레메트리에 온전히 기록한다."""
+    from llm_driver.base import BaseLlmHarness, LlmExecutionResult
+
+    class _MockHarness(BaseLlmHarness):
+        name = "mock_google_api"
+
+        def __init__(self) -> None:
+            super().__init__(model="gemini-3.5-flash-lite")
+
+        @property
+        def primary_provider(self) -> str:
+            return "google_api"
+
+        def run_structured(self, prompt: str, **kwargs) -> LlmExecutionResult:
+            return LlmExecutionResult(
+                status="SUCCESS",
+                model="gemini-3.5-flash-lite",
+                structured_output={"doc_title": "테스트 문서", "blocks": []},
+                input_tokens=2500,
+                output_tokens=800,
+                total_tokens=3300,
+                telemetry_metadata={"provider": "google_api"},
+            )
+
+    pdf = tmp_path / "test_usage.pdf"
+    _make_pdf(pdf)
+
+    harness = _MockHarness()
+    pipeline = ScaffoldPipeline(harness=harness)
+    pipeline.run(pdf, display_name="테스트_와이어프레임.pdf")
+
+    telemetry = pipeline.last_telemetry
+    assert telemetry is not None
+    assert telemetry.provenance.get("model") == "gemini-3.5-flash-lite"
+    assert telemetry.provenance.get("provider") == "google_api"
+    assert telemetry.total_usage.prompt_tokens == 2500
+    assert telemetry.total_usage.completion_tokens == 800
+
+    llm_span = next((s for s in telemetry.spans if s.name == "LlmInference"), None)
+    assert llm_span is not None
+    assert "execution_command" in llm_span.inputs
+    assert "curl" in llm_span.inputs["execution_command"]
+    assert "prompt" in llm_span.inputs
+    assert "structured_output" in llm_span.outputs
+
+    run_id = "test-scaffold-usage-run"
+    run_dir = settings.storage.runs / run_id
+    try:
+        ingest_pipeline_telemetry(
+            telemetry,
+            run_id=run_id,
+            doc_id=None,
+            target_name="테스트_와이어프레임.pdf",
+        )
+        runs = client.get("/api/v1/inspector/runs").json()
+        found = next((r for r in runs if r["run_id"] == run_id), None)
+        assert found is not None
+        assert found["primary_provider"] == "google_api"
+        assert found["primary_model"] == "gemini-3.5-flash-lite"
+        assert found["input_tokens"] == 2500
+        assert found["output_tokens"] == 800
+    finally:
+        import shutil
+        shutil.rmtree(run_dir, ignore_errors=True)
+
+

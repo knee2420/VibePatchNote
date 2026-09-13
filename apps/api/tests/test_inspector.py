@@ -169,7 +169,7 @@ def test_provider_is_recorded_not_guessed(tmp_path: Path):
         )
 
         found = next(
-            r for r in client.get("/api/v1/inspector/runs").json() if r["run_id"] == run_id
+            r for r in client.get("/api/v1/inspector/runs?limit=200").json() if r["run_id"] == run_id
         )
         # 모델은 기록돼 있으니 그대로 나온다.
         assert found["primary_model"] == "gemini-3.8-flash-low"

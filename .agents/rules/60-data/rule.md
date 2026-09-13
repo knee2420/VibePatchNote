@@ -86,8 +86,7 @@ apps/api/
 │
 └── state/                                   죽어도 되는 것
     ├── provider-state.json                  ledger 에서 재계산 가능
-    ├── agy-status.json
-    └── log/  app.log · engines/ · traces/{date}/
+    └── log/  {YYYY-MM-DD}/(app.log · debug.log · engines/) · traces/runs/{YYYY-MM-DD}/
 ```
 
 **층 이름(`knowledge` `runs` `memory` `agreements` `ledger`)은 아키텍처 문서의

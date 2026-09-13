@@ -9,7 +9,8 @@ import sys
 from pathlib import Path
 
 from scaffold_engine.core.pipeline import ScaffoldPipeline
-from scaffold_engine.harness.agy_client import DEFAULT_MODEL
+
+DEFAULT_MODEL = "gemini-3.8-flash-low"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -36,7 +37,15 @@ def main() -> None:
             logger.error("파일이 존재하지 않습니다: %s", pdf_path)
             sys.exit(1)
 
-        pipeline = ScaffoldPipeline(model=args.model)
+        harness = None
+        try:
+            import importlib
+            mod = importlib.import_module("agent_core")
+            harness = getattr(mod, "HarnessFactory").create(model=args.model)
+        except Exception:
+            harness = None
+
+        pipeline = ScaffoldPipeline(harness=harness, model=args.model)
         try:
             result = pipeline.run(pdf_path, page_number=args.page)
             logger.info("추출 성공: %s", result.meta.title)

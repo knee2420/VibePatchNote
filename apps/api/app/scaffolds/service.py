@@ -116,6 +116,20 @@ class ScaffoldArchiveService:
         meta = self._to_meta(record)
         scope = current_scope()
         if scope:
+            scope.set_inputs({
+                "scaffold_id": scaffold_id,
+                "title": title,
+                "doc_id": doc_id,
+                "slots_count": len(result.slots),
+                "page_number": page_number,
+                "pdf_path": str(pdf_path),
+            })
+            scope.set_outputs({
+                "scaffold_id": scaffold_id,
+                "title": meta.title,
+                "archive_dir": str(self.repository.resolve_dir(record.scaffold_id)),
+                "has_render_image": self.repository.has_asset(record.scaffold_id, ASSET_VISION_RENDER),
+            })
             scope.set_label(
                 summary_pill=f"아카이브 {scaffold_id[:16]} 영속화 완료",
                 data_in=f"{pdf_path.name} (slots={len(result.slots)})",

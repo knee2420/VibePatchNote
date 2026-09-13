@@ -9,7 +9,7 @@ import logging
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from scaffold_engine.core.interfaces import LlmHarness
-from scaffold_engine.harness.parsing import unknown_ids
+from scaffold_engine.utils.parsing import parse_json_payload, unknown_ids
 
 from .prompt import build_classification_prompt
 from .schema import BLOCK_CLASSIFICATION_SCHEMA, SHAPE_REMINDER
@@ -28,6 +28,8 @@ class SlotClassifier:
 
     def __init__(self, harness: LlmHarness) -> None:
         self.harness = harness
+        self.last_result: Optional[Any] = None
+        self.last_prompt: str = ""
 
     def classify(self, source_name: str, page: "PageGeometry") -> Dict[str, Any]:
         """실패해도 예외를 던지지 않는다 — 빈 판정을 돌려주면 전부 고정 텍스트가 된다."""
@@ -35,11 +37,25 @@ class SlotClassifier:
         if not blocks:
             return {"doc_title": source_name, "blocks": []}
 
-        payload = self.harness.run_json(
-            build_classification_prompt(source_name, page),
-            schema=BLOCK_CLASSIFICATION_SCHEMA,
-            retry_hint=SHAPE_REMINDER,
-        )
+        prompt = build_classification_prompt(source_name, page)
+        self.last_prompt = prompt
+        if hasattr(self.harness, "run_structured"):
+            res = self.harness.run_structured(
+                prompt,
+                json_schema=BLOCK_CLASSIFICATION_SCHEMA,
+            )
+            self.last_result = res
+            payload = res.structured_output
+            if not payload and res.raw_response:
+                payload = parse_json_payload(res.raw_response, list_key="blocks")
+        else:
+            payload = self.harness.run_json(
+                prompt,
+                schema=BLOCK_CLASSIFICATION_SCHEMA,
+                retry_hint=SHAPE_REMINDER,
+            )
+            self.last_result = getattr(self.harness, "last_result", None)
+
         if not payload:
             logger.warning("[classify] 판정 실패 — 전체를 고정 텍스트로 처리: %s p%d",
                            source_name, page.page)

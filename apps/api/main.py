@@ -6,13 +6,13 @@ from pathlib import Path
 
 # 모노레포 패키지(packages/scaffold-engine 등) 자동 로드 보장
 _PACKAGES_DIR = Path(__file__).resolve().parents[2] / "packages"
-for _pkg in ("scaffold-engine", "agent-runtime", "agent-telemetry"):
+for _pkg in ("scaffold-engine", "agent-core", "agent-telemetry"):
     _pkg_path = str(_PACKAGES_DIR / _pkg)
     if _pkg_path not in sys.path:
         sys.path.insert(0, _pkg_path)
 
 from app.core.config import settings
-from app.core.logging_config import setup_logging
+from app.core.logging_config import purge_expired_logs, setup_logging
 
 # 로그 파일도 state/ 아래에 놓이므로 등급 디렉터리를 먼저 만든다.
 settings.ensure_directories()
@@ -81,6 +81,10 @@ async def lifespan(app: FastAPI):
     purged = purge_expired_traces(settings.trace_retention_days)
     if purged:
         logger.info("[Startup] 만료 트레이스 %d일치를 정리했습니다.", purged)
+
+    purged_logs = purge_expired_logs(settings.storage.log, settings.trace_retention_days)
+    if purged_logs:
+        logger.info("[Startup] 만료 로그 %d일치를 정리했습니다.", purged_logs)
 
     yield
 

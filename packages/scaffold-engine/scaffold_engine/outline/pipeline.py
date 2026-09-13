@@ -12,12 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
-from scaffold_engine.harness import (
-    DEFAULT_MODEL,
-    BaseLlmHarness,
-    HarnessFactory,
-    LlmExecutionResult,
-)
+from scaffold_engine.core.interfaces import LlmHarness
 from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
 from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.schemas.models import (
@@ -37,6 +32,7 @@ from agent_telemetry import (
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_MODEL = "default"
 DEFAULT_SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "outline_schema.json"
 
 
@@ -49,7 +45,7 @@ class OutlinePipeline:
 
     def __init__(
         self,
-        harness: Optional[BaseLlmHarness] = None,
+        harness: Optional[LlmHarness] = None,
         schema_path: Optional[Path] = None,
         system_instructions_path: Optional[Path] = None,
         default_model: str = DEFAULT_MODEL,
@@ -60,12 +56,12 @@ class OutlinePipeline:
         # 파생물을 어디에 둘지는 호스트가 정한다. 엔진이 입력 파일 옆에 쓰면
         # 호스트의 업로드 디렉터리를 오염시키고, 호스트 비의존 계약이 깨진다.
         # 기본값은 "아무 데도 쓰지 않는다" 다.
+        if harness is None:
+            raise ValueError("OutlinePipeline에 LlmHarness 인스턴스를 반드시 주입해야 합니다.")
         self.context_dir = Path(context_dir) if context_dir else None
         self.default_model = default_model
         self.default_effort = default_effort
-        self.harness = harness or HarnessFactory.create(
-            model=default_model, effort=default_effort, timeout_seconds=timeout_seconds
-        )
+        self.harness = harness
         self.context_builder = DocumentContextBuilder()
         self.schema_path = schema_path or DEFAULT_SCHEMA_PATH
         self.system_instructions_path = system_instructions_path or SYSTEM_INSTRUCTIONS_PATH
@@ -246,7 +242,7 @@ class OutlinePipeline:
                 model_source(target_model),
             ],
         ) as s_llm:
-            exec_res: LlmExecutionResult = self.harness.run_structured(
+            exec_res = self.harness.run_structured(
                 prompt=prompt,
                 schema_path=self.schema_path,
                 model=target_model,
@@ -289,16 +285,16 @@ class OutlinePipeline:
                 "prompt": prompt,
             })
             s_llm.set_outputs({
-                "has_structured_output": bool(exec_res.structured_output),
+                "has_structured_output": bool(getattr(exec_res, "structured_output", None)),
                 "tokens": {
-                    "input": exec_res.input_tokens,
-                    "output": exec_res.output_tokens,
-                    "thinking": exec_res.thinking_tokens or 0,
-                    "total": exec_res.total_tokens,
+                    "input": getattr(exec_res, "input_tokens", 0) or 0,
+                    "output": getattr(exec_res, "output_tokens", 0) or 0,
+                    "thinking": getattr(exec_res, "thinking_tokens", 0) or 0,
+                    "total": getattr(exec_res, "total_tokens", 0) or 0,
                 },
-                "duration_seconds": exec_res.duration_seconds,
-                "raw_response": exec_res.raw_response or "",
-                "structured_output": exec_res.structured_output,
+                "duration_seconds": getattr(exec_res, "duration_seconds", 0.0) or 0.0,
+                "raw_response": getattr(exec_res, "raw_response", "") or "",
+                "structured_output": getattr(exec_res, "structured_output", None),
             })
             # 실제 실행된 하네스와 모델로 경유 지점을 확정한다.
             s_llm.set_sources(
@@ -351,16 +347,16 @@ class OutlinePipeline:
         telemetry = {
             "model": actual_model,
             "ctx_duration": round(collector.spans[0].usage.latency_ms / 1000, 3) if collector.spans else 0.0,
-            "cli_duration": exec_res.duration_seconds,
+            "cli_duration": getattr(exec_res, "duration_seconds", 0.0) or 0.0,
             "tokens": {
-                "input": exec_res.input_tokens,
-                "output": exec_res.output_tokens,
-                "thinking": exec_res.thinking_tokens,
-                "cache_read": exec_res.cache_read_tokens,
-                "total": exec_res.total_tokens,
+                "input": getattr(exec_res, "input_tokens", 0) or 0,
+                "output": getattr(exec_res, "output_tokens", 0) or 0,
+                "thinking": getattr(exec_res, "thinking_tokens", 0) or 0,
+                "cache_read": getattr(exec_res, "cache_read_tokens", 0) or 0,
+                "total": getattr(exec_res, "total_tokens", 0) or 0,
             },
-            "status": exec_res.status,
-            "error": exec_res.error,
+            "status": getattr(exec_res, "status", "SUCCESS"),
+            "error": getattr(exec_res, "error", None),
             "total_pages": doc_ctx.get("total_pages", 1),
             "context_chars": context_chars,
             "prompt": prompt,

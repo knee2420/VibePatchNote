@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import time
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -29,11 +30,12 @@ from scaffold_engine.assemble.html import HtmlAssembler
 from scaffold_engine.classify.agent import SlotClassifier
 from scaffold_engine.core.interfaces import LlmHarness
 from scaffold_engine.extract.geometry import PdfGeometryExtractor
-from scaffold_engine.harness import DEFAULT_MODEL_NAME, HarnessFactory
 from scaffold_engine.score.fidelity import score_page
 from scaffold_engine.types import ScaffoldExtractResult, ScaffoldMeta
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_MODEL_NAME = "default"
 
 
 class ScannedDocumentError(RuntimeError):
@@ -45,13 +47,13 @@ class ScaffoldPipeline:
 
     def __init__(
         self,
-        model: str = DEFAULT_MODEL_NAME,
         harness: Optional[LlmHarness] = None,
+        model: str = DEFAULT_MODEL_NAME,
         timeout_seconds: int = 75,
     ) -> None:
-        self.harness = harness or HarnessFactory.create(
-            model=model, timeout_seconds=timeout_seconds
-        )
+        if harness is None:
+            raise ValueError("ScaffoldPipeline에 LlmHarness 인스턴스를 반드시 주입해야 합니다.")
+        self.harness = harness
         self.extractor = PdfGeometryExtractor()
         self.classifier = SlotClassifier(self.harness)
         self.assembler = HtmlAssembler()
@@ -84,8 +86,25 @@ class ScaffoldPipeline:
                 return self._run_traced(collector, pdf_path, page_number, display_name)
         finally:
             # 실패해도 거기까지의 단계는 남는다. 관측 도구가 가장 봐야 할 기록이다.
+            exec_res = getattr(self.classifier, "last_result", None) or getattr(self.harness, "last_result", None)
+            actual_model = (
+                getattr(exec_res, "model", None)
+                or getattr(self.harness, "model", None)
+                or getattr(self.harness, "name", "unknown")
+            )
+            actual_provider = (
+                getattr(exec_res, "telemetry_metadata", {}).get("provider")
+                or getattr(self.harness, "primary_provider", None)
+                or getattr(self.harness, "_primary_provider", None)
+                or "google_api"
+            )
             self.last_telemetry = collector.export_telemetry(
-                provenance={"engine": "scaffold", "harness": self.harness.name}
+                provenance={
+                    "engine": "scaffold",
+                    "harness": self.harness.name,
+                    "model": actual_model,
+                    "provider": actual_provider,
+                }
             )
 
 
@@ -116,17 +135,41 @@ class ScaffoldPipeline:
             if not pages:
                 raise ValueError(f"페이지를 읽을 수 없습니다: {target_display_name}")
             page = pages[min(max(page_number, 1), len(pages)) - 1]
-            s_extract.set_inputs({"filename": target_display_name, "page_number": page_number})
+            s_extract.set_inputs({
+                "filename": target_display_name,
+                "page_number": page_number,
+                "resolved_path": str(pdf_path),
+            })
             s_extract.set_outputs({
                 "total_pages": len(pages),
                 "doc_type": page.doc_type,
                 "blocks": len(page.classifiable()),
                 "tables": len(page.tables),
                 "has_text_layer": page.has_text_layer,
+                "blocks_summary": [
+                    {
+                        "id": getattr(b, "id", None) or (b.get("id") if isinstance(b, dict) else str(idx)),
+                        "bbox": [round(float(c), 2) for c in (getattr(b, "bbox", None) or (b.get("bbox") if isinstance(b, dict) else []))],
+                        "text": getattr(b, "text", None) or (b.get("text") if isinstance(b, dict) else ""),
+                    }
+                    for idx, b in enumerate(page.classifiable())
+                ],
             })
             s_extract.set_label(
                 summary_pill=f"{page.doc_type} · 블록 {len(page.classifiable())}개 · 표 {len(page.tables)}개",
                 data_out=f"PageGeometry ({len(page.classifiable())} blocks)",
+            )
+            s_extract.snapshot(
+                stage_id="geometry_extraction",
+                stage_name="PDF 기하 실측",
+                payload={
+                    "filename": target_display_name,
+                    "total_pages": len(pages),
+                    "page_number": page_number,
+                    "blocks_count": len(page.classifiable()),
+                    "tables_count": len(page.tables),
+                    "doc_type": page.doc_type,
+                },
             )
 
         if not page.has_text_layer:
@@ -151,17 +194,91 @@ class ScaffoldPipeline:
         ) as s_classify:
             decisions = self.classifier.classify(target_display_name, page)
             classified = len(decisions.get("blocks", []))
+            exec_res = getattr(self.classifier, "last_result", None) or getattr(self.harness, "last_result", None)
+            actual_model = getattr(exec_res, "model", None) or getattr(self.harness, "model", self.harness.name)
+            actual_provider = (
+                getattr(exec_res, "telemetry_metadata", {}).get("provider")
+                or getattr(self.harness, "primary_provider", None)
+                or getattr(self.harness, "_primary_provider", None)
+                or "google_api"
+            )
+
+            prompt = getattr(self.classifier, "last_prompt", "")
+
+            # CLI 또는 Direct API 체계에 따른 실제 실행 명령어 추출 및 조립
+            tel_meta = getattr(exec_res, "telemetry_metadata", {}) if exec_res else {}
+            raw_command = tel_meta.get("raw_command")
+            if not raw_command and "command" in tel_meta:
+                c_list = tel_meta["command"]
+                raw_command = " ".join(f'"{c}"' if " " in str(c) else str(c) for c in c_list) if isinstance(c_list, list) else str(c_list)
+            if not raw_command:
+                prov = actual_provider
+                clean_m = re.sub(r"-(low|medium|high)$", "", actual_model)
+                if "api" in str(prov).lower() or "google" in str(prov).lower():
+                    raw_command = (
+                        f'curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/{clean_m}:generateContent?key=$GOOGLE_API_KEY" \\\n'
+                        f'  -H "Content-Type: application/json" \\\n'
+                        f'  -d \'{{"generationConfig": {{"responseMimeType": "application/json", "responseSchema": "<BLOCK_CLASSIFICATION_SCHEMA>"}}, "contents": [{{"role": "user", "parts": [{{"text": "<PROMPT_STRING ({len(prompt)} chars)>"}}]}}]}}\''
+                    )
+                else:
+                    raw_command = (
+                        f'agy --model {actual_model} --input-format stream-json --output-format stream-json '
+                        f'--dangerously-skip-permissions --disable-slash-commands'
+                    )
+
+            if exec_res is not None:
+                s_classify.attach_harness_result(exec_res)
+                s_classify.set_sources(
+                    source_of(SlotClassifier.classify),
+                    model_source(actual_model),
+                    replace=True,
+                )
+                in_tok = getattr(exec_res, "input_tokens", 0) or 0
+                out_tok = getattr(exec_res, "output_tokens", 0) or 0
+                s_classify.set_label(
+                    display_label=f"{actual_model} 블록 역할 판정",
+                    summary_pill=f"입력 {in_tok:,}tok ➔ 출력 {out_tok:,}tok",
+                    data_out="BlockDecisions",
+                )
+            else:
+                s_classify.set_label(
+                    summary_pill=f"{classified}개 블록 분류",
+                    data_out="BlockDecisions",
+                )
+
             s_classify.set_inputs({
+                "execution_command": raw_command,
                 "source_name": target_display_name,
                 "candidate_blocks": len(page.classifiable()),
+                "target_model": actual_model,
+                "provider": actual_provider,
+                "prompt_chars": len(prompt),
+                "prompt": prompt,
             })
             s_classify.set_outputs({
                 "classified_blocks": classified,
                 "doc_title": decisions.get("doc_title"),
+                "has_structured_output": bool(getattr(exec_res, "structured_output", None)) if exec_res else bool(decisions),
+                "tokens": {
+                    "input": getattr(exec_res, "input_tokens", 0) if exec_res else 0,
+                    "output": getattr(exec_res, "output_tokens", 0) if exec_res else 0,
+                    "thinking": getattr(exec_res, "thinking_tokens", 0) if exec_res else 0,
+                    "total": getattr(exec_res, "total_tokens", 0) if exec_res else 0,
+                },
+                "duration_seconds": getattr(exec_res, "duration_seconds", 0.0) if exec_res else 0.0,
+                "raw_response": getattr(exec_res, "raw_response", "") if exec_res else "",
+                "structured_output": decisions,
             })
-            s_classify.set_label(
-                summary_pill=f"{classified}개 블록 분류",
-                data_out="BlockDecisions",
+            s_classify.snapshot(
+                stage_id="slot_classification",
+                stage_name="블록 역할 판정",
+                payload={
+                    "doc_title": decisions.get("doc_title"),
+                    "candidate_blocks": len(page.classifiable()),
+                    "classified_blocks": classified,
+                    "model": actual_model,
+                    "provider": actual_provider,
+                },
             )
 
         # C. 조립
@@ -175,14 +292,32 @@ class ScaffoldPipeline:
             sources=[source_of(HtmlAssembler.assemble)],
         ) as s_assemble:
             html, markdown, slots = self.assembler.assemble(pdf_path, page, decisions)
+            s_assemble.set_inputs({
+                "pdf_path": str(pdf_path),
+                "page_number": page_number,
+                "candidate_blocks": len(page.classifiable()),
+                "classified_blocks": classified,
+            })
             s_assemble.set_outputs({
-                "slots": len(slots),
+                "slots_count": len(slots),
                 "html_chars": len(html),
                 "markdown_chars": len(markdown),
+                "markdown": markdown,
+                "html": html,
+                "slots": [s.model_dump() if hasattr(s, "model_dump") else s for s in slots],
             })
             s_assemble.set_label(
                 summary_pill=f"슬롯 {len(slots)}개 · HTML {len(html):,}자",
                 data_out=f"ScaffoldExtractResult (slots: {len(slots)})",
+            )
+            s_assemble.snapshot(
+                stage_id="scaffold_assembly",
+                stage_name="와이어프레임 조립",
+                payload={
+                    "slots_count": len(slots),
+                    "html_chars": len(html),
+                    "markdown_chars": len(markdown),
+                },
             )
 
         # D. 채점 (출력 누락 검사. 렌더 좌표를 주면 IoU 까지 본다)
@@ -196,7 +331,16 @@ class ScaffoldPipeline:
             sources=[source_of(score_page)],
         ) as s_score:
             report = score_page(page, html)
-            s_score.set_outputs({"ok": report.ok, "summary": report.summary()})
+            s_score.set_inputs({
+                "candidate_blocks": len(page.classifiable()),
+                "html_chars": len(html),
+                "slots_count": len(slots),
+            })
+            s_score.set_outputs({
+                "ok": report.ok,
+                "summary": report.summary(),
+                "details": getattr(report, "details", {}),
+            })
             s_score.set_label(
                 summary_pill=report.summary(),
                 data_out="FidelityReport",
