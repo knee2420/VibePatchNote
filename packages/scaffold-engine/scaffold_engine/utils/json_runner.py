@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from .contracts import LlmHarness
+from ..contracts import LlmHarness
 
 
 class JsonPromptRunner:

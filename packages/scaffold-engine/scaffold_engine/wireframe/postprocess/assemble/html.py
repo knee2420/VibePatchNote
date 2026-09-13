@@ -10,10 +10,10 @@ from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 import fitz  # PyMuPDF
 
-from ..classify.schema import SLOT_ROLES
+from scaffold_engine.wireframe.inference.classify.schema import SLOT_ROLES
 
 if TYPE_CHECKING:  # pragma: no cover
-    from ..extract.geometry import Block, PageGeometry, TableGeometry
+    from scaffold_engine.tools import Block, PageGeometry, TableGeometry
 
 
 def _slot_span(slot_id: str, number: int, label: str, fill: bool) -> str:

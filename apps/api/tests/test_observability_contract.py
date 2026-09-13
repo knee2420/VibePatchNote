@@ -243,9 +243,12 @@ def test_span_sources_are_structured_not_strings() -> None:
     AttributeError 가 난다. 문자열은 둘 다 못 한다.
     """
     from agent_telemetry import SpanType, StepCollector, model_source, source_of
-    from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
+    from scaffold_engine.outline.preprocess.context_builder import (
+        DocumentContextBuilder,
+    )
 
     collector = StepCollector(pipeline_name="T")
+
     with collector.step(
         "S",
         span_type=SpanType.TOOL,
@@ -257,7 +260,8 @@ def test_span_sources_are_structured_not_strings() -> None:
     assert len(sources) == 2
 
     code, model = sources
-    assert code.module == "scaffold_engine.outline.prompts.context_builder"
+    assert code.module == "scaffold_engine.outline.preprocess.context_builder"
+
     assert code.qualname == "DocumentContextBuilder.build_context"
     assert code.lineno > 0
     assert code.kind == "method"

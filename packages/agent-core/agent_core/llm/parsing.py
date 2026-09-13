@@ -43,11 +43,14 @@ def _normalize(obj: Any, list_key: str) -> Optional[Dict[str, Any]]:
             found = parse_json_payload(value, list_key)
             if found:
                 return found
+    # 임의의 도메인 스키마 객체 (예: {"document_title": ..., "outlines": [...]}) 보존
+    if obj and any(k not in _PAYLOAD_KEYS for k in obj.keys()):
+        return obj
     return None
 
 
 def parse_json_payload(raw: str, list_key: str = "blocks") -> Optional[Dict[str, Any]]:
-    """원시 출력에서 `{list_key: [...]}` 형태를 회수한다. 실패 시 None."""
+    """원시 출력에서 유효한 JSON 객체 또는 `{list_key: [...]}` 형태를 회수한다. 실패 시 None."""
     if not raw or not raw.strip():
         return None
     for candidate in (raw.strip(), _strip_fence(raw).strip()):
@@ -57,7 +60,21 @@ def parse_json_payload(raw: str, list_key: str = "blocks") -> Optional[Dict[str,
                 return found
         except json.JSONDecodeError:
             pass
+
+        # 멀티라인/NDJSON 역순 탐색 (개행 분리된 개별 JSON 객체 시도)
+        lines = [ln.strip() for ln in candidate.splitlines() if ln.strip()]
+        for line in reversed(lines):
+            if not (line.startswith("{") and line.endswith("}")):
+                continue
+            try:
+                found = _normalize(json.loads(line), list_key)
+                if found:
+                    return found
+            except json.JSONDecodeError:
+                continue
+
         for opener, closer in (("{", "}"), ("[", "]")):
+
             start, end = candidate.find(opener), candidate.rfind(closer)
             if start == -1 or end <= start:
                 continue

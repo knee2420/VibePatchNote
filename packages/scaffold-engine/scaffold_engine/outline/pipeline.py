@@ -2,6 +2,11 @@
 
 PyMuPDF 기반 3중 멀티모달 컨텍스트와 보편적 인지 분해 원칙을 적용하여,
 한국형 서식 표 및 문서 구조를 1-Stage로 전수 추출하는 고정밀 독립 엔진입니다.
+
+파이프라인 단계 구조:
+    1. 전처리·실측 및 프롬프트 조립   ->  2. LLM 구조화 추론   ->  3. 후처리·파싱 및 표준화  ->  4. 품질검증
+    preprocess/                       inference/                postprocess/                 evaluate/
+    (context_builder, prompt_assembler) (agent)                 (parser)                     (validator)
 """
 from __future__ import annotations
 
@@ -11,15 +16,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
-from scaffold_engine.contracts import LlmHarness
-from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
-from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
-from scaffold_engine.outline.schemas.models import (
-    OutlineDocument,
-    OutlineItem,
-    OutlineOutput,
-)
 from agent_telemetry import (
     SpanPhase,
     SpanStatus,
@@ -28,6 +24,23 @@ from agent_telemetry import (
     current_collector,
     model_source,
     source_of,
+)
+
+from scaffold_engine.contracts import LlmHarness
+from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
+
+from .evaluate.validator import OutlineValidator
+from .inference.agent import OutlineInferencer
+from .postprocess.parser import OutlineResponseParser
+from .preprocess.context_builder import DocumentContextBuilder
+from .preprocess.prompt_assembler import (
+    SYSTEM_INSTRUCTIONS_PATH,
+    OutlinePromptAssembler,
+)
+from .schemas.models import (
+    OutlineDocument,
+    OutlineItem,
+    OutlineOutput,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,19 +66,23 @@ class OutlinePipeline:
         timeout_seconds: int = 180,
         context_dir: Optional[Path] = None,
     ) -> None:
-        # 파생물을 어디에 둘지는 호스트가 정한다. 엔진이 입력 파일 옆에 쓰면
-        # 호스트의 업로드 디렉터리를 오염시키고, 호스트 비의존 계약이 깨진다.
-        # 기본값은 "아무 데도 쓰지 않는다" 다.
         if harness is None:
             raise ValueError("OutlinePipeline에 LlmHarness 인스턴스를 반드시 주입해야 합니다.")
         self.context_dir = Path(context_dir) if context_dir else None
         self.default_model = default_model
         self.default_effort = default_effort
         self.harness = harness
-        self.context_builder = DocumentContextBuilder()
         self.schema_path = schema_path or DEFAULT_SCHEMA_PATH
         self.system_instructions_path = system_instructions_path or SYSTEM_INSTRUCTIONS_PATH
-        # 마지막 실행의 계측 결과 (ScaffoldPipeline과 동일한 정본 규격). 호스트가 원장에 넣을지는 호스트가 정한다.
+
+        # 4단계 파이프라인 컴포넌트 초기화
+        self.context_builder = DocumentContextBuilder()
+        self.prompt_assembler = OutlinePromptAssembler(self.system_instructions_path)
+        self.inferencer = OutlineInferencer(self.harness)
+        self.parser = OutlineResponseParser()
+        self.validator = OutlineValidator()
+
+        # 마지막 실행의 계측 결과 (호스트 관측 계약)
         self.last_telemetry: Optional[Any] = None
 
     def run(
@@ -124,11 +141,9 @@ class OutlinePipeline:
         )
 
         # 1. 시스템 프롬프트 지침 로드
-        instructions = ""
-        if self.system_instructions_path.exists():
-            instructions = self.system_instructions_path.read_text(encoding="utf-8")
+        instructions = self.prompt_assembler.load_instructions()
 
-        # 2. 3중 멀티모달 컨텍스트 추출 및 파일 영속화
+        # 2. [Stage 1-A: 전처리] 3중 멀티모달 컨텍스트 추출 및 파일 영속화
         target_context_dir = Path(context_dir) if context_dir else self.context_dir
         with collector.step(
             "DocumentContextBuilder",
@@ -150,7 +165,11 @@ class OutlinePipeline:
             context_chars = len(doc_ctx.get("context_text", ""))
             pages_cnt = doc_ctx.get("total_pages", 1)
             resolved_file_path = doc_ctx.get("resolved_path") or str(pdf_path.resolve())
-            s_ctx.set_inputs({"filename": target_display_name, "total_pages": pages_cnt, "resolved_path": resolved_file_path})
+            s_ctx.set_inputs({
+                "filename": target_display_name,
+                "total_pages": pages_cnt,
+                "resolved_path": resolved_file_path,
+            })
             s_ctx.set_outputs({
                 "context_chars": context_chars,
                 "total_pages": pages_cnt,
@@ -172,7 +191,7 @@ class OutlinePipeline:
                 },
             )
 
-        # 3. 통합 프롬프트 빌드
+        # 3. [Stage 1-B: 전처리] 통합 프롬프트 빌드
         with collector.step(
             "PromptAssembly",
             span_type=SpanType.CHAIN,
@@ -180,28 +199,13 @@ class OutlinePipeline:
             display_label="맞춤 프롬프트 및 메타데이터 조립",
             description="시스템 지침, 실측 컨텍스트, 대상 문서 메타데이터를 결합합니다.",
             data_in="DocumentContext + Instructions",
-            sources=[source_of(OutlinePipeline.execute)],
+            sources=[source_of(OutlinePromptAssembler.assemble)],
         ) as s_prompt:
-            prompt = (
-                f"{instructions}\n\n"
-                f"======================================================================\n"
-                f"[분석 대상 원본 문서]\n"
-                f"- 파일명: {doc_ctx['filename']}\n"
-                f"- 원본 파일 경로: {resolved_file_path}\n"
-                f"- 총 페이지: {doc_ctx['total_pages']}페이지\n\n"
-                f"[중요 지침: 실측 기하 메타데이터 및 멀티모달 컨텍스트 활용]\n"
-                f"1. [시각적 비전 (PDF 직접 열람)]: 환경에서 도구(view/inspect)가 제공되는 경우 위 원본 파일 경로('{resolved_file_path}')를 직접 확인하여 전체적인 시각 레이아웃(여백, 박스 테두리, 심미적 위계, 서식 표 구획)을 파악하세요.\n"
-                f"2. [실측 기하 메타데이터 엄격 바인딩 (핵심)]: 아래 제공된 표(Table), 미디어(Media), 그리고 [3. 실측 텍스트 블록 기하 메타데이터]의 각 블록 '상대좌표=[ymin, xmin, ymax, xmax]'는 문서 엔진이 정밀 측정한 0~1000 정규화 좌표입니다.\n"
-                f"   - 좌표(box_2d)를 절대로 임의로 추측(Hallucination)하지 마십시오.\n"
-                f"   - 목차 노드는 해당 라벨/헤더의 실측 블록 상대좌표를, elements는 값/내용이 위치한 실측 블록 상대좌표를 직접 바인딩하거나 여러 줄인 경우 해당 블록들을 온전히 감싸도록 병합(Union)하여 지정해야 합니다.\n"
-                f"   - 특히 문서 최하단의 유의사항, 문의처/푸터(Contact/Notice/Footer), 서명란 등은 아래 실측 목록 하단(Y: 800~1000 범위)에 위치한 블록 상대좌표를 엄격히 참조하여 실제 위치에 정확히 일치시키십시오.\n"
-                f"3. [원문 텍스트 전문 (Raw Text Flow)]: 좌표 숫자 노이즈 없이 연속된 문장 흐름이 보존된 깨끗한 원문 텍스트를 읽고, 항목명과 세부 라벨의 정확한 명칭을 오타나 누락 없이 파악하세요.\n\n"
-                f"[추출된 멀티모달 기하 및 원문 텍스트 컨텍스트]\n"
-                f"{doc_ctx['context_text']}\n"
-                f"======================================================================\n\n"
-                f"위 문서의 시각적 레이아웃과 텍스트 정보를 종합 분석하여, 지정된 JSON Schema에 맞추어 계층적 목차(Outline Tree, L1~L4)와 각 구획별 컴포넌트 분류(classify: header, key_value, table, list, paragraph, media) 및 실측 기입값(elements)을 1-Stage로 빠짐없이 전수 추출하십시오.\n"
-                f"특히 한국형 서식 표(Table)는 내부의 헤더 및 세부 필드명(대학, 학과(부), 학년, 학번 등)까지 L4 단계까지 전수 분해하여 목차 트리로 구성하고, 각 필드 노드의 elements에 실제 기입된 값을 매핑하십시오.\n"
-                f"좌표(box_2d) 지정 시, 목차 노드는 해당 라벨/헤더 텍스트 영역을, elements는 내용/본문 리스트/입력값/영수증 부착란 전체 사각 영역을 정확히 감싸도록 역할에 맞게 정밀 지정하십시오."
+            prompt = self.prompt_assembler.assemble(
+                instructions=instructions,
+                doc_ctx=doc_ctx,
+                target_display_name=target_display_name,
+                resolved_file_path=resolved_file_path,
             )
             s_prompt.set_inputs({
                 "target_document": target_display_name,
@@ -225,12 +229,9 @@ class OutlinePipeline:
                 },
             )
 
-        # 4. CLI / LLM 네이티브 구조화 실행
+        # 4. [Stage 2: LLM 추론] 구조화 목차 인지 실행
         actual_model = target_model
         with collector.step(
-            # 스팬 **이름**은 단계의 정체성이다. 모델은 그 단계의 속성이므로
-            # 이름에 박으면 같은 단계가 모델마다 다른 단계로 집계된다
-            # (워크플로우 카탈로그에서 드러났다). 모델은 라벨과 sources 에 있다.
             "LlmInference",
             span_type=SpanType.LLM,
             phase=SpanPhase.LLM,
@@ -242,42 +243,31 @@ class OutlinePipeline:
                 model_source(target_model),
             ],
         ) as s_llm:
-            exec_res = self.harness.run_structured(
+            exec_res = self.inferencer.infer(
                 prompt=prompt,
                 schema_path=self.schema_path,
+                pdf_path=pdf_path,
                 model=target_model,
                 effort=target_effort,
-                file_path=pdf_path,
             )
             actual_model = exec_res.model or target_model
             s_llm.attach_harness_result(exec_res)
 
-            # CLI 또는 Direct API 체계에 따른 실제 실행 명령어 추출 및 조립
-            tel_meta = getattr(exec_res, "telemetry_metadata", {})
-            raw_command = tel_meta.get("raw_command")
-            if not raw_command and "command" in tel_meta:
-                c_list = tel_meta["command"]
-                raw_command = " ".join(f'"{c}"' if " " in str(c) else str(c) for c in c_list) if isinstance(c_list, list) else str(c_list)
-            if not raw_command:
-                prov = getattr(exec_res, "provider", "agy_cli")
-                if "api" in str(prov).lower():
-                    clean_m = re.sub(r"-(low|medium|high)$", "", actual_model)
-                    raw_command = (
-                        f'curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/{clean_m}:generateContent?key=$GOOGLE_API_KEY" \\\n'
-                        f'  -H "Content-Type: application/json" \\\n'
-                        f'  -d \'{{"generationConfig": {{"responseMimeType": "application/json", "responseSchema": "<{self.schema_path.name}>"}}, "contents": [{{"role": "user", "parts": [{{"inlineData": {{"mimeType": "application/pdf", "data": "<BASE64_PDF: {target_display_name}>"}}}}, {{"text": "<PROMPT_STRING ({len(prompt)} chars)>"}}]}}]}}\''
-                    )
-                else:
-                    effort_arg = f" --effort {target_effort}" if target_effort else ""
-                    raw_command = (
-                        f'agy --model {actual_model}{effort_arg} --input-format stream-json --output-format stream-json '
-                        f'--dangerously-skip-permissions --disable-slash-commands --json-schema "{self.schema_path}"'
-                    )
+            actual_provider = getattr(exec_res, "provider", "agy_cli")
+            raw_command = OutlineInferencer.build_raw_command(
+                exec_res=exec_res,
+                actual_model=actual_model,
+                actual_provider=actual_provider,
+                target_effort=target_effort,
+                schema_path=self.schema_path,
+                target_display_name=target_display_name,
+                prompt_len=len(prompt),
+            )
 
             s_llm.set_inputs({
                 "execution_command": raw_command,
                 "target_model": actual_model,
-                "provider": getattr(exec_res, "provider", "agy_cli"),
+                "provider": actual_provider,
                 "effort": target_effort or "default",
                 "schema_file": str(self.schema_path),
                 "attached_document": target_display_name,
@@ -296,7 +286,6 @@ class OutlinePipeline:
                 "raw_response": getattr(exec_res, "raw_response", "") or "",
                 "structured_output": getattr(exec_res, "structured_output", None),
             })
-            # 실제 실행된 하네스와 모델로 경유 지점을 확정한다.
             s_llm.set_sources(
                 type(self.harness).run_structured,
                 model_source(actual_model),
@@ -316,7 +305,6 @@ class OutlinePipeline:
             schema_hash=hash_file(self.schema_path),
         ).to_dict()
 
-        # 기존 레거시 steps 호환 리스트 구성
         legacy_steps: List[Dict[str, Any]] = [
             {
                 "name": sp.name,
@@ -368,7 +356,7 @@ class OutlinePipeline:
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
             logger.error("[OutlinePipeline] LLM 실행 실패 (%s): %s", exec_res.status, exec_res.error)
-            fallback_doc = self._create_fallback_document(
+            fallback_doc = self.parser.create_fallback_document(
                 pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
             )
             return {
@@ -379,7 +367,7 @@ class OutlinePipeline:
                 "fallback_document": fallback_doc,
             }
 
-        # 5. 스키마 유효성 검증 및 표준화
+        # 5. [Stage 3: 후처리] 스키마 유효성 검증 및 표준화
         raw_output = exec_res.structured_output
         with collector.step(
             "OutlineSchemaValidation",
@@ -389,8 +377,6 @@ class OutlinePipeline:
             description="모델이 생성한 구조화 출력을 Pydantic 스키마 및 목차 계층 트리로 파싱하고 검증합니다.",
             data_in="Structured JSON (Raw Response)",
             sources=[
-                # 검증 주체는 스키마 자체다. `model_validate` 는 pydantic 이 상속시킨
-                # 메서드라 우리 코드가 아니며, 가리켜 봐야 의존성 파일이 열린다.
                 source_of(OutlineOutput),
                 source_of(OutlineDocument.from_outline_output),
             ],
@@ -400,19 +386,9 @@ class OutlinePipeline:
                 "schema_definition": Path(self.schema_path).name if self.schema_path else "outline_schema.json",
                 "raw_output": raw_output,
             })
-            try:
-                validated = OutlineOutput.model_validate(raw_output)
-                val_error = None
-
-                def _count_elems(items):
-                    c = 0
-                    for it in items:
-                        c += len(it.elements or [])
-                        if it.children:
-                            c += _count_elems(it.children)
-                    return c
-
-                total_elems = _count_elems(validated.outlines)
+            validated, val_error = self.parser.validate_schema(raw_output)
+            if validated:
+                total_elems = self.parser.count_elements(validated.outlines)
                 s_val.set_outputs({
                     "is_valid": True,
                     "outlines_count": len(validated.outlines),
@@ -432,8 +408,7 @@ class OutlinePipeline:
                         "is_valid": True,
                     },
                 )
-            except Exception as ve:
-                validated, val_error = None, str(ve)
+            else:
                 s_val.status = SpanStatus.FAILED
                 s_val.set_outputs({"is_valid": False, "error": val_error})
 
@@ -446,7 +421,7 @@ class OutlinePipeline:
                 "success": False,
                 "status": "ERROR",
                 "error": telemetry["error"],
-                "fallback_document": self._create_fallback_document(
+                "fallback_document": self.parser.create_fallback_document(
                     pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                 ),
                 "telemetry": telemetry,
@@ -457,9 +432,11 @@ class OutlinePipeline:
             if (not document.document_title or document.document_title == "source.pdf") and target_display_name:
                 document.document_title = target_display_name
 
-            if not document.flat_elements:
+            # 6. [Stage 4: 품질 검증] 목차 및 엘리먼트 무결성 평가
+            val_report = self.validator.validate(document)
+            if not val_report.ok:
                 telemetry["status"] = "ERROR"
-                telemetry["error"] = "OUTLINE_CONTENT_EMPTY: 문서 구성요소가 하나도 추출되지 않았습니다."
+                telemetry["error"] = f"OUTLINE_CONTENT_EMPTY: {'; '.join(val_report.warnings)}"
                 telemetry["telemetry_metadata"]["failure_code"] = "INVALID_MODEL_OUTPUT"
                 legacy_steps.append({
                     "name": "OutlineSemanticValidation",
@@ -474,15 +451,15 @@ class OutlinePipeline:
                     "success": False,
                     "status": "ERROR",
                     "error": telemetry["error"],
-                    "fallback_document": self._create_fallback_document(
+                    "fallback_document": self.parser.create_fallback_document(
                         pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                     ),
                     "telemetry": telemetry,
                 }
+
             logger.info(
-                "[OutlinePipeline] 성공: 루트 노드 %d건, 엘리먼트 %d건 (시간: %ss)",
-                len(document.outlines),
-                len(document.flat_elements),
+                "[OutlinePipeline] 성공: %s (시간: %ss)",
+                val_report.summary(),
                 round(telemetry["ctx_duration"] + exec_res.duration_seconds, 2),
             )
             pipeline_tel = collector.export_telemetry(provenance=provenance_dict)
@@ -505,12 +482,13 @@ class OutlinePipeline:
                 "success": False,
                 "status": "ERROR",
                 "error": telemetry["error"],
-                "fallback_document": self._create_fallback_document(
+                "fallback_document": self.parser.create_fallback_document(
                     pdf_path, doc_ctx["total_pages"], telemetry, display_name=target_display_name
                 ),
                 "telemetry": telemetry,
             }
 
+    # 하위 호환성 메서드 (외부/테스트에서 직접 호출하는 경우 대비)
     def _create_fallback_document(
         self,
         pdf_path: Path,
@@ -518,25 +496,7 @@ class OutlinePipeline:
         telemetry: Dict[str, Any],
         display_name: Optional[str] = None,
     ) -> OutlineDocument:
-        title_name = display_name or pdf_path.name
-        root = OutlineItem(
-            id="out-root",
-            level=1,
-            title=title_name,
-            page=1,
-            box_2d=[50, 50, 950, 950],
-            purpose="문서 전체 (폴백)",
-            elements=[],
-            children=[],
-        )
-        return OutlineDocument(
-            document_title=title_name,
-            total_pages=total_pages,
-            outlines=[root],
-            markdown_outline=f"- **{title_name}** (p.1)",
-            flat_elements=[],
-            telemetry=telemetry,
-        )
+        return self.parser.create_fallback_document(pdf_path, total_pages, telemetry, display_name)
 
     def _lenient_recover(
         self,
@@ -545,33 +505,7 @@ class OutlinePipeline:
         total_pages: int,
         telemetry: Dict[str, Any],
     ) -> OutlineDocument:
-        outlines_data = raw_json.get("outlines") or []
-        items: List[OutlineItem] = []
-        for idx, it in enumerate(outlines_data):
-            if isinstance(it, dict):
-                items.append(
-                    OutlineItem(
-                        id=it.get("id") or f"out-{idx+1}",
-                        level=it.get("level", 1),
-                        title=it.get("title") or f"섹션 {idx+1}",
-                        page=it.get("page", 1),
-                        box_2d=it.get("box_2d"),
-                        purpose=it.get("purpose"),
-                        elements=[],
-                        children=[],
-                    )
-                )
-        if not items:
-            return self._create_fallback_document(
-                Path(filename), total_pages, telemetry, display_name=filename
-            )
-
-        output = OutlineOutput(
-            document_title=raw_json.get("document_title") or filename,
-            total_pages=raw_json.get("total_pages") or total_pages,
-            outlines=items,
-        )
-        return OutlineDocument.from_outline_output(output, telemetry=telemetry)
+        return self.parser.lenient_recover(raw_json, filename, total_pages, telemetry)
 
 
 # 별칭 지원

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from agent_telemetry import SpanPhase, SpanType, current_scope, traceable
-from scaffold_engine.vision import (
+from scaffold_engine.tools import (
     render_page_as_png,
     render_scaffold_png,
     render_slot_overlay_png,

@@ -5,7 +5,7 @@
 - `outline`: 1-Stage 멀티모달 인지 분해 기반 계층 목차 및 컴포넌트 추출 파이프라인 (`OutlinePipeline`)
 """
 from .contracts import LlmHarness, ModelExecutor
-from .json_runner import JsonPromptRunner
+from .utils.json_runner import JsonPromptRunner
 from .outline import (
     ElementItem,
     OutlineDocument,
@@ -18,6 +18,13 @@ from .wireframe import (
     ScaffoldPipeline,
     ScannedDocumentError,
     SlotMappingItem,
+)
+
+from .tools import (
+    PageGeometry,
+    PdfGeometryExtractor,
+    PdfRasterizer,
+    VisualOverlayDrawer,
 )
 
 __all__ = [
@@ -36,4 +43,9 @@ __all__ = [
     "LlmHarness",
     "ModelExecutor",
     "JsonPromptRunner",
+    # 공용 도구 (Tools)
+    "PdfGeometryExtractor",
+    "PdfRasterizer",
+    "PageGeometry",
+    "VisualOverlayDrawer",
 ]

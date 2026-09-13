@@ -10,7 +10,7 @@ from statistics import mean
 from typing import Dict, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
-    from ..extract.geometry import PageGeometry
+    from scaffold_engine.tools import PageGeometry
 
 IOU_PASS = 0.90
 _BID = re.compile(r'data-bid="([^"]+)"')

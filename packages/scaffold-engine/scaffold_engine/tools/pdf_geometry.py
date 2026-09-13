@@ -1,17 +1,22 @@
-"""Stage A — 결정적 기하 측정 (Wireframe 트랙).
+"""[scaffold_engine.tools] PDF 결정적 기하 측정 도구 (PdfGeometryExtractor).
 
-PDF 에서 표 구조, 셀 경계, 행 높이, 열 너비, 텍스트 라인, 이미지, 구분선을
-PyMuPDF 로 실측한다. AI 를 호출하지 않으며 어떤 PDF 에서도 동일하게 동작한다.
-이후 단계(분류/조립)는 여기서 나온 값만 좌표의 단일 출처로 삼는다.
+PDF에서 표 구조, 셀 경계, 행 높이, 열 너비, 텍스트 라인, 이미지, 구분선을
+PyMuPDF(fitz)로 실측하여 정규화된 2D 기하 데이터 모델을 생성합니다.
+AI 추론을 호출하지 않으며, 모든 파이프라인(wireframe, outline)이 공유하는 결정적 기하 기반입니다.
 """
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-import fitz  # PyMuPDF
+try:
+    import pymupdf as fitz
+except ImportError:
+    import fitz
+
+from ..utils.coordinates import normalize_bbox, normalize_coord
 
 logger = logging.getLogger(__name__)
 
@@ -19,22 +24,15 @@ MIN_RULE_WIDTH_PT = 20.0
 MAX_RULE_HEIGHT_PT = 6.0
 
 
-def _norm(value: float, total: float) -> int:
-    """0~1000 페이지 상대 좌표로 정규화."""
-    if total <= 0:
-        return 0
-    return max(0, min(1000, round(value / total * 1000)))
-
-
 @dataclass
 class Block:
-    """분류 대상이 되는 최소 단위. id 는 파이프라인 전체에서 좌표를 찾는 열쇠다."""
+    """분류 대상이 되는 최소 기하 단위. id는 파이프라인 전체에서 좌표를 찾는 고유 키입니다."""
 
     id: str
     kind: str  # cell | line | image | rule
     page: int
     bbox: List[float]  # [x0, y0, x1, y1] (pt, 페이지 절대좌표)
-    norm: List[int]  # [ymin, xmin, ymax, xmax] 0~1000
+    norm: List[int]  # [ymin, xmin, ymax, xmax] (0~1000 상대좌표)
     text: str = ""
     size: float = 0.0
     bold: bool = False
@@ -45,6 +43,8 @@ class Block:
 
 @dataclass
 class TableGeometry:
+    """실측된 단일 표(Table)의 구조 및 상대 비율 메타데이터."""
+
     id: str
     page: int
     bbox: List[float]
@@ -58,6 +58,8 @@ class TableGeometry:
 
 @dataclass
 class PageGeometry:
+    """단일 PDF 페이지의 전체 실측 기하 컨테이너."""
+
     page: int
     width: float
     height: float
@@ -67,7 +69,7 @@ class PageGeometry:
     blocks: List[Block] = field(default_factory=list)
 
     def classifiable(self) -> List[Block]:
-        """역할 판정 대상 블록(구분선 제외)."""
+        """역할 판정 대상 블록 (구분선 제외)."""
         return [b for b in self.blocks if b.kind != "rule"]
 
 
@@ -82,19 +84,20 @@ def _align_of(bbox: List[float], left: float, right: float) -> str:
 
 
 class PdfGeometryExtractor:
-    """기하 실측 구현체."""
+    """PDF 결정적 기하 측정기 (엔진 공용 도구)."""
 
     def extract(self, path: Union[str, Path]) -> List[PageGeometry]:
-        path = Path(path)
+        path = Path(path).resolve()
+        if not path.exists():
+            raise FileNotFoundError(f"PDF 파일을 찾을 수 없습니다: {path}")
+
         doc = fitz.open(path)
         try:
             return [self._page(page, i + 1) for i, page in enumerate(doc)]
         finally:
             doc.close()
 
-    # --- 내부 ---
-
-    def _page(self, page, pno: int) -> PageGeometry:
+    def _page(self, page: Any, pno: int) -> PageGeometry:
         width, height = page.rect.width, page.rect.height
         geom = PageGeometry(page=pno, width=width, height=height)
         raw_blocks = page.get_text("dict")["blocks"]
@@ -109,8 +112,8 @@ class PdfGeometryExtractor:
 
         try:
             tables = page.find_tables().tables
-        except Exception as exc:  # PyMuPDF 버전차 / 손상 PDF 방어
-            logger.warning("[geometry] find_tables 실패 (p%d): %s", pno, exc)
+        except Exception as exc:
+            logger.warning("[PdfGeometryExtractor] find_tables 실패 (p%d): %s", pno, exc)
             tables = []
 
         covered: List[List[float]] = []
@@ -127,8 +130,7 @@ class PdfGeometryExtractor:
                     id=f"t{ti}",
                     page=pno,
                     bbox=[round(v, 1) for v in tb],
-                    norm=[_norm(tb[1], height), _norm(tb[0], width),
-                          _norm(tb[3], height), _norm(tb[2], width)],
+                    norm=normalize_bbox(tb, width, height),
                     rows=len(table.rows),
                     cols=len(col_w),
                     col_pct=[round(w / t_width * 100, 2) for w in col_w],
@@ -143,9 +145,12 @@ class PdfGeometryExtractor:
                     if cell is None:
                         continue
                     cell_sizes = [
-                        s["size"] for s in spans
-                        if cell[0] - 1 <= s["bbox"][0] and s["bbox"][2] <= cell[2] + 1
-                        and cell[1] - 1 <= s["bbox"][1] and s["bbox"][3] <= cell[3] + 1
+                        s["size"]
+                        for s in spans
+                        if cell[0] - 1 <= s["bbox"][0]
+                        and s["bbox"][2] <= cell[2] + 1
+                        and cell[1] - 1 <= s["bbox"][1]
+                        and s["bbox"][3] <= cell[3] + 1
                     ]
                     geom.blocks.append(
                         Block(
@@ -153,8 +158,7 @@ class PdfGeometryExtractor:
                             kind="cell",
                             page=pno,
                             bbox=[round(v, 1) for v in cell],
-                            norm=[_norm(cell[1], height), _norm(cell[0], width),
-                                  _norm(cell[3], height), _norm(cell[2], width)],
+                            norm=normalize_bbox(cell, width, height),
                             text=" ".join(page.get_textbox(fitz.Rect(cell)).split()),
                             size=round(max(cell_sizes), 1) if cell_sizes else 0.0,
                             row=ri,
@@ -162,10 +166,12 @@ class PdfGeometryExtractor:
                         )
                     )
 
-        def inside_table(bb) -> bool:
+        def inside_table(bb: List[float]) -> bool:
             return any(
-                bb[0] >= t[0] - 2 and bb[1] >= t[1] - 2
-                and bb[2] <= t[2] + 2 and bb[3] <= t[3] + 2
+                bb[0] >= t[0] - 2
+                and bb[1] >= t[1] - 2
+                and bb[2] <= t[2] + 2
+                and bb[3] <= t[3] + 2
                 for t in covered
             )
 
@@ -174,11 +180,14 @@ class PdfGeometryExtractor:
             bb = b["bbox"]
             if b.get("type") == 1:
                 geom.blocks.append(
-                    Block(id=f"img{seq}", kind="image", page=pno,
-                          bbox=[round(v, 1) for v in bb],
-                          norm=[_norm(bb[1], height), _norm(bb[0], width),
-                                _norm(bb[3], height), _norm(bb[2], width)],
-                          text="[IMAGE]")
+                    Block(
+                        id=f"img{seq}",
+                        kind="image",
+                        page=pno,
+                        bbox=[round(v, 1) for v in bb],
+                        norm=normalize_bbox(bb, width, height),
+                        text="[IMAGE]",
+                    )
                 )
                 seq += 1
                 continue
@@ -191,13 +200,17 @@ class PdfGeometryExtractor:
                 s0 = line["spans"][0]
                 lb = line["bbox"]
                 geom.blocks.append(
-                    Block(id=f"L{seq}", kind="line", page=pno,
-                          bbox=[round(v, 1) for v in lb],
-                          norm=[_norm(lb[1], height), _norm(lb[0], width),
-                                _norm(lb[3], height), _norm(lb[2], width)],
-                          text=text, size=round(s0["size"], 1),
-                          bold="bold" in s0["font"].lower(),
-                          align=_align_of(lb, left, right))
+                    Block(
+                        id=f"L{seq}",
+                        kind="line",
+                        page=pno,
+                        bbox=[round(v, 1) for v in lb],
+                        norm=normalize_bbox(lb, width, height),
+                        text=text,
+                        size=round(s0["size"], 1),
+                        bold="bold" in s0["font"].lower(),
+                        align=_align_of(lb, left, right),
+                    )
                 )
                 seq += 1
 
@@ -207,10 +220,13 @@ class PdfGeometryExtractor:
             if r.width < MIN_RULE_WIDTH_PT or r.height > MAX_RULE_HEIGHT_PT:
                 continue
             geom.blocks.append(
-                Block(id=f"R{rule_seq}", kind="rule", page=pno,
-                      bbox=[round(r.x0, 1), round(r.y0, 1), round(r.x1, 1), round(r.y1, 1)],
-                      norm=[_norm(r.y0, height), _norm(r.x0, width),
-                            _norm(r.y1, height), _norm(r.x1, width)])
+                Block(
+                    id=f"R{rule_seq}",
+                    kind="rule",
+                    page=pno,
+                    bbox=[round(r.x0, 1), round(r.y0, 1), round(r.x1, 1), round(r.y1, 1)],
+                    norm=normalize_bbox([r.x0, r.y0, r.x1, r.y1], width, height),
+                )
             )
             rule_seq += 1
 

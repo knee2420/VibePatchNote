@@ -15,7 +15,7 @@ from .prompt import build_classification_prompt
 from .schema import BLOCK_CLASSIFICATION_SCHEMA, SHAPE_REMINDER
 
 if TYPE_CHECKING:  # pragma: no cover
-    from ..extract.geometry import PageGeometry
+    from scaffold_engine.tools import PageGeometry
 
 logger = logging.getLogger(__name__)
 

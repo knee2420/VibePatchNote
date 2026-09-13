@@ -3,11 +3,12 @@
 부품을 조립하기만 한다. 각 단계의 구현은 주입 가능하므로, 새 하네스나 새 조립
 전략을 붙일 때 이 파일을 고칠 필요가 없다.
 
-    A 측정(결정적)  ->  B 판정(에이전트)  ->  C 조립(결정적)  ->  D 채점
-    extract/           classify/            assemble/          score/
+    1. 전처리·실측  ->  2. LLM 역할판정  ->  3. 후처리·조립  ->  4. 품질측정·채점
+    preprocess/        inference/          postprocess/        evaluate/
+    (extract/)         (classify/)         (assemble/)         (score/)
 
-핵심 불변식: **좌표는 A 에서만 만들어진다.** B 의 출력 스키마에는 좌표 필드가
-없고, C 는 A 의 실측치만 사용한다. 그래서 문서가 바뀌어도 매핑이 어긋나지 않는다.
+핵심 불변식: **좌표는 1단계(전처리)에서만 만들어진다.** 2단계 출력 스키마에는 좌표 필드가
+없고, 3단계는 1단계의 실측치만 사용한다. 그래서 문서가 바뀌어도 매핑이 어긋나지 않는다.
 """
 from __future__ import annotations
 
@@ -28,11 +29,12 @@ from agent_telemetry import (
 
 from scaffold_engine.contracts import LlmHarness
 
-from .assemble.html import HtmlAssembler
-from .classify.agent import SlotClassifier
-from .extract.geometry import PdfGeometryExtractor
+from .preprocess.extract.geometry import PdfGeometryExtractor
+from .inference.classify.agent import SlotClassifier
+from .postprocess.assemble.html import HtmlAssembler
+from .evaluate.score.fidelity import score_page
 from .schemas.models import ScaffoldExtractResult, ScaffoldMeta
-from .score.fidelity import score_page
+
 
 logger = logging.getLogger(__name__)
 

@@ -248,11 +248,30 @@ class AgyCliHarness(BaseLlmHarness):
 
             if structured_out is None and raw_text:
                 try:
-                    structured_out = json.loads(raw_text.strip())
-                    if not isinstance(structured_out, dict):
-                        structured_out = None
+                    loaded = json.loads(raw_text.strip())
+                    if isinstance(loaded, dict):
+                        structured_out = loaded
                 except Exception:
+                    pass
+
+                # NDJSON 또는 다중 라인 JSON 객체 역순 탐색 (최신 완성본 우선)
+                if structured_out is None:
+                    for line in reversed(raw_text.strip().splitlines()):
+                        line_clean = line.strip()
+                        if not (line_clean.startswith("{") and line_clean.endswith("}")):
+                            continue
+                        try:
+                            candidate_obj = json.loads(line_clean)
+                            if isinstance(candidate_obj, dict):
+                                structured_out = candidate_obj
+                                break
+                        except Exception:
+                            continue
+
+                # 마크다운 코드펜스 등 관용적 페이로드 회수
+                if structured_out is None:
                     structured_out = parse_json_payload(raw_text)
+
 
             if structured_out is None:
                 logger.warning("[AgyCliHarness] 구조화 JSON 파싱 실패 (raw_len=%d)", len(raw_text))

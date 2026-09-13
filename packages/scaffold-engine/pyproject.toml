@@ -19,4 +19,5 @@ dependencies = [
 ]
 
 [project.scripts]
-scaffold-engine = "scaffold_engine.cli:main"
+scaffold-engine = "scaffold_engine.utils.cli:main"
+
