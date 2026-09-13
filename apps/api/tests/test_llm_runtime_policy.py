@@ -14,13 +14,17 @@ from typing import Any, Iterator
 import pymupdf
 import pytest
 from dependency_injector import providers
-from scaffold_engine.harness import AgyCliHarness, HarnessFactory, LlmExecutionResult
+from llm_driver import (
+    PRIMARY_PROVIDER_ID,
+    AgyCliHarness,
+    GoogleGenAiHarness,
+    HarnessFactory,
+    LlmExecutionResult,
+    ProviderStateStore,
+)
 
 from app.bootstrap.container import Container
 from app.core.config import settings
-from app.core.llm.adapters import GoogleGenAiHarness
-from app.core.llm.fallback import PRIMARY_PROVIDER_ID
-from app.core.llm.provider_state import ProviderStateStore
 
 OLD_PRIMARY, OLD_PRIMARY_TIMEOUT = "claude-sonnet-4-6", 120
 OLD_FALLBACK, OLD_FALLBACK_TIMEOUT = "gemini-3.5-flash", 90

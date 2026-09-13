@@ -4,10 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from scaffold_engine.harness import LlmExecutionResult
+from llm_driver import GoogleGenAiHarness, LlmExecutionResult
 from scaffold_engine.outline.pipeline import OutlinePipeline
-
-from app.core.llm.adapters import GoogleGenAiHarness
 
 
 class _Response:
@@ -52,7 +50,7 @@ def test_google_adapter_loads_schema_path_into_request(tmp_path: Path, monkeypat
         captured.update(kwargs["json"])
         return _Response()
 
-    monkeypatch.setattr("app.core.llm.adapters.gemini_adapter.requests.post", post)
+    monkeypatch.setattr("llm_driver.adapters.gemini.requests.post", post)
     result = GoogleGenAiHarness(model="gemini-test", api_key="test-key").run_structured(
         "extract", schema_path=schema_path
     )
@@ -115,7 +113,7 @@ def test_google_adapter_attaches_file_as_inlinedata(tmp_path: Path, monkeypatch)
         captured.update(kwargs["json"])
         return _Response()
 
-    monkeypatch.setattr("app.core.llm.adapters.gemini_adapter.requests.post", post)
+    monkeypatch.setattr("llm_driver.adapters.gemini.requests.post", post)
 
     # 1. file_path 인자로 직접 넘겼을 때
     harness = GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-key")

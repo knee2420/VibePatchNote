@@ -15,22 +15,22 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, Optional
 
-from scaffold_engine.harness import (
+from llm_driver import (
     AgyCliHarness,
     BaseLlmHarness,
+    CliQuotaAvailability,
+    FallbackLlmHarness,
     GoogleGenAiHarness,
     HarnessFactory,
     LlmExecutionResult,
     LocalGemmaHarness,
     ModelSpec,
+    ProviderStateStore,
     get_model_spec,
 )
 
 from app.core.config import settings
-from app.core.llm.availability import CliQuotaAvailability
 from app.core.llm.credentials import CredentialStore
-from app.core.llm.fallback import FallbackLlmHarness
-from app.core.llm.provider_state import ProviderStateStore
 
 logger = logging.getLogger(__name__)
 

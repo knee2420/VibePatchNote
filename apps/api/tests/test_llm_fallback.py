@@ -3,9 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from scaffold_engine.harness import STATUS_ERROR, BaseLlmHarness, LlmExecutionResult
-
-from app.core.llm.fallback import FallbackLlmHarness
+from llm_driver import (
+    STATUS_ERROR,
+    BaseLlmHarness,
+    CliAvailability,
+    FallbackLlmHarness,
+    GoogleGenAiHarness,
+    LlmExecutionResult,
+)
 
 
 class EmptyCredentialStore:
@@ -20,8 +25,6 @@ class GoogleCredentialStore:
 
 class ExhaustedAvailability:
     def check(self, model: str):
-        from app.core.llm.availability import CliAvailability
-
         return CliAvailability("exhausted", 0)
 
     def invalidate(self) -> None:
@@ -61,7 +64,7 @@ def test_known_empty_cli_quota_skips_primary(monkeypatch) -> None:
         cli_availability=ExhaustedAvailability(),  # type: ignore[arg-type]
     )
     monkeypatch.setattr(
-        "app.core.llm.fallback.GoogleGenAiHarness.run_structured",
+        "llm_driver.fallback.GoogleGenAiHarness.run_structured",
         lambda self, prompt, **kwargs: LlmExecutionResult(
             status="SUCCESS", model=self.model, structured_output={"ok": True}
         ),
@@ -77,8 +80,6 @@ def test_known_empty_cli_quota_skips_primary(monkeypatch) -> None:
 
 
 def test_google_primary_success(monkeypatch) -> None:
-    from app.core.llm.adapters import GoogleGenAiHarness
-
     harness = FallbackLlmHarness(
         GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-key"),
         GoogleCredentialStore(),
@@ -89,7 +90,7 @@ def test_google_primary_success(monkeypatch) -> None:
         cli_model="gemini-3.8-flash-low",
     )
     monkeypatch.setattr(
-        "app.core.llm.adapters.gemini_adapter.GoogleGenAiHarness.run_structured",
+        "llm_driver.adapters.gemini.GoogleGenAiHarness.run_structured",
         lambda self, prompt, **kwargs: LlmExecutionResult(
             status="SUCCESS", model=self.model, structured_output={"direct": True}
         ),
@@ -102,8 +103,6 @@ def test_google_primary_success(monkeypatch) -> None:
 
 
 def test_google_primary_failure_falls_back_to_cli(monkeypatch) -> None:
-    from app.core.llm.adapters import GoogleGenAiHarness
-
     harness = FallbackLlmHarness(
         GoogleGenAiHarness(model="gemini-3.5-flash", api_key="test-key"),
         GoogleCredentialStore(),
@@ -114,13 +113,13 @@ def test_google_primary_failure_falls_back_to_cli(monkeypatch) -> None:
         cli_model="gemini-3.8-flash-low",
     )
     monkeypatch.setattr(
-        "app.core.llm.adapters.gemini_adapter.GoogleGenAiHarness.run_structured",
+        "llm_driver.adapters.gemini.GoogleGenAiHarness.run_structured",
         lambda self, prompt, **kwargs: LlmExecutionResult(
             status="ERROR", model=self.model, error="ResourceExhausted: 429 Quota exceeded"
         ),
     )
     monkeypatch.setattr(
-        "scaffold_engine.harness.AgyCliHarness.run_structured",
+        "llm_driver.adapters.agy_cli.AgyCliHarness.run_structured",
         lambda self, prompt, **kwargs: LlmExecutionResult(
             status="SUCCESS", model=self.model, structured_output={"cli_fallback": True}
         ),

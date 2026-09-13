@@ -3,10 +3,9 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from scaffold_engine.harness import MODEL_REGISTRY
+from llm_driver import MODEL_REGISTRY, PRIMARY_PROVIDER_ID
 
 from app.core.config import settings
-from app.core.llm.fallback import PRIMARY_PROVIDER_ID
 
 from ..ports import CredentialStorePort, RuntimePolicyRepository
 

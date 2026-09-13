@@ -6,10 +6,15 @@
 from llm_driver import (
     DEFAULT_MODEL_NAME,
     MODEL_REGISTRY,
+    PRIMARY_PROVIDER_ID,
     BaseLlmHarness,
+    CliQuotaAvailability,
+    FallbackLlmHarness,
     HarnessFactory,
     LlmExecutionResult,
     ModelSpec,
+    ProviderStateStore,
+    RuntimePolicyHarness,
     UnsupportedProviderError,
     get_model_spec,
     parse_json_payload,
@@ -19,7 +24,6 @@ from llm_driver import (
 
 from app.core.llm.agy_status_snapshot import AgyStatusSnapshot
 from app.core.llm.manager import LlmManager
-from app.core.llm.policy_harness import RuntimePolicyHarness
 from app.core.llm.ports import ExecutionRecorder, ModelExecutor
 from app.core.llm.telemetry import LedgerExecutionRecorder, cost_of
 from app.core.llm.tracer import (
@@ -43,6 +47,10 @@ __all__ = [
     "ModelSpec",
     "MODEL_REGISTRY",
     "DEFAULT_MODEL_NAME",
+    "PRIMARY_PROVIDER_ID",
+    "FallbackLlmHarness",
+    "CliQuotaAvailability",
+    "ProviderStateStore",
     "HarnessFactory",
     "UnsupportedProviderError",
     "get_model_spec",

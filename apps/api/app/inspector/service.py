@@ -536,7 +536,7 @@ class InspectorService:
 
     def get_matrix(self) -> MatrixResponse:
         """현재 등록된 모델 매트릭스 및 라우팅 설정 반환."""
-        from scaffold_engine.harness import MODEL_REGISTRY
+        from llm_driver import MODEL_REGISTRY
 
         models: list[MatrixModelInfo] = []
         for name, spec in MODEL_REGISTRY.items():

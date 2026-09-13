@@ -16,11 +16,13 @@ scratch/*
 # Python
 *.py[cod]
 *$py.class
+*.tmp_pytest*
+*.pytest_tmp*
+*.pytest-tmp*
 .pytest_cache/
 .pytest_tmp/
 .pytest-tmp/
-apps/api/.pytest-tmp/
-apps/api/.pytest_tmp/
+.tmp_pytest/
 apps/api/.import_linter_cache/
 apps/api/.ruff_cache/
 .env

@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import List
 
 from dotenv import dotenv_values
-from scaffold_engine.harness import DEFAULT_CLI_MODEL_NAME, DEFAULT_GOOGLE_MODEL_NAME
+from llm_driver import DEFAULT_CLI_MODEL_NAME, DEFAULT_GOOGLE_MODEL_NAME
 
 from app.core.storage import StorageRoots
 

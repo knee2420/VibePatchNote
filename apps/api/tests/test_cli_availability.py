@@ -1,4 +1,4 @@
-from app.core.llm.availability import CliQuotaAvailability
+from llm_driver import CliQuotaAvailability
 
 
 class _Usage:

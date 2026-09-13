@@ -8,10 +8,14 @@ from __future__ import annotations
 
 from datetime import timedelta
 
-from scaffold_engine.harness import BaseLlmHarness, LlmExecutionResult
-
-from app.core.llm.fallback import PRIMARY_PROVIDER_ID, FallbackLlmHarness
-from app.core.llm.provider_state import ProviderStateStore, parse_reset_after
+from llm_driver import (
+    PRIMARY_PROVIDER_ID,
+    BaseLlmHarness,
+    FallbackLlmHarness,
+    LlmExecutionResult,
+    ProviderStateStore,
+    parse_reset_after,
+)
 
 QUOTA_MESSAGE = (
     "Individual quota reached. Please upgrade your subscription to "

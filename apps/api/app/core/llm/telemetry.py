@@ -19,7 +19,7 @@ import logging
 from typing import Any
 
 from agent_runtime import LedgerEntry, LedgerPort, RunCost
-from scaffold_engine.harness import LlmExecutionResult
+from llm_driver import LlmExecutionResult
 
 logger = logging.getLogger(__name__)
 

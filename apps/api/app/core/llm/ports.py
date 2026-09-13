@@ -13,8 +13,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from llm_driver import LlmExecutionResult
 from scaffold_engine.contracts import ModelExecutor
-from scaffold_engine.harness import LlmExecutionResult
 
 __all__ = ["ModelExecutor", "LlmExecutionResult", "ExecutionRecorder"]
 

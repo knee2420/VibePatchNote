@@ -1,4 +1,5 @@
-from app.core.llm.availability import CliAvailability
+from llm_driver import CliAvailability
+
 from app.llm_settings.service import LlmSettingsService
 
 
