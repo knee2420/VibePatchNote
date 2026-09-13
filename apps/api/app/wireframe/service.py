@@ -41,23 +41,28 @@ class WireframeArchiveService:
     def archive_scaffold(
         self,
         doc_id: str,
-        pdf_path: Path,
-        result: Any,
+        pdf_path: Optional[Path] = None,
+        result: Any = None,
         page_number: int = 1,
+        source_path: Optional[Path] = None,
     ) -> WireframeArchiveMeta:
+        target_path = pdf_path or source_path
+        if target_path is None:
+            raise ValueError("archive_scaffold requires either pdf_path or source_path")
+
         now_iso = datetime.now(timezone.utc).isoformat()
         scaffold_id = new_id("scaffold")
         meta_title = getattr(getattr(result, "meta", None), "title", "")
-        title = meta_title or f"{pdf_path.stem} 서식 틀"
+        title = meta_title or f"{target_path.stem} 서식 틀"
 
         orig_png = None
         overlay_png = None
         render_png = None
         slots = getattr(result, "slots", [])
         try:
-            orig_png = render_page_as_png(pdf_path, page_number=page_number, dpi=150)
+            orig_png = render_page_as_png(target_path, page_number=page_number, dpi=150)
             overlay_png = render_slot_overlay_png(
-                pdf_path, slots, page_number=page_number, dpi=150
+                target_path, slots, page_number=page_number, dpi=150
             )
         except Exception as exc:
             logger.warning("[WireframeArchiveService] Vision rendering skipped: %s", exc)
@@ -68,7 +73,7 @@ class WireframeArchiveService:
 
         prompt_spec_md = PromptSpecFormatter.format(
             title=title,
-            source_name=pdf_path.name,
+            source_name=target_path.name,
             slots=slots,
             markdown_content=getattr(result, "markdown_content", ""),
             created_at=now_iso,
@@ -78,7 +83,7 @@ class WireframeArchiveService:
             scaffold_id=scaffold_id,
             doc_id=doc_id,
             meta=getattr(result, "meta", None),
-            source_pdf_file_name=pdf_path.name,
+            source_pdf_file_name=target_path.name,
             slots_count=len(slots),
             page_number=page_number,
         )
@@ -103,7 +108,7 @@ class WireframeArchiveService:
                 "doc_id": doc_id,
                 "slots_count": len(slots),
                 "page_number": page_number,
-                "pdf_path": str(pdf_path),
+                "pdf_path": str(target_path),
             })
             scope.set_outputs({
                 "scaffold_id": scaffold_id,
@@ -113,7 +118,7 @@ class WireframeArchiveService:
             })
             scope.set_label(
                 summary_pill=f"아카이브 {scaffold_id[:16]} 영속화 완료",
-                data_in=f"{pdf_path.name} (slots={len(slots)})",
+                data_in=f"{target_path.name} (slots={len(slots)})",
                 data_out=f"scaffold_id: {scaffold_id}",
             )
         logger.info("[WireframeArchiveService] Archived '%s' (%s)", title, scaffold_id)

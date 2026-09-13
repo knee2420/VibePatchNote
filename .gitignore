@@ -13,16 +13,21 @@ build/
 *.tsbuildinfo
 scratch/*
 
-# Python
+# Python & Pytest Temp
 *.py[cod]
 *$py.class
-*.tmp_pytest*
-*.pytest_tmp*
-*.pytest-tmp*
-.pytest_cache/
-.pytest_tmp/
-.pytest-tmp/
-.tmp_pytest/
+**/*pytest_tmp*
+**/*pytest_temp*
+**/*pytest-tmp*
+**/*pytest-temp*
+**/.pytest_cache/
+**/.pytest_tmp/
+**/.pytest_temp/
+**/.pytest-tmp/
+**/.pytest-temp/
+**/.tmp_pytest*
+**/.pytest_temp*
+**/.pytest_tmp*
 apps/api/.import_linter_cache/
 apps/api/.ruff_cache/
 .env

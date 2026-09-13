@@ -58,11 +58,14 @@ class GenerateWireframeUseCase:
         self,
         file_path: Any,
         display_name: str | None = None,
+        doc_id: str | None = None,
     ) -> WireframeExtractOutput:
         if not self._engine:
             raise RuntimeError("WireframeExtractPort 엔진 어댑터가 구성되지 않았습니다.")
 
-        raw = await self._engine.extract(Path(file_path), display_name=display_name)
+        raw = await self._engine.extract(
+            Path(file_path), display_name=display_name, doc_id=doc_id
+        )
         if isinstance(raw, WireframeExtractOutput):
             return raw
         if isinstance(raw, tuple) and len(raw) == 2:
@@ -121,7 +124,7 @@ class GenerateWireframeUseCase:
             file_path = self._source.resolve_file(doc_id)
             try:
                 output: WireframeExtractOutput = await self._run_pipeline(
-                    file_path, display_name=original_name
+                    file_path, display_name=original_name, doc_id=doc_id
                 )
             except Exception as exc:
                 logger.error("[GenerateWireframe] 파이프라인 실패: %s", exc, exc_info=True)
@@ -142,7 +145,7 @@ class GenerateWireframeUseCase:
                 try:
                     archive_meta = self._archive.archive_scaffold(
                         doc_id=doc_id,
-                        source_path=file_path,
+                        pdf_path=file_path,
                         result=output,
                     )
                 except Exception as exc:

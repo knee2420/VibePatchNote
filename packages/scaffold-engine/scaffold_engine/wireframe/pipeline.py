@@ -28,8 +28,10 @@ from agent_telemetry import (
 )
 
 from scaffold_engine.contracts import LlmHarness
+from scaffold_engine.tools import PdfRasterizer
 
 from .preprocess.extract.geometry import PdfGeometryExtractor
+from .preprocess.extract.hint_builder import HintBuilder
 from .inference.classify.agent import SlotClassifier
 from .postprocess.assemble.html import HtmlAssembler
 from .evaluate.score.fidelity import score_page
@@ -58,6 +60,7 @@ class ScaffoldPipeline:
             raise ValueError("ScaffoldPipeline에 LlmHarness 인스턴스를 반드시 주입해야 합니다.")
         self.harness = harness
         self.extractor = PdfGeometryExtractor()
+        self.rasterizer = PdfRasterizer(dpi=150)
         self.classifier = SlotClassifier(self.harness)
         self.assembler = HtmlAssembler()
         # 마지막 실행의 계측 결과. 호스트가 원장에 넣을지는 호스트가 정한다.
@@ -68,6 +71,7 @@ class ScaffoldPipeline:
         pdf_path: Union[str, Path],
         page_number: int = 1,
         display_name: Optional[str] = None,
+        context_dir: Optional[Path] = None,
     ) -> ScaffoldExtractResult:
         """PDF 한 페이지를 스캐폴딩으로 만든다.
 
@@ -84,9 +88,9 @@ class ScaffoldPipeline:
         )
         try:
             if active_col is not None:
-                return self._run_traced(collector, pdf_path, page_number, display_name)
+                return self._run_traced(collector, pdf_path, page_number, display_name, context_dir)
             with collector.activate():
-                return self._run_traced(collector, pdf_path, page_number, display_name)
+                return self._run_traced(collector, pdf_path, page_number, display_name, context_dir)
         finally:
             # 실패해도 거기까지의 단계는 남는다. 관측 도구가 가장 봐야 할 기록이다.
             exec_res = getattr(self.classifier, "last_result", None) or getattr(self.harness, "last_result", None)
@@ -116,6 +120,7 @@ class ScaffoldPipeline:
         pdf_path: Union[str, Path],
         page_number: int,
         display_name: Optional[str],
+        context_dir: Optional[Path] = None,
     ) -> ScaffoldExtractResult:
         started = time.time()
         pdf_path = Path(pdf_path).resolve()
@@ -128,15 +133,28 @@ class ScaffoldPipeline:
             "GeometryExtraction",
             span_type=SpanType.TOOL,
             phase=SpanPhase.PRE_LLM,
-            display_label="PDF 기하 실측",
-            description="원본 PDF에서 블록·표의 좌표와 폰트 크기를 결정적으로 측정합니다. AI를 쓰지 않습니다.",
+            display_label="PDF 기하 실측 & 비전 렌더링",
+            description="원본 PDF에서 블록·표의 좌표와 폰트 크기를 결정적으로 측정하고, 150 DPI 고해상도 이미지를 렌더링합니다.",
             data_in=target_display_name,
-            sources=[source_of(PdfGeometryExtractor.extract)],
+            sources=[source_of(PdfGeometryExtractor.extract), source_of(PdfRasterizer.render_page)],
         ) as s_extract:
             pages = self.extractor.extract(pdf_path)
             if not pages:
                 raise ValueError(f"페이지를 읽을 수 없습니다: {target_display_name}")
             page = pages[min(max(page_number, 1), len(pages)) - 1]
+
+            # 고해상도 비전 렌더링 (150 DPI) 및 정밀 기하 힌트 매트릭스 생성
+            img_output_path = None
+            if context_dir:
+                c_dir = Path(context_dir)
+                c_dir.mkdir(parents=True, exist_ok=True)
+                img_output_path = c_dir / f"page_{page_number}.png"
+
+            page_img_info = self.rasterizer.render_page(
+                pdf_path, page_number=page_number, output_path=img_output_path
+            )
+            hint_text = HintBuilder.build_hint_text(page)
+
             s_extract.set_inputs({
                 "filename": target_display_name,
                 "page_number": page_number,
@@ -148,6 +166,9 @@ class ScaffoldPipeline:
                 "blocks": len(page.classifiable()),
                 "tables": len(page.tables),
                 "has_text_layer": page.has_text_layer,
+                "image_path": str(page_img_info.image_path),
+                "image_dpi": page_img_info.dpi,
+                "hint_chars": len(hint_text),
                 "blocks_summary": [
                     {
                         "id": getattr(b, "id", None) or (b.get("id") if isinstance(b, dict) else str(idx)),
@@ -158,12 +179,12 @@ class ScaffoldPipeline:
                 ],
             })
             s_extract.set_label(
-                summary_pill=f"{page.doc_type} · 블록 {len(page.classifiable())}개 · 표 {len(page.tables)}개",
-                data_out=f"PageGeometry ({len(page.classifiable())} blocks)",
+                summary_pill=f"{page.doc_type} · 블록 {len(page.classifiable())}개 · 비전 150DPI",
+                data_out=f"PageGeometry ({len(page.classifiable())} blocks) + PageImage",
             )
             s_extract.snapshot(
                 stage_id="geometry_extraction",
-                stage_name="PDF 기하 실측",
+                stage_name="PDF 기하 실측 & 비전 렌더링",
                 payload={
                     "filename": target_display_name,
                     "total_pages": len(pages),
@@ -171,6 +192,9 @@ class ScaffoldPipeline:
                     "blocks_count": len(page.classifiable()),
                     "tables_count": len(page.tables),
                     "doc_type": page.doc_type,
+                    "image_path": str(page_img_info.image_path),
+                    "image_dpi": page_img_info.dpi,
+                    "hint_chars": len(hint_text),
                 },
             )
 
@@ -180,20 +204,25 @@ class ScaffoldPipeline:
                 "이 파이프라인은 텍스트 기반 추출만 지원합니다."
             )
 
-        # B. 판정 (유일하게 AI 가 개입하는 단계)
+        # B. 판정 (비전 멀티모달 추론 단계)
         with collector.step(
             "LlmInference",
             span_type=SpanType.LLM,
             phase=SpanPhase.LLM,
-            display_label=f"{self.harness.name} 블록 역할 판정",
-            description="실측된 블록이 제목·본문·표·입력란 중 무엇인지 모델이 판정합니다. 좌표는 만들지 않습니다.",
-            data_in=f"PageGeometry ({len(page.classifiable())} blocks)",
+            display_label=f"{self.harness.name} 블록 역할 판정 (Vision)",
+            description="페이지 이미지와 정밀 기하 힌트를 멀티모달 모델이 대조하여 각 블록의 역할과 슬롯 라벨을 판정합니다.",
+            data_in=f"PageGeometry ({len(page.classifiable())} blocks) + PageImage",
             sources=[
                 source_of(SlotClassifier.classify),
                 model_source(self.harness.name),
             ],
         ) as s_classify:
-            decisions = self.classifier.classify(target_display_name, page)
+            decisions = self.classifier.classify(
+                target_display_name,
+                page,
+                image_path=page_img_info.image_path,
+                hint_text=hint_text,
+            )
             classified = len(decisions.get("blocks", []))
             exec_res = getattr(self.classifier, "last_result", None) or getattr(self.harness, "last_result", None)
             actual_model = getattr(exec_res, "model", None) or getattr(self.harness, "model", self.harness.name)
@@ -254,6 +283,9 @@ class ScaffoldPipeline:
                 "target_model": actual_model,
                 "provider": actual_provider,
                 "prompt_chars": len(prompt),
+                "image_path": str(page_img_info.image_path),
+                "image_dpi": page_img_info.dpi,
+                "hint_chars": len(hint_text),
                 "prompt": prompt,
             })
             s_classify.set_outputs({
@@ -272,13 +304,15 @@ class ScaffoldPipeline:
             })
             s_classify.snapshot(
                 stage_id="slot_classification",
-                stage_name="블록 역할 판정",
+                stage_name="블록 역할 판정 (Vision)",
                 payload={
                     "doc_title": decisions.get("doc_title"),
                     "candidate_blocks": len(page.classifiable()),
                     "classified_blocks": classified,
                     "model": actual_model,
                     "provider": actual_provider,
+                    "image_path": str(page_img_info.image_path),
+                    "image_dpi": page_img_info.dpi,
                 },
             )
 

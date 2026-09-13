@@ -30,18 +30,25 @@ class SlotClassifier:
         self.last_result: Optional[Any] = None
         self.last_prompt: str = ""
 
-    def classify(self, source_name: str, page: "PageGeometry") -> Dict[str, Any]:
+    def classify(
+        self,
+        source_name: str,
+        page: "PageGeometry",
+        image_path: Optional[Any] = None,
+        hint_text: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """실패해도 예외를 던지지 않는다 — 빈 판정을 돌려주면 전부 고정 텍스트가 된다."""
         blocks = page.classifiable()
         if not blocks:
             return {"doc_title": source_name, "blocks": []}
 
-        prompt = build_classification_prompt(source_name, page)
+        prompt = build_classification_prompt(source_name, page, hint_text=hint_text)
         self.last_prompt = prompt
         if hasattr(self.harness, "run_structured"):
             res = self.harness.run_structured(
                 prompt,
                 json_schema=BLOCK_CLASSIFICATION_SCHEMA,
+                file_path=image_path,
             )
             self.last_result = res
             payload = res.structured_output
@@ -73,8 +80,15 @@ class SlotClassifier:
     ) -> Dict[str, Any]:
         """모델 출력을 실측 사실과 대조해 걸러낸다."""
         text_by_id = {b.id: b.text for b in blocks}
+        id_alias_map: Dict[str, str] = {}
+        for b in blocks:
+            id_alias_map[b.id] = b.id
+            if b.id.startswith("t"):
+                id_alias_map[b.id[1:]] = b.id
+            elif "-" in b.id:
+                id_alias_map[f"t{b.id}"] = b.id
 
-        ghosts = unknown_ids(payload, list(text_by_id))
+        ghosts = [i.get("id") for i in payload.get("blocks", []) if isinstance(i, dict) and i.get("id") not in id_alias_map]
         if ghosts:
             logger.warning("[classify] 미지의 id %d개 제거 (p%d): %s",
                            len(ghosts), page_no, ghosts[:5])
@@ -83,8 +97,9 @@ class SlotClassifier:
         for item in payload.get("blocks", []):
             if not isinstance(item, dict):
                 continue
-            bid = item.get("id")
-            if bid not in text_by_id:
+            raw_bid = item.get("id")
+            bid = id_alias_map.get(raw_bid)
+            if not bid or bid not in text_by_id:
                 continue
             role = item.get("role") or FALLBACK_ROLE
             value_text = (item.get("value_text") or "").strip()

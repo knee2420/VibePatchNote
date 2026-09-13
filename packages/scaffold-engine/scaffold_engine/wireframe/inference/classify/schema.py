@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-ROLES = ("title", "label", "value", "mixed", "decoration")
+ROLES = ("title", "label", "value", "mixed", "decoration", "ignore")
 SLOT_ROLES = frozenset({"value", "mixed"})
 
 BLOCK_CLASSIFICATION_SCHEMA: Dict[str, Any] = {

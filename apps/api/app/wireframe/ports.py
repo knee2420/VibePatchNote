@@ -54,6 +54,8 @@ class WireframeExtractPort(Protocol):
         self,
         file_path: Path,
         *,
+        doc_id: str | None = None,
+        context_dir: Path | None = None,
         display_name: str | None = None,
     ) -> WireframeExtractOutput: ...
 

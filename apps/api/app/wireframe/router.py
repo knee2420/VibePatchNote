@@ -72,6 +72,13 @@ async def start_wireframe_run(
     return {"runId": run.run_id, "status": run.status}
 
 
+@router.get("/by-document/{doc_id}", response_model=list[WireframeArchiveMeta])
+@inject
+async def list_archives_for_document(doc_id: str, service: WireframeArchiveServiceDep):
+    """특정 문서(doc_id)에 속한 모든 와이어프레임 아카이브 목록을 최신순으로 조회합니다."""
+    return service.list_for_document(doc_id)
+
+
 @router.get("/{scaffold_id}", response_model=WireframeArchiveDetail)
 @inject
 async def get_archive_detail(scaffold_id: str, service: WireframeArchiveServiceDep):

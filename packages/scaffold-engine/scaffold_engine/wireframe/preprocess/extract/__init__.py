@@ -5,9 +5,11 @@ from .geometry import (
     PdfGeometryExtractor,
     TableGeometry,
 )
+from .hint_builder import HintBuilder
 
 __all__ = [
     "Block",
+    "HintBuilder",
     "PageGeometry",
     "PdfGeometryExtractor",
     "TableGeometry",

@@ -81,9 +81,8 @@ export function useScaffoldArchive(
 
   // 1) 아카이브 -> 노드 (하이드레이션)
   useEffect(() => {
-    if (!scaffoldId || hydratedIdRef.current === scaffoldId) return;
     if (data.archiveMissing) return; // 이미 없는 것으로 판명난 보관본
-    hydratedIdRef.current = scaffoldId;
+    if (data.status === 'generating') return; // AI 신규 생성 중인 노드는 이전 아카이브를 불러오지 않고 작업 완료를 대기
 
     async function hydrate(id: string) {
       setSyncState('hydrating');
@@ -136,69 +135,94 @@ export function useScaffoldArchive(
       }
     }
 
-    void hydrate(scaffoldId);
-  }, [scaffoldId, nodeId, data.archiveMissing, setNodes]);
+    if (scaffoldId) {
+      if (hydratedIdRef.current === scaffoldId) return;
+      hydratedIdRef.current = scaffoldId;
+      void hydrate(scaffoldId);
+      return;
+    }
+
+    // scaffoldId 포인터가 결손되었으나 docId 가 있고 본문이 비어있다면,
+    // 백엔드 아카이브에서 해당 문서의 최신 보관본을 찾아 자동 복구합니다.
+    const docId = typeof data.docId === 'string' ? data.docId : undefined;
+    if (docId && !data.htmlContent && !hydratedIdRef.current) {
+      hydratedIdRef.current = `doc-${docId}`;
+      async function resolveByDoc(targetDocId: string) {
+        try {
+          const archives = await scaffoldArchiveApi.listByDocument(targetDocId);
+          if (archives.length > 0) {
+            const latest = archives[0];
+            hydratedIdRef.current = latest.scaffoldId;
+            void hydrate(latest.scaffoldId);
+          } else {
+            setNodes((nds) =>
+              nds.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, archiveMissing: true } } : n))
+            );
+          }
+        } catch (error) {
+          console.warn('[useScaffoldArchive] Failed to list archives for docId', targetDocId, error);
+        }
+      }
+      void resolveByDoc(docId);
+    }
+  }, [scaffoldId, nodeId, data.docId, data.htmlContent, data.status, data.archiveMissing, setNodes]);
 
   // 2) 노드 -> 아카이브 (편집 되쓰기 및 스냅샷 갱신)
   useEffect(() => {
     if (!scaffoldId || data.archiveMissing) return;
     if (syncedHtmlRef.current === null) return; // 하이드레이션 전 편집은 있을 수 없다
-    // 구 캔버스 데이터나 하이드레이션 중인 노드에는 본문이 아직 없을 수 있다.
-    // undefined 는 JSON 직렬화에서 누락되어 서버에는 `{}`로 전달된다.
-    if (typeof html !== 'string') return;
-    if (html === syncedHtmlRef.current) return; // 실제 변경분만 보낸다
+    if (html === undefined || html === syncedHtmlRef.current) return;
 
-    if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current);
+    }
 
-    saveTimerRef.current = window.setTimeout(() => {
-      saveTimerRef.current = null;
+    saveTimerRef.current = window.setTimeout(async () => {
       setSyncState('saving');
-      scaffoldArchiveApi
-        .saveRender(scaffoldId, html, markdown)
-        .then(() => {
-          syncedHtmlRef.current = html;
-          setSyncState('saved');
-          // 편집 저장 완료 후 DOM이 업데이트되면 실제 화면 스냅샷 업로드
-          window.setTimeout(() => {
-            void uploadSnapshot(scaffoldId);
-          }, 400);
-        })
-        .catch((error) => {
-          console.error('[useScaffoldArchive] Failed to save render', scaffoldId, error);
-          setSyncState('error');
-        });
+      try {
+        await scaffoldArchiveApi.saveRender(scaffoldId, html, markdown);
+        syncedHtmlRef.current = html;
+        setSyncState('saved');
+
+        // 저장 성공 후 브라우저 DOM 렌더링 화면을 스냅샷으로 캡처
+        if (snapshotTimerRef.current !== null) {
+          window.clearTimeout(snapshotTimerRef.current);
+        }
+        snapshotTimerRef.current = window.setTimeout(() => {
+          void uploadSnapshot(scaffoldId);
+        }, 500);
+      } catch (error) {
+        console.error('[useScaffoldArchive] Failed to save render', scaffoldId, error);
+        setSyncState('error');
+      }
     }, SAVE_DEBOUNCE_MS);
 
     return () => {
       if (saveTimerRef.current !== null) {
         window.clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = null;
+      }
+      if (snapshotTimerRef.current !== null) {
+        window.clearTimeout(snapshotTimerRef.current);
       }
     };
   }, [scaffoldId, html, markdown, data.archiveMissing, uploadSnapshot]);
 
-  // 3) 초기 렌더링 완료 후 실제 브라우저 DOM 스냅샷을 백엔드에 1회 동기화
-  //    (백엔드가 생성한 간이 렌더러 결과물을 실제 브라우저 렌더링 스냅샷으로 교체)
+  // 3) 초기 로드 완료 시 1회 초기 DOM 스냅샷 자동 업로드 (백엔드 에셋 최신화)
   useEffect(() => {
     if (!scaffoldId || syncState === 'hydrating' || !data.htmlContent || data.archiveMissing) return;
     if (initialSnapshotTakenRef.current === scaffoldId) return;
 
-    if (snapshotTimerRef.current !== null) window.clearTimeout(snapshotTimerRef.current);
-
-    // 폰트 로딩 및 Tiptap DOM 마운트가 안정화된 후 캡처
-    snapshotTimerRef.current = window.setTimeout(() => {
+    // 초기 렌더링 안정화를 위해 살짝 지연 후 캡처
+    const timer = window.setTimeout(() => {
+      if (initialSnapshotTakenRef.current === scaffoldId) return;
       initialSnapshotTakenRef.current = scaffoldId;
       void uploadSnapshot(scaffoldId);
-    }, 1000);
+    }, 1500);
 
     return () => {
-      if (snapshotTimerRef.current !== null) {
-        window.clearTimeout(snapshotTimerRef.current);
-        snapshotTimerRef.current = null;
-      }
+      window.clearTimeout(timer);
     };
   }, [scaffoldId, syncState, data.htmlContent, data.archiveMissing, uploadSnapshot]);
 
-  return { syncState, isHydrating: syncState === 'hydrating' };
+  return { syncState };
 }
-

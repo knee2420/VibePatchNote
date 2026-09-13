@@ -206,6 +206,7 @@ class Container(containers.DeclarativeContainer):
     scaffold_extractor = providers.Factory(
         EngineWireframeExtractAdapter,
         harness=llm_harness,
+        cache=document_cache_repository,
     )
     outline_archive = providers.Factory(
         DocumentOutlineArchiveAdapter,

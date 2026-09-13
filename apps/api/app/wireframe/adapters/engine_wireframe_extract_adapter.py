@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 class EngineWireframeExtractAdapter:
     """`WireframeExtractPort` 구현체."""
 
-    def __init__(self, harness: BaseLlmHarness) -> None:
+    def __init__(self, harness: BaseLlmHarness, cache: Any = None) -> None:
         self._harness = harness
+        self._cache = cache
 
     @traceable(
         name="HarnessPolicyAndRouting",
@@ -67,12 +68,21 @@ class EngineWireframeExtractAdapter:
         self,
         file_path: Path,
         *,
+        doc_id: str | None = None,
+        context_dir: Path | None = None,
         display_name: str | None = None,
     ) -> WireframeExtractOutput:
         self._resolve_routing(display_name=display_name)
         pipeline = ScaffoldPipeline(harness=self._harness)
+        target_context_dir = context_dir
+        if target_context_dir is None and doc_id and self._cache and hasattr(self._cache, "context_dir"):
+            target_context_dir = self._cache.context_dir(doc_id)
+
         result: ScaffoldExtractResult = await asyncio.to_thread(
-            pipeline.run, file_path, display_name=display_name
+            pipeline.run,
+            file_path,
+            display_name=display_name,
+            context_dir=target_context_dir,
         )
         raw_telemetry = pipeline.last_telemetry or {}
 

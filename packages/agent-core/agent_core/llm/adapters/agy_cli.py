@@ -125,7 +125,13 @@ class AgyCliHarness(BaseLlmHarness):
         isolated_source_dir: Optional[str] = None
 
         try:
-            prompt_file.write_text(prompt, encoding="utf-8")
+            effective_prompt = prompt
+            if file_path:
+                fp = Path(file_path).resolve()
+                if fp.exists() and fp.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif"}:
+                    if not prompt.startswith("참조 이미지:") and f"@{fp}" not in prompt:
+                        effective_prompt = f"참조 이미지: @{fp}\n\n{prompt}"
+            prompt_file.write_text(effective_prompt, encoding="utf-8")
 
             final_schema_path: Optional[str] = None
             if json_schema is not None:

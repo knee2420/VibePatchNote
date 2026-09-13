@@ -21,6 +21,9 @@ export const scaffoldArchiveApi = {
   get: (scaffoldId: string) =>
     httpClient.get<ScaffoldArchiveDetail>(`${BASE_PATH}/${encodeURIComponent(scaffoldId)}`),
 
+  listByDocument: (docId: string) =>
+    httpClient.get<ScaffoldArchiveMeta[]>(`${BASE_PATH}/by-document/${encodeURIComponent(docId)}`),
+
   /** 재구성된 서식 화면의 스냅샷 PNG 를 아카이브에 보관합니다. */
   saveRenderImage: (scaffoldId: string, png: Blob) => {
     const formData = new FormData();
