@@ -68,6 +68,8 @@ class OutlinePipeline:
         self.context_builder = DocumentContextBuilder()
         self.schema_path = schema_path or DEFAULT_SCHEMA_PATH
         self.system_instructions_path = system_instructions_path or SYSTEM_INSTRUCTIONS_PATH
+        # 마지막 실행의 계측 결과 (ScaffoldPipeline과 동일한 정본 규격). 호스트가 원장에 넣을지는 호스트가 정한다.
+        self.last_telemetry: Optional[Any] = None
 
     def run(
         self,
@@ -340,6 +342,8 @@ class OutlinePipeline:
             for sp in collector.spans
         ]
 
+        pipeline_tel = collector.export_telemetry(provenance=provenance_dict)
+        self.last_telemetry = pipeline_tel
         telemetry = {
             "model": actual_model,
             "ctx_duration": round(collector.spans[0].usage.latency_ms / 1000, 3) if collector.spans else 0.0,
@@ -359,7 +363,7 @@ class OutlinePipeline:
             "telemetry_metadata": getattr(exec_res, "telemetry_metadata", {}),
             "steps": legacy_steps,
             "provenance": provenance_dict,
-            "pipeline_telemetry": collector.export_telemetry(provenance=provenance_dict).model_dump(mode="json"),
+            "pipeline_telemetry": pipeline_tel.model_dump(mode="json"),
         }
 
         if exec_res.status != "SUCCESS" or not exec_res.structured_output:
@@ -481,7 +485,9 @@ class OutlinePipeline:
                 len(document.flat_elements),
                 round(telemetry["ctx_duration"] + exec_res.duration_seconds, 2),
             )
-            telemetry["pipeline_telemetry"] = collector.export_telemetry(provenance=provenance_dict).model_dump(mode="json")
+            pipeline_tel = collector.export_telemetry(provenance=provenance_dict)
+            self.last_telemetry = pipeline_tel
+            telemetry["pipeline_telemetry"] = pipeline_tel.model_dump(mode="json")
             document.telemetry = telemetry
             return {
                 "success": True,

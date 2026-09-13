@@ -15,6 +15,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Protocol
 
+from agent_runtime import RunCost
+from scaffold_engine import OutlineDocument
+
 from .models import ArtifactKind, ArtifactProvenance, DocumentMeta
 
 
@@ -108,3 +111,57 @@ class AgentRuntimePort(Protocol):
         doc_id: str | None = None,
         run_input: Any = None,
     ) -> tuple[Any, Any]: ...
+
+    def record_cost(self, run_id: str, cost: RunCost) -> None: ...
+
+    def mark_waiting(
+        self, run_id: str, *, failure_code: str, doc_id: str, reason: str
+    ) -> None: ...
+
+    def mark_failed(
+        self, run_id: str, *, error_code: str, detail: str
+    ) -> None: ...
+
+
+class OutlineExtractPort(Protocol):
+    """문서 목차/요소 추출 엔진 실행 계약."""
+
+    async def extract(
+        self,
+        file_path: Path,
+        *,
+        doc_id: str | None = None,
+        context_dir: Path | None = None,
+        display_name: str | None = None,
+    ) -> OutlineDocument: ...
+
+
+class OutlineArchivePort(Protocol):
+    """아웃라인 아티팩트 보관 및 채택본 조회 계약."""
+
+    def load_adopted(self, meta: DocumentMeta) -> dict[str, Any] | None: ...
+
+    def archive(
+        self,
+        meta: DocumentMeta,
+        document: Any,
+        *,
+        run_id: str,
+        cost: RunCost,
+        default_model: str = "",
+    ) -> ArtifactProvenance: ...
+
+
+class DocumentTelemetryPort(Protocol):
+    """documents 파이프라인 관측 텔레메트리 영속화 계약."""
+
+    def record_outline_telemetry(
+        self,
+        telemetry: Any,
+        *,
+        run_id: str,
+        doc_id: str,
+        target_name: str,
+    ) -> None:
+        """엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장(ledger, snapshots, meta)에 영속화한다."""
+        ...

@@ -32,6 +32,9 @@ from app.core.llm import (
 )
 from app.core.llm.credentials import OsCredentialStore
 from app.documents.adapters import (
+    DocumentOutlineArchiveAdapter,
+    DocumentTelemetryAdapter,
+    EngineOutlineExtractAdapter,
     EngineSegmentScanAdapter,
     LocalDocumentArtifactRepository,
     LocalDocumentCacheRepository,
@@ -190,8 +193,19 @@ class Container(containers.DeclarativeContainer):
     # --- [6 Models] · Runner 정의 ------------------------------------------
     json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
     segment_scanner = providers.Factory(EngineSegmentScanAdapter, runner=json_prompt_runner)
+    outline_extractor = providers.Factory(
+        EngineOutlineExtractAdapter,
+        harness=llm_harness,
+        cache=document_cache_repository,
+    )
+    outline_archive = providers.Factory(
+        DocumentOutlineArchiveAdapter,
+        artifacts=document_artifact_repository,
+    )
 
     # --- documents 유스케이스 ----------------------------------------------
+    document_telemetry = providers.Singleton(DocumentTelemetryAdapter)
+
     register_document = providers.Factory(
         RegisterDocumentUseCase, source=document_source_repository
     )
@@ -218,6 +232,9 @@ class Container(containers.DeclarativeContainer):
         agent_runtime=agent_runtime,
         recorder=execution_recorder,
         llm_harness=llm_harness,
+        telemetry=document_telemetry,
+        engine=outline_extractor,
+        archive=outline_archive,
     )
     scan_document_segments = providers.Factory(
         ScanDocumentSegmentsUseCase,
