@@ -26,7 +26,7 @@ from agent_telemetry import (
     source_of,
 )
 
-from scaffold_engine.core.interfaces import LlmHarness
+from scaffold_engine.contracts import LlmHarness
 
 from .assemble.html import HtmlAssembler
 from .classify.agent import SlotClassifier

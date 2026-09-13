@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from scaffold_engine.contracts.provenance import EngineProvenance, hash_file, hash_text
-from scaffold_engine.core.interfaces import LlmHarness
+from scaffold_engine.contracts import LlmHarness
 from scaffold_engine.outline.prompts import SYSTEM_INSTRUCTIONS_PATH
 from scaffold_engine.outline.prompts.context_builder import DocumentContextBuilder
 from scaffold_engine.outline.schemas.models import (

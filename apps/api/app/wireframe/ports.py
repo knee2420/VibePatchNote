@@ -37,14 +37,14 @@ class WireframeDocumentSourcePort(Protocol):
 class WireframeExtractOutput(BaseModel):
     """와이어프레임(서식 틀) 추출 엔진 포트의 반환 데이터 계약 (SSOT)."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True, arbitrary_types_allowed=True)
 
     meta: ScaffoldMeta
     html_content: str = Field(alias="htmlContent")
     markdown_content: str = Field(alias="markdownContent")
     slots: list[SlotMappingItem] = Field(default_factory=list)
     cost: RunCost = Field(default_factory=RunCost)
-    telemetry: dict[str, Any] = Field(default_factory=dict)
+    telemetry: Any = Field(default_factory=dict)
 
 
 class WireframeExtractPort(Protocol):

@@ -10,6 +10,7 @@ from .extract.geometry import (
     PdfGeometryExtractor,
     TableGeometry,
 )
+from .interfaces import Assembler, BlockClassifier, GeometryExtractor
 from .pipeline import ScaffoldPipeline, ScannedDocumentError
 from .schemas.models import (
     ScaffoldExtractResult,
@@ -24,6 +25,9 @@ __all__ = [
     "ScaffoldExtractResult",
     "ScaffoldMeta",
     "SlotMappingItem",
+    "GeometryExtractor",
+    "BlockClassifier",
+    "Assembler",
     "PdfGeometryExtractor",
     "PageGeometry",
     "Block",

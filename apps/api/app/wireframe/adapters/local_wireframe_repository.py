@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from pydantic import ValidationError
-from scaffold_engine.types import SlotMappingItem
+from scaffold_engine.wireframe import SlotMappingItem
 
 from app.core.storage import read_json, safe_segment, write_json
 

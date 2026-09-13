@@ -44,7 +44,7 @@ extract/           classify/            assemble/          score/
 
 ```python
 from scaffold_engine import ScaffoldPipeline
-from scaffold_engine.core.interfaces import LlmHarness
+from scaffold_engine.contracts import LlmHarness
 
 class MyHarness:                      # LlmHarness 프로토콜 구현
     name = "my-vendor"

@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from scaffold_engine.core.pipeline import ScaffoldPipeline
+from scaffold_engine.wireframe import ScaffoldPipeline
 
 from app.core.config import settings
 from app.core.llm.tracer import ingest_pipeline_telemetry

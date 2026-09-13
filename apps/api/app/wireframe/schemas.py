@@ -3,7 +3,7 @@ from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
-from scaffold_engine.types import SlotMappingItem
+from scaffold_engine.wireframe import SlotMappingItem
 
 # --- 아카이브 디렉터리 내 표준 아티팩트 경로 SSOT ---
 ASSET_MANIFEST = "manifest.json"

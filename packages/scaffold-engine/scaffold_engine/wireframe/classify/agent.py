@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-from scaffold_engine.core.interfaces import LlmHarness
+from scaffold_engine.contracts import LlmHarness
 from scaffold_engine.utils.parsing import parse_json_payload, unknown_ids
 
 from .prompt import build_classification_prompt

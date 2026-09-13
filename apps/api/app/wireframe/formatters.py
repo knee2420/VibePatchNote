@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from scaffold_engine.types import ScaffoldMeta, SlotMappingItem
+from scaffold_engine.wireframe import ScaffoldMeta, SlotMappingItem
 
 from .schemas import (
     ASSET_HTML,

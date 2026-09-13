@@ -99,13 +99,19 @@ class EngineWireframeExtractAdapter:
             except Exception as e:
                 logger.warning("[EngineWireframeExtractAdapter] 텔레메트리 비용 계산 실패: %s", e)
 
+        telemetry_dict: dict[str, Any] = {}
+        if hasattr(raw_telemetry, "model_dump"):
+            telemetry_dict = raw_telemetry.model_dump(mode="json")
+        elif isinstance(raw_telemetry, dict):
+            telemetry_dict = raw_telemetry
+
         return WireframeExtractOutput(
             meta=result.meta,
             html_content=result.html_content,
             markdown_content=result.markdown_content,
             slots=result.slots,
             cost=cost,
-            telemetry=raw_telemetry,
+            telemetry=telemetry_dict,
         )
 
 
