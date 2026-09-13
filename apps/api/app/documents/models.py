@@ -115,10 +115,10 @@ class OutlineArtifactFiles(BaseModel):
 class OutlineExecutionResult(BaseModel):
     """아웃라인 추출 UseCase의 도메인 실행 결과 모델."""
 
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     status: str = "completed"
-    doc_id: str
+    doc_id: str = Field(alias="docId")
     document_title: str
     total_pages: int = 1
     total_outlines: int = 0
@@ -127,11 +127,12 @@ class OutlineExecutionResult(BaseModel):
     elements: list[ElementItem] = Field(default_factory=list)
     markdown_outline: str = ""
     manifest: dict[str, Any] = Field(default_factory=dict)
-    artifact_id: str | None = None
-    trace_id: str | None = None
-    agent_run_id: str | None = None
+    artifact_id: str | None = Field(default=None, alias="artifactId")
+    trace_id: str | None = Field(default=None, alias="traceId")
+    agent_run_id: str | None = Field(default=None, alias="agentRunId")
     error: Any = None
 
     def to_dict(self) -> dict[str, Any]:
         """기존 딕셔너리 반환 규격 호환 직렬화."""
         return self.model_dump(by_alias=True)
+

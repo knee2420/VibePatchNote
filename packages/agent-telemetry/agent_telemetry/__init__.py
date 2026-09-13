@@ -4,6 +4,7 @@ from agent_telemetry.collector import (
     StepCollector,
     StepScope,
     current_collector,
+    current_scope,
     traceable,
 )
 from agent_telemetry.contracts import (
@@ -33,6 +34,8 @@ __all__ = [
     "StepScope",
     "traceable",
     "current_collector",
+    "current_scope",
+
     "SpanType",
     "SpanStatus",
     "SpanPhase",

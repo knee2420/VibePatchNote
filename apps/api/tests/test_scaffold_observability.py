@@ -131,3 +131,125 @@ def test_scaffold_sources_resolve(scaffold_run: str) -> None:
             checked += 1
 
     assert checked > 0, "확인할 코드 지점이 없습니다"
+
+
+@pytest.mark.anyio
+async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
+    """GenerateScaffoldUseCase 실행 시 하네스 라우팅 -> 기하 실측 -> 슬롯 분류 -> HTML 조립 -> 아티팩트 커밋 5단계 스팬 검증."""
+    from unittest.mock import MagicMock
+
+    from agent_telemetry import current_collector
+    from scaffold_engine import ScaffoldExtractResult, ScaffoldMeta
+
+    from app.documents.adapters import (
+        DocumentTelemetryAdapter,
+        EngineScaffoldExtractAdapter,
+    )
+    from app.documents.agents.generate_scaffold import GenerateScaffoldUseCase
+    from app.documents.models import DocumentMeta
+
+    doc_id = "doc-test-scaffold-123"
+    pdf = tmp_path / "sample.pdf"
+    _make_pdf(pdf)
+
+    meta = DocumentMeta(
+        doc_id=doc_id,
+        original_name="sample.pdf",
+        stored_name="sample.pdf",
+        stored_path=str(pdf),
+        mime="application/pdf",
+        size_bytes=1024,
+        sha256="abc1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    )
+
+    source_repo = MagicMock()
+    source_repo.get.return_value = meta
+    source_repo.resolve_file.return_value = pdf
+
+    mock_harness = MagicMock()
+    mock_harness.model = "gemini-3.5-flash-lite"
+    mock_harness.primary_provider = "google_api"
+
+    engine_adapter = EngineScaffoldExtractAdapter(harness=mock_harness)
+
+    async def mock_extract(*args, **kwargs):
+        collector = current_collector()
+        assert collector is not None, "상위 워크플로우 수집기가 활성화되어 있어야 합니다"
+        engine_adapter._resolve_routing()
+        with collector.step("GeometryExtraction"):
+            pass
+        with collector.step("SlotClassification"):
+            pass
+        with collector.step("HtmlAssembly"):
+            pass
+        return (
+            ScaffoldExtractResult(
+                meta=ScaffoldMeta(
+                    id="scaffold-test",
+                    title="테스트 서식 틀",
+                    target_doc="sample.pdf",
+                    source_pdf_file_name="sample.pdf",
+                ),
+                html_content="<div>Scaffold</div>",
+                markdown_content="# Scaffold",
+                slots=[],
+            ),
+            {"status": "SUCCESS"},
+        )
+
+
+    engine_adapter.extract = mock_extract
+
+    archive_service = MagicMock()
+    archive_meta_mock = MagicMock()
+    archive_meta_mock.model_dump.return_value = {"scaffold_id": "scaffold-123"}
+
+    # archive_scaffold 호출 시 스팬 기록 시뮬레이션
+    def mock_archive(*args, **kwargs):
+        col = current_collector()
+        if col:
+            with col.step("ScaffoldArtifactCommit"):
+                pass
+        return archive_meta_mock
+
+    archive_service.archive_scaffold = mock_archive
+
+    captured_telemetries = []
+
+    class TestTelemetryAdapter(DocumentTelemetryAdapter):
+        def workflow_session(self, **kwargs):
+            from contextlib import contextmanager
+
+            @contextmanager
+            def _intercepted_session():
+                with super(TestTelemetryAdapter, self).workflow_session(**kwargs) as col:
+                    yield col
+                    captured_telemetries.append(col.export_telemetry())
+
+            return _intercepted_session()
+
+    test_telemetry = TestTelemetryAdapter()
+
+    use_case = GenerateScaffoldUseCase(
+        source=source_repo,
+        scaffolds=archive_service,
+        agent_runtime=None,
+        engine=engine_adapter,
+        telemetry=test_telemetry,
+    )
+
+
+    res = await use_case.execute(doc_id)
+    assert res["status"] == "completed"
+
+    assert len(captured_telemetries) == 1
+    telemetry = captured_telemetries[0]
+    span_names = [s.name for s in telemetry.spans]
+
+    assert "HarnessPolicyAndRouting" in span_names
+    assert "GeometryExtraction" in span_names
+    assert "SlotClassification" in span_names
+    assert "HtmlAssembly" in span_names
+    assert "ScaffoldArtifactCommit" in span_names
+    assert len(telemetry.spans) == 5
+

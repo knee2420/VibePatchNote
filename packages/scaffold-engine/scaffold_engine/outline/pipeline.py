@@ -30,6 +30,7 @@ from agent_telemetry import (
     SpanStatus,
     SpanType,
     StepCollector,
+    current_collector,
     model_source,
     source_of,
 )
@@ -115,12 +116,15 @@ class OutlinePipeline:
             target_effort,
         )
 
-        collector = StepCollector(
-            pipeline_name="OutlinePipeline",
-            domain="documents",
-            workflow_name="documents.extract_outline",
-            workflow_label="문서 목차 추출",
-            target_name=target_display_name,
+        collector = (
+            current_collector()
+            or StepCollector(
+                pipeline_name="OutlinePipeline",
+                domain="documents",
+                workflow_name="documents.extract_outline",
+                workflow_label="문서 목차 추출",
+                target_name=target_display_name,
+            )
         )
 
         # 1. 시스템 프롬프트 지침 로드

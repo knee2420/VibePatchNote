@@ -20,6 +20,7 @@ from agent_telemetry import (
     SpanPhase,
     SpanType,
     StepCollector,
+    current_collector,
     model_source,
     source_of,
 )
@@ -68,7 +69,8 @@ class ScaffoldPipeline:
         계측 결과는 `self.last_telemetry` 에 남는다. 호스트가 그것을 원장에
         넣을지는 호스트가 정한다 — 엔진은 저장 위치를 모른다.
         """
-        collector = StepCollector(
+        active_col = current_collector()
+        collector = active_col or StepCollector(
             pipeline_name="ScaffoldPipeline",
             domain="documents",
             workflow_name="documents.generate_scaffold",
@@ -76,6 +78,8 @@ class ScaffoldPipeline:
             target_name=display_name or Path(pdf_path).name,
         )
         try:
+            if active_col is not None:
+                return self._run_traced(collector, pdf_path, page_number, display_name)
             with collector.activate():
                 return self._run_traced(collector, pdf_path, page_number, display_name)
         finally:
@@ -83,6 +87,7 @@ class ScaffoldPipeline:
             self.last_telemetry = collector.export_telemetry(
                 provenance={"engine": "scaffold", "harness": self.harness.name}
             )
+
 
     def _run_traced(
         self,

@@ -166,6 +166,18 @@ class OutlineArchivePort(Protocol):
 class DocumentTelemetryPort(Protocol):
     """documents 파이프라인 관측 텔레메트리 영속화 계약."""
 
+    def workflow_session(
+        self,
+        *,
+        run_id: str,
+        doc_id: str,
+        target_name: str,
+        workflow_name: str = "documents.extract_outline",
+        workflow_label: str = "문서 목차 추출",
+    ) -> Any:
+        """워크플로우 수집기를 활성화하고 완료 시 자동으로 Inspector 원장에 영속화하는 컨텍스트 매니저를 반환한다."""
+        ...
+
     def record_outline_telemetry(
         self,
         telemetry: Any,
@@ -174,6 +186,7 @@ class DocumentTelemetryPort(Protocol):
         doc_id: str,
         target_name: str,
     ) -> None:
+
         """엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장(ledger, snapshots, meta)에 영속화한다."""
         ...
 

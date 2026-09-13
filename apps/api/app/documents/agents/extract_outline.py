@@ -7,6 +7,7 @@ LLM 이 개입하므로 Agent Runtime 을 통과하고, 결과는 **캐시가 �
 from __future__ import annotations
 
 import logging
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ from agent_telemetry import SpanUsage, usage_to_product_dict
 from scaffold_engine import OutlineDocument
 
 from app.core.llm import BaseLlmHarness, ExecutionRecorder
+from app.core.storage import RUN_PREFIX, new_id
 
 from ..adapters import (
     DocumentOutlineArchiveAdapter,
@@ -105,86 +107,98 @@ class ExtractOutlineUseCase:
 
     async def execute(self, doc_id: str, force_refresh: bool = False) -> dict[str, Any]:
         meta = self._require(doc_id)
-
-        if not force_refresh:
-            adopted = self._archive.load_adopted(meta)
-            if adopted is not None:
-                logger.info("[ExtractOutline] 채택본 재사용: %s", doc_id)
-                return adopted
-            logger.warning("[ExtractOutline] 내용 없는 채택본 재분석: %s", doc_id)
-
-        file_path = self._source.resolve_file(doc_id)
         run_id = current_run_id()
-        if run_id:
+        if not run_id and self._runtime:
+            agent_run, result = await self._runtime.execute(
+                self.name,
+                lambda: self._execute_internal(meta, force_refresh=force_refresh),
+                doc_id=doc_id,
+                run_input=AgentRunInput(
+                    use_case=self.name,
+                    doc_id=doc_id,
+                    payload={"docId": doc_id, "forceRefresh": force_refresh},
+                ),
+            )
+            return result
+        return await self._execute_internal(meta, force_refresh=force_refresh)
+
+    async def _execute_internal(
+        self, meta: DocumentMeta, *, force_refresh: bool = False
+    ) -> dict[str, Any]:
+        doc_id = meta.doc_id
+        run_id = current_run_id() or new_id(RUN_PREFIX)
+
+        # 관측 세션: StepCollector 활성화 및 작업 완료 시 Inspector 원장 자동 영속화
+        session_ctx = (
+            self._telemetry.workflow_session(
+                run_id=run_id,
+                doc_id=doc_id,
+                target_name=meta.original_name,
+                workflow_name=self.name,
+                workflow_label="문서 목차 추출",
+            )
+            if self._telemetry
+            else nullcontext()
+        )
+
+        with session_ctx:
+            adopted = self._archive.load_adopted(meta)
+            if not force_refresh:
+                if adopted is not None:
+                    logger.info("[ExtractOutline] 채택본 재사용: %s", doc_id)
+                    return adopted
+                logger.warning("[ExtractOutline] 내용 없는 채택본 재분석: %s", doc_id)
+            else:
+                logger.info("[ExtractOutline] 강제 재분석(force_refresh=True): %s", doc_id)
+
+
+            file_path = self._source.resolve_file(doc_id)
             document = await self._engine.extract(
                 file_path,
                 doc_id=doc_id,
                 display_name=meta.original_name,
             )
-        else:
-            agent_run, document = await self._runtime.execute(
-                self.name,
-                lambda: self._engine.extract(
-                    file_path,
-                    doc_id=doc_id,
-                    display_name=meta.original_name,
-                ),
+
+            pipeline_telemetry = (document.telemetry or {}).get("pipeline_telemetry")
+
+            # 1. 비용 원장 기록 (SpanUsage -> RunCost 변환: usage_to_product_dict 단일 진실)
+            cost = RunCost()
+            if pipeline_telemetry:
+                if isinstance(pipeline_telemetry, dict) and "total_usage" in pipeline_telemetry:
+                    cost = RunCost(**usage_to_product_dict(SpanUsage.model_validate(pipeline_telemetry["total_usage"])))
+                elif hasattr(pipeline_telemetry, "total_usage"):
+                    cost = RunCost(**usage_to_product_dict(pipeline_telemetry.total_usage))
+            if self._runtime:
+                self._runtime.record_cost(run_id, cost)
+
+            telemetry = document.telemetry or {}
+            status_val = telemetry.get("status", "SUCCESS")
+
+            provenance = None
+            if status_val == "SUCCESS":
+                default_m = self._harness.model if self._harness else ""
+                provenance = self._archive.archive(meta, document, run_id=run_id, cost=cost, default_model=default_m)
+            else:
+                self._settle_failure(run_id, doc_id, telemetry)
+
+            result = OutlineExecutionResult(
+                status="completed" if status_val == "SUCCESS" else "failed",
                 doc_id=doc_id,
-                run_input=AgentRunInput(
-                    use_case=self.name,
-                    doc_id=doc_id,
-                    payload={"docId": doc_id, "forceRefresh": True},
-                ),
+                document_title=meta.original_name,
+                total_pages=document.total_pages,
+                total_outlines=len(document.outlines),
+                total_elements=len(document.flat_elements),
+                outlines=document.outlines,
+                elements=document.flat_elements,
+                markdown_outline=document.markdown_outline,
+                manifest=telemetry,
+                artifact_id=provenance.artifact_id if provenance else None,
+                trace_id=run_id,
+                agent_run_id=run_id,
+                error=None if status_val == "SUCCESS" else analysis_error(telemetry),
             )
-            run_id = agent_run.run_id
+            return result.to_dict()
 
-        pipeline_telemetry = (document.telemetry or {}).get("pipeline_telemetry")
-
-        # 1. 비용 원장 기록 (SpanUsage -> RunCost 변환: usage_to_product_dict 단일 진실)
-        cost = RunCost()
-        if pipeline_telemetry:
-            if isinstance(pipeline_telemetry, dict) and "total_usage" in pipeline_telemetry:
-                cost = RunCost(**usage_to_product_dict(SpanUsage.model_validate(pipeline_telemetry["total_usage"])))
-            elif hasattr(pipeline_telemetry, "total_usage"):
-                cost = RunCost(**usage_to_product_dict(pipeline_telemetry.total_usage))
-        self._runtime.record_cost(run_id, cost)
-
-        # 2. 단계별 상세를 관측 원장(Inspector)에 남긴다 (실패해도 본 작업을 막지 않는다)
-        if self._telemetry and run_id:
-            self._telemetry.record_outline_telemetry(
-                pipeline_telemetry,
-                run_id=run_id,
-                doc_id=doc_id,
-                target_name=meta.original_name,
-            )
-
-        telemetry = document.telemetry or {}
-        status_val = telemetry.get("status", "SUCCESS")
-
-        provenance = None
-        if status_val == "SUCCESS":
-            default_m = self._harness.model if self._harness else ""
-            provenance = self._archive.archive(meta, document, run_id=run_id, cost=cost, default_model=default_m)
-        else:
-            self._settle_failure(run_id, doc_id, telemetry)
-
-        result = OutlineExecutionResult(
-            status="completed" if status_val == "SUCCESS" else "failed",
-            doc_id=doc_id,
-            document_title=meta.original_name,
-            total_pages=document.total_pages,
-            total_outlines=len(document.outlines),
-            total_elements=len(document.flat_elements),
-            outlines=document.outlines,
-            elements=document.flat_elements,
-            markdown_outline=document.markdown_outline,
-            manifest=telemetry,
-            artifact_id=provenance.artifact_id if provenance else None,
-            trace_id=run_id,
-            agent_run_id=run_id,
-            error=None if status_val == "SUCCESS" else analysis_error(telemetry),
-        )
-        return result.to_dict()
 
     # --- 내부 -----------------------------------------------------------
 

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+from agent_telemetry import SpanPhase, SpanType, current_scope, traceable
 from scaffold_engine.types import ScaffoldExtractResult
 from scaffold_engine.vision import (
     render_page_as_png,
@@ -38,6 +39,13 @@ class ScaffoldArchiveService:
     def __init__(self, repository: ScaffoldRepository) -> None:
         self.repository = repository
 
+    @traceable(
+        name="ScaffoldArtifactCommit",
+        span_type=SpanType.TOOL,
+        phase=SpanPhase.POST_LLM,
+        display_label="스캐폴드 아티팩트 및 비전 에셋 아카이빙",
+        description="스캐폴딩 결과와 시각 비전(원본, 슬롯 오버레이, 재구성본)을 아카이브로 오케스트레이션하여 영속화합니다.",
+    )
     def archive_scaffold(
         self,
         doc_id: str,
@@ -45,6 +53,7 @@ class ScaffoldArchiveService:
         result: ScaffoldExtractResult,
         page_number: int = 1,
     ) -> ScaffoldArchiveMeta:
+
         """스캐폴딩 결과와 시각 비전을 아카이브로 오케스트레이션하여 영속화.
 
         식별자는 파일명이 아니라 대리키다. 파일명을 넣으면 이름을 바꾼 순간
@@ -104,8 +113,17 @@ class ScaffoldArchiveService:
             render_png=render_png,
         )
 
+        meta = self._to_meta(record)
+        scope = current_scope()
+        if scope:
+            scope.set_label(
+                summary_pill=f"아카이브 {scaffold_id[:16]} 영속화 완료",
+                data_in=f"{pdf_path.name} (slots={len(result.slots)})",
+                data_out=f"scaffold_id: {scaffold_id}",
+            )
         logger.info("[ScaffoldArchiveService] Archived '%s' (%s)", title, scaffold_id)
-        return self._to_meta(record)
+        return meta
+
 
     def _to_meta(self, record: ScaffoldArchiveRecord) -> ScaffoldArchiveMeta:
         """코어 레코드에 조회 시점의 URL/경로를 입혀 응답 메타로 변환."""

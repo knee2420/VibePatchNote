@@ -21,6 +21,7 @@
 from __future__ import annotations
 
 import functools
+import inspect
 from contextvars import ContextVar
 from typing import Any, Callable, Optional, TypeVar
 
@@ -38,6 +39,16 @@ def current_collector() -> Optional[Any]:
     return _active_collector.get()
 
 
+def current_scope() -> Optional[Any]:
+    """지금 실행 중인 활성 단계의 `StepScope`. 없으면 None."""
+    collector = _active_collector.get()
+    if collector and getattr(collector, "_span_stack", None):
+        from agent_telemetry.collector.scope import StepScope
+
+        return StepScope(collector._span_stack[-1], collector)
+    return None
+
+
 def set_collector(collector: Optional[Any]) -> Any:
     """활성 수집기를 바꾸고 복원용 토큰을 돌려준다."""
     return _active_collector.set(collector)
@@ -47,6 +58,61 @@ def reset_collector(token: Any) -> None:
     _active_collector.reset(token)
 
 
+def _safe_serialize_val(v: Any) -> Any:
+    """스팬 I/O 에 안전하게 넣을 수 있는 직렬화 헬퍼."""
+    if v is None or isinstance(v, (int, float, bool)):
+        return v
+    if isinstance(v, str):
+        return v if len(v) <= 1000 else f"{v[:1000]}...[truncated]"
+    if isinstance(v, (list, tuple)):
+        if len(v) <= 20:
+            return [_safe_serialize_val(x) for x in v]
+        return f"[{len(v)} items]"
+    if isinstance(v, dict):
+        return {str(k): _safe_serialize_val(val) for k, val in list(v.items())[:20]}
+    if hasattr(v, "model_dump"):
+        try:
+            return _safe_serialize_val(v.model_dump(mode="json"))
+        except Exception:
+            pass
+    if hasattr(v, "to_dict"):
+        try:
+            return _safe_serialize_val(v.to_dict())
+        except Exception:
+            pass
+    return str(v)
+
+
+def _record_func_io(scope: Any, func: Callable[..., Any], args: tuple[Any, ...], kwargs: dict[str, Any], result: Any = None) -> None:
+    """함수의 입출력을 스팬에 안전하게 기록한다."""
+    try:
+        sig = inspect.signature(func)
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+        inputs_dict = {}
+        for k, v in bound.arguments.items():
+            if k in ("self", "cls"):
+                continue
+            inputs_dict[k] = _safe_serialize_val(v)
+        if inputs_dict:
+            scope.set_inputs(inputs_dict)
+    except Exception:
+        pass
+
+    if result is not None:
+        try:
+            if isinstance(result, dict):
+                scope.set_outputs(_safe_serialize_val(result))
+            elif hasattr(result, "model_dump"):
+                scope.set_outputs(_safe_serialize_val(result.model_dump(mode="json")))
+            elif hasattr(result, "to_dict"):
+                scope.set_outputs(_safe_serialize_val(result.to_dict()))
+            else:
+                scope.set_outputs({"result": _safe_serialize_val(result)})
+        except Exception:
+            pass
+
+
 def traceable(
     name: Optional[str] = None,
     *,
@@ -54,15 +120,48 @@ def traceable(
     phase: Optional[SpanPhase] = None,
     display_label: Optional[str] = None,
     description: Optional[str] = None,
+    summary_pill: Optional[str] = None,
+    data_in: Optional[str] = None,
+    data_out: Optional[str] = None,
+    record_io: bool = True,
 ) -> Callable[[F], F]:
     """함수 실행을 스팬으로 기록한다.
 
     스팬 이름은 `name` 또는 함수의 `__qualname__` 이다. 코드 지점(`sources`)은
     **자동으로** 잡는다 — 손으로 적으면 이름을 바꿨을 때 따라오지 않는다.
+    동기 함수와 비동기(async def) 코루틴 함수를 모두 투명하게 지원합니다.
     """
 
     def decorate(func: F) -> F:
         span_name = name or func.__qualname__
+
+        if inspect.iscoroutinefunction(func):
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                collector = _active_collector.get()
+                if collector is None:
+                    return await func(*args, **kwargs)
+
+                source = source_of(func)
+                with collector.step(
+                    span_name,
+                    span_type=span_type,
+                    phase=phase,
+                    display_label=display_label,
+                    description=description,
+                    summary_pill=summary_pill,
+                    data_in=data_in,
+                    data_out=data_out,
+                    sources=[source] if source else None,
+                ) as scope:
+                    if record_io:
+                        _record_func_io(scope, func, args, kwargs)
+                    result = await func(*args, **kwargs)
+                    if record_io:
+                        _record_func_io(scope, func, args, kwargs, result=result)
+                    return result
+
+            return async_wrapper  # type: ignore[return-value]
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -78,13 +177,20 @@ def traceable(
                 phase=phase,
                 display_label=display_label,
                 description=description,
+                summary_pill=summary_pill,
+                data_in=data_in,
+                data_out=data_out,
                 sources=[source] if source else None,
-            ):
-                # 이 데코레이터는 "이 함수가 돌았고, 얼마 걸렸고, 어디인가"만 기록한다.
-                # 입출력까지 남기려면 명시적인 `with collector.step(...)` 을 쓴다 —
-                # 스코프를 함수 객체에 붙여 두면 동시 실행에서 서로 덮어쓴다.
-                return func(*args, **kwargs)
+            ) as scope:
+                if record_io:
+                    _record_func_io(scope, func, args, kwargs)
+                result = func(*args, **kwargs)
+                if record_io:
+                    _record_func_io(scope, func, args, kwargs, result=result)
+                return result
 
         return wrapper  # type: ignore[return-value]
 
     return decorate
+
+

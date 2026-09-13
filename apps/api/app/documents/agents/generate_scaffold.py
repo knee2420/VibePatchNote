@@ -6,11 +6,15 @@
 from __future__ import annotations
 
 import logging
+from contextlib import nullcontext
 from typing import Any
 
 from agent_runtime import AgentRunInput, current_run_id
 from scaffold_engine import ScaffoldExtractResult
 
+from app.core.storage import RUN_PREFIX, new_id
+
+from ..models import DocumentMeta
 from ..ports import (
     AgentRuntimePort,
     DocumentSourceRepository,
@@ -31,11 +35,12 @@ class GenerateScaffoldUseCase:
         self,
         source: DocumentSourceRepository,
         scaffolds: ScaffoldArchivePort,
-        agent_runtime: AgentRuntimePort,
-        engine: ScaffoldExtractPort,
-        telemetry: DocumentTelemetryPort,
+        agent_runtime: AgentRuntimePort | None = None,
+        engine: ScaffoldExtractPort | None = None,
+        telemetry: DocumentTelemetryPort | None = None,
         llm_harness: Any = None,
     ) -> None:
+
         self._source = source
         self._scaffolds = scaffolds
         self._runtime = agent_runtime
@@ -50,58 +55,70 @@ class GenerateScaffoldUseCase:
         return await self._engine.extract(file_path, display_name=display_name)
 
     async def execute(self, doc_id: str) -> dict[str, Any]:
-        meta = self._source.get(doc_id)
-        if meta is None:
-            raise FileNotFoundError(f"Document not found: {doc_id}")
-
-        file_path = self._source.resolve_file(doc_id)
+        meta = self._require(doc_id)
         run_id = current_run_id()
-        if run_id:
-            result, telemetry = await self._run_pipeline(
-                file_path, display_name=meta.original_name
-            )
-        else:
-            agent_run, (result, telemetry) = await self._runtime.execute(
+        if not run_id and self._runtime:
+            agent_run, result = await self._runtime.execute(
                 self.name,
-                lambda: self._run_pipeline(file_path, display_name=meta.original_name),
+                lambda: self._execute_internal(meta),
                 doc_id=doc_id,
                 run_input=AgentRunInput(
                     use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
                 ),
             )
-            run_id = agent_run.run_id
+            return result
+        return await self._execute_internal(meta)
 
-        # 단계별 상세를 원장에 남긴다. 실패해도 본 작업을 막지 않는다 —
-        # 상세의 부재는 오류가 아니라 정상 상태다
-        # (`.agents/rules/60-data/observability.md` §2-3).
-        if telemetry is not None and run_id:
-            self._telemetry.record_scaffold_telemetry(
-                telemetry,
+    async def _execute_internal(self, meta: DocumentMeta) -> dict[str, Any]:
+        doc_id = meta.doc_id
+        run_id = current_run_id() or new_id(RUN_PREFIX)
+
+        # 관측 세션: StepCollector 활성화 및 작업 완료 시 Inspector 원장 자동 영속화
+        session_ctx = (
+            self._telemetry.workflow_session(
                 run_id=run_id,
                 doc_id=doc_id,
                 target_name=meta.original_name,
+                workflow_name=self.name,
+                workflow_label="와이어프레임 생성",
             )
-
-        logger.info(
-            "[GenerateScaffold] 완료: %s (slots=%d, html=%d자)",
-            doc_id, len(result.slots), len(result.html_content),
+            if self._telemetry
+            else nullcontext()
         )
 
-        # 아카이브 실패가 생성 결과 전체를 버리게 하지는 않는다. 본문은 응답에 실려 있다.
-        archive_meta = None
-        try:
-            archive_meta = self._scaffolds.archive_scaffold(doc_id, file_path, result)
-        except Exception as exc:
-            logger.warning("[GenerateScaffold] 아카이브 실패(치명적 아님): %s", exc, exc_info=True)
+        with session_ctx:
+            file_path = self._source.resolve_file(doc_id)
+            result, _ = await self._run_pipeline(
+                file_path, display_name=meta.original_name
+            )
 
-        return {
-            "status": "completed",
-            "docId": doc_id,
-            "meta": result.meta.model_dump(by_alias=True),
-            "htmlContent": result.html_content,
-            "markdownContent": result.markdown_content,
-            "slots": [slot.model_dump(by_alias=True) for slot in result.slots],
-            "archive": archive_meta.model_dump(by_alias=True) if archive_meta else None,
-            "agentRunId": run_id,
-        }
+            logger.info(
+                "[GenerateScaffold] 완료: %s (slots=%d, html=%d자)",
+                doc_id, len(result.slots), len(result.html_content),
+            )
+
+            # 아카이브 실패가 생성 결과 전체를 버리게 하지는 않는다. 본문은 응답에 실려 있다.
+            archive_meta = None
+            try:
+                archive_meta = self._scaffolds.archive_scaffold(doc_id, file_path, result)
+            except Exception as exc:
+                logger.warning("[GenerateScaffold] 아카이브 실패(치명적 아님): %s", exc, exc_info=True)
+
+            return {
+                "status": "completed",
+                "docId": doc_id,
+                "meta": result.meta.model_dump(by_alias=True),
+                "htmlContent": result.html_content,
+                "markdownContent": result.markdown_content,
+                "slots": [slot.model_dump(by_alias=True) for slot in result.slots],
+                "archive": archive_meta.model_dump(by_alias=True) if archive_meta else None,
+                "agentRunId": run_id,
+            }
+
+    def _require(self, doc_id: str) -> DocumentMeta:
+        meta = self._source.get(doc_id)
+        if meta is None:
+            raise FileNotFoundError(f"Document not found: {doc_id}")
+        return meta
+
 
