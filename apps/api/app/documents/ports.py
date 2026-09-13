@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable, Protocol
 
 from agent_runtime import RunCost
-from scaffold_engine import OutlineDocument
+from scaffold_engine import OutlineDocument, ScaffoldExtractResult
 
 from .models import ArtifactKind, ArtifactProvenance, DocumentMeta
 
@@ -136,6 +136,17 @@ class OutlineExtractPort(Protocol):
     ) -> OutlineDocument: ...
 
 
+class ScaffoldExtractPort(Protocol):
+    """문서 스캐폴딩(HTML, Markdown, Slots) 추출 엔진 실행 계약."""
+
+    async def extract(
+        self,
+        file_path: Path,
+        *,
+        display_name: str | None = None,
+    ) -> tuple[ScaffoldExtractResult, Any]: ...
+
+
 class OutlineArchivePort(Protocol):
     """아웃라인 아티팩트 보관 및 채택본 조회 계약."""
 
@@ -165,3 +176,15 @@ class DocumentTelemetryPort(Protocol):
     ) -> None:
         """엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장(ledger, snapshots, meta)에 영속화한다."""
         ...
+
+    def record_scaffold_telemetry(
+        self,
+        telemetry: Any,
+        *,
+        run_id: str,
+        doc_id: str,
+        target_name: str,
+    ) -> None:
+        """스캐폴드 엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장에 영속화한다."""
+        ...
+

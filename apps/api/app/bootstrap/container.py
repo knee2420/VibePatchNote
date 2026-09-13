@@ -35,6 +35,7 @@ from app.documents.adapters import (
     DocumentOutlineArchiveAdapter,
     DocumentTelemetryAdapter,
     EngineOutlineExtractAdapter,
+    EngineScaffoldExtractAdapter,
     EngineSegmentScanAdapter,
     LocalDocumentArtifactRepository,
     LocalDocumentCacheRepository,
@@ -198,6 +199,10 @@ class Container(containers.DeclarativeContainer):
         harness=llm_harness,
         cache=document_cache_repository,
     )
+    scaffold_extractor = providers.Factory(
+        EngineScaffoldExtractAdapter,
+        harness=llm_harness,
+    )
     outline_archive = providers.Factory(
         DocumentOutlineArchiveAdapter,
         artifacts=document_artifact_repository,
@@ -248,6 +253,8 @@ class Container(containers.DeclarativeContainer):
         source=document_source_repository,
         scaffolds=scaffold_archive_service,
         agent_runtime=agent_runtime,
+        engine=scaffold_extractor,
+        telemetry=document_telemetry,
         llm_harness=llm_harness,
     )
 

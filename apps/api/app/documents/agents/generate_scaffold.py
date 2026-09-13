@@ -5,16 +5,19 @@
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
 from agent_runtime import AgentRunInput, current_run_id
-from scaffold_engine import ScaffoldExtractResult, ScaffoldPipeline
+from scaffold_engine import ScaffoldExtractResult
 
-from app.core.llm import BaseLlmHarness, ingest_pipeline_telemetry
-
-from ..ports import AgentRuntimePort, DocumentSourceRepository, ScaffoldArchivePort
+from ..ports import (
+    AgentRuntimePort,
+    DocumentSourceRepository,
+    DocumentTelemetryPort,
+    ScaffoldArchivePort,
+    ScaffoldExtractPort,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,24 +32,22 @@ class GenerateScaffoldUseCase:
         source: DocumentSourceRepository,
         scaffolds: ScaffoldArchivePort,
         agent_runtime: AgentRuntimePort,
-        llm_harness: BaseLlmHarness,
+        engine: ScaffoldExtractPort,
+        telemetry: DocumentTelemetryPort,
+        llm_harness: Any = None,
     ) -> None:
         self._source = source
         self._scaffolds = scaffolds
         self._runtime = agent_runtime
-        self._harness = llm_harness
+        self._engine = engine
+        self._telemetry = telemetry
+        self._harness = llm_harness or getattr(engine, "_harness", None)
 
     async def _run_pipeline(
         self, file_path: Any, display_name: str | None = None
     ) -> tuple[ScaffoldExtractResult, Any]:
-        """독립 문서 엔진(scaffold_engine)의 ScaffoldPipeline을 스레드 풀에서 직접 실행합니다.
-
-        엔진은 계측 결과를 `last_telemetry` 에 남길 뿐 어디에 저장할지는 모른다
-        (`60-data/rule.md` §4-5). 원장에 넣는 것은 호스트인 이 유스케이스의 일이다.
-        """
-        pipeline = ScaffoldPipeline(harness=self._harness)
-        result = await asyncio.to_thread(pipeline.run, file_path, display_name=display_name)
-        return result, pipeline.last_telemetry
+        """스캐폴드 추출 엔진 포트(ScaffoldExtractPort)에 위임하여 실행합니다."""
+        return await self._engine.extract(file_path, display_name=display_name)
 
     async def execute(self, doc_id: str) -> dict[str, Any]:
         meta = self._source.get(doc_id)
@@ -74,15 +75,13 @@ class GenerateScaffoldUseCase:
         # 상세의 부재는 오류가 아니라 정상 상태다
         # (`.agents/rules/60-data/observability.md` §2-3).
         if telemetry is not None and run_id:
-            try:
-                ingest_pipeline_telemetry(
-                    telemetry,
-                    run_id=run_id,
-                    doc_id=doc_id,
-                    target_name=meta.original_name,
-                )
-            except Exception as exc:
-                logger.warning("[GenerateScaffold] 계측 저장 실패(치명적 아님): %s", exc)
+            self._telemetry.record_scaffold_telemetry(
+                telemetry,
+                run_id=run_id,
+                doc_id=doc_id,
+                target_name=meta.original_name,
+            )
+
         logger.info(
             "[GenerateScaffold] 완료: %s (slots=%d, html=%d자)",
             doc_id, len(result.slots), len(result.html_content),
@@ -105,3 +104,4 @@ class GenerateScaffoldUseCase:
             "archive": archive_meta.model_dump(by_alias=True) if archive_meta else None,
             "agentRunId": run_id,
         }
+

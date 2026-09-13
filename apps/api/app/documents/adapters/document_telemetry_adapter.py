@@ -38,3 +38,19 @@ class DocumentTelemetryAdapter:
         except Exception as exc:
             # 관측 영속화 실패는 비즈니스 본 작업을 중단시키지 않는다 (.agents/rules/60-data/observability.md §2-3).
             logger.warning("[DocumentTelemetry] 계측 저장 실패(치명적 아님): %s", exc)
+
+    def record_scaffold_telemetry(
+        self,
+        telemetry: Any,
+        *,
+        run_id: str,
+        doc_id: str,
+        target_name: str,
+    ) -> None:
+        """스캐폴드 엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장에 영속화합니다."""
+        self.record_outline_telemetry(
+            telemetry,
+            run_id=run_id,
+            doc_id=doc_id,
+            target_name=target_name,
+        )
