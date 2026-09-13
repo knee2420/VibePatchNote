@@ -4,10 +4,6 @@
 다시 흐려진다.
 """
 
-from .document_outline_archive_adapter import DocumentOutlineArchiveAdapter
-from .document_telemetry_adapter import DocumentTelemetryAdapter
-from .engine_outline_extract_adapter import EngineOutlineExtractAdapter
-from .engine_scaffold_extract_adapter import EngineScaffoldExtractAdapter
 from .local_document_artifact_repository import LocalDocumentArtifactRepository
 from .local_document_cache_repository import LocalDocumentCacheRepository
 from .local_document_source_repository import LocalDocumentSourceRepository
@@ -18,9 +14,4 @@ __all__ = [
     "LocalDocumentArtifactRepository",
     "LocalDocumentCacheRepository",
     "EngineSegmentScanAdapter",
-    "DocumentTelemetryAdapter",
-    "EngineOutlineExtractAdapter",
-    "EngineScaffoldExtractAdapter",
-    "DocumentOutlineArchiveAdapter",
 ]
-

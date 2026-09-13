@@ -1,24 +1,26 @@
-"""documents 유스케이스가 외부 세계에 요구하는 계약.
+"""documents 도메인이 외부 세계에 요구하는 순수 계약 (Ports).
 
-여기에는 로컬 디렉터리, JSON 파일, SQLAlchemy 같은 구현 세부 사항을 두지 않는다.
+여기에는 로컬 디렉터리, JSON 파일, 특정 엔진 등의 구현 세부 사항을 두지 않는다.
 
-저장소가 세 갈래인 것은 **수명주기가 셋이기 때문**이다.
-
-- `DocumentSourceRepository`  원본. 지우면 복구 불가        → data/
-- `DocumentArtifactRepository` LLM 산출물. 재현되지 않음     → data/
-- `DocumentCacheRepository`   결정적 파생. 언제든 재계산 가능 → cache/
-
-이 셋을 한 포트로 합치면 "지워도 되는가"가 다시 흐려진다.
+저장소가 세 갈래인 것은 수명주기가 셋이기 때문이다:
+- DocumentSourceRepository  원본. 지우면 복구 불가        -> data/
+- DocumentArtifactRepository LLM 산출물. 재현되지 않음     -> data/
+- DocumentCacheRepository   결정적 파생. 언제든 재계산 가능 -> cache/
 """
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Protocol
-
-from agent_runtime import RunCost
-from scaffold_engine import OutlineDocument, ScaffoldExtractResult
+from typing import Any, Protocol
 
 from .models import ArtifactKind, ArtifactProvenance, DocumentMeta
+
+__all__ = [
+    "DocumentArtifactRepository",
+    "DocumentCacheRepository",
+    "DocumentSourceRepository",
+    "SegmentScanPort",
+    "WireframeArchivePort",
+]
 
 
 class DocumentSourceRepository(Protocol):
@@ -38,11 +40,7 @@ class DocumentSourceRepository(Protocol):
 
 
 class DocumentArtifactRepository(Protocol):
-    """LLM 산출물의 커밋과 조회 계약.
-
-    커밋된 산출물은 바뀌지 않는다. 다시 분석하면 새 `artifact_id` 가 생기고
-    HEAD 포인터만 옮겨 간다. 그래야 이전 결과와 비교할 수 있다.
-    """
+    """문서 산출물의 커밋과 조회 계약."""
 
     def commit(
         self,
@@ -87,117 +85,11 @@ class SegmentScanPort(Protocol):
     async def scan(self, prompt: str) -> dict[str, Any] | None: ...
 
 
-class ScaffoldArchivePort(Protocol):
-    """documents 가 scaffold 산출물을 보관하기 위해 요구하는 계약.
-
-    스캐폴드는 문서에 종속된 하위 구조가 아니라 자기 식별자와 수명주기를 가진
-    별개의 애그리거트다. documents 는 `doc_id` 만 넘기고 그 안을 알지 못한다.
-    """
-
-    def archive_scaffold(self, doc_id: str, source_path: Path, result: Any) -> Any: ...
+class WireframeArchivePort(Protocol):
+    """문서 삭제 시 파생된 서식 틀(와이어프레임) 아카이브를 연쇄 정리하기 위한 계약."""
 
     def delete_for_document(self, doc_id: str) -> int: ...
 
 
-class AgentRuntimePort(Protocol):
-    """documents 유스케이스가 Agent 실행과 상태 추적에 요구하는 런타임 계약."""
-
-    async def execute(
-        self,
-        agent_name: str,
-        operation: Callable[[], Awaitable[Any]],
-        *,
-        trace_id: str | None = None,
-        doc_id: str | None = None,
-        run_input: Any = None,
-    ) -> tuple[Any, Any]: ...
-
-    def record_cost(self, run_id: str, cost: RunCost) -> None: ...
-
-    def mark_waiting(
-        self, run_id: str, *, failure_code: str, doc_id: str, reason: str
-    ) -> None: ...
-
-    def mark_failed(
-        self, run_id: str, *, error_code: str, detail: str
-    ) -> None: ...
-
-
-class OutlineExtractPort(Protocol):
-    """문서 목차/요소 추출 엔진 실행 계약."""
-
-    async def extract(
-        self,
-        file_path: Path,
-        *,
-        doc_id: str | None = None,
-        context_dir: Path | None = None,
-        display_name: str | None = None,
-    ) -> OutlineDocument: ...
-
-
-class ScaffoldExtractPort(Protocol):
-    """문서 스캐폴딩(HTML, Markdown, Slots) 추출 엔진 실행 계약."""
-
-    async def extract(
-        self,
-        file_path: Path,
-        *,
-        display_name: str | None = None,
-    ) -> tuple[ScaffoldExtractResult, Any]: ...
-
-
-class OutlineArchivePort(Protocol):
-    """아웃라인 아티팩트 보관 및 채택본 조회 계약."""
-
-    def load_adopted(self, meta: DocumentMeta) -> dict[str, Any] | None: ...
-
-    def archive(
-        self,
-        meta: DocumentMeta,
-        document: Any,
-        *,
-        run_id: str,
-        cost: RunCost,
-        default_model: str = "",
-    ) -> ArtifactProvenance: ...
-
-
-class DocumentTelemetryPort(Protocol):
-    """documents 파이프라인 관측 텔레메트리 영속화 계약."""
-
-    def workflow_session(
-        self,
-        *,
-        run_id: str,
-        doc_id: str,
-        target_name: str,
-        workflow_name: str = "documents.extract_outline",
-        workflow_label: str = "문서 목차 추출",
-    ) -> Any:
-        """워크플로우 수집기를 활성화하고 완료 시 자동으로 Inspector 원장에 영속화하는 컨텍스트 매니저를 반환한다."""
-        ...
-
-    def record_outline_telemetry(
-        self,
-        telemetry: Any,
-        *,
-        run_id: str,
-        doc_id: str,
-        target_name: str,
-    ) -> None:
-
-        """엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장(ledger, snapshots, meta)에 영속화한다."""
-        ...
-
-    def record_scaffold_telemetry(
-        self,
-        telemetry: Any,
-        *,
-        run_id: str,
-        doc_id: str,
-        target_name: str,
-    ) -> None:
-        """스캐폴드 엔진이 방출한 PipelineTelemetry 객체를 Inspector 원장에 영속화한다."""
-        ...
-
+# 하위 호환 alias
+ScaffoldArchivePort = WireframeArchivePort

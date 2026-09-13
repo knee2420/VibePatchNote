@@ -35,7 +35,7 @@ class FailedOutlineService:
     def resolve_doc_id(self, doc_id: str | None, filename: str | None) -> str:
         return doc_id or "doc-test"
 
-    async def extract_document_outline(
+    async def extract_outline(
         self, _doc_id: str, force_refresh: bool = False
     ) -> dict[str, object]:
         return {
@@ -136,10 +136,10 @@ def test_documents_upload_route_resolves_injected_service() -> None:
 
 
 def test_outline_failure_is_not_reported_as_http_success() -> None:
-    with main.container.document_service.override(providers.Object(FailedOutlineService())):
+    with main.container.outline_service.override(providers.Object(FailedOutlineService())):
         with TestClient(main.app) as client:
             response = client.post(
-                "/api/v1/documents/outline", json={"docId": "doc-test"}
+                "/api/v1/outlines/extract", json={"docId": "doc-test"}
             )
 
     assert response.status_code == 424
@@ -150,18 +150,18 @@ def test_outline_failure_is_not_reported_as_http_success() -> None:
 def test_outline_request_without_any_identifier_is_rejected() -> None:
     """어느 문서를 말하는지 서버가 추측하지 않는다."""
     with TestClient(main.app) as client:
-        response = client.post("/api/v1/documents/outline", json={})
+        response = client.post("/api/v1/outlines/extract", json={})
 
     assert response.status_code == 422
 
 
 def test_scaffolds_route_resolves_injected_service() -> None:
-    """scaffolds 라우터도 전역 서비스 없이 컨테이너를 통해 호출한다."""
+    """wireframes 라우터도 전역 서비스 없이 컨테이너를 통해 호출한다."""
     fake_service = FakeScaffoldArchiveService()
 
     with main.container.scaffold_archive_service.override(providers.Object(fake_service)):
         with TestClient(main.app) as client:
-            response = client.get("/api/v1/scaffolds/missing")
+            response = client.get("/api/v1/wireframes/missing")
 
     assert response.status_code == 404
 

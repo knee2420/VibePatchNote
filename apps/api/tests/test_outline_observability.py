@@ -6,13 +6,14 @@ import pytest
 from agent_telemetry import current_collector
 from scaffold_engine import OutlineDocument
 
-from app.documents.adapters import (
+from app.documents.models import DocumentMeta
+from app.outline.adapters import (
     DocumentOutlineArchiveAdapter,
-    DocumentTelemetryAdapter,
     EngineOutlineExtractAdapter,
+    OutlineTelemetryAdapter,
 )
-from app.documents.agents import ExtractOutlineUseCase
-from app.documents.models import ArtifactProvenance, DocumentMeta
+from app.outline.agents import ExtractOutlineUseCase
+from app.outline.models import ArtifactProvenance
 
 
 @pytest.mark.anyio
@@ -86,7 +87,7 @@ async def test_extract_outline_collects_full_lifecycle_spans(tmp_path: Path):
 
     captured_telemetries = []
 
-    class TestTelemetryAdapter(DocumentTelemetryAdapter):
+    class TestTelemetryAdapter(OutlineTelemetryAdapter):
         def workflow_session(self, **kwargs):
             from contextlib import contextmanager
 
@@ -166,7 +167,7 @@ async def test_extract_outline_cache_hit_emits_single_inspection_span(tmp_path: 
 
     captured_telemetries = []
 
-    class TestTelemetryAdapter(DocumentTelemetryAdapter):
+    class TestTelemetryAdapter(OutlineTelemetryAdapter):
         def workflow_session(self, **kwargs):
             from contextlib import contextmanager
 

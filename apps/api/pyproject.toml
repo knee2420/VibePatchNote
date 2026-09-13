@@ -16,17 +16,18 @@ include_external_packages = true
 name = "Core must not import domains"
 type = "forbidden"
 source_modules = ["app.core"]
-forbidden_modules = ["app.documents", "app.scaffolds", "app.workspaces", "app.llm_settings", "app.runtime"]
+forbidden_modules = ["app.documents", "app.outline", "app.wireframe", "app.workspaces", "app.llm_settings", "app.runtime"]
 
 # Agent Core(Runtime + LLM Driver)는 실행 생애주기와 다중 모델 커널을 담당한다.
-# 비즈니스 도메인(documents, scaffolds, workspaces)이나 문서 서식 엔진(scaffold_engine)을 알지 않는다.
+# 비즈니스 도메인(documents, outline, wireframe, workspaces)이나 문서 서식 엔진(scaffold_engine)을 알지 않는다.
 [[tool.importlinter.contracts]]
 name = "Agent Core is domain agnostic"
 type = "forbidden"
 source_modules = ["agent_runtime", "llm_driver"]
 forbidden_modules = [
     "app.documents",
-    "app.scaffolds",
+    "app.outline",
+    "app.wireframe",
     "app.workspaces",
     "app.llm_settings",
     "app.runtime",
@@ -44,7 +45,8 @@ forbidden_modules = [
     "agent_runtime",
     "llm_driver",
     "app.documents",
-    "app.scaffolds",
+    "app.outline",
+    "app.wireframe",
     "app.workspaces",
     "app.llm_settings",
     "app.runtime",
@@ -62,10 +64,12 @@ type = "forbidden"
 allow_indirect_imports = true
 source_modules = [
     "app.documents.use_cases",
-    "app.documents.agents",
     "app.documents.experimental",
     "app.documents.service",
-    "app.scaffolds.service",
+    "app.outline.service",
+    "app.outline.agents",
+    "app.wireframe.service",
+    "app.wireframe.agents",
     "app.workspaces.service",
 ]
 forbidden_modules = ["app.core.config"]
@@ -76,20 +80,33 @@ type = "forbidden"
 source_modules = [
     "app.documents.service",
     "app.documents.use_cases",
-    "app.documents.agents",
     "app.documents.experimental",
     "app.documents.adapters",
 ]
-forbidden_modules = ["app.workspaces", "app.scaffolds"]
+forbidden_modules = ["app.workspaces", "app.wireframe", "app.outline"]
 
 [[tool.importlinter.contracts]]
-name = "Scaffolds must not depend on other domains"
+name = "Outline must not depend on other domains"
 type = "forbidden"
-source_modules = ["app.scaffolds.service", "app.scaffolds.adapters"]
-forbidden_modules = ["app.documents", "app.workspaces"]
+source_modules = [
+    "app.outline.service",
+    "app.outline.adapters",
+    "app.outline.agents",
+]
+forbidden_modules = ["app.documents", "app.wireframe", "app.workspaces"]
+
+[[tool.importlinter.contracts]]
+name = "Wireframe must not depend on other domains"
+type = "forbidden"
+source_modules = [
+    "app.wireframe.service",
+    "app.wireframe.adapters",
+    "app.wireframe.agents",
+]
+forbidden_modules = ["app.documents", "app.outline", "app.workspaces"]
 
 [[tool.importlinter.contracts]]
 name = "Workspaces must not depend on document domains"
 type = "forbidden"
 source_modules = ["app.workspaces.service", "app.workspaces.adapters"]
-forbidden_modules = ["app.documents", "app.scaffolds"]
+forbidden_modules = ["app.documents", "app.outline", "app.wireframe"]

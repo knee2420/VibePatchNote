@@ -192,6 +192,27 @@ class AgentRuntime:
             ),
         )
 
+    def settle_failure(
+        self,
+        run_id: str,
+        *,
+        error_code: str,
+        doc_id: str | None = None,
+        detail: str = "",
+        reason: str = "",
+        attempt: int = 1,
+    ) -> AgentRun | None:
+        """정책(RetryPolicy)에 따라 대기 또는 실패로 확정한다."""
+        decision = self._policy.decide(error_code, attempt=attempt)
+        if decision == "wait_for_configuration":
+            return self.mark_waiting(
+                run_id,
+                failure_code=error_code,
+                doc_id=doc_id,
+                reason=reason or "AI 공급자를 사용할 수 없어 사용자의 설정이 필요합니다.",
+            )
+        return self.mark_failed(run_id, error_code=error_code, detail=detail)
+
     def record_cost(self, run_id: str, cost: RunCost) -> None:
         """실행이 쓴 자원을 이력에 누적한다. 원장 기록은 호출부가 따로 한다."""
         self._runs.append(run_id, AgentRunEvent(type="cost_recorded", cost=cost))

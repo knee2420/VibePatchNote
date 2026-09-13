@@ -2,7 +2,7 @@ import { httpClient } from '@/shared/api';
 
 import type { ScaffoldArchiveMeta, ScaffoldSlot } from '../model/types';
 
-const BASE_PATH = '/api/v1/scaffolds';
+const BASE_PATH = '/api/v1/wireframes';
 
 /** `GET /api/v1/scaffolds/{id}` 응답. 서식 본문의 단일 진실 공급원(SSOT)입니다. */
 export interface ScaffoldArchiveDetail extends ScaffoldArchiveMeta {

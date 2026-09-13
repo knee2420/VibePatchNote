@@ -81,7 +81,7 @@ def test_packages_do_not_import_app_modules() -> None:
 
 def test_only_bootstrap_may_import_domain_implementations() -> None:
     app_dir = Path(__file__).resolve().parents[1] / "app"
-    domains = {"documents", "scaffolds", "workspaces"}
+    domains = {"documents", "outline", "wireframe", "workspaces"}
     violations: list[str] = []
 
     for source_file in app_dir.rglob("*.py"):

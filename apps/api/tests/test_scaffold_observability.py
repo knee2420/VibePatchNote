@@ -139,14 +139,16 @@ async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
     from unittest.mock import MagicMock
 
     from agent_telemetry import current_collector
-    from scaffold_engine import ScaffoldExtractResult, ScaffoldMeta
+    from scaffold_engine import ScaffoldMeta
 
-    from app.documents.adapters import (
-        DocumentTelemetryAdapter,
-        EngineScaffoldExtractAdapter,
-    )
-    from app.documents.agents.generate_scaffold import GenerateScaffoldUseCase
     from app.documents.models import DocumentMeta
+    from app.wireframe.adapters import (
+        EngineWireframeExtractAdapter as EngineScaffoldExtractAdapter,
+    )
+    from app.wireframe.adapters import (
+        WireframeTelemetryAdapter,
+    )
+    from app.wireframe.agents import GenerateWireframeUseCase as GenerateScaffoldUseCase
 
     doc_id = "doc-test-scaffold-123"
     pdf = tmp_path / "sample.pdf"
@@ -182,19 +184,19 @@ async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
             pass
         with collector.step("HtmlAssembly"):
             pass
-        return (
-            ScaffoldExtractResult(
-                meta=ScaffoldMeta(
-                    id="scaffold-test",
-                    title="테스트 서식 틀",
-                    target_doc="sample.pdf",
-                    source_pdf_file_name="sample.pdf",
-                ),
-                html_content="<div>Scaffold</div>",
-                markdown_content="# Scaffold",
-                slots=[],
+        from app.wireframe.ports import WireframeExtractOutput
+
+        return WireframeExtractOutput(
+            meta=ScaffoldMeta(
+                id="scaffold-test",
+                title="테스트 서식 틀",
+                target_doc="sample.pdf",
+                source_pdf_file_name="sample.pdf",
             ),
-            {"status": "SUCCESS"},
+            html_content="<div>Scaffold</div>",
+            markdown_content="# Scaffold",
+            slots=[],
+            telemetry={"status": "SUCCESS"},
         )
 
 
@@ -216,7 +218,7 @@ async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
 
     captured_telemetries = []
 
-    class TestTelemetryAdapter(DocumentTelemetryAdapter):
+    class TestTelemetryAdapter(WireframeTelemetryAdapter):
         def workflow_session(self, **kwargs):
             from contextlib import contextmanager
 

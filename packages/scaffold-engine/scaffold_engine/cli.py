@@ -8,7 +8,7 @@ import logging
 import sys
 from pathlib import Path
 
-from scaffold_engine.core.pipeline import ScaffoldPipeline
+from scaffold_engine.wireframe import ScaffoldPipeline
 
 DEFAULT_MODEL = "gemini-3.8-flash-low"
 

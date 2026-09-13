@@ -17,7 +17,7 @@ from ..ports import (
     DocumentArtifactRepository,
     DocumentCacheRepository,
     DocumentSourceRepository,
-    ScaffoldArchivePort,
+    WireframeArchivePort,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class DeleteDocumentUseCase:
         source: DocumentSourceRepository,
         artifacts: DocumentArtifactRepository,
         cache: DocumentCacheRepository,
-        scaffolds: ScaffoldArchivePort,
+        scaffolds: WireframeArchivePort,
     ) -> None:
         self._source = source
         self._artifacts = artifacts

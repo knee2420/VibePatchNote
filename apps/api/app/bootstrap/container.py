@@ -32,18 +32,10 @@ from app.core.llm import (
 )
 from app.core.llm.credentials import OsCredentialStore
 from app.documents.adapters import (
-    DocumentOutlineArchiveAdapter,
-    DocumentTelemetryAdapter,
-    EngineOutlineExtractAdapter,
-    EngineScaffoldExtractAdapter,
     EngineSegmentScanAdapter,
     LocalDocumentArtifactRepository,
     LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
-)
-from app.documents.agents import (
-    ExtractOutlineUseCase,
-    GenerateScaffoldUseCase,
 )
 from app.documents.experimental import ScanDocumentSegmentsUseCase
 from app.documents.service import DocumentService
@@ -66,9 +58,21 @@ from app.llm_settings.use_cases import (
     ResolveNextExecutionUseCase,
     UpdateRuntimePolicyUseCase,
 )
+from app.outline.adapters import (
+    DocumentOutlineArchiveAdapter,
+    EngineOutlineExtractAdapter,
+    OutlineTelemetryAdapter,
+)
+from app.outline.agents import ExtractOutlineUseCase
+from app.outline.service import OutlineService
 from app.runtime.service import RuntimeService
-from app.scaffolds.adapters.local_scaffold_repository import LocalScaffoldRepository
-from app.scaffolds.service import ScaffoldArchiveService
+from app.wireframe.adapters import (
+    EngineWireframeExtractAdapter,
+    LocalWireframeRepository,
+    WireframeTelemetryAdapter,
+)
+from app.wireframe.agents import GenerateWireframeUseCase
+from app.wireframe.service import WireframeArchiveService
 from app.workspaces.adapters.local_workspace_repository import LocalWorkspaceRepository
 from app.workspaces.service import WorkspaceService
 
@@ -184,11 +188,11 @@ class Container(containers.DeclarativeContainer):
         root_dir=providers.Object(_storage.cache_of("documents")),
     )
     scaffold_repository = providers.Singleton(
-        LocalScaffoldRepository,
+        LocalWireframeRepository,
         root_dir=providers.Object(_storage.knowledge_of("scaffolds")),
     )
     scaffold_archive_service = providers.Singleton(
-        ScaffoldArchiveService, repository=scaffold_repository
+        WireframeArchiveService, repository=scaffold_repository
     )
 
     # --- [6 Models] · Runner 정의 ------------------------------------------
@@ -200,7 +204,7 @@ class Container(containers.DeclarativeContainer):
         cache=document_cache_repository,
     )
     scaffold_extractor = providers.Factory(
-        EngineScaffoldExtractAdapter,
+        EngineWireframeExtractAdapter,
         harness=llm_harness,
     )
     outline_archive = providers.Factory(
@@ -208,9 +212,11 @@ class Container(containers.DeclarativeContainer):
         artifacts=document_artifact_repository,
     )
 
-    # --- documents 유스케이스 ----------------------------------------------
-    document_telemetry = providers.Singleton(DocumentTelemetryAdapter)
+    # --- 도메인 관측 (Telemetry) -------------------------------------------
+    outline_telemetry = providers.Singleton(OutlineTelemetryAdapter)
+    wireframe_telemetry = providers.Singleton(WireframeTelemetryAdapter)
 
+    # --- documents 유스케이스 ----------------------------------------------
     register_document = providers.Factory(
         RegisterDocumentUseCase, source=document_source_repository
     )
@@ -237,7 +243,7 @@ class Container(containers.DeclarativeContainer):
         agent_runtime=agent_runtime,
         recorder=execution_recorder,
         llm_harness=llm_harness,
-        telemetry=document_telemetry,
+        telemetry=outline_telemetry,
         engine=outline_extractor,
         archive=outline_archive,
     )
@@ -249,27 +255,29 @@ class Container(containers.DeclarativeContainer):
         agent_runtime=agent_runtime,
     )
     generate_scaffold = providers.Factory(
-        GenerateScaffoldUseCase,
+        GenerateWireframeUseCase,
         source=document_source_repository,
-        scaffolds=scaffold_archive_service,
+        archive=scaffold_archive_service,
         agent_runtime=agent_runtime,
         engine=scaffold_extractor,
-        telemetry=document_telemetry,
+        telemetry=wireframe_telemetry,
         llm_harness=llm_harness,
     )
 
     # 재개 핸들러를 Agent Runtime 에 등록하는 지점이므로 요청마다 새로 만들지 않는다.
+    outline_service = providers.Factory(
+        OutlineService,
+        extract_outline=extract_outline,
+    )
+
     document_service = providers.Singleton(
         DocumentService,
         register=register_document,
         get_file=get_document_file,
         delete=delete_document,
         artifacts=list_document_artifacts,
-        extract_outline=extract_outline,
         scan_segments=scan_document_segments,
-        generate_scaffold=generate_scaffold,
         agent_runtime=agent_runtime,
-        approvals=approval_service,
     )
 
     # --- [3 Memory] --------------------------------------------------------

@@ -31,8 +31,9 @@ from app.core.storage import STORAGE_VERSION
 from app.documents import router as documents_router
 from app.inspector import router as inspector_router
 from app.llm_settings import router as llm_settings_router
+from app.outline import router as outline_router
 from app.runtime import router as runtime_router
-from app.scaffolds import router as scaffolds_router
+from app.wireframe import router as wireframe_router
 from app.workspaces import router as workspaces_router
 
 
@@ -100,7 +101,15 @@ app = FastAPI(
 
 # 객체 그래프는 Container 한 곳에서 조립하고, 라우터에서만 FastAPI 의존성으로 꺼낸다.
 container = Container()
-container.wire(modules=[documents_router, scaffolds_router, workspaces_router, llm_settings_router, inspector_router, runtime_router])
+container.wire(modules=[
+    documents_router,
+    outline_router,
+    wireframe_router,
+    workspaces_router,
+    llm_settings_router,
+    inspector_router,
+    runtime_router,
+])
 app.container = container
 
 
@@ -150,10 +159,11 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 app.include_router(documents_router.router, prefix="/api/v1/documents", tags=["Documents & Agents"])
+app.include_router(outline_router.router, prefix="/api/v1/outlines", tags=["Outlines"])
+app.include_router(wireframe_router.router, prefix="/api/v1/wireframes", tags=["Wireframes"])
 app.include_router(runtime_router.router, prefix="/api/v1/runtime", tags=["Agent Runtime"])
 app.include_router(inspector_router.router, prefix="/api/v1/inspector", tags=["Observability & Inspector"])
 app.include_router(llm_settings_router.router, prefix="/api/v1/llm-settings", tags=["LLM Settings"])
-app.include_router(scaffolds_router.router, prefix="/api/v1/scaffolds", tags=["Scaffolds & Vision Archives"])
 app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])
 
 

@@ -116,7 +116,7 @@ export const referenceDocumentApi = {
 
   /** 채택된 아웃라인을 읽습니다. 없으면 404. */
   getOutline: (docId: string) =>
-    httpClient.get<ExtractOutlineResponse>(`${BASE_PATH}/${docId}/outline`),
+    httpClient.get<ExtractOutlineResponse>(`/api/v1/outlines/${docId}`),
 
   /** 채택된 세그먼트를 읽습니다. 아직 없으면 빈 목록을 받습니다. */
   getSegments: (docId: string) =>
@@ -138,23 +138,23 @@ export const referenceDocumentApi = {
 
   /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. */
   extractScaffold: (docId: string) =>
-    httpClient.post<ScaffoldExtractResponse>(`${BASE_PATH}/scaffold`, { docId }),
+    httpClient.post<ScaffoldExtractResponse>('/api/v1/wireframes/extract', { docId }),
 
   /** 스캐폴드 생성을 백그라운드 실행으로 접수합니다. */
   startScaffold: (docId: string) =>
-    httpClient.post<{ runId: string; status: string }>(`${BASE_PATH}/scaffold/runs`, { docId }),
+    httpClient.post<{ runId: string; status: string }>('/api/v1/wireframes/runs', { docId }),
 
   /** 아웃라인 분석을 동기로 실행합니다(채택본이 있으면 그대로 반환). */
   extractOutline: (docId: string, forceRefresh = false) =>
-    httpClient.post<ExtractOutlineResponse>(`${BASE_PATH}/outline`, {
-      docId,
+    httpClient.post<ExtractOutlineResponse>('/api/v1/outlines/extract', {
+      doc_id: docId,
       force_refresh: forceRefresh,
     }),
 
   /** 긴 분석을 HTTP 연결과 분리해 백그라운드 실행으로 접수합니다. */
   startOutline: (docId: string, forceRefresh = false) =>
-    httpClient.post<{ runId: string; status: string }>(`${BASE_PATH}/outline/runs`, {
-      docId,
+    httpClient.post<{ runId: string; status: string }>('/api/v1/outlines/runs', {
+      doc_id: docId,
       force_refresh: forceRefresh,
     }),
 };

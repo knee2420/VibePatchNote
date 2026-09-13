@@ -368,8 +368,8 @@ def test_llm_span_name_does_not_carry_the_model():
     """
     import inspect
 
-    from scaffold_engine.core import pipeline as scaffold_pipeline
     from scaffold_engine.outline import pipeline as outline_pipeline
+    from scaffold_engine.wireframe import pipeline as scaffold_pipeline
 
     for module in (outline_pipeline, scaffold_pipeline):
         source = inspect.getsource(module)

@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.scaffolds.adapters.local_scaffold_repository import LocalScaffoldRepository
-from app.scaffolds.schemas import ScaffoldArchiveRecord
+from app.wireframe.adapters import (
+    LocalWireframeRepository as LocalScaffoldRepository,
+)
+from app.wireframe.schemas import (
+    WireframeArchiveRecord as ScaffoldArchiveRecord,
+)
 
 
 def _record(scaffold_id: str, title: str, created_at: str) -> ScaffoldArchiveRecord:
