@@ -1,0 +1,55 @@
+# pytest 설정 블록 — 각 워크스페이스의 `pyproject.toml` 끝에 붙인다.
+#
+# 현재 저장소에는 이 섹션이 **어디에도 없다**(2026-09-14 감사). 그래서 마커가 없고,
+# 마커가 없으니 부분 실행 수단이 없고, 그래서 매번 전체를 돌리게 된다.
+#
+# 정본: workbench/07.test_strategy/spec/04.execution/02.pytest-config.md
+
+# ─────────────────────────────────────────────────────────────────────────────
+# apps/api/pyproject.toml
+# ─────────────────────────────────────────────────────────────────────────────
+
+[tool.pytest.ini_options]
+
+# 경로를 매번 손으로 주지 않는다. `pytest` 만 쳐도 같은 것이 돈다.
+testpaths = ["tests"]
+
+# -ra            : 통과 외 결과(스킵·xfail·에러)를 끝에 요약. 조용히 사라지는 것을 막는다.
+# --strict-markers: 오타 난 마커를 **에러로** 만든다. 이게 없으면 `@pytest.mark.wiring`
+#                   을 `wirring` 으로 잘못 써도 조용히 "마커 없는 테스트"가 되어
+#                   기본 실행에 섞여 들어간다.
+# -m "not wiring" : **기본 실행은 L1+L2 만.** L3(배선)는 `pnpm test:all` 에서만 돈다.
+addopts = "-ra --strict-markers -m 'not wiring'"
+
+# 등급은 파일 이름이 아니라 마커로 표시한다. 파일을 옮기지 않고 등급을 바꿀 수 있어야 한다.
+markers = [
+    "wiring: 앱을 부팅하는 L3 배선 테스트 (pnpm test:all 에서만 실행)",
+    "external: 외부 프로세스를 실제로 띄우는 테스트 (기본 실행에서 제외 대상 후보)",
+]
+
+# 우리 코드의 DeprecationWarning 만 에러로 올린다. 서드파티 경고까지 올리면
+# 라이브러리 업그레이드 때마다 스위트가 멈춰 아무도 이 설정을 신뢰하지 않게 된다.
+filterwarnings = [
+    "error::DeprecationWarning:app.*",
+    "error::DeprecationWarning:agent_core.*",
+    "error::DeprecationWarning:agent_telemetry.*",
+    "error::DeprecationWarning:scaffold_engine.*",
+]
+
+# anyio 백엔드를 고정한다. 지금은 `@pytest.mark.anyio` 와 `asyncio.run()` 이
+# 섞여 있는데, 스타일이 둘이면 "이 테스트는 어느 루프에서 도는가"가 파일마다 달라진다.
+# 새 비동기 테스트는 `@pytest.mark.anyio` 로 통일한다.
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# packages/scaffold-engine/pyproject.toml
+# packages/agent-core/pyproject.toml
+# packages/agent-telemetry/pyproject.toml
+#
+# 패키지는 앱을 부팅하지 않으므로 `wiring` 마커가 없다. 그래서 addopts 도 단순하다.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# [tool.pytest.ini_options]
+# testpaths = ["tests"]
+# addopts = "-ra --strict-markers"
+# filterwarnings = ["error::DeprecationWarning:scaffold_engine.*"]
