@@ -180,9 +180,14 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
         },
       ];
 
-      const owner = segmentStructure?.mappings.find(
-        (item) => item.targetId === hoveredElement.id
-      )?.primarySegmentId;
+      // **소속 세그먼트는 Segments 탭에서만 보여 준다.**
+      // 세그먼트 구조는 한 번 불러오면 상태에 남는다. 탭 조건 없이 쓰면 Segments
+      // 탭을 한 번 들렀다는 이유만으로 Outline 탭에도 세그먼트 테두리가 새어 나온다.
+      const owner =
+        panelTab === 'segments'
+          ? segmentStructure?.mappings.find((item) => item.targetId === hoveredElement.id)
+              ?.primarySegmentId
+          : undefined;
       const ownerSegment = owner
         ? segmentStructure?.segments.find((segment) => segment.id === owner)
         : undefined;
@@ -233,7 +238,7 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
         variant: 'primary',
       },
     ];
-  }, [hoveredElement, hoveredSegment, activeMapping, segmentStructure, id, data.title, data.url]);
+  }, [hoveredElement, hoveredSegment, activeMapping, segmentStructure, panelTab, id, data.title, data.url]);
 
   // 클릭은 트리 선택 상태만 바꾼다. 강조는 호버가 담당하므로 점유가 생기지 않는다.
   const handleSelectElement = useCallback(
@@ -376,6 +381,13 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
   useEffect(() => {
     if (!isEditMode) setMergeCandidateIds([]);
   }, [isEditMode]);
+
+  // 탭을 옮기면 이전 탭에서 올려 둔 미리보기를 비운다. 마우스가 패널 밖으로
+  // 나가지 않은 채 탭만 바뀌면 `onMouseLeave` 가 오지 않아 강조가 남는다.
+  useEffect(() => {
+    setHoveredElement(null);
+    setHoveredSegment(null);
+  }, [panelTab]);
 
   // 되돌리기 단축키. 입력 중에는 브라우저 기본 동작(텍스트 되돌리기)을 막지 않는다.
   useEffect(() => {
