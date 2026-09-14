@@ -93,3 +93,15 @@ class WireframeArchivePort(Protocol):
 
 # 하위 호환 alias
 ScaffoldArchivePort = WireframeArchivePort
+
+
+class RunArchivePort(Protocol):
+    """이 문서에서 비롯된 실행 기록을 지우는 계약.
+
+    **프롬프트에는 문서 본문이 실린다.** 그 본문은 실행 기록의 `payloads/` 에
+    내용 해시로 외부화되어 남으므로, 원본만 지우면 지운 문서의 내용이 계속
+    디스크에 있다. 예전에는 트레이스 연쇄 삭제가 이 역할이었지만, 트레이스
+    자체가 쓰이지 않게 된 뒤로 빈 디렉터리를 뒤지는 no-op 이 되어 있었다.
+    """
+
+    def delete_for_document(self, doc_id: str) -> int: ...

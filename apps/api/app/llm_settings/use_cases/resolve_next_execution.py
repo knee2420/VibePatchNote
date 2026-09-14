@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from llm_driver import PRIMARY_PROVIDER_ID, remaining_text
 
-from app.core.config import settings
+from app.core.llm import RuntimeExecutionPolicy
 
 from ..ports import CliAvailabilityPort, CredentialStorePort, ProviderStatePort
 
@@ -22,22 +22,26 @@ class ResolveNextExecutionUseCase:
     def __init__(
         self,
         credentials: CredentialStorePort,
+        policy: RuntimeExecutionPolicy,
         provider_state: Optional[ProviderStatePort] = None,
         cli_availability: Optional[CliAvailabilityPort] = None,
     ) -> None:
         self._credentials = credentials
+        # 실행 정책은 런타임에 바뀐다. 전역 설정에서 값을 복사해 오면 설정 화면에서
+        # 바꾼 정책이 이 판정에 반영되지 않는다.
+        self._policy = policy
         self._state = provider_state
         self._cli_availability = cli_availability
 
     def primary_provider_status(self) -> dict[str, Any]:
         """CLI 는 설치돼 있으면 설정된 것으로 본다. 다만 지금 쓸 수 있는지는 별개다."""
-        is_primary = settings.primary_provider not in ("google_api", "google-api")
+        is_primary = not self._policy.is_google_primary
         status: dict[str, Any] = {
             "id": PRIMARY_PROVIDER_ID,
             "label": "Antigravity CLI",
             "configured": True,
             "role": "primary" if is_primary else "fallback",
-            "available": bool(shutil.which(settings.agent_cli_bin)),
+            "available": bool(shutil.which(self._policy.agent_cli_bin)),
         }
         if not status["available"]:
             status["blocked_reason"] = "CLI_NOT_FOUND"
@@ -62,7 +66,7 @@ class ResolveNextExecutionUseCase:
     def fallback_provider_status(self) -> dict[str, Any]:
         api_key = self._credentials.get_google_api_key()
         configured = bool(api_key)
-        is_primary = settings.primary_provider in ("google_api", "google-api")
+        is_primary = self._policy.is_google_primary
         until = self._state.blocked_until("google-api") if self._state else None
         available = configured and until is None
         status: dict[str, Any] = {
@@ -83,7 +87,7 @@ class ResolveNextExecutionUseCase:
 
     def execute(self) -> dict[str, Any]:
         """현재 스냅샷 기준 다음 AI 작업의 예상 경로. 실행 이력은 만들지 않는다."""
-        is_google_primary = settings.primary_provider in ("google_api", "google-api")
+        is_google_primary = self._policy.is_google_primary
         primary = self.fallback_provider_status() if is_google_primary else self.primary_provider_status()
         secondary = self.primary_provider_status() if is_google_primary else self.fallback_provider_status()
 
@@ -91,34 +95,34 @@ class ResolveNextExecutionUseCase:
             if primary.get("available"):
                 return {
                     "provider": "google-api",
-                    "model": settings.google_api_model,
+                    "model": self._policy.google_api_model,
                     "routeReason": "api_configured",
                 }
             return {
                 "provider": PRIMARY_PROVIDER_ID if secondary["available"] else None,
-                "model": settings.agent_cli_model if secondary["available"] else None,
+                "model": self._policy.agent_cli_model if secondary["available"] else None,
                 "routeReason": "api_unavailable_fallback_to_cli",
             }
         else:
             if not primary.get("available"):
                 return {
                     "provider": "google-api" if secondary["available"] else None,
-                    "model": settings.google_api_model if secondary["available"] else None,
+                    "model": self._policy.google_api_model if secondary["available"] else None,
                     "routeReason": "cli_blocked",
                 }
             availability = (
-                self._cli_availability.check(settings.agent_cli_model)
+                self._cli_availability.check(self._policy.agent_cli_model)
                 if self._cli_availability
                 else None
             )
             if availability and availability.exhausted:
                 return {
                     "provider": "google-api" if secondary["available"] else None,
-                    "model": settings.google_api_model if secondary["available"] else None,
+                    "model": self._policy.google_api_model if secondary["available"] else None,
                     "routeReason": "cli_quota_exhausted",
                 }
             return {
                 "provider": PRIMARY_PROVIDER_ID,
-                "model": settings.agent_cli_model,
+                "model": self._policy.agent_cli_model,
                 "routeReason": "cli_available" if availability and availability.state == "available" else "cli_quota_unknown",
             }

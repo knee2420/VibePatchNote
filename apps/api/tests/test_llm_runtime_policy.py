@@ -69,7 +69,8 @@ class ExecutionLog:
 
 @pytest.fixture
 def container(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Container]:
-    # 정책은 전역 settings 에 산다. 시작값을 고정하고, 끝나면 monkeypatch 가 원래 값으로 되돌린다.
+    # 실행 정책의 기본값은 전역 settings 에서 온다. 시작값을 고정하면 컨테이너가
+    # 그 값으로 `RuntimeExecutionPolicy` 를 만든다. 이후 변경은 정책 객체에만 일어난다.
     monkeypatch.setattr(settings, "agent_cli_model", OLD_PRIMARY)
     monkeypatch.setattr(settings, "agent_cli_timeout_seconds", OLD_PRIMARY_TIMEOUT)
     monkeypatch.setattr(settings, "google_api_model", OLD_FALLBACK)
@@ -200,3 +201,72 @@ def test_fallback_follows_updated_policy_and_shares_provider_state(
     ]
     # 하네스가 남긴 차단 기록이 설정 화면이 읽는 바로 그 저장소에 있어야 한다.
     assert container.provider_state().blocked_until(PRIMARY_PROVIDER_ID) is not None
+
+
+def test_policy_update_does_not_mutate_global_settings(container: Container) -> None:
+    """설정 화면의 변경은 주입된 실행 정책에만 일어난다.
+
+    예전에는 유스케이스가 전역 `settings` 객체에 직접 대입했다 — 불변 설정이라고
+    문서에 적힌 객체를 프로세스 전체가 공유하면서 가변으로 쓴 것이다. 누가 언제
+    바꿨는지 추적할 수 없고, 테스트는 매번 전역을 되돌려 놓아야 했다.
+    """
+    policy = container.execution_policy()
+    assert policy.agent_cli_model == OLD_PRIMARY
+
+    _update_policy(container)
+
+    assert policy.agent_cli_model == NEW_PRIMARY
+    # 전역은 그대로다.
+    assert settings.agent_cli_model == OLD_PRIMARY
+    assert settings.google_api_model == OLD_FALLBACK
+
+
+def test_inspector_matrix_follows_the_live_policy(container: Container) -> None:
+    """관측 매트릭스는 부팅 시점 값이 아니라 지금의 정책을 보여준다.
+
+    예전에는 컨테이너가 `providers.Object(settings.primary_provider)` 로 **값을
+    복사**해서, 공급자를 바꿔도 매트릭스는 옛 값을 계속 보여줬다.
+    """
+    matrix = container.model_matrix()
+    assert matrix.describe()["primary_provider"] == "agy_cli"
+
+    container.llm_settings_service().update_runtime_policy(
+        primary_model=NEW_FALLBACK,
+        primary_timeout_seconds=NEW_PRIMARY_TIMEOUT,
+        fallback_model=NEW_PRIMARY,
+        fallback_timeout_seconds=NEW_FALLBACK_TIMEOUT,
+        primary_provider="google-api",
+    )
+
+    assert matrix.describe()["primary_provider"] == "google_api"
+
+
+def test_saved_policy_is_restored_at_boot_not_on_first_settings_request(
+    container: Container,
+) -> None:
+    """저장된 정책은 설정 화면이 아니라 부팅이 읽는다.
+
+    예전에는 복원이 `LlmSettingsService` 생성자에 있었고 그 서비스는 Factory 였다.
+    그래서 설정 화면을 한 번도 열지 않으면 프로세스는 저장된 정책이 아니라 환경
+    변수 기본값으로 실행했다 — 재시작 직후의 첫 분석이 사용자가 고르지 않은
+    공급자로 돌아갈 수 있었다.
+    """
+    container.runtime_policy_repository().save(
+        {
+            "primaryProvider": "google-api",
+            "primaryModel": NEW_FALLBACK,
+            "primaryTimeoutSeconds": NEW_FALLBACK_TIMEOUT,
+            "fallbackProvider": PRIMARY_PROVIDER_ID,
+            "fallbackModel": NEW_PRIMARY,
+            "fallbackTimeoutSeconds": NEW_PRIMARY_TIMEOUT,
+        }
+    )
+    policy = container.execution_policy()
+    assert policy.primary_provider == "agy_cli", "복원 전에는 기본값이다"
+
+    # main.py 의 lifespan 이 하는 일과 같다.
+    container.update_runtime_policy().restore()
+
+    assert policy.is_google_primary
+    assert policy.google_api_model == NEW_FALLBACK
+    assert policy.google_api_timeout_seconds == NEW_FALLBACK_TIMEOUT

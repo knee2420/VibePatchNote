@@ -268,3 +268,28 @@ def test_declined_agreement_does_not_resume(runtime: AgentRuntime, roots: Storag
 
     asyncio.run(scenario())
     assert calls == []
+
+
+def test_recorded_cost_reaches_the_ledger(runtime: AgentRuntime, roots: StorageRoots) -> None:
+    """비용의 정본은 원장이다. 그런데 한동안 아무도 원장에 적지 않았다.
+
+    `LedgerExecutionRecorder` 는 컨테이너가 만들어 유스케이스에 주입까지 했지만
+    한 번도 호출되지 않았고, `data/ledger/` 는 어느 시점부터 조용히 멈췄다.
+    관측 화면이 텔레메트리 합산으로 폴백하고 있어서 아무도 눈치채지 못했다.
+    """
+    runtime._runs.append("run-cost", AgentRunEvent(type="started", agent_name="outline", doc_id="doc-9"))
+    runtime.record_cost(
+        "run-cost",
+        RunCost(input_tokens=10, output_tokens=5, total_tokens=15),
+        model="test-model",
+        status="SUCCESS",
+    )
+
+    entries = list(LocalLedger(roots.ledger).entries())
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry.run_id == "run-cost"
+    assert entry.doc_id == "doc-9"
+    assert entry.task_name == "outline"
+    assert entry.model == "test-model"
+    assert entry.cost.total_tokens == 15

@@ -73,17 +73,6 @@ source_modules = [
     "app.*.experimental",
 ]
 forbidden_modules = ["app.core.config"]
-# 아래 셋은 **알려진 미해결 위반**이다. 세그먼트 계약으로 바꾸자마자 드러났다.
-# `update_runtime_policy` 는 경로를 읽는 정도가 아니라 **전역 `settings` 객체를
-# 런타임에 덮어쓴다** (`settings.primary_provider = ...`). 프로세스 전체가 공유하는
-# 설정을 유스케이스가 변경하는 구조라, 포트를 하나 끼우는 것으로 끝나지 않고
-# 실행 정책 흐름 전체를 손봐야 한다. 그때까지 **보이는 곳에** 남겨 둔다 —
-# source_modules 에서 조용히 빼면 다시 보이지 않게 된다.
-ignore_imports = [
-    "app.llm_settings.service -> app.core.config",
-    "app.llm_settings.use_cases.resolve_next_execution -> app.core.config",
-    "app.llm_settings.use_cases.update_runtime_policy -> app.core.config",
-]
 
 # 도메인 간 직접 참조는 전부 금지한다. 다른 도메인의 동작이 필요하면 자기
 # `ports.py` 에 계약을 정의하고 컨테이너가 구현체를 주입한다.

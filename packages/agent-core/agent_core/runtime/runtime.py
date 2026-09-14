@@ -14,7 +14,7 @@ from typing import Any, Awaitable, Callable, TypeVar
 
 from .approval import ApprovalService
 from .events import AgentRunEvent
-from .models import AgentRun, AgentRunInput, RunCost
+from .models import AgentRun, AgentRunInput, LedgerEntry, RunCost
 from .policy import DEFAULT_RETRY_POLICY, RetryPolicy
 from .ports import AgentRunRepository, LedgerPort
 from .progress import bind_progress
@@ -213,9 +213,48 @@ class AgentRuntime:
             )
         return self.mark_failed(run_id, error_code=error_code, detail=detail)
 
-    def record_cost(self, run_id: str, cost: RunCost) -> None:
-        """실행이 쓴 자원을 이력에 누적한다. 원장 기록은 호출부가 따로 한다."""
-        self._runs.append(run_id, AgentRunEvent(type="cost_recorded", cost=cost))
+    def record_cost(
+        self,
+        run_id: str,
+        cost: RunCost,
+        *,
+        provider: str = "",
+        model: str = "",
+        status: str = "SUCCESS",
+        failure_code: str | None = None,
+        duration_seconds: float = 0.0,
+    ) -> None:
+        """실행이 쓴 자원을 이력에 누적하고 **원장에도 남긴다.**
+
+        예전에는 "원장 기록은 호출부가 따로 한다"고 적어 두고 아무도 하지 않았다.
+        `LedgerExecutionRecorder` 는 컨테이너가 만들어 유스케이스에 주입까지 했지만
+        `self._recorder` 에 담긴 채 한 번도 호출되지 않았고, 그래서 비용의 정본이라던
+        `data/ledger/` 가 어느 시점부터 조용히 멈췄다 — 관측 화면은 텔레메트리 합산
+        폴백으로 넘어가 있었기 때문에 아무도 눈치채지 못했다.
+
+        기록할 의무를 호출부에 나눠 주면 호출부 수만큼 빠뜨릴 기회가 생긴다.
+        비용을 아는 지점은 여기 하나뿐이므로 여기서 적는다.
+        """
+        run = self._runs.append(run_id, AgentRunEvent(type="cost_recorded", cost=cost))
+        if self._ledger is None:
+            return
+        try:
+            self._ledger.record(
+                LedgerEntry(
+                    run_id=run_id,
+                    doc_id=run.doc_id if run else None,
+                    task_name=run.agent_name if run else "",
+                    provider=provider,
+                    model=model,
+                    status=status,
+                    failure_code=failure_code,
+                    duration_seconds=duration_seconds,
+                    cost=cost,
+                )
+            )
+        except Exception as exc:
+            # 원장 기록 실패가 본 작업을 막지는 않는다. 다만 조용히 넘기지도 않는다.
+            logger.warning("[AgentRuntime] 원장 기록 실패 (%s): %s", run_id, exc)
 
     def get(self, run_id: str) -> AgentRun | None:
         return self._runs.get(run_id)

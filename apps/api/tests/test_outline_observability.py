@@ -16,6 +16,27 @@ from app.outline.agents import ExtractOutlineUseCase
 from app.outline.models import ArtifactProvenance
 
 
+def _runtime(tmp_path: Path):
+    """실제 Agent Runtime. 대역이 아니라 본 물건을 쓴다.
+
+    유스케이스의 협력자가 전부 필수가 된 뒤로, 런타임 없이 만든 유스케이스는
+    프로덕션에 존재하지 않는 조합이 되었다. 그런 조합을 테스트가 만들어 내면
+    테스트는 자기가 지어낸 세계를 검증한다.
+    """
+    from agent_runtime import AgentRuntime, LocalAgentRunRepository, LocalLedger
+
+    return AgentRuntime(
+        runs=LocalAgentRunRepository(tmp_path / "runs"),
+        ledger=LocalLedger(tmp_path / "ledger"),
+    )
+
+
+class _StubHarness:
+    """모델 이름만 묻는 자리. 실제 실행은 엔진 어댑터가 한다."""
+
+    model = "test-model"
+
+
 @pytest.mark.anyio
 async def test_extract_outline_collects_full_lifecycle_spans(tmp_path: Path):
     """캐시 검사 -> 하네스 라우팅 -> 엔진 실행 -> 아티팩트 커밋까지 7단계 스팬이 단일 수집기에 기록되는지 검증."""
@@ -99,13 +120,17 @@ async def test_extract_outline_collects_full_lifecycle_spans(tmp_path: Path):
 
             return _intercepted_session()
 
-    test_telemetry = TestTelemetryAdapter()
+    from app.core.observation import RunObservationStore
+
+    test_telemetry = TestTelemetryAdapter(store=RunObservationStore(tmp_path / "runs"))
 
     use_case = ExtractOutlineUseCase(
         source=source_repo,
         engine=engine_adapter,
         archive=archive_adapter,
+        agent_runtime=_runtime(tmp_path),
         telemetry=test_telemetry,
+        llm_harness=_StubHarness(),
     )
 
     # 5. 실행
@@ -179,13 +204,17 @@ async def test_extract_outline_cache_hit_emits_single_inspection_span(tmp_path: 
 
             return _intercepted_session()
 
-    test_telemetry = TestTelemetryAdapter()
+    from app.core.observation import RunObservationStore
+
+    test_telemetry = TestTelemetryAdapter(store=RunObservationStore(tmp_path / "runs"))
 
     use_case = ExtractOutlineUseCase(
         source=source_repo,
         engine=engine_adapter,
         archive=archive_adapter,
+        agent_runtime=_runtime(tmp_path),
         telemetry=test_telemetry,
+        llm_harness=_StubHarness(),
     )
 
     res = await use_case.execute(doc_id, force_refresh=False)

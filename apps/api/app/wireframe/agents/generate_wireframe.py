@@ -2,14 +2,11 @@
 from __future__ import annotations
 
 import logging
-from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
-from app.core.llm import BaseLlmHarness
 from app.core.storage import RUN_PREFIX, new_id
 
-from ..adapters import EngineWireframeExtractAdapter
 from ..models import WireframeExecutionResult
 from ..ports import (
     AgentRunInput,
@@ -34,25 +31,26 @@ class GenerateWireframeUseCase:
     def __init__(
         self,
         source: WireframeDocumentSourcePort,
-        scaffolds: WireframeArchivePort | None = None,
-        archive: WireframeArchivePort | None = None,
-        agent_runtime: AgentRuntimePort | None = None,
-        engine: WireframeExtractPort | None = None,
-        telemetry: WireframeTelemetryPort | None = None,
-        llm_harness: BaseLlmHarness | None = None,
+        engine: WireframeExtractPort,
+        archive: WireframeArchivePort,
+        agent_runtime: AgentRuntimePort,
+        telemetry: WireframeTelemetryPort,
     ) -> None:
+        """협력자는 전부 필수다. **유스케이스는 어댑터를 고르지 않는다.**
+
+        예전에는 전부 `| None = None` 이었고, 빠진 것은 생성자가 직접
+        `EngineWireframeExtractAdapter(...)` 를 만들어 채웠다. 어댑터 선택이
+        컨테이너 밖으로 새고, 컨테이너가 하나를 빠뜨려도 부팅이 성공한 뒤
+        사용자 요청이 그것을 발견한다. `scaffolds` / `archive` 두 이름으로 같은
+        것을 받던 별칭도 없앴다 — 같은 것을 두 이름으로 받으면 어느 쪽이 정본인지
+        호출부마다 달라진다. 쓰이지 않던 `llm_harness` 도 함께 뺐다 — 엔진
+        어댑터가 하네스를 들고 있으므로 유스케이스가 또 받을 이유가 없다.
+        """
         self._source = source
+        self._engine = engine
+        self._archive = archive
         self._runtime = agent_runtime
         self._telemetry = telemetry
-        self._harness = llm_harness
-        self._archive = archive or scaffolds
-
-        if engine is not None:
-            self._engine = engine
-        elif llm_harness is not None:
-            self._engine = EngineWireframeExtractAdapter(harness=llm_harness)
-        else:
-            self._engine = None  # type: ignore
 
     async def _run_pipeline(
         self,
@@ -61,9 +59,6 @@ class GenerateWireframeUseCase:
         doc_id: str | None = None,
         pages: list[int] | None = None,
     ) -> WireframeExtractOutput:
-        if not self._engine:
-            raise RuntimeError("WireframeExtractPort 엔진 어댑터가 구성되지 않았습니다.")
-
         raw = await self._engine.extract(
             Path(file_path), display_name=display_name, doc_id=doc_id, pages=pages
         )
@@ -92,7 +87,7 @@ class GenerateWireframeUseCase:
     async def execute(self, doc_id: str, pages: list[int] | None = None) -> dict[str, Any]:
         meta = self._require(doc_id)
         run_id = current_run_id()
-        if not run_id and self._runtime:
+        if not run_id:
             agent_run, result = await self._runtime.execute(
                 self.name,
                 lambda: self._execute_internal(meta, pages=pages),
@@ -109,16 +104,12 @@ class GenerateWireframeUseCase:
         original_name = getattr(meta, "original_name", "") or getattr(meta, "title", "document")
         run_id = current_run_id() or new_id(RUN_PREFIX)
 
-        session_ctx = (
-            self._telemetry.workflow_session(
-                run_id=run_id,
-                doc_id=doc_id,
-                target_name=original_name,
-                workflow_name=self.name,
-                workflow_label="와이어프레임 생성",
-            )
-            if self._telemetry
-            else nullcontext()
+        session_ctx = self._telemetry.workflow_session(
+            run_id=run_id,
+            doc_id=doc_id,
+            target_name=original_name,
+            workflow_name=self.name,
+            workflow_label="와이어프레임 생성",
         )
 
         with session_ctx:
@@ -138,19 +129,17 @@ class GenerateWireframeUseCase:
             )
 
             cost = getattr(output, "cost", None) or RunCost()
-            if self._runtime:
-                self._runtime.record_cost(run_id, cost)
+            self._runtime.record_cost(run_id, cost, status="SUCCESS")
 
             archive_meta = None
-            if self._archive is not None:
-                try:
-                    archive_meta = self._archive.archive_scaffold(
-                        doc_id=doc_id,
-                        pdf_path=file_path,
-                        result=output,
-                    )
-                except Exception as exc:
-                    logger.warning("[GenerateWireframe] 아카이빙 실패: %s", exc)
+            try:
+                archive_meta = self._archive.archive_scaffold(
+                    doc_id=doc_id,
+                    pdf_path=file_path,
+                    result=output,
+                )
+            except Exception as exc:
+                logger.warning("[GenerateWireframe] 아카이빙 실패: %s", exc)
 
             result = WireframeExecutionResult(
                 status="completed",
@@ -174,8 +163,6 @@ class GenerateWireframeUseCase:
         return meta
 
     def _settle_failure(self, run_id: str, doc_id: str, error_detail: str) -> None:
-        if not self._runtime:
-            return
         self._runtime.settle_failure(
             run_id,
             error_code="PIPELINE_ERROR",

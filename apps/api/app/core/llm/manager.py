@@ -3,7 +3,7 @@
 모든 도메인 서비스의 단일 진입점이다. 하는 일은 세 가지뿐이다.
 
 1. 호스트 전용 어댑터를 `HarnessFactory` 에 등록한다 (프로바이더 확장).
-2. 앱 설정(`settings.agent_cli_*`)을 어댑터 생성에 주입한다.
+2. 주입받은 실행 정책(`RuntimeExecutionPolicy`)을 어댑터 생성에 넘긴다.
 3. 모델명만 받아 적합한 하네스를 돌려준다.
 
 프롬프트 내용이나 도메인 규칙은 이 계층이 알지 못하며, 알아서도 안 된다.
@@ -29,8 +29,8 @@ from llm_driver import (
     get_model_spec,
 )
 
-from app.core.config import settings
 from app.core.llm.credentials import CredentialStore
+from app.core.llm.execution_policy import RuntimeExecutionPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +43,13 @@ class LlmManager:
         credentials: CredentialStore,
         provider_state: ProviderStateStore,
         cli_availability: CliQuotaAvailability,
+        policy: RuntimeExecutionPolicy,
     ) -> None:
         # 자격 증명과 차단 상태는 설정 화면(LlmSettingsService)과 같은 인스턴스여야 한다.
         # ProviderStateStore 는 파일 내용을 메모리에 캐시하므로, 따로 만들면 두 캐시가
         # 갈라져 한쪽의 차단 기록을 다른 쪽이 보지 못하고 서로의 쓰기를 덮어쓴다.
-        self._executable: str = settings.agent_cli_bin
+        self._policy = policy
+        self._executable: str = policy.agent_cli_bin
         self._credentials = credentials
         self._provider_state = provider_state
         self._cli_availability = cli_availability
@@ -58,7 +60,7 @@ class LlmManager:
     def _register_providers(self) -> None:
         """엔진 팩토리에 호스트 어댑터를 얹는다.
 
-        `agy_cli` 는 엔진에도 기본 빌더가 있지만, 실행 파일 경로(`settings.agent_cli_bin`)를
+        `agy_cli` 는 엔진에도 기본 빌더가 있지만, 실행 파일 경로(`policy.agent_cli_bin`)를
         아는 것은 호스트뿐이므로 여기서 덮어쓴다.
         """
         HarnessFactory.register("agy_cli", self._build_agy_cli)
@@ -95,12 +97,11 @@ class LlmManager:
         executable: Optional[str] = None,
     ) -> BaseLlmHarness:
         """모델 프로필에 맞는 하네스를 돌려준다."""
-        # 인자를 비우면 호출 시점의 런타임 정책(설정 UI 가 갱신한 settings)을 읽는다.
+        # 인자를 비우면 호출 시점의 런타임 정책을 읽는다.
         # 돌려준 하네스는 그 시점의 정책으로 굳어 있으므로 오래 붙들고 쓰면 안 된다.
         # 장기 주입용은 매 호출마다 여기를 다시 부르는 `RuntimePolicyHarness` 다.
-        is_google_primary = settings.primary_provider in ("google_api", "google-api")
-        default_model = settings.google_api_model if is_google_primary else settings.agent_cli_model
-        default_timeout = settings.google_api_timeout_seconds if is_google_primary else settings.agent_cli_timeout_seconds
+        default_model = self._policy.primary_model
+        default_timeout = self._policy.primary_timeout_seconds
 
         target_model = model or default_model
         timeout_seconds = timeout or default_timeout
@@ -130,14 +131,14 @@ class LlmManager:
             return FallbackLlmHarness(
                 primary=harness,
                 credentials=self._credentials,
-                google_model=settings.google_api_model,
-                google_timeout_seconds=settings.google_api_timeout_seconds,
+                google_model=self._policy.google_api_model,
+                google_timeout_seconds=self._policy.google_api_timeout_seconds,
                 provider_state=self._provider_state,
                 cli_availability=self._cli_availability,
                 primary_provider=primary_provider,
                 fallback_provider=fallback_provider,
-                cli_model=settings.agent_cli_model,
-                cli_timeout_seconds=settings.agent_cli_timeout_seconds,
+                cli_model=self._policy.agent_cli_model,
+                cli_timeout_seconds=self._policy.agent_cli_timeout_seconds,
                 cli_executable=self._executable,
             )
         return harness

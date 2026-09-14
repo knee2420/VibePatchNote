@@ -14,10 +14,16 @@ from fastapi.testclient import TestClient
 from scaffold_engine.wireframe import ScaffoldPipeline
 
 from app.core.config import settings
-from app.core.llm.tracer import ingest_pipeline_telemetry
 from main import app
 
 client = TestClient(app)
+
+
+def _ingest(telemetry, **kwargs):
+    """관측 자료 저장은 주입받은 store 가 한다. 테스트도 같은 경로를 쓴다."""
+    from app.core.observation import RunObservationStore
+
+    return RunObservationStore(settings.storage.runs).ingest(telemetry, **kwargs)
 
 SAMPLE_PDF = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "sample.pdf"
 
@@ -62,7 +68,7 @@ def scaffold_run(tmp_path: Path):
 
     run_id = "test-scaffold-observability"
     run_dir = settings.storage.runs / run_id
-    ingest_pipeline_telemetry(
+    _ingest(
         telemetry, run_id=run_id, doc_id=None, target_name="와이어프레임_대상.pdf"
     )
     try:
@@ -230,13 +236,22 @@ async def test_generate_scaffold_collects_full_lifecycle_spans(tmp_path: Path):
 
             return _intercepted_session()
 
-    test_telemetry = TestTelemetryAdapter()
+    from app.core.observation import RunObservationStore
+
+    test_telemetry = TestTelemetryAdapter(store=RunObservationStore(tmp_path / "runs"))
+
+    from agent_runtime import AgentRuntime, LocalAgentRunRepository, LocalLedger
 
     use_case = GenerateScaffoldUseCase(
         source=source_repo,
-        scaffolds=archive_service,
-        agent_runtime=None,
         engine=engine_adapter,
+        archive=archive_service,
+        # 런타임은 대역이 아니라 본 물건을 쓴다. 협력자가 필수가 된 뒤로
+        # "런타임 없는 유스케이스"는 프로덕션에 없는 조합이다.
+        agent_runtime=AgentRuntime(
+            runs=LocalAgentRunRepository(tmp_path / "runs"),
+            ledger=LocalLedger(tmp_path / "ledger"),
+        ),
         telemetry=test_telemetry,
     )
 
@@ -305,7 +320,7 @@ def test_scaffold_pipeline_records_usage_and_provider(tmp_path: Path) -> None:
     run_id = "test-scaffold-usage-run"
     run_dir = settings.storage.runs / run_id
     try:
-        ingest_pipeline_telemetry(
+        _ingest(
             telemetry,
             run_id=run_id,
             doc_id=None,

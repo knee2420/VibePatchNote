@@ -16,6 +16,13 @@ FIXTURE_RUN_EVENTS_ONLY = "agent-5a0846d55d53"
 client = TestClient(app)
 
 
+def _ingest(telemetry, **kwargs):
+    """관측 자료 저장은 주입받은 store 가 한다. 테스트도 같은 경로를 쓴다."""
+    from app.core.observation import RunObservationStore
+
+    return RunObservationStore(settings.storage.runs).ingest(telemetry, **kwargs)
+
+
 def test_inspector_matrix():
     response = client.get("/api/v1/inspector/matrix")
     assert response.status_code == 200
@@ -102,8 +109,7 @@ def test_attempt_records_follow_the_contract(observability_runs: list[str]):
 def test_ingest_pipeline_telemetry_resolves_target_name(tmp_path: Path):
     from agent_telemetry.collector import StepCollector
 
-    from app.core.llm.tracer import ingest_pipeline_telemetry
-
+    
     runs_dir = settings.storage.runs
     test_run_id = "test-run-display-name-002"
     run_dir = runs_dir / test_run_id
@@ -117,7 +123,7 @@ def test_ingest_pipeline_telemetry_resolves_target_name(tmp_path: Path):
             target_name="source.pdf",
         )
         tel = collector.export_telemetry()
-        ingest_pipeline_telemetry(
+        _ingest(
             tel,
             run_id=test_run_id,
             doc_id="doc-123",

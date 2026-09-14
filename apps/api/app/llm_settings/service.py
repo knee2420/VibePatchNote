@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from llm_driver import MODEL_REGISTRY
 
-from app.core.config import settings
+from app.core.llm import RuntimeExecutionPolicy
 
 from .ports import (
     AgyStatusLineSettings,
@@ -22,8 +22,8 @@ from .use_cases import (
     ReadGoogleProjectUsageUseCase,
     ResolveNextExecutionUseCase,
     UpdateRuntimePolicyUseCase,
-    get_current_policy_dict,
     mask_key,
+    policy_dict,
 )
 
 
@@ -31,6 +31,10 @@ class LlmSettingsService:
     def __init__(
         self,
         credentials: CredentialStorePort,
+        policy: RuntimeExecutionPolicy,
+        resolve_next_execution: ResolveNextExecutionUseCase,
+        update_policy_uc: UpdateRuntimePolicyUseCase,
+        agy_status_bridge_command: str,
         provider_state: Optional[ProviderStatePort] = None,
         agy_status: Optional[AgyStatusSnapshotPort] = None,
         runtime_policy: Optional[RuntimePolicyRepository] = None,
@@ -40,10 +44,10 @@ class LlmSettingsService:
         google_quotas: Optional[GoogleQuotaPort] = None,
         google_usage: Optional[ReadGoogleProjectUsageUseCase] = None,
         cli_availability: Optional[CliAvailabilityPort] = None,
-        resolve_next_execution: Optional[ResolveNextExecutionUseCase] = None,
-        update_policy_uc: Optional[UpdateRuntimePolicyUseCase] = None,
     ) -> None:
         self._credentials = credentials
+        self._policy = policy
+        self._agy_status_bridge_command = agy_status_bridge_command
         self._state = provider_state
         self._agy_status = agy_status
         self._runtime_policy = runtime_policy
@@ -53,16 +57,10 @@ class LlmSettingsService:
         self._google_quotas = google_quotas
         self._google_usage = google_usage
         self._cli_availability = cli_availability
-        self._resolve_next_execution = resolve_next_execution or ResolveNextExecutionUseCase(
-            credentials=credentials,
-            provider_state=provider_state,
-            cli_availability=cli_availability,
-        )
-        self._update_policy_uc = update_policy_uc or UpdateRuntimePolicyUseCase(
-            credentials=credentials,
-            runtime_policy=runtime_policy,
-        )
-        self._update_policy_uc.restore()
+        # 유스케이스는 컨테이너가 준다. 여기서 직접 만들면 조립이 두 곳으로 갈리고,
+        # 같은 실행 정책 객체를 공유하지 않는 사본이 생길 수 있다.
+        self._resolve_next_execution = resolve_next_execution
+        self._update_policy_uc = update_policy_uc
 
     def list_providers(self) -> dict[str, object]:
         return {"providers": [self._primary(), self._fallback()]}
@@ -84,23 +82,23 @@ class LlmSettingsService:
             })
 
         # 환경 변수나 커스텀 설정으로 레지스트리에 없는 새 모델이 지정된 경우에만 추가
-        if settings.google_api_model and settings.google_api_model not in known_ids:
+        if self._policy.google_api_model and self._policy.google_api_model not in known_ids:
             models.append({
-                "id": settings.google_api_model,
-                "label": f"Google API · {settings.google_api_model}",
+                "id": self._policy.google_api_model,
+                "label": f"Google API · {self._policy.google_api_model}",
                 "provider": "google-api",
                 "inputTokenLimit": None,
                 "outputTokenLimit": None,
                 "supportsStructuredOutput": True,
             })
-            known_ids.add(settings.google_api_model)
+            known_ids.add(self._policy.google_api_model)
         return {
             "providers": [self._primary(), self._fallback()],
             "models": models,
-            "policy": get_current_policy_dict(),
+            "policy": policy_dict(self._policy),
             "quotaNotice": "정확한 잔여 호출 수는 API 키에서 제공되지 않습니다. 프로젝트별 한도와 상세 사용량은 Google AI Studio에서 확인하며, 여기서는 실제 차단 상태와 복구 예정 시각을 표시합니다.",
             "agyStatus": self._agy_status.read() if self._agy_status else None,
-            "agyStatusBridgeCommand": f'python "{settings.base_dir / "scripts" / "agy_status_bridge.py"}"',
+            "agyStatusBridgeCommand": self._agy_status_bridge_command,
             "agyStatusLineInstalled": self._agy_status_line.is_installed() if self._agy_status_line else False,
             "nextExecution": self._next_execution(),
         }

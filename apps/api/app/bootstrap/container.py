@@ -27,15 +27,17 @@ from scaffold_engine import JsonPromptRunner
 from app.core.config import settings
 from app.core.llm import (
     AgyStatusSnapshot,
-    LedgerExecutionRecorder,
     LlmManager,
+    RuntimeExecutionPolicy,
 )
 from app.core.llm.credentials import OsCredentialStore
+from app.core.observation import RunObservationStore
 from app.documents.adapters import (
     EngineSegmentScanAdapter,
     LocalDocumentArtifactRepository,
     LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
+    RunObservationArchiveAdapter,
 )
 from app.documents.experimental import ScanDocumentSegmentsUseCase
 from app.documents.service import DocumentService
@@ -87,8 +89,32 @@ from app.workspaces.service import WorkspaceService
 _storage = settings.storage
 
 
+def _policy_from_settings() -> RuntimeExecutionPolicy:
+    """기본값을 설정에서 한 번 읽어 실행 정책을 만든다.
+
+    `providers.Object(settings.x)` 로 쓰지 않는 이유는 그것이 **클래스 본문이
+    실행되는 시점**, 즉 모듈 import 시점의 값을 복사하기 때문이다. 그러면 컨테이너를
+    만들기 전에 설정을 바꿔도 반영되지 않고, 실제로 그 방식으로 굳어 있던
+    인스펙터 매트릭스는 정책을 바꿔도 옛 값을 보여줬다.
+    """
+    return RuntimeExecutionPolicy(
+        primary_provider=settings.primary_provider,
+        fallback_provider=settings.fallback_provider,
+        google_api_model=settings.google_api_model,
+        google_api_timeout_seconds=settings.google_api_timeout_seconds,
+        agent_cli_model=settings.agent_cli_model,
+        agent_cli_timeout_seconds=settings.agent_cli_timeout_seconds,
+        agent_cli_bin=settings.agent_cli_bin,
+    )
+
+
 class Container(containers.DeclarativeContainer):
     """API 프로세스의 장기 객체와 요청별 유스케이스를 정의한다."""
+
+    # --- 실행 정책 (런타임 가변) --------------------------------------------
+    # 설정 화면이 바꾸는 값은 여기 하나에 모여 있다. 전역 `settings` 는 부팅 시
+    # 읽는 기본값만 제공하고, 이후의 변경은 이 객체에만 일어난다.
+    execution_policy = providers.Singleton(_policy_from_settings)
 
     # --- 비밀 · 공급자 상태 ------------------------------------------------
     credential_store = providers.Singleton(OsCredentialStore)
@@ -124,17 +150,20 @@ class Container(containers.DeclarativeContainer):
     resolve_next_execution = providers.Factory(
         ResolveNextExecutionUseCase,
         credentials=credential_store,
+        policy=execution_policy,
         provider_state=provider_state,
         cli_availability=cli_quota_availability,
     )
     update_runtime_policy = providers.Factory(
         UpdateRuntimePolicyUseCase,
         credentials=credential_store,
+        policy=execution_policy,
         runtime_policy=runtime_policy_repository,
     )
     llm_manager = providers.Singleton(
         LlmManager,
         credentials=credential_store,
+        policy=execution_policy,
         provider_state=provider_state,
         cli_availability=cli_quota_availability,
     )
@@ -147,6 +176,10 @@ class Container(containers.DeclarativeContainer):
     llm_settings_service = providers.Factory(
         LlmSettingsService,
         credentials=credential_store,
+        policy=execution_policy,
+        agy_status_bridge_command=providers.Object(
+            f'python "{settings.base_dir / "scripts" / "agy_status_bridge.py"}"'
+        ),
         provider_state=provider_state,
         agy_status=agy_status_snapshot,
         runtime_policy=runtime_policy_repository,
@@ -180,7 +213,10 @@ class Container(containers.DeclarativeContainer):
         agent_runtime=agent_runtime,
         approvals=approval_service,
     )
-    execution_recorder = providers.Singleton(LedgerExecutionRecorder, ledger=ledger)
+    # `data/runs/{run_id}/` 안의 관측 자료를 아는 유일한 객체. 루트는 여기서 준다.
+    run_observations = providers.Singleton(
+        RunObservationStore, runs_dir=providers.Object(_storage.runs)
+    )
 
     # --- [A Observation] 조회 (inspector) ----------------------------------
     # 관측 콘솔은 읽기 전용이지만 디스크 레이아웃을 알아서는 안 된다. 예전에는
@@ -188,16 +224,18 @@ class Container(containers.DeclarativeContainer):
     # 서비스가 `settings.storage.runs` 를 열어 run 디렉터리를 손으로 훑었다.
     run_archive = providers.Singleton(
         LocalRunArchive,
-        runs_dir=providers.Object(_storage.runs),
+        lifecycles=agent_run_repository,
+        observations=run_observations,
         ledger_dir=providers.Object(_storage.ledger),
     )
     source_archive = providers.Singleton(
         LocalSourceArchive, repo_root=providers.Object(settings.base_dir.parents[1])
     )
     model_matrix = providers.Singleton(
+        # 값을 복사하지 않고 정책 객체를 준다. 예전에는 부팅 시점 값을 복사해서,
+        # 설정 화면에서 공급자를 바꿔도 관측 매트릭스는 옛 값을 보여줬다.
         RegistryModelMatrixAdapter,
-        primary_provider=providers.Object(settings.primary_provider),
-        fallback_provider=providers.Object(settings.fallback_provider),
+        policy=execution_policy,
     )
 
     # --- [4 Knowledge] 저장소 ----------------------------------------------
@@ -246,8 +284,8 @@ class Container(containers.DeclarativeContainer):
     )
 
     # --- 도메인 관측 (Telemetry) -------------------------------------------
-    outline_telemetry = providers.Singleton(OutlineTelemetryAdapter)
-    wireframe_telemetry = providers.Singleton(WireframeTelemetryAdapter)
+    outline_telemetry = providers.Singleton(OutlineTelemetryAdapter, store=run_observations)
+    wireframe_telemetry = providers.Singleton(WireframeTelemetryAdapter, store=run_observations)
 
     # --- documents 유스케이스 ----------------------------------------------
     register_document = providers.Factory(
@@ -256,12 +294,16 @@ class Container(containers.DeclarativeContainer):
     get_document_file = providers.Factory(
         GetDocumentFileUseCase, source=document_source_repository
     )
+    document_run_archive = providers.Singleton(
+        RunObservationArchiveAdapter, observations=run_observations
+    )
     delete_document = providers.Factory(
         DeleteDocumentUseCase,
         source=document_source_repository,
         artifacts=document_artifact_repository,
         cache=document_cache_repository,
         scaffolds=scaffold_archive_service,
+        runs=document_run_archive,
     )
     list_document_artifacts = providers.Factory(
         ListDocumentArtifactsUseCase,
@@ -271,14 +313,11 @@ class Container(containers.DeclarativeContainer):
     extract_outline = providers.Factory(
         ExtractOutlineUseCase,
         source=document_source_repository,
-        artifacts=document_artifact_repository,
-        cache=document_cache_repository,
-        agent_runtime=agent_runtime,
-        recorder=execution_recorder,
-        llm_harness=llm_harness,
-        telemetry=outline_telemetry,
         engine=outline_extractor,
         archive=outline_archive,
+        agent_runtime=agent_runtime,
+        telemetry=outline_telemetry,
+        llm_harness=llm_harness,
     )
     scan_document_segments = providers.Factory(
         ScanDocumentSegmentsUseCase,
@@ -290,11 +329,10 @@ class Container(containers.DeclarativeContainer):
     generate_scaffold = providers.Factory(
         GenerateWireframeUseCase,
         source=document_source_repository,
+        engine=scaffold_extractor,
         archive=scaffold_archive_service,
         agent_runtime=agent_runtime,
-        engine=scaffold_extractor,
         telemetry=wireframe_telemetry,
-        llm_harness=llm_harness,
     )
 
     # 재개 핸들러를 Agent Runtime 에 등록하는 지점이므로 요청마다 새로 만들지 않는다.

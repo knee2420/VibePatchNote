@@ -64,7 +64,6 @@ from fastapi.responses import JSONResponse
 
 from app.bootstrap.container import Container
 from app.bootstrap.resume_handlers import register_resume_handlers
-from app.core.llm import purge_expired_traces
 from app.documents import router as documents_router
 from app.inspector import router as inspector_router
 from app.llm_settings import router as llm_settings_router
@@ -78,10 +77,18 @@ from app.workspaces import router as workspaces_router
 async def lifespan(app: FastAPI):
     """부팅 복구와 보존정책 집행.
 
+    - 실행 정책 복원: 저장된 정책은 설정 화면이 아니라 부팅이 읽어야 한다.
     - 재개 핸들러 등록: 이름으로만 재개할 수 있으므로 부팅 시 빠짐없이 등록한다.
     - 끊긴 실행 정리: 프로세스와 함께 사라진 run 이 영원히 "분석 중"으로 남지 않게 한다.
-    - 만료 트레이스 정리: 앱이 요청마다 파일을 회전시키는 대신 여기서 일괄 처리한다.
+    - 만료 로그 정리: 앱이 요청마다 파일을 회전시키는 대신 여기서 일괄 처리한다.
     """
+    # 저장된 실행 정책을 먼저 복원한다. 예전에는 이 복원이 `LlmSettingsService`
+    # 생성자에 있었고, 그 서비스는 요청마다 만들어지는 Factory 였다. 그래서
+    # **설정 화면을 열기 전까지** 프로세스는 저장된 정책이 아니라 환경 변수
+    # 기본값으로 실행했다 — 재시작 직후의 첫 분석이 사용자가 고르지 않은
+    # 공급자로 돌아갈 수 있었다.
+    app.container.update_runtime_policy().restore()
+
     # 재개 핸들러 등록이 고아 정리보다 먼저다. 정리 대상이 곧 재개 후보이고,
     # 등록되지 않은 유스케이스는 재개할 수 없다.
     register_resume_handlers(app.container)
@@ -90,10 +97,6 @@ async def lifespan(app: FastAPI):
     swept = runtime.sweep_orphans()
     if swept:
         logger.warning("[Startup] 끊긴 실행 %d건을 실패로 정리했습니다.", len(swept))
-
-    purged = purge_expired_traces(settings.trace_retention_days)
-    if purged:
-        logger.info("[Startup] 만료 트레이스 %d일치를 정리했습니다.", purged)
 
     purged_logs = purge_expired_logs(settings.storage.log, settings.trace_retention_days)
     if purged_logs:

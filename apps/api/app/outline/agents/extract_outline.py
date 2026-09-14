@@ -7,17 +7,12 @@ LLM 이 개입하므로 Agent Runtime 을 통과하고, 결과는 **캐시가 �
 from __future__ import annotations
 
 import logging
-from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
-from app.core.llm import BaseLlmHarness, ExecutionRecorder
+from app.core.llm import BaseLlmHarness
 from app.core.storage import RUN_PREFIX, new_id
 
-from ..adapters import (
-    DocumentOutlineArchiveAdapter,
-    EngineOutlineExtractAdapter,
-)
 from ..errors import analysis_error, failure_code_of
 from ..models import (
     OutlineExecutionResult,
@@ -26,7 +21,6 @@ from ..ports import (
     AgentRunInput,
     AgentRuntimePort,
     OutlineArchivePort,
-    OutlineArtifactRepository,
     OutlineDocumentSourcePort,
     OutlineExtractOutput,
     OutlineExtractPort,
@@ -46,37 +40,27 @@ class ExtractOutlineUseCase:
     def __init__(
         self,
         source: OutlineDocumentSourcePort,
-        artifacts: OutlineArtifactRepository | None = None,
-        cache: Any = None,
-        agent_runtime: AgentRuntimePort | None = None,
-        recorder: ExecutionRecorder | None = None,
-        llm_harness: BaseLlmHarness | None = None,
-        telemetry: OutlineTelemetryPort | None = None,
-        engine: OutlineExtractPort | None = None,
-        archive: OutlineArchivePort | None = None,
+        engine: OutlineExtractPort,
+        archive: OutlineArchivePort,
+        agent_runtime: AgentRuntimePort,
+        telemetry: OutlineTelemetryPort,
+        llm_harness: BaseLlmHarness,
     ) -> None:
+        """협력자는 전부 필수다. **유스케이스는 어댑터를 고르지 않는다.**
+
+        예전에는 모든 인자가 `| None = None` 이었고, 빠진 것은 생성자가 직접
+        `EngineOutlineExtractAdapter(...)` 를 만들어 채웠다. 세 가지가 한꺼번에
+        깨졌다 — 어댑터 선택이 컨테이너 밖으로 샜고, 컨테이너가 하나를 빠뜨려도
+        부팅이 성공한 뒤 사용자 요청이 `AttributeError` 로 발견했으며,
+        유지할 대상이 없는 "하위 호환" 폴백이 그 위반을 데리고 살아 있었다.
+        조립 오류는 요청이 아니라 부팅이 발견해야 한다.
+        """
         self._source = source
-        self._artifacts = artifacts
-        self._cache = cache
+        self._engine = engine
+        self._archive = archive
         self._runtime = agent_runtime
-        self._recorder = recorder
-        self._harness = llm_harness
         self._telemetry = telemetry
-
-        # 포트-어댑터 기본 조립 (직접 주입되지 않은 경우 자동 구성하여 하위 호환성 보장)
-        if engine is not None:
-            self._engine = engine
-        elif llm_harness is not None and cache is not None:
-            self._engine = EngineOutlineExtractAdapter(harness=llm_harness, cache=cache)
-        else:
-            self._engine = None  # type: ignore
-
-        if archive is not None:
-            self._archive = archive
-        elif artifacts is not None:
-            self._archive = DocumentOutlineArchiveAdapter(artifacts=artifacts)
-        else:
-            self._archive = None  # type: ignore
+        self._harness = llm_harness
 
     async def _run_pipeline(
         self,
@@ -85,13 +69,11 @@ class ExtractOutlineUseCase:
         display_name: str | None = None,
     ) -> OutlineExtractOutput:
         """독립 문서 엔진 포트를 통해 OutlineExtractOutput 추출을 실행합니다."""
-        if self._engine:
-            return await self._engine.extract(
-                Path(file_path),
-                context_dir=Path(context_dir) if context_dir else None,
-                display_name=display_name,
-            )
-        raise RuntimeError("OutlineExtractPort 엔진 어댑터가 구성되지 않았습니다.")
+        return await self._engine.extract(
+            Path(file_path),
+            context_dir=Path(context_dir) if context_dir else None,
+            display_name=display_name,
+        )
 
     def load_adopted(self, doc_id: str) -> dict[str, Any] | None:
         """현재 채택본을 그대로 읽는다. LLM 을 호출하지 않는 일반 경로다."""
@@ -101,7 +83,7 @@ class ExtractOutlineUseCase:
     async def execute(self, doc_id: str, force_refresh: bool = False) -> dict[str, Any]:
         meta = self._require(doc_id)
         run_id = current_run_id()
-        if not run_id and self._runtime:
+        if not run_id:
             agent_run, result = await self._runtime.execute(
                 self.name,
                 lambda: self._execute_internal(meta, force_refresh=force_refresh),
@@ -123,16 +105,12 @@ class ExtractOutlineUseCase:
         run_id = current_run_id() or new_id(RUN_PREFIX)
 
         # 관측 세션: StepCollector 활성화 및 작업 완료 시 Inspector 원장 자동 영속화
-        session_ctx = (
-            self._telemetry.workflow_session(
-                run_id=run_id,
-                doc_id=doc_id,
-                target_name=original_name,
-                workflow_name=self.name,
-                workflow_label="문서 목차 추출",
-            )
-            if self._telemetry
-            else nullcontext()
+        session_ctx = self._telemetry.workflow_session(
+            run_id=run_id,
+            doc_id=doc_id,
+            target_name=original_name,
+            workflow_name=self.name,
+            workflow_label="문서 목차 추출",
         )
 
         with session_ctx:
@@ -153,16 +131,22 @@ class ExtractOutlineUseCase:
             )
 
             # 1. 비용 원장 기록 (Engine 어댑터가 계산한 RunCost 계약 활용)
-            cost = getattr(document, "cost", None) or RunCost()
-            if self._runtime:
-                self._runtime.record_cost(run_id, cost)
-
             telemetry = document.telemetry or {}
             status_val = telemetry.get("status", "SUCCESS")
 
+            # 원장은 성공만 적는 곳이 아니다. 실패한 실행도 토큰을 쓴다.
+            cost = getattr(document, "cost", None) or RunCost()
+            self._runtime.record_cost(
+                run_id,
+                cost,
+                model=self._harness.model,
+                status=status_val,
+                failure_code=None if status_val == "SUCCESS" else failure_code_of(telemetry),
+            )
+
             provenance = None
             if status_val == "SUCCESS":
-                default_m = self._harness.model if self._harness else ""
+                default_m = self._harness.model
                 provenance = self._archive.archive(meta, document, run_id=run_id, cost=cost, default_model=default_m)
             else:
                 self._settle_failure(run_id, doc_id, telemetry)
@@ -195,8 +179,6 @@ class ExtractOutlineUseCase:
 
     def _settle_failure(self, run_id: str, doc_id: str, telemetry: dict[str, Any]) -> None:
         """실패를 정책에 따라 런타임에 위임하여 '대기' 또는 '실패'로 확정한다."""
-        if not self._runtime:
-            return
         code = failure_code_of(telemetry)
         self._runtime.settle_failure(
             run_id,

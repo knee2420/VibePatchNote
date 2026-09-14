@@ -11,13 +11,21 @@ from typing import Any, Generator
 
 from agent_telemetry import StepCollector
 
-from app.core.llm import ingest_pipeline_telemetry
+from app.core.observation import RunObservationStore
 
 logger = logging.getLogger(__name__)
 
 
 class OutlineTelemetryAdapter:
-    """`OutlineTelemetryPort` 계약의 호스트 구현체."""
+    """`OutlineTelemetryPort` 계약의 호스트 구현체.
+
+    저장 위치는 모른다. 관측 자료를 어디에 쓰는지는 `RunObservationStore` 가 알고,
+    그 루트는 컨테이너가 준다. 예전에는 전역 함수를 불렀고, 그 함수가 함수 안에서
+    `settings` 를 열어 경로를 지어냈다.
+    """
+
+    def __init__(self, store: RunObservationStore) -> None:
+        self._store = store
 
     @contextmanager
     def workflow_session(
@@ -44,7 +52,7 @@ class OutlineTelemetryAdapter:
             finally:
                 try:
                     telemetry = collector.export_telemetry()
-                    ingest_pipeline_telemetry(
+                    self._store.ingest(
                         telemetry,
                         run_id=run_id,
                         doc_id=doc_id,
@@ -66,7 +74,7 @@ class OutlineTelemetryAdapter:
             return
 
         try:
-            ingest_pipeline_telemetry(
+            self._store.ingest(
                 telemetry,
                 run_id=run_id,
                 doc_id=doc_id,
