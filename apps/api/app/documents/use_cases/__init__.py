@@ -8,7 +8,7 @@
 
 - **Agent 경로** — LLM 이 개입한다. Agent Runtime 을 통과하고, 산출물은
   `data/` 에 provenance 와 함께 아티팩트로 커밋한다.
-  `extract_outline` `scan_document_segments` `generate_scaffold`
+  `extract_outline` `generate_scaffold`
 """
 from .delete_document import DeleteDocumentUseCase
 from .get_document_file import GetDocumentFileUseCase

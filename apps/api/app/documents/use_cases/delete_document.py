@@ -16,6 +16,7 @@ from ..ports import (
     DocumentCacheRepository,
     DocumentSourceRepository,
     RunArchivePort,
+    SegmentArchivePort,
     WireframeArchivePort,
 )
 
@@ -32,18 +33,22 @@ class DeleteDocumentUseCase:
         cache: DocumentCacheRepository,
         scaffolds: WireframeArchivePort,
         runs: RunArchivePort,
+        segments: SegmentArchivePort | None = None,
     ) -> None:
         self._source = source
         self._artifacts = artifacts
         self._cache = cache
         self._scaffolds = scaffolds
         self._runs = runs
+        self._segments = segments
 
     def execute(self, doc_id: str) -> dict[str, int | bool]:
         if self._source.get(doc_id) is None:
             raise FileNotFoundError(f"Document not found: {doc_id}")
 
         removed_scaffolds = self._scaffolds.delete_for_document(doc_id)
+        if self._segments is not None:
+            self._segments.delete_for_document(doc_id)
         self._artifacts.delete_all(doc_id)
         self._cache.clear(doc_id)
         removed_runs = self._runs.delete_for_document(doc_id)

@@ -14,22 +14,35 @@ import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
 import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
+import { referenceDocumentApi } from '../api/referenceDocumentApi';
 import { useDocumentLayout } from '../lib/useDocumentLayout';
 import { useNodeResize } from '../lib/useNodeResize';
 import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
 import { useSegmentEditing } from '../model/useSegmentEditing';
 import { useDocumentScaffold } from '../model/useDocumentScaffold';
 import { useDocumentOutline } from '../model/useDocumentOutline';
+import { useSegmentStructure } from '../model/useSegmentStructure';
 import {
   REFERENCE_DOCUMENT_NODE_TYPE,
   type ReferenceDocumentData,
   type DocumentElementItem,
+  type DocumentSegmentItem,
 } from '../model/types';
 import { CardResizeFrame } from './CardResizeFrame';
 import { NodeSpreadAnchor } from './NodeSpreadAnchor';
 import { ReferenceCardHeader } from './ReferenceCardHeader';
 import { DocumentOutlinePanel } from './DocumentOutlinePanel';
+import { SegmentStructurePanel } from './SegmentStructurePanel';
 import { getReferenceCardTheme } from './referenceCardTheme';
+
+/**
+ * 세그먼트 탭이 아닐 때 뷰어에 넘기는 빈 목록.
+ *
+ * 여기서 `[]` 리터럴을 쓰면 렌더마다 새 배열이 되어 `PdfPage` 의 memo 가 매번
+ * 깨진다. 다시 그려진 `<Page>` 는 `onLoadSuccess` 를 또 부르고, 그 콜백이 상태를
+ * 바꾸면 렌더가 끝나지 않는다.
+ */
+const EMPTY_SEGMENTS: DocumentSegmentItem[] = [];
 
 /**
  * ReferenceDocumentCard (FSD Entity UI)
@@ -50,6 +63,8 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
 
   const [activeElement, setActiveElement] = useState<DocumentElementItem | null>(null);
+  const [panelTab, setPanelTab] = useState<'outline' | 'segments'>('outline');
+  const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
 
   // 이 카드가 해당 매핑의 대상이거나 아웃라인 엘리먼트가 선택되었을 때만 강조한다 (타 카드 번짐 완벽 방지)
   const highlight = useMemo<ViewerHighlight | null>(() => {
@@ -112,6 +127,14 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     initialStatus: data.outlineStatus,
     initialError: data.outlineError,
   });
+
+  const {
+    structure: segmentStructure,
+    isLoading: isLoadingSegmentStructure,
+    error: segmentStructureError,
+    refresh: refreshSegmentStructure,
+    assign: assignSegmentRelationship,
+  } = useSegmentStructure(data.docId, isOutlineOpen && panelTab === 'segments');
 
   const handleSelectElement = useCallback(
     (elem: DocumentElementItem) => {
@@ -196,13 +219,22 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     updateSegment,
     createSegment,
     deleteSegment,
+    splitSegment,
+    mergeSegments,
   } = useSegmentEditing({
     nodeId: id,
     docId: data.docId,
-    onScanSuccess: (loaded) =>
-      alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`),
+    onScanSuccess: (loaded) => {
+      void refreshSegmentStructure();
+      alert(`문서 분석 완료: 총 ${loaded.length}개의 논리 세그먼트(표/목록/섹션)가 감지되었습니다.`);
+    },
     onScanError: () => alert('문서 영역 스캔 중 오류가 발생했습니다.'),
+    onSegmentSaved: () => void refreshSegmentStructure(),
   });
+
+  const handleSelectSegment = useCallback((segment: { id: string }) => {
+    setSelectedSegmentId(segment.id);
+  }, []);
 
   const { isExtractingScaffold, extractScaffold } = useDocumentScaffold({
     nodeId: id,
@@ -229,8 +261,18 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   }, [resetCustomSize, handleToggleFit]);
 
   const handleDelete = useCallback(() => {
-    setNodes((nds) => nds.filter((node) => node.id !== id));
-  }, [id, setNodes]);
+    void (async () => {
+      try {
+        if (data.docId) await referenceDocumentApi.remove(data.docId);
+      } catch (error) {
+        // 서버 정리가 실패했어도 캔버스에서 카드를 지울지 사용자에게 묻는 별도
+        // 플로우는 다음 UX 개선으로 남긴다. 현재는 고아를 숨기지 않기 위해 기록한다.
+        console.error('[ReferenceDocumentCard] 문서 및 세그먼트 정리 실패:', error);
+        return;
+      }
+      setNodes((nds) => nds.filter((node) => node.id !== id));
+    })();
+  }, [data.docId, id, setNodes]);
 
   const theme = getReferenceCardTheme(data.theme);
 
@@ -269,7 +311,6 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         headerThemeClass={theme.header}
         isScanning={isScanning}
         hasSegments={segments.length > 0}
-        isEditMode={isEditMode}
         isExtractingScaffold={isExtractingScaffold}
         isExtractingOutline={isExtractingOutline}
         hasOutline={hasOutline}
@@ -279,7 +320,6 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
         onExtractScaffold={extractScaffold}
         onExtractOutline={() => extractOutline(hasOutline)}
         onToggleOutlinePanel={toggleOutlinePanel}
-        onToggleEditMode={toggleEditMode}
         onDelete={handleDelete}
       />
 
@@ -301,35 +341,73 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
             url={data.url}
             title={data.title}
             isSpread={isSpread}
-            segments={segments}
+            segments={panelTab === 'segments' ? segments : EMPTY_SEGMENTS}
             highlight={highlight}
-            isEditMode={isEditMode}
+            selectedSegmentId={selectedSegmentId}
+            isEditMode={panelTab === 'segments' && isEditMode}
             enableSmartSnap={enableSmartSnap}
             onUpdateSegment={updateSegment}
             onCreateSegment={createSegment}
             onDeleteSegment={deleteSegment}
+            onSplitSegment={splitSegment}
+            onSelectSegment={handleSelectSegment}
             onPageCountChange={setPageCount}
             onDimensionsChange={setDimensions}
           />
         </div>
 
         {/* 아웃라인 & 엘리먼트 트리 패널 */}
-        {isOutlineOpen && (hasOutline || isExtractingOutline) && (
-          <DocumentOutlinePanel
-            title={data.title}
-            outlines={outlines}
-            selectedElementId={selectedElementId}
-            isRefreshing={isExtractingOutline}
-            isExtracting={isExtractingOutline}
-            progressStep={outlineProgressStep}
-            progressMessage={outlineProgressMessage}
-            execution={outlineExecution}
-            onSelectElement={handleSelectElement}
-            onClose={toggleOutlinePanel}
-            onRefresh={() => extractOutline(true)}
-            error={outlineError}
-            onConfigureLlm={requestLlmSettings}
-          />
+        {isOutlineOpen && (hasOutline || isExtractingOutline || segments.length > 0) && (
+          <div className="w-[340px] h-full flex flex-col shrink-0">
+            <div className="h-8 px-2 flex items-center gap-1 border-l border-b border-slate-200 bg-slate-50 dark:bg-slate-900 nodrag">
+              <button
+                onClick={() => setPanelTab('outline')}
+                className={`px-2 py-1 rounded text-[10px] font-semibold ${panelTab === 'outline' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-200'}`}
+              >
+                Outline
+              </button>
+              <button
+                onClick={() => setPanelTab('segments')}
+                className={`px-2 py-1 rounded text-[10px] font-semibold ${panelTab === 'segments' ? 'bg-violet-600 text-white' : 'text-slate-500 hover:bg-slate-200'}`}
+              >
+                Segments
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              {panelTab === 'outline' ? (
+                <DocumentOutlinePanel
+                  title={data.title}
+                  outlines={outlines}
+                  selectedElementId={selectedElementId}
+                  isRefreshing={isExtractingOutline}
+                  isExtracting={isExtractingOutline}
+                  progressStep={outlineProgressStep}
+                  progressMessage={outlineProgressMessage}
+                  execution={outlineExecution}
+                  onSelectElement={handleSelectElement}
+                  onClose={toggleOutlinePanel}
+                  onRefresh={() => extractOutline(true)}
+                  error={outlineError}
+                  onConfigureLlm={requestLlmSettings}
+                />
+              ) : (
+                <SegmentStructurePanel
+                  title={data.title}
+                  structure={segmentStructure}
+                  isLoading={isLoadingSegmentStructure}
+                  error={segmentStructureError}
+                  selectedSegmentId={selectedSegmentId}
+                  isEditMode={isEditMode}
+                  onSelectSegment={handleSelectSegment}
+                  onSelectElement={handleSelectElement}
+                  onAssign={(kind, targetId, segmentId) => void assignSegmentRelationship(kind, targetId, segmentId)}
+                  onToggleEdit={toggleEditMode}
+                  onMerge={mergeSegments}
+                  onClose={toggleOutlinePanel}
+                />
+              )}
+            </div>
+          </div>
         )}
       </div>
 

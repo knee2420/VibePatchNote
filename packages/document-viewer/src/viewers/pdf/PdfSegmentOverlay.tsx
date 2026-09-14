@@ -10,6 +10,7 @@ import { useSegmentSelection } from './segment-overlay/useSegmentSelection';
 interface PdfSegmentOverlayProps {
   pageNumber: number;
   segments?: ViewerSegment[];
+  selectedSegmentId?: string | null;
   /** PDF 텍스트 줄의 Y 좌표. 스마트 마그넷 스냅 앵커로 씁니다. */
   textLines?: number[];
   isEditMode?: boolean;
@@ -17,6 +18,7 @@ interface PdfSegmentOverlayProps {
   onUpdateSegment?: (updated: ViewerSegment) => void;
   onCreateSegment?: (created: ViewerSegment) => void;
   onDeleteSegment?: (segmentId: string) => void;
+  onSplitSegment?: (segmentId: string, axis: 'horizontal' | 'vertical') => void;
   onSelectSegment?: (segment: ViewerSegment) => void;
 }
 
@@ -31,12 +33,14 @@ interface PdfSegmentOverlayProps {
 export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   pageNumber,
   segments = [],
+  selectedSegmentId,
   textLines,
   isEditMode = false,
   enableSnap = true,
   onUpdateSegment,
   onCreateSegment,
   onDeleteSegment,
+  onSplitSegment,
   onSelectSegment,
 }: PdfSegmentOverlayProps) {
   const pageSegments = useMemo(
@@ -46,6 +50,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
 
   const selection = useSegmentSelection({
     pageSegments,
+    selectedSegmentId,
     isEditMode,
     onUpdateSegment,
     onDeleteSegment,
@@ -77,7 +82,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   return (
     <div
       ref={drag.containerRef}
-      onMouseDown={drag.handleContainerMouseDown}
+      onPointerDown={drag.handleContainerPointerDown}
       className={`
         absolute inset-0 z-10 select-none overflow-visible nodrag nopan
         ${isEditMode ? 'pointer-events-auto' : 'pointer-events-none'}
@@ -106,6 +111,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
             onStartLabelEdit={selection.startLabelEdit}
             onHoverChange={selection.setHoveredId}
             onDelete={selection.deleteSegment}
+            onSplit={onSplitSegment}
             onClearSelection={selection.clearSelection}
             onEditingLabelChange={selection.setEditingLabel}
             onSaveLabel={selection.saveLabel}

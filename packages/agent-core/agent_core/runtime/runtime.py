@@ -30,6 +30,10 @@ ResumeHandler = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
 # 프로세스가 죽어 끊긴 실행에 붙이는 코드. 일반 실패와 구분해야 재개 대상을 고를 수 있다.
 INTERRUPTED_CODE = "AGENT_RUN_INTERRUPTED"
 
+# 유스케이스는 성공했는데 그 결과를 이력에 남기지 못한 경우. 실행 실패와 구분해야
+# "무엇을 고쳐야 하는가"가 갈린다 — 이쪽은 유스케이스의 반환 형태 문제다.
+UNRECORDABLE_RESULT_CODE = "AGENT_RESULT_UNRECORDABLE"
+
 
 class AgentRuntime:
     """실행 이력·대기·재개를 책임지는 도메인 무관 런타임."""
@@ -315,11 +319,36 @@ class AgentRuntime:
                 )
                 logger.exception("[AgentRuntime] 실행 실패 (%s): %s", run_id, exc)
                 return
-            current = self._runs.get(run_id)
-            if current is not None and (current.is_waiting or current.status == "failed"):
-                return
-            self._runs.append(run_id, AgentRunEvent(type="succeeded", result=result))
+            # 종결 기록은 반드시 남는다. 예전에는 이 줄들이 try 밖에 있었고,
+            # 유스케이스가 dict 가 아닌 값을 돌려주면 `AgentRunEvent` 검증이 여기서
+            # 터졌다. 그 예외는 아무도 받지 않아 태스크만 조용히 죽었고, run 은
+            # 영원히 running 으로 남았다 — 화면에서는 끝나지 않는 스피너였다.
+            # 결과를 못 남기는 것과 실행이 실패한 것은 다르므로 코드를 나눈다.
+            try:
+                current = self._runs.get(run_id)
+                if current is not None and (current.is_waiting or current.status == "failed"):
+                    return
+                self._runs.append(run_id, AgentRunEvent(type="succeeded", result=result))
+            except Exception as exc:
+                logger.exception(
+                    "[AgentRuntime] 결과를 이력에 남기지 못했습니다 (%s): %s", run_id, exc
+                )
+                self._fail_quietly(run_id, UNRECORDABLE_RESULT_CODE, exc)
 
         task = asyncio.create_task(run_operation(), name=run_id)
         self._pending.add(task)
         task.add_done_callback(self._pending.discard)
+
+    def _fail_quietly(self, run_id: str, error_code: str, exc: Exception) -> None:
+        """실패를 남기려다 또 실패해도 태스크를 죽이지 않는다.
+
+        여기서 예외가 새어 나가면 애초에 막으려던 상황 — 아무 기록 없이 사라지는
+        run — 이 그대로 재현된다.
+        """
+        try:
+            self._runs.append(
+                run_id,
+                AgentRunEvent(type="failed", error_code=error_code, detail={"error": str(exc)}),
+            )
+        except Exception:  # pragma: no cover - 저장소 자체가 망가진 경우
+            logger.exception("[AgentRuntime] 실패 기록마저 남기지 못했습니다: %s", run_id)

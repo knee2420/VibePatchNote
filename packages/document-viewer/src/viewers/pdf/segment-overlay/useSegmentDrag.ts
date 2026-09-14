@@ -94,9 +94,9 @@ export function useSegmentDrag({
     }
   }, []);
 
-  /** 빈 공간 mousedown: Shift 면 신규 영역 생성 시작, 아니면 선택 해제. */
-  const handleContainerMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  /** 빈 공간 pointerdown: Shift 면 신규 영역 생성 시작, 아니면 선택 해제. */
+  const handleContainerPointerDown = useCallback(
+    (e: React.PointerEvent) => {
       if (!isEditMode) return;
       if (e.target !== containerRef.current) return;
 
@@ -107,7 +107,7 @@ export function useSegmentDrag({
 
       e.stopPropagation();
       e.preventDefault();
-      e.nativeEvent.stopImmediatePropagation();
+      e.currentTarget.setPointerCapture?.(e.pointerId);
       setSelectedId(null);
       cacheContainerRect();
 
@@ -127,9 +127,9 @@ export function useSegmentDrag({
     [isEditMode, isShiftDown, enableSnap, snapAnchors, setSelectedId, cacheContainerRect]
   );
 
-  /** 박스 본체나 리사이즈 핸들 mousedown: 이동/리사이즈 시작. */
+  /** 박스 본체나 리사이즈 핸들 pointerdown: 이동/리사이즈 시작. */
   const startDrag = useCallback(
-    (handle: ResizeHandle, segment: ViewerSegment, e: React.MouseEvent) => {
+    (handle: ResizeHandle, segment: ViewerSegment, e: React.PointerEvent) => {
       if (!isEditMode) return;
       e.stopPropagation();
       e.preventDefault();
@@ -181,11 +181,11 @@ export function useSegmentDrag({
     setResizingState(null);
   }, []);
 
-  // 전역 mousemove / mouseup: 드래그가 컨테이너 밖으로 나가도 이어집니다.
+  // 전역 pointermove / pointerup: 포인터가 컨테이너 밖으로 나가도 이어집니다.
   useEffect(() => {
     if (!isCreating && !resizingState) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       const rect = containerRectRef.current;
       if (!rect) return;
 
@@ -216,7 +216,7 @@ export function useSegmentDrag({
       }
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       setActiveGuideX(null);
       setActiveGuideY(null);
 
@@ -226,11 +226,13 @@ export function useSegmentDrag({
       containerRectRef.current = null;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
     };
   }, [
     isCreating,
@@ -262,7 +264,7 @@ export function useSegmentDrag({
     resizingSegmentId: resizingState?.segmentId ?? null,
     activeGuideX,
     activeGuideY,
-    handleContainerMouseDown,
+    handleContainerPointerDown,
     startDrag,
     boxOf,
   };

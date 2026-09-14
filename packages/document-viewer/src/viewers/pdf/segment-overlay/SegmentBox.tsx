@@ -18,11 +18,12 @@ interface SegmentBoxProps {
   isEditing: boolean;
   editingLabel: string;
   boxRef: Ref<HTMLDivElement> | null;
-  onStartDrag: (handle: ResizeHandle, segment: ViewerSegment, e: React.MouseEvent) => void;
+  onStartDrag: (handle: ResizeHandle, segment: ViewerSegment, e: React.PointerEvent) => void;
   onSelect: (segment: ViewerSegment) => void;
   onStartLabelEdit: (segment: ViewerSegment) => void;
   onHoverChange: (segmentId: string | null) => void;
   onDelete: (segmentId: string) => void;
+  onSplit?: (segmentId: string, axis: 'horizontal' | 'vertical') => void;
   onClearSelection: () => void;
   onEditingLabelChange: (label: string) => void;
   onSaveLabel: () => void;
@@ -47,6 +48,7 @@ export const SegmentBox = memo(function SegmentBox({
   onStartLabelEdit,
   onHoverChange,
   onDelete,
+  onSplit,
   onClearSelection,
   onEditingLabelChange,
   onSaveLabel,
@@ -60,7 +62,7 @@ export const SegmentBox = memo(function SegmentBox({
     <div
       ref={boxRef}
       // 박스 본체 아무 곳이나 잡고 끌면 즉시 이동합니다.
-      onMouseDown={(e) => isEditMode && onStartDrag('move', segment, e)}
+      onPointerDown={(e) => isEditMode && onStartDrag('move', segment, e)}
       onClick={(e) => {
         if (!isEditMode) return;
         e.stopPropagation();
@@ -108,6 +110,7 @@ export const SegmentBox = memo(function SegmentBox({
           editingLabel={editingLabel}
           onStartEdit={() => onStartLabelEdit(segment)}
           onDelete={() => onDelete(segment.id)}
+          onSplit={onSplit ? (axis) => onSplit(segment.id, axis) : undefined}
           onClose={onClearSelection}
           onEditingLabelChange={onEditingLabelChange}
           onSaveLabel={onSaveLabel}
@@ -118,7 +121,7 @@ export const SegmentBox = memo(function SegmentBox({
 
       {isSelected && isEditMode && (
         <SegmentResizeHandles
-          onHandleMouseDown={(handle, e) => onStartDrag(handle, segment, e)}
+          onHandlePointerDown={(handle, e) => onStartDrag(handle, segment, e)}
         />
       )}
     </div>

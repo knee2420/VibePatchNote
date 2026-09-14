@@ -3,7 +3,6 @@ export { REFERENCE_DOCUMENT_NODE_TYPE, REFERENCE_CARD_SIZE } from './model/types
 export type {
   ReferenceDocumentData,
   DocumentSegmentItem,
-  ScanDocumentResponse,
   DocumentOutlineNode,
   DocumentElementItem,
   ExtractOutlineResponse,

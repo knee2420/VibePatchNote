@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { referenceDocumentApi } from '../api/referenceDocumentApi';
 import { useDocumentScan } from './useDocumentScan';
@@ -12,6 +12,7 @@ interface UseSegmentEditingOptions {
   /** 스캔 완료/실패 알림은 헤드리스 훅이 아니라 호출한 UI 가 담당합니다. */
   onScanSuccess?: (segments: DocumentSegmentItem[]) => void;
   onScanError?: (error: unknown) => void;
+  onSegmentSaved?: () => void;
 }
 
 /**
@@ -26,15 +27,22 @@ export function useSegmentEditing({
   docId,
   onScanSuccess,
   onScanError,
+  onSegmentSaved,
 }: UseSegmentEditingOptions) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { isScanning, segments, setSegments, execution, scanDocument } = useDocumentScan({
+  const { isScanning, segments, artifactId, setArtifactId, setSegments, execution, scanDocument } = useDocumentScan({
     docId,
     onSuccess: (loaded) => onScanSuccess?.(loaded),
     onError: (error) => onScanError?.(error),
   });
+  const segmentsRef = useRef(segments);
+  const artifactIdRef = useRef(artifactId);
+  const saveQueueRef = useRef(Promise.resolve());
+
+  useEffect(() => { segmentsRef.current = segments; }, [segments]);
+  useEffect(() => { artifactIdRef.current = artifactId; }, [artifactId]);
 
   const scan = useCallback(() => {
     void scanDocument();
@@ -46,29 +54,33 @@ export function useSegmentEditing({
 
   /** 편집 결과를 새 아티팩트로 커밋합니다. */
   const persist = useCallback(
-    async (next: DocumentSegmentItem[]) => {
+    (next: DocumentSegmentItem[]) => {
       if (!docId) return;
-      setIsSaving(true);
-      try {
-        await referenceDocumentApi.saveSegments(docId, next);
-      } catch (error) {
-        console.error('[useSegmentEditing] 세그먼트 저장 실패:', error);
-      } finally {
-        setIsSaving(false);
-      }
+      saveQueueRef.current = saveQueueRef.current.then(async () => {
+        setIsSaving(true);
+        try {
+          const saved = await referenceDocumentApi.saveSegments(docId, artifactIdRef.current, next);
+          const nextArtifactId = saved.artifactId || null;
+          artifactIdRef.current = nextArtifactId;
+          setArtifactId(nextArtifactId);
+          onSegmentSaved?.();
+        } catch (error) {
+          console.error('[useSegmentEditing] 세그먼트 저장 실패:', error);
+        } finally {
+          setIsSaving(false);
+        }
+      });
     },
-    [docId]
+    [docId, setArtifactId, onSegmentSaved]
   );
 
   /** setSegments 의 updater 안에서 부수효과를 부르지 않고, 계산된 결과만 커밋합니다. */
   const commit = useCallback(
     (project: (prev: DocumentSegmentItem[]) => DocumentSegmentItem[]) => {
-      let next: DocumentSegmentItem[] = [];
-      setSegments((prev) => {
-        next = project(prev);
-        return next;
-      });
-      void persist(next);
+      const next = project(segmentsRef.current);
+      segmentsRef.current = next;
+      setSegments(next);
+      persist(next);
     },
     [setSegments, persist]
   );
@@ -89,8 +101,57 @@ export function useSegmentEditing({
     [commit]
   );
 
+  const splitSegment = useCallback(
+    (segmentId: string, axis: 'horizontal' | 'vertical') =>
+      commit((prev) => {
+        const target = prev.find((segment) => segment.id === segmentId);
+        if (!target) return prev;
+        const [ymin, xmin, ymax, xmax] = target.box_2d;
+        const midpoint = axis === 'horizontal' ? Math.round((ymin + ymax) / 2) : Math.round((xmin + xmax) / 2);
+        if ((axis === 'horizontal' && midpoint <= ymin) || (axis === 'vertical' && midpoint <= xmin)) return prev;
+        const firstBox: DocumentSegmentItem['box_2d'] = axis === 'horizontal'
+          ? [ymin, xmin, midpoint, xmax]
+          : [ymin, xmin, ymax, midpoint];
+        const secondBox: DocumentSegmentItem['box_2d'] = axis === 'horizontal'
+          ? [midpoint, xmin, ymax, xmax]
+          : [ymin, midpoint, ymax, xmax];
+        const suffix = axis === 'horizontal' ? '상단' : '좌측';
+        const nextId = `${target.id}-split-${Date.now()}`;
+        const replacement = [
+          { ...target, label: `${target.label} (${suffix})`, box_2d: firstBox },
+          { ...target, id: nextId, label: `${target.label} (${axis === 'horizontal' ? '하단' : '우측'})`, box_2d: secondBox },
+        ];
+        return prev.flatMap((segment) => segment.id === segmentId ? replacement : [segment]);
+      }),
+    [commit],
+  );
+
+  const mergeSegments = useCallback(
+    (segmentIds: string[]) =>
+      commit((prev) => {
+        const selected = prev.filter((segment) => segmentIds.includes(segment.id));
+        if (selected.length < 2 || new Set(selected.map((segment) => segment.page)).size !== 1) return prev;
+        const [first, ...rest] = selected;
+        const merged: DocumentSegmentItem = {
+          ...first,
+          label: `${first.label} 외 ${selected.length - 1}개`,
+          box_2d: [
+            Math.min(...selected.map((segment) => segment.box_2d[0])),
+            Math.min(...selected.map((segment) => segment.box_2d[1])),
+            Math.max(...selected.map((segment) => segment.box_2d[2])),
+            Math.max(...selected.map((segment) => segment.box_2d[3])),
+          ],
+          content_summary: [first.content_summary, ...rest.map((segment) => segment.content_summary)]
+            .filter(Boolean).join(' '),
+        };
+        return prev.flatMap((segment) => segment.id === first.id ? [merged] : segmentIds.includes(segment.id) ? [] : [segment]);
+      }),
+    [commit],
+  );
+
   return {
     segments,
+    artifactId,
     isScanning,
     execution,
     isSaving,
@@ -100,5 +161,7 @@ export function useSegmentEditing({
     updateSegment,
     createSegment,
     deleteSegment,
+    splitSegment,
+    mergeSegments,
   };
 }

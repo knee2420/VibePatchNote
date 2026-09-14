@@ -3,20 +3,14 @@
 비즈니스 로직은 `use_cases/` 및 `experimental/` 이 갖는다. 이 계층이 하는 일은:
 1. 요청이 준 식별자(`docId` 또는 레거시 `filename`)를 `doc_id` 로 정규화한다.
 2. 알맞은 유스케이스로 위임한다.
-3. 세그먼트 스캔 비동기 실행을 Agent Runtime 에 연계한다.
-
-재개 핸들러 등록은 여기가 아니라 `bootstrap/resume_handlers.py` 가 부팅 시 한다.
-생성자에 두면 이 서비스가 처음 만들어질 때까지 재개가 불가능해진다.
+세그먼트 분석은 독립 `segments` 도메인의 책임이다. 문서 서비스는 원본과
+문서 자체의 아티팩트만 소유한다.
 """
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
-from agent_runtime import AgentRunInput, AgentRuntime
-
-from .experimental import ScanDocumentSegmentsUseCase
 from .models import DocumentMeta
 from .use_cases import (
     DeleteDocumentUseCase,
@@ -24,8 +18,6 @@ from .use_cases import (
     ListDocumentArtifactsUseCase,
     RegisterDocumentUseCase,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class DocumentService:
@@ -37,15 +29,11 @@ class DocumentService:
         get_file: GetDocumentFileUseCase,
         delete: DeleteDocumentUseCase,
         artifacts: ListDocumentArtifactsUseCase,
-        scan_segments: ScanDocumentSegmentsUseCase,
-        agent_runtime: AgentRuntime,
     ) -> None:
         self._register = register
         self._get_file = get_file
         self._delete = delete
         self._artifacts = artifacts
-        self._scan_segments = scan_segments
-        self._runtime = agent_runtime
 
     # --- 원본 문서 관리 ---------------------------------------------------
 
@@ -69,27 +57,3 @@ class DocumentService:
 
     def list_artifacts(self, doc_id: str) -> dict[str, Any]:
         return self._artifacts.execute(doc_id)
-
-    # --- 세그먼트 스캔 -----------------------------------------------------
-
-    def load_adopted_segments(self, doc_id: str) -> dict[str, Any] | None:
-        return self._scan_segments.load_adopted(doc_id)
-
-    def save_edited_segments(self, doc_id: str, segments: list[Any]) -> dict[str, Any]:
-        return self._scan_segments.save_edited(doc_id, segments)
-
-    async def scan_document_segments(self, doc_id: str) -> dict[str, Any]:
-        return await self._scan_segments.execute(doc_id)
-
-    async def start_document_scan(self, doc_id: str) -> dict[str, Any]:
-        run = await self._runtime.submit(
-            self._scan_segments.name,
-            lambda: self._scan_segments.execute(doc_id),
-            doc_id=doc_id,
-            run_input=AgentRunInput(
-                use_case=self._scan_segments.name,
-                doc_id=doc_id,
-                payload={"docId": doc_id},
-            ),
-        )
-        return {"runId": run.run_id, "status": run.status}

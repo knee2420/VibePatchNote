@@ -22,7 +22,7 @@ from llm_driver import (
     ProviderStateStore,
     RuntimePolicyHarness,
 )
-from scaffold_engine import JsonPromptRunner
+from scaffold_engine import JsonPromptRunner, SegmentPipeline
 
 from app.core.config import settings
 from app.core.llm import (
@@ -33,13 +33,11 @@ from app.core.llm import (
 from app.core.llm.credentials import OsCredentialStore
 from app.core.observation import RunObservationStore
 from app.documents.adapters import (
-    EngineSegmentScanAdapter,
     LocalDocumentArtifactRepository,
     LocalDocumentCacheRepository,
     LocalDocumentSourceRepository,
     RunObservationArchiveAdapter,
 )
-from app.documents.experimental import ScanDocumentSegmentsUseCase
 from app.documents.service import DocumentService
 from app.documents.use_cases import (
     DeleteDocumentUseCase,
@@ -75,6 +73,25 @@ from app.outline.adapters import (
 from app.outline.agents import ExtractOutlineUseCase
 from app.outline.service import OutlineService
 from app.runtime.service import RuntimeService
+from app.segments.adapters import (
+    EngineSegmentExtractAdapter,
+    LocalDocumentSourceReader,
+    LocalOutlineReader,
+    LocalSegmentAgreementRepository,
+    LocalSegmentMappingCache,
+    LocalSegmentRepository,
+    LocalWireframeReader,
+    SegmentCleanupAdapter,
+    SegmentTelemetryAdapter,
+)
+from app.segments.agents import ExtractSegmentsUseCase
+from app.segments.service import SegmentsService
+from app.segments.use_cases import (
+    GetAdoptedSegmentsUseCase,
+    GetSegmentStructureViewUseCase,
+    SaveSegmentRevisionUseCase,
+    SetRelationshipOverrideUseCase,
+)
 from app.wireframe.adapters import (
     EngineWireframeExtractAdapter,
     HttpWireframeUrlResolver,
@@ -251,6 +268,18 @@ class Container(containers.DeclarativeContainer):
         LocalDocumentCacheRepository,
         root_dir=providers.Object(_storage.cache_of("documents")),
     )
+    segment_repository = providers.Singleton(
+        LocalSegmentRepository,
+        root_dir=providers.Object(_storage.knowledge_of("segments")),
+    )
+    segment_agreement_repository = providers.Singleton(
+        LocalSegmentAgreementRepository,
+        root_dir=providers.Object(_storage.agreements),
+    )
+    segment_mapping_cache = providers.Singleton(
+        LocalSegmentMappingCache,
+        root_dir=providers.Object(_storage.cache_of("segments")),
+    )
     wireframe_url_resolver = providers.Singleton(
         HttpWireframeUrlResolver,
         asset_route_prefix=providers.Object("/api/v1/scaffolds"),
@@ -267,7 +296,8 @@ class Container(containers.DeclarativeContainer):
 
     # --- [6 Models] · Runner 정의 ------------------------------------------
     json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
-    segment_scanner = providers.Factory(EngineSegmentScanAdapter, runner=json_prompt_runner)
+    segment_pipeline = providers.Factory(SegmentPipeline, runner=json_prompt_runner)
+    segment_extractor = providers.Factory(EngineSegmentExtractAdapter, pipeline=segment_pipeline)
     outline_extractor = providers.Factory(
         EngineOutlineExtractAdapter,
         harness=llm_harness,
@@ -286,6 +316,7 @@ class Container(containers.DeclarativeContainer):
     # --- 도메인 관측 (Telemetry) -------------------------------------------
     outline_telemetry = providers.Singleton(OutlineTelemetryAdapter, store=run_observations)
     wireframe_telemetry = providers.Singleton(WireframeTelemetryAdapter, store=run_observations)
+    segment_telemetry = providers.Singleton(SegmentTelemetryAdapter, store=run_observations)
 
     # --- documents 유스케이스 ----------------------------------------------
     register_document = providers.Factory(
@@ -297,6 +328,12 @@ class Container(containers.DeclarativeContainer):
     document_run_archive = providers.Singleton(
         RunObservationArchiveAdapter, observations=run_observations
     )
+    segment_cleanup = providers.Singleton(
+        SegmentCleanupAdapter,
+        repository=segment_repository,
+        agreements=segment_agreement_repository,
+        cache=segment_mapping_cache,
+    )
     delete_document = providers.Factory(
         DeleteDocumentUseCase,
         source=document_source_repository,
@@ -304,6 +341,7 @@ class Container(containers.DeclarativeContainer):
         cache=document_cache_repository,
         scaffolds=scaffold_archive_service,
         runs=document_run_archive,
+        segments=segment_cleanup,
     )
     list_document_artifacts = providers.Factory(
         ListDocumentArtifactsUseCase,
@@ -319,12 +357,52 @@ class Container(containers.DeclarativeContainer):
         telemetry=outline_telemetry,
         llm_harness=llm_harness,
     )
-    scan_document_segments = providers.Factory(
-        ScanDocumentSegmentsUseCase,
-        source=document_source_repository,
-        artifacts=document_artifact_repository,
-        scanner=segment_scanner,
+    segment_source_reader = providers.Factory(
+        LocalDocumentSourceReader, source=document_source_repository
+    )
+    segment_outline_reader = providers.Factory(
+        LocalOutlineReader, artifacts=document_artifact_repository
+    )
+    segment_wireframe_reader = providers.Factory(
+        LocalWireframeReader, repository=scaffold_repository
+    )
+    extract_segments = providers.Factory(
+        ExtractSegmentsUseCase,
+        source=segment_source_reader,
+        extractor=segment_extractor,
+        repository=segment_repository,
         agent_runtime=agent_runtime,
+        telemetry=segment_telemetry,
+        llm_harness=llm_harness,
+    )
+    get_adopted_segments = providers.Factory(
+        GetAdoptedSegmentsUseCase,
+        source=segment_source_reader,
+        repository=segment_repository,
+    )
+    save_segment_revision = providers.Factory(
+        SaveSegmentRevisionUseCase,
+        source=segment_source_reader,
+        repository=segment_repository,
+        cache=segment_mapping_cache,
+    )
+    get_segment_structure_view = providers.Factory(
+        GetSegmentStructureViewUseCase,
+        source=segment_source_reader,
+        segments=segment_repository,
+        agreements=segment_agreement_repository,
+        cache=segment_mapping_cache,
+        outlines=segment_outline_reader,
+        wireframes=segment_wireframe_reader,
+    )
+    set_segment_relationship_override = providers.Factory(
+        SetRelationshipOverrideUseCase,
+        source=segment_source_reader,
+        segments=segment_repository,
+        agreements=segment_agreement_repository,
+        cache=segment_mapping_cache,
+        outlines=segment_outline_reader,
+        wireframes=segment_wireframe_reader,
     )
     generate_scaffold = providers.Factory(
         GenerateWireframeUseCase,
@@ -347,7 +425,14 @@ class Container(containers.DeclarativeContainer):
         get_file=get_document_file,
         delete=delete_document,
         artifacts=list_document_artifacts,
-        scan_segments=scan_document_segments,
+    )
+    segments_service = providers.Factory(
+        SegmentsService,
+        extract=extract_segments,
+        adopted=get_adopted_segments,
+        save_revision=save_segment_revision,
+        structure=get_segment_structure_view,
+        override=set_segment_relationship_override,
         agent_runtime=agent_runtime,
     )
 

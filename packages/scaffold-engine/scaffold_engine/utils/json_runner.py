@@ -12,6 +12,11 @@ class JsonPromptRunner:
     def __init__(self, harness: LlmHarness) -> None:
         self._harness = harness
 
+    @property
+    def model(self) -> str:
+        """현재 하네스가 선택한 모델 식별자. 관측에만 사용한다."""
+        return str(getattr(self._harness, "model", "configured-llm"))
+
     def run(self, prompt: str, list_key: str = "__engine_payload__", **kwargs: Any) -> Optional[dict[str, Any]]:
         if not prompt.strip():
             raise ValueError("JsonPromptRunner requires a non-empty prompt.")

@@ -18,7 +18,7 @@ __all__ = [
     "DocumentArtifactRepository",
     "DocumentCacheRepository",
     "DocumentSourceRepository",
-    "SegmentScanPort",
+    "SegmentArchivePort",
     "WireframeArchivePort",
 ]
 
@@ -79,16 +79,16 @@ class DocumentCacheRepository(Protocol):
     def clear(self, doc_id: str) -> None: ...
 
 
-class SegmentScanPort(Protocol):
-    """문서 세그먼트 분석 실행 계약."""
-
-    async def scan(self, prompt: str) -> dict[str, Any] | None: ...
-
-
 class WireframeArchivePort(Protocol):
     """문서 삭제 시 파생된 서식 틀(와이어프레임) 아카이브를 연쇄 정리하기 위한 계약."""
 
     def delete_for_document(self, doc_id: str) -> int: ...
+
+
+class SegmentArchivePort(Protocol):
+    """Independent segment aggregate cleanup during document deletion."""
+
+    def delete_for_document(self, doc_id: str) -> None: ...
 
 
 # 하위 호환 alias

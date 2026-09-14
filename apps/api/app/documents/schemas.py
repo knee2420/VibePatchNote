@@ -5,7 +5,7 @@
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -21,7 +21,6 @@ class DocumentTarget(BaseModel):
     )
 
     model_config = {"populate_by_name": True}
-
     @model_validator(mode="after")
     def _require_one(self) -> "DocumentTarget":
         if not self.doc_id and not self.filename:
@@ -59,40 +58,3 @@ class DocumentArtifactsResponse(BaseModel):
     artifacts: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = {"populate_by_name": True}
-
-
-# --- 세그먼트 스캔 ------------------------------------------------------------
-
-
-class SegmentItem(BaseModel):
-    """스캔 결과의 평면 세그먼트 1건 (프런트 캔버스 오버레이가 그대로 소비)."""
-
-    id: str = Field(..., description="세그먼트 식별자")
-    page: int = Field(1, description="문서 페이지 번호 (1-based)")
-    type: str = Field(..., description="블록 타입: section, table, list, paragraph")
-    label: str = Field(..., description="블록 표시 라벨/제목")
-    box_2d: List[int] = Field(
-        ..., description="[ymin, xmin, ymax, xmax] 0~1000 상대 비율 좌표"
-    )
-    content_summary: Optional[str] = Field(None, description="블록 내용 요약")
-
-
-class ScanDocumentRequest(DocumentTarget):
-    pass
-
-
-class ScanDocumentResponse(BaseModel):
-    status: str = Field("completed", description="처리 상태 (completed/failed)")
-    doc_id: str = Field(..., alias="docId")
-    document_title: str = Field(..., description="문서 제목")
-    total_segments: int = Field(..., description="감지된 세그먼트 수")
-    segments: List[SegmentItem] = Field(default_factory=list, description="세그먼트 목록")
-    agent_run_id: Optional[str] = Field(default=None, alias="agentRunId")
-
-    model_config = {"populate_by_name": True}
-
-
-class SegmentsUpdate(BaseModel):
-    """사용자가 편집한 세그먼트 저장 요청."""
-
-    segments: List[SegmentItem] = Field(default_factory=list)

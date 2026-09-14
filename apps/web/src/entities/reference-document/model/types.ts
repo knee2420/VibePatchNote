@@ -18,13 +18,45 @@ export interface DocumentSegmentItem {
   content_summary?: string;
 }
 
-export interface ScanDocumentResponse {
+export interface SegmentArtifactResponse {
   status: string;
   docId: string;
-  document_title: string;
-  total_segments: number;
+  documentTitle: string;
+  totalPages: number;
+  artifactId?: string | null;
   segments: DocumentSegmentItem[];
   agentRunId?: string;
+}
+
+export interface SegmentStructureTarget {
+  id: string;
+  page: number;
+  label: string;
+  type: string;
+  box_2d?: [number, number, number, number] | null;
+  artifactId?: string | null;
+  scaffoldId?: string | null;
+}
+
+export interface SegmentMappingItem {
+  targetKind: 'outline_element' | 'wireframe_block';
+  targetId: string;
+  primarySegmentId?: string | null;
+  confidence: number;
+  source: 'algorithm' | 'override' | 'unassigned';
+  reason: string;
+}
+
+export interface SegmentStructureResponse {
+  docId: string;
+  segmentArtifactId?: string | null;
+  outlineArtifactId?: string | null;
+  segments: DocumentSegmentItem[];
+  outlineElements: SegmentStructureTarget[];
+  wireframeBlocks: SegmentStructureTarget[];
+  mappings: SegmentMappingItem[];
+  staleOverrideIds: string[];
+  mappingEngineVersion: string;
 }
 
 export interface DocumentElementItem {

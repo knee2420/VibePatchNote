@@ -12,12 +12,15 @@ export const PdfViewer = memo(function PdfViewer({
   url,
   isSpread = false,
   segments = [],
+  selectedSegmentId,
   highlight,
   isEditMode = false,
   enableSmartSnap = true,
   onUpdateSegment,
   onCreateSegment,
   onDeleteSegment,
+  onSplitSegment,
+  onSelectSegment,
   onPageCountChange,
   onDimensionsChange,
 }: DocumentViewerProps) {
@@ -65,7 +68,7 @@ export const PdfViewer = memo(function PdfViewer({
   }
 
   return (
-    <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-100/70 rounded-b-md select-none">
+    <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-100/70 rounded-b-md">
       <Document
         file={url}
         onLoadSuccess={handleDocumentLoadSuccess}
@@ -96,6 +99,7 @@ export const PdfViewer = memo(function PdfViewer({
                   totalPages={numPages}
                   isSpread={isSpread}
                   segments={segments}
+                  selectedSegmentId={selectedSegmentId}
                   highlight={highlight}
                   textLines={textLinesByPage[pageNumber]}
                   isEditMode={isEditMode}
@@ -105,6 +109,8 @@ export const PdfViewer = memo(function PdfViewer({
                   onUpdateSegment={onUpdateSegment}
                   onCreateSegment={onCreateSegment}
                   onDeleteSegment={onDeleteSegment}
+                  onSplitSegment={onSplitSegment}
+                  onSelectSegment={onSelectSegment}
                 />
               );
             })}

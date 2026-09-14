@@ -7,13 +7,11 @@
 from .local_document_artifact_repository import LocalDocumentArtifactRepository
 from .local_document_cache_repository import LocalDocumentCacheRepository
 from .local_document_source_repository import LocalDocumentSourceRepository
-from .native_segment_scan_adapter import EngineSegmentScanAdapter
 from .run_archive_adapter import RunObservationArchiveAdapter
 
 __all__ = [
     "LocalDocumentSourceRepository",
     "LocalDocumentArtifactRepository",
     "LocalDocumentCacheRepository",
-    "EngineSegmentScanAdapter",
     "RunObservationArchiveAdapter",
 ]

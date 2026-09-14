@@ -44,10 +44,22 @@ export function usePdfTextLines() {
           normalizedYs.add(normalizedY);
         }
 
-        setTextLinesByPage((prev) => ({
-          ...prev,
-          [pageNumber]: Array.from(normalizedYs).sort((a, b) => a - b),
-        }));
+        const next = Array.from(normalizedYs).sort((a, b) => a - b);
+        setTextLinesByPage((prev) => {
+          // **값이 같으면 이전 참조를 그대로 돌려준다.** 매번 새 객체·새 배열을
+          // 만들면 `textLines` 프롭 신원이 바뀌어 `PdfPage` 의 memo 가 깨지고,
+          // 다시 그려진 `<Page>` 가 `onLoadSuccess` 를 또 부른다 — 그 콜백이
+          // 바로 여기다. 끝나지 않는 리렌더(화면 깜빡임)의 진원지였다.
+          const current = prev[pageNumber];
+          if (
+            current &&
+            current.length === next.length &&
+            current.every((value, index) => value === next[index])
+          ) {
+            return prev;
+          }
+          return { ...prev, [pageNumber]: next };
+        });
       })
       .catch(() => {
         // 텍스트 레이어가 없는 스캔 PDF: 기존 세그먼트 경계만 스냅 앵커로 사용합니다.

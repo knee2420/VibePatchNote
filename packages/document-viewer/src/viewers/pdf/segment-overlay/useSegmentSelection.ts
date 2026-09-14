@@ -4,6 +4,7 @@ import type { ViewerSegment } from '../../../types';
 
 interface UseSegmentSelectionOptions {
   pageSegments: ViewerSegment[];
+  selectedSegmentId?: string | null;
   isEditMode: boolean;
   onUpdateSegment?: (updated: ViewerSegment) => void;
   onDeleteSegment?: (segmentId: string) => void;
@@ -15,6 +16,7 @@ interface UseSegmentSelectionOptions {
  */
 export function useSegmentSelection({
   pageSegments,
+  selectedSegmentId,
   isEditMode,
   onUpdateSegment,
   onDeleteSegment,
@@ -26,6 +28,11 @@ export function useSegmentSelection({
 
   /** 선택된 박스의 DOM. 바깥 클릭 판정에 씁니다. */
   const activeBoxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setSelectedId(selectedSegmentId ?? null);
+    if (selectedSegmentId === null || selectedSegmentId === undefined) setIsEditing(false);
+  }, [selectedSegmentId]);
 
   // 최신 콜백을 ref 로 유지해 리스너를 불필요하게 재등록하지 않습니다.
   const onUpdateSegmentRef = useRef(onUpdateSegment);
@@ -59,14 +66,14 @@ export function useSegmentSelection({
   useEffect(() => {
     if (!selectedId) return;
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: PointerEvent) => {
       if (activeBoxRef.current && !activeBoxRef.current.contains(e.target as Node)) {
         clearSelection();
       }
     };
 
-    window.addEventListener('mousedown', handleClickOutside, true);
-    return () => window.removeEventListener('mousedown', handleClickOutside, true);
+    window.addEventListener('pointerdown', handleClickOutside, true);
+    return () => window.removeEventListener('pointerdown', handleClickOutside, true);
   }, [selectedId, clearSelection]);
 
   // 키보드 단축키: Del/Backspace 삭제, Esc 선택 해제

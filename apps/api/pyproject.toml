@@ -16,7 +16,16 @@ include_external_packages = true
 name = "Core must not import domains"
 type = "forbidden"
 source_modules = ["app.core"]
-forbidden_modules = ["app.documents", "app.outline", "app.wireframe", "app.workspaces", "app.llm_settings", "app.runtime"]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
+    "app.segments",
+    "app.wireframe",
+    "app.workspaces",
+]
 
 # Agent Core(Runtime + LLM Driver)는 실행 생애주기와 다중 모델 커널을 담당한다.
 # 비즈니스 도메인(documents, outline, wireframe, workspaces)이나 문서 서식 엔진(scaffold_engine)을 알지 않는다.
@@ -26,11 +35,13 @@ type = "forbidden"
 source_modules = ["agent_runtime", "llm_driver"]
 forbidden_modules = [
     "app.documents",
+    "app.inspector",
+    "app.llm_settings",
     "app.outline",
+    "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
-    "app.llm_settings",
-    "app.runtime",
     "app.core.config",
     "scaffold_engine",
 ]
@@ -45,11 +56,13 @@ forbidden_modules = [
     "agent_runtime",
     "llm_driver",
     "app.documents",
+    "app.inspector",
+    "app.llm_settings",
     "app.outline",
+    "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
-    "app.llm_settings",
-    "app.runtime",
     "app.core",
 ]
 
@@ -93,7 +106,6 @@ source_modules = [
     "app.documents.service",
     "app.documents.use_cases",
     "app.documents.adapters",
-    "app.documents.experimental",
     "app.documents.ports",
 ]
 forbidden_modules = [
@@ -101,6 +113,7 @@ forbidden_modules = [
     "app.llm_settings",
     "app.outline",
     "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
 ]
@@ -118,6 +131,7 @@ forbidden_modules = [
     "app.llm_settings",
     "app.outline",
     "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
 ]
@@ -136,6 +150,7 @@ forbidden_modules = [
     "app.inspector",
     "app.outline",
     "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
 ]
@@ -154,6 +169,7 @@ forbidden_modules = [
     "app.inspector",
     "app.llm_settings",
     "app.runtime",
+    "app.segments",
     "app.wireframe",
     "app.workspaces",
 ]
@@ -169,6 +185,27 @@ forbidden_modules = [
     "app.inspector",
     "app.llm_settings",
     "app.outline",
+    "app.segments",
+    "app.wireframe",
+    "app.workspaces",
+]
+
+[[tool.importlinter.contracts]]
+name = "segments must not depend on other domains"
+type = "forbidden"
+source_modules = [
+    "app.segments.service",
+    "app.segments.use_cases",
+    "app.segments.adapters",
+    "app.segments.agents",
+    "app.segments.ports",
+]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
     "app.wireframe",
     "app.workspaces",
 ]
@@ -189,6 +226,7 @@ forbidden_modules = [
     "app.outline",
     "app.runtime",
     "app.workspaces",
+    "app.segments",
 ]
 
 [[tool.importlinter.contracts]]
@@ -205,5 +243,6 @@ forbidden_modules = [
     "app.llm_settings",
     "app.outline",
     "app.runtime",
+    "app.segments",
     "app.wireframe",
 ]

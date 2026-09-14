@@ -12,6 +12,7 @@ from .outline import (
     OutlineNode,
     OutlinePipeline,
 )
+from .segments import SegmentDocument, SegmentItem, SegmentPipeline
 from .wireframe import (
     ScaffoldExtractResult,
     ScaffoldMeta,
@@ -43,6 +44,10 @@ __all__ = [
     "LlmHarness",
     "ModelExecutor",
     "JsonPromptRunner",
+    # Segment track
+    "SegmentDocument",
+    "SegmentItem",
+    "SegmentPipeline",
     # 공용 도구 (Tools)
     "PdfGeometryExtractor",
     "PdfRasterizer",

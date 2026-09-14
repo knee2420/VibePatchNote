@@ -73,13 +73,6 @@ class FakeDocumentSourceRepository:
         return False
 
 
-class FakeSegmentScanner:
-    """레거시 워크플로우를 실행하지 않는 세그먼트 분석 포트 대역."""
-
-    async def scan(self, _prompt: str) -> dict[str, object]:
-        return {"segments": []}
-
-
 class FakeScaffoldArchiveService:
     """전역 싱글턴 대신 컨테이너 주입이 사용되는지 확인하는 대역."""
 
@@ -95,7 +88,7 @@ class FakeWorkspaceService:
 
 
 def test_use_cases_share_one_harness_with_engine_runner() -> None:
-    """아웃라인 유스케이스와 엔진 JSON 실행기는 같은 주입 하네스를 사용해야 한다.
+    """아웃라인·세그먼트 엔진은 같은 주입 하네스를 사용해야 한다.
 
     공유는 의도된 것이다. 공유되는 하네스(RuntimePolicyHarness)는 매 호출마다 현재
     런타임 정책을 읽으므로, 공유해도 모델이 굳지 않고 정책 변경이 모든 소비자에게
@@ -103,21 +96,18 @@ def test_use_cases_share_one_harness_with_engine_runner() -> None:
     """
     fake_harness = FakeHarness()
     fake_source = FakeDocumentSourceRepository()
-    fake_scanner = FakeSegmentScanner()
-
     with (
         main.container.llm_harness.override(providers.Object(fake_harness)),
         main.container.document_source_repository.override(providers.Object(fake_source)),
-        main.container.segment_scanner.override(providers.Object(fake_scanner)),
     ):
         extract_outline = main.container.extract_outline()
-        scan_segments = main.container.scan_document_segments()
         json_runner = main.container.json_prompt_runner()
+        segment_pipeline = main.container.segment_pipeline()
 
     assert extract_outline._harness is fake_harness
     assert json_runner._harness is fake_harness
+    assert segment_pipeline._runner.model == fake_harness.model
     assert extract_outline._source is fake_source
-    assert scan_segments._scanner is fake_scanner
 
 
 def test_documents_upload_route_resolves_injected_service() -> None:
@@ -190,6 +180,6 @@ def test_every_resumable_use_case_is_registered_at_boot() -> None:
     assert registered == [
         "documents.extract_outline",
         "documents.generate_scaffold",
-        "documents.scan_segments",
+        "segments.extract",
     ]
     assert set(main.container.agent_runtime()._resume_handlers) >= set(registered)

@@ -2,6 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 
 import { REFERENCE_CARD_SIZE } from '../model/types';
 
+export interface DocumentDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+}
+
 interface UseDocumentLayoutProps {
   viewerDefId: string;
   isOutlineOpen?: boolean;
@@ -11,7 +17,30 @@ export function useDocumentLayout({ viewerDefId, isOutlineOpen = false }: UseDoc
   const [isSpread, setIsSpread] = useState(false);
   const [isFitContent, setIsFitContent] = useState(false);
   const [pageCount, setPageCount] = useState<number | null>(null);
-  const [dimensions, setDimensions] = useState<{ width: number; height: number; aspectRatio: number } | null>(null);
+  const [dimensions, setDimensionsState] = useState<DocumentDimensions | null>(null);
+
+  /**
+   * 뷰어가 같은 치수를 다시 알려오면 상태를 바꾸지 않는다.
+   *
+   * 뷰어는 페이지를 다시 그릴 때마다 `{width, height, aspectRatio}` **새 객체**를
+   * 만들어 넘긴다. 그대로 저장하면 값이 같아도 참조가 달라 매번 리렌더가 일어나고,
+   * 그 리렌더가 페이지를 또 그리게 해 끝나지 않는 갱신이 된다.
+   */
+  const setDimensions = useCallback((next: DocumentDimensions | null) => {
+    setDimensionsState((prev) => {
+      if (prev === next) return prev;
+      if (
+        prev &&
+        next &&
+        prev.width === next.width &&
+        prev.height === next.height &&
+        prev.aspectRatio === next.aspectRatio
+      ) {
+        return prev;
+      }
+      return next;
+    });
+  }, []);
 
   const handleToggleSpread = useCallback(() => {
     setIsSpread((prev) => !prev);

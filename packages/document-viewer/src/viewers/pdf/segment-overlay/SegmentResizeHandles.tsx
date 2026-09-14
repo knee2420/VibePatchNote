@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react';
 import type { ResizeHandle } from './geometry';
 
 interface SegmentResizeHandlesProps {
-  onHandleMouseDown: (handle: ResizeHandle, e: React.MouseEvent) => void;
+  onHandlePointerDown: (handle: ResizeHandle, e: React.PointerEvent) => void;
 }
 
 const HANDLE_DOT =
@@ -93,13 +93,13 @@ const EDGES: Array<{
 ];
 
 /** 선택된 세그먼트의 4모서리 + 4변 리사이즈 핸들. */
-export function SegmentResizeHandles({ onHandleMouseDown }: SegmentResizeHandlesProps) {
+export function SegmentResizeHandles({ onHandlePointerDown }: SegmentResizeHandlesProps) {
   return (
     <>
       {CORNERS.map((corner) => (
         <div
           key={corner.handle}
-          onMouseDown={(e) => onHandleMouseDown(corner.handle, e)}
+          onPointerDown={(e) => onHandlePointerDown(corner.handle, e)}
           className={corner.className}
           title={corner.title}
         >
@@ -110,7 +110,7 @@ export function SegmentResizeHandles({ onHandleMouseDown }: SegmentResizeHandles
       {EDGES.map((edge) => (
         <div
           key={edge.handle}
-          onMouseDown={(e) => onHandleMouseDown(edge.handle, e)}
+          onPointerDown={(e) => onHandlePointerDown(edge.handle, e)}
           style={edge.style}
           className={edge.className}
           title={edge.title}

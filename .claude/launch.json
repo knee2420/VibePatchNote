@@ -2,15 +2,33 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@vibe/web",
+        "dev"
+      ],
+      "port": 5173
+    },
+    {
       "name": "api",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@vibe/api", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@vibe/api",
+        "dev"
+      ],
       "port": 8000
     },
     {
       "name": "inspector",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@vibe/inspector", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "@vibe/inspector",
+        "dev"
+      ],
       "port": 5174
     }
   ]

@@ -16,7 +16,7 @@ documents 도메인의 일반 유스케이스를 정의한다. **LLM 이 개입�
 ## Agent 경로 — `documents/agents/`
 
 LLM 이 개입하는 아웃라인 추출(`extract_outline`) 및 스캐폴드 생성(`generate_scaffold`)은 `documents/agents/` 에 배치되어 있습니다.
-(실험/과도기적 세그먼트 스캔 `scan_document_segments`는 `documents/experimental/` 에 격리)
+세그먼트 추출·수정·관계 매핑은 독립 `segments` 도메인이 소유합니다.
 
 상세 내용은 [`../agents/README.md`](../agents/README.md) 를 참조하십시오.
 

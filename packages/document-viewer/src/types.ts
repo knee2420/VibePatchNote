@@ -29,6 +29,7 @@ export interface DocumentViewerProps {
   title: string;
   isSpread?: boolean;
   segments?: ViewerSegment[];
+  selectedSegmentId?: string | null;
   /** 원본 위에 표시할 동기화 강조 영역 (없으면 표시하지 않음). */
   highlight?: ViewerHighlight | null;
   isEditMode?: boolean;
@@ -36,6 +37,9 @@ export interface DocumentViewerProps {
   onUpdateSegment?: (updated: ViewerSegment) => void;
   onCreateSegment?: (created: ViewerSegment) => void;
   onDeleteSegment?: (segmentId: string) => void;
+  /** 현재 세그먼트를 가로 또는 세로 기준으로 두 개의 독립 세그먼트로 나눕니다. */
+  onSplitSegment?: (segmentId: string, axis: 'horizontal' | 'vertical') => void;
+  onSelectSegment?: (segment: ViewerSegment) => void;
   onPageCountChange?: (count: number) => void;
   onDimensionsChange?: (dimensions: { width: number; height: number; aspectRatio: number }) => void;
 }

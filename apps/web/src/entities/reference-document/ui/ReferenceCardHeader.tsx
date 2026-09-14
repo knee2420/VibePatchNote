@@ -5,11 +5,10 @@ import {
   Scaling,
   Image as ImageIcon,
   Loader2,
-  Edit3,
   Sparkles,
   PanelRightClose,
   PanelRightOpen,
-  FlaskConical,
+  Layers3,
 } from 'lucide-react';
 
 interface ReferenceCardHeaderProps {
@@ -20,7 +19,6 @@ interface ReferenceCardHeaderProps {
   headerThemeClass: string;
   isScanning?: boolean;
   hasSegments?: boolean;
-  isEditMode?: boolean;
   isExtractingScaffold?: boolean;
   isExtractingOutline?: boolean;
   hasOutline?: boolean;
@@ -30,7 +28,6 @@ interface ReferenceCardHeaderProps {
   onExtractScaffold?: () => void;
   onExtractOutline?: () => void;
   onToggleOutlinePanel?: () => void;
-  onToggleEditMode?: () => void;
   onDelete: () => void;
 }
 
@@ -42,7 +39,6 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   headerThemeClass,
   isScanning = false,
   hasSegments = false,
-  isEditMode = false,
   isExtractingScaffold = false,
   isExtractingOutline = false,
   hasOutline = false,
@@ -52,7 +48,6 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   onExtractScaffold,
   onExtractOutline,
   onToggleOutlinePanel,
-  onToggleEditMode,
   onDelete,
 }: ReferenceCardHeaderProps) {
   return (
@@ -113,7 +108,7 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
         )}
 
         {/* [NEW] 추출 완료 후 생겨나는 아웃라인 & 엘리먼트 패널 보기/접기 버튼 */}
-        {hasOutline && onToggleOutlinePanel && (
+        {(hasOutline || hasSegments) && onToggleOutlinePanel && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -167,10 +162,10 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
           </button>
         )}
 
-        {/* [실험실 / 보류 기능] 구분선 및 단순 영역 스캔 (HITL Masking Test) */}
+        {/* 독립 세그먼트 추출: 결과는 segments aggregate에만 남긴다. */}
         {onScan && (
           <>
-            <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5" title="실험 기능 구분선" />
+            <div className="w-px h-3.5 bg-slate-200 dark:bg-slate-700 mx-0.5" />
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -189,40 +184,19 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
               `}
               title={
                 isScanning
-                  ? '[실험] 문서 영역 분석 중...'
+                  ? '세그먼트 분석 중...'
                   : hasSegments
-                  ? '[실험] 문서 영역 재스캔 (마스킹 테스트)'
-                  : '[실험실] 단순 평면 영역 스캔 (HITL 마스킹 테스트용)'
+                  ? '세그먼트 재분석'
+                  : '세그먼트 추출'
               }
             >
               {isScanning ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" />
               ) : (
-                <FlaskConical className="w-3.5 h-3.5" />
+                <Layers3 className="w-3.5 h-3.5" />
               )}
             </button>
           </>
-        )}
-
-        {/* Mask Edit Mode Toggle Button (Visible when segments exist) */}
-        {hasSegments && onToggleEditMode && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleEditMode();
-            }}
-            className={`
-              p-1.5 rounded-md transition-colors nodrag cursor-pointer flex items-center justify-center
-              ${
-                isEditMode
-                  ? 'text-indigo-700 bg-indigo-100 ring-1 ring-indigo-300 font-semibold'
-                  : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
-              }
-            `}
-            title={isEditMode ? '영역 편집 모드 끄기 (뷰 모드로 전환)' : '영역 편집 모드 켜기 (크기 조절 및 라벨 수정)'}
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
         )}
 
         {/* Fit to Content Toggle Button */}
@@ -253,4 +227,3 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
     </div>
   );
 });
-

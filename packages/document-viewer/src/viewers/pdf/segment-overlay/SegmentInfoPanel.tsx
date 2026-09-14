@@ -1,4 +1,4 @@
-import { Edit3, Trash2, X } from 'lucide-react';
+import { Columns2, Edit3, Rows2, Trash2, X } from 'lucide-react';
 
 import type { ViewerSegment } from '../../../types';
 import { SegmentLabelEditor } from './SegmentLabelEditor';
@@ -13,6 +13,7 @@ interface SegmentInfoPanelProps {
   editingLabel: string;
   onStartEdit: () => void;
   onDelete: () => void;
+  onSplit?: (axis: 'horizontal' | 'vertical') => void;
   onClose: () => void;
   onEditingLabelChange: (label: string) => void;
   onSaveLabel: () => void;
@@ -35,6 +36,7 @@ export function SegmentInfoPanel({
   editingLabel,
   onStartEdit,
   onDelete,
+  onSplit,
   onClose,
   onEditingLabelChange,
   onSaveLabel,
@@ -77,6 +79,16 @@ export function SegmentInfoPanel({
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
+            {onSplit && (
+              <>
+                <button onClick={() => onSplit('horizontal')} className={ACTION_BUTTON} title="가로 분할">
+                  <Rows2 className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => onSplit('vertical')} className={ACTION_BUTTON} title="세로 분할">
+                  <Columns2 className="w-3.5 h-3.5" />
+                </button>
+              </>
+            )}
             <button onClick={onClose} className={ACTION_BUTTON} title="선택 해제 (Esc)">
               <X className="w-3.5 h-3.5" />
             </button>

@@ -21,6 +21,7 @@ interface UseDocumentScanOptions {
 export function useDocumentScan(options: UseDocumentScanOptions = {}) {
   const [isScanning, setIsScanning] = useState(false);
   const [segments, setSegments] = useState<DocumentSegmentItem[]>([]);
+  const [artifactId, setArtifactId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [execution, setExecution] = useState<AgentRunExecution | null>(null);
 
@@ -41,6 +42,7 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
       try {
         const adopted = await referenceDocumentApi.getSegments(docId);
         setSegments(adopted.segments || []);
+        setArtifactId(adopted.artifactId || null);
       } catch (err) {
         // 현재 API는 미생성 세그먼트를 빈 목록으로 돌려준다. 404는 문서가
         // 삭제되는 등의 경쟁 상태에서만 가능하므로 조용히 무시한다.
@@ -69,6 +71,7 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
       const response = settled.result;
       const loadedSegments = response.segments || [];
       setSegments(loadedSegments);
+      setArtifactId(response.artifactId || null);
       optionsRef.current.onSuccess?.(loadedSegments);
     } catch (err) {
       console.error('Document scan failed:', err);
@@ -82,6 +85,8 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
   return {
     isScanning,
     segments,
+    artifactId,
+    setArtifactId,
     setSegments,
     error,
     execution,

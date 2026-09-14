@@ -20,12 +20,19 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
+from app.segments.agents import ExtractSegmentsUseCase
+from app.segments.schemas import to_run_result
+
 if TYPE_CHECKING:  # pragma: no cover - 타입 전용
     from app.bootstrap.container import Container
 
 logger = logging.getLogger(__name__)
 
 ResumeHandler = Callable[[dict[str, Any]], Awaitable[dict[str, Any]]]
+
+
+async def _extract_segments_result(use_case: ExtractSegmentsUseCase, doc_id: str) -> dict[str, Any]:
+    return to_run_result(await use_case.execute(doc_id))
 
 
 def register_resume_handlers(container: "Container") -> list[str]:
@@ -38,7 +45,7 @@ def register_resume_handlers(container: "Container") -> list[str]:
 
     extract_outline = container.extract_outline()
     generate_scaffold = container.generate_scaffold()
-    scan_segments = container.scan_document_segments()
+    extract_segments = container.extract_segments()
 
     handlers: dict[str, ResumeHandler] = {
         extract_outline.name: lambda payload: extract_outline.execute(
@@ -47,7 +54,11 @@ def register_resume_handlers(container: "Container") -> list[str]:
         generate_scaffold.name: lambda payload: generate_scaffold.execute(
             payload["docId"], pages=payload.get("pages")
         ),
-        scan_segments.name: lambda payload: scan_segments.execute(payload["docId"]),
+        # 세그먼트 유스케이스만 도메인 객체를 돌려준다. 런타임 이력은 dict 만
+        # 받으므로 재개 경로에서도 같은 변환을 거쳐야 한다.
+        extract_segments.name: lambda payload: _extract_segments_result(
+            extract_segments, payload["docId"]
+        ),
     }
 
     for name, handler in handlers.items():
