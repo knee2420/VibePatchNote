@@ -121,7 +121,8 @@ class GetSegmentStructureViewUseCase:
         for kind, targets in (("outline_element", elements),):
             for target in targets:
                 override = latest.get((kind, target.id))
-                if override is not None:
+                # 철회된 결정은 없는 것으로 보고 알고리즘 결과로 되돌아간다.
+                if override is not None and not override.revoked:
                     mappings.append(
                         SegmentMappingItem(
                             targetKind=kind,

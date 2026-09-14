@@ -11,6 +11,7 @@ from .schemas import to_run_result
 from .use_cases import (
     GetAdoptedSegmentsUseCase,
     GetSegmentStructureViewUseCase,
+    ResetRelationshipOverrideUseCase,
     SaveSegmentRevisionUseCase,
     SetRelationshipOverrideUseCase,
 )
@@ -24,6 +25,7 @@ class SegmentsService:
         save_revision: SaveSegmentRevisionUseCase,
         structure: GetSegmentStructureViewUseCase,
         override: SetRelationshipOverrideUseCase,
+        reset_override: ResetRelationshipOverrideUseCase,
         agent_runtime: AgentRuntime,
     ) -> None:
         self._extract = extract
@@ -31,6 +33,7 @@ class SegmentsService:
         self._save_revision = save_revision
         self._structure = structure
         self._override = override
+        self._reset_override = reset_override
         self._runtime = agent_runtime
 
     async def extract(self, doc_id: str):
@@ -70,3 +73,6 @@ class SegmentsService:
             target_id=target_id,
             primary_segment_id=primary_segment_id,
         )
+
+    def reset_override(self, doc_id: str, *, target_kind: str, target_id: str):
+        return self._reset_override.execute(doc_id, target_kind=target_kind, target_id=target_id)

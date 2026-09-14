@@ -1,11 +1,6 @@
 import { httpClient } from '@/shared/api';
 
-import type {
-  DocumentSegmentItem,
-  ExtractOutlineResponse,
-  SegmentArtifactResponse,
-  SegmentStructureResponse,
-} from '../model/types';
+import type { ExtractOutlineResponse } from '../model/types';
 
 const BASE_PATH = '/api/v1/documents';
 
@@ -123,38 +118,7 @@ export const referenceDocumentApi = {
   getOutline: (docId: string) =>
     httpClient.get<ExtractOutlineResponse>(`/api/v1/outlines/${docId}`),
 
-  /** 채택된 세그먼트를 읽습니다. 아직 없으면 빈 목록을 받습니다. */
-  getSegments: (docId: string) =>
-    httpClient.get<SegmentArtifactResponse>(`/api/v1/segments/${docId}`),
-
-  /** 사용자가 손으로 고친 세그먼트를 새 아티팩트로 남깁니다. */
-  saveSegments: (docId: string, baseArtifactId: string | null, segments: DocumentSegmentItem[]) =>
-    httpClient.put<SegmentArtifactResponse>(`/api/v1/segments/${docId}`, { baseArtifactId, segments }),
-
-  getSegmentStructure: (docId: string) =>
-    httpClient.get<SegmentStructureResponse>(`/api/v1/segments/${docId}/structure`),
-
-  setSegmentRelationship: (
-    docId: string,
-    targetKind: 'outline_element' | 'wireframe_block',
-    targetId: string,
-    primarySegmentId: string | null,
-  ) =>
-    httpClient.put(`/api/v1/segments/${docId}/relationships`, {
-      targetKind,
-      targetId,
-      primarySegmentId,
-    }),
-
   // --- 실행 (Agent 경로) ---
-
-  /** 문서 영역을 분석하여 표, 개조식 목록, 섹션 바운딩 박스를 추출합니다. */
-  scanSegments: (docId: string) =>
-    httpClient.post<SegmentArtifactResponse>('/api/v1/segments/extract', { docId }),
-
-  /** 세그먼트 분석을 백그라운드 실행으로 접수합니다. */
-  startSegmentScan: (docId: string) =>
-    httpClient.post<{ runId: string; status: string }>('/api/v1/segments/runs', { docId }),
 
   /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. (pages 미지정 시 전체 페이지) */
   extractScaffold: (docId: string, pages?: number[]) =>

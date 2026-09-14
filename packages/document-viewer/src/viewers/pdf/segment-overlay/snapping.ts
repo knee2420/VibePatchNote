@@ -55,7 +55,7 @@ export function buildSnapAnchors(
 
   for (const seg of pageSegments) {
     if (excludeSegmentId && seg.id === excludeSegmentId) continue;
-    const [ymin, xmin, ymax, xmax] = seg.box_2d;
+    const [ymin, xmin, ymax, xmax] = seg.box;
     xList.push(xmin, xmax);
     yList.push(ymin, ymax);
   }

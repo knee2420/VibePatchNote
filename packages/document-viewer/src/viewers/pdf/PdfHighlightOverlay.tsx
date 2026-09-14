@@ -1,10 +1,11 @@
 import { memo } from 'react';
 
+import { INTERNAL_COORDINATE_SCALE } from '../../coordinates';
 import type { ViewerHighlight } from '../../types';
 
 interface PdfHighlightOverlayProps {
   pageNumber: number;
-  highlight?: ViewerHighlight | null;
+  highlights?: ViewerHighlight[];
 }
 
 /** 좌표가 테두리에 바짝 붙어 잘려 보이지 않도록 주는 시각적 여백(정규화 단위). */
@@ -22,19 +23,34 @@ const PAD_Y = 3;
  */
 export const PdfHighlightOverlay = memo(function PdfHighlightOverlay({
   pageNumber,
-  highlight,
+  highlights,
 }: PdfHighlightOverlayProps) {
-  if (!highlight || highlight.page !== pageNumber) return null;
+  const visible = (highlights ?? []).filter((item) => item.page === pageNumber);
+  if (visible.length === 0) return null;
 
-  const [ymin, xmin, ymax, xmax] = highlight.box_2d;
+  // 배경(context)을 먼저 깔고 고른 것(primary)을 위에 올린다.
+  const ordered = [...visible].sort((left, right) =>
+    (left.variant === 'context' ? 0 : 1) - (right.variant === 'context' ? 0 : 1)
+  );
+
+  return <>{ordered.map((item) => <HighlightBox key={`${item.variant ?? 'primary'}:${item.id}`} highlight={item} />)}</>;
+});
+
+function HighlightBox({ highlight }: { highlight: ViewerHighlight }) {
+  const isContext = highlight.variant === 'context';
+  const [ymin, xmin, ymax, xmax] = highlight.box;
   const top = Math.max(ymin - PAD_Y, 0) / 10;
   const left = Math.max(xmin - PAD_X, 0) / 10;
-  const bottom = Math.min(ymax + PAD_Y, 1000) / 10;
-  const right = Math.min(xmax + PAD_X, 1000) / 10;
+  const bottom = (Math.min(ymax + PAD_Y, INTERNAL_COORDINATE_SCALE) / INTERNAL_COORDINATE_SCALE) * 100;
+  const right = (Math.min(xmax + PAD_X, INTERNAL_COORDINATE_SCALE) / INTERNAL_COORDINATE_SCALE) * 100;
 
   return (
     <div
-      className="absolute z-30 pointer-events-none rounded-md border-2 border-indigo-500 bg-indigo-500/15 shadow-[0_0_15px_rgba(99,102,241,0.25)] ring-2 ring-indigo-400/30 transition-all duration-150 ease-out"
+      className={`absolute pointer-events-none rounded-md transition-all duration-150 ease-out ${
+        isContext
+          ? 'z-20 border-2 border-dashed border-violet-500 bg-violet-500/5'
+          : 'z-30 border-2 border-indigo-500 bg-indigo-500/15 shadow-[0_0_15px_rgba(99,102,241,0.25)] ring-2 ring-indigo-400/30'
+      }`}
       style={{
         top: `${top}%`,
         left: `${left}%`,
@@ -49,11 +65,17 @@ export const PdfHighlightOverlay = memo(function PdfHighlightOverlay({
           </span>
         )}
         {highlight.label && (
-          <span className="px-1.5 py-0.5 rounded bg-white/95 text-slate-800 border border-slate-200/90 font-medium text-[10px] shadow-xs max-w-[200px] truncate">
+          <span
+            className={`px-1.5 py-0.5 rounded font-medium text-[10px] shadow-xs max-w-[200px] truncate border ${
+              isContext
+                ? 'bg-violet-50 text-violet-800 border-violet-300'
+                : 'bg-white/95 text-slate-800 border-slate-200/90'
+            }`}
+          >
             {highlight.label}
           </span>
         )}
       </div>
     </div>
   );
-});
+}

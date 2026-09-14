@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ViewerSegment } from '../../../types';
+import { useSegmentTypes, useViewerLabels } from '../../../viewerConfig';
 import {
   clientToNormalized,
   isDrawableBox,
@@ -35,6 +36,7 @@ interface UseSegmentDragOptions {
   onSelectSegment?: (segment: ViewerSegment) => void;
   onCreateSegment?: (created: ViewerSegment) => void;
   onUpdateSegment?: (updated: ViewerSegment) => void;
+  onSplitSegment?: (segmentId: string, axis: 'horizontal' | 'vertical', position: number) => void;
 }
 
 /**
@@ -53,7 +55,12 @@ export function useSegmentDrag({
   onSelectSegment,
   onCreateSegment,
   onUpdateSegment,
+  onSplitSegment,
 }: UseSegmentDragOptions) {
+  // 새 영역의 기본 타입·라벨도 호스트가 정한다. 패키지가 'section' 같은 도메인
+  // 어휘나 한국어 라벨을 직접 고르면, 다른 호스트에서는 없는 타입이 만들어진다.
+  const labels = useViewerLabels();
+  const segmentTypes = useSegmentTypes();
   const containerRef = useRef<HTMLDivElement | null>(null);
   /** 드래그 시작 시 1회만 캐시해 매 프레임 강제 리플로우를 막습니다. */
   const containerRectRef = useRef<ContainerRect | null>(null);
@@ -71,6 +78,15 @@ export function useSegmentDrag({
   const [resizingState, setResizingState] = useState<ResizingState | null>(null);
   const [activeGuideX, setActiveGuideX] = useState<number | null>(null);
   const [activeGuideY, setActiveGuideY] = useState<number | null>(null);
+  /**
+   * 분할 자리 고르기.
+   *
+   * 예전에는 버튼을 누르는 즉시 박스의 **정중앙**에서 잘랐다. 내용과 무관한 자리라
+   * 표를 자르면 행 한가운데를 지나갔다. 이제 선을 끌어 자리를 정하고, 다른 조작과
+   * 같은 스냅 앵커(다른 세그먼트 경계 + PDF 텍스트 줄)를 쓴다.
+   */
+  const [splitRequest, setSplitRequest] = useState<{ segmentId: string; axis: 'horizontal' | 'vertical' } | null>(null);
+  const [splitPosition, setSplitPosition] = useState<number | null>(null);
 
   const snapAnchors = useMemo(
     () => buildSnapAnchors(pageSegments, textLines, resizingState?.segmentId ?? null),
@@ -94,10 +110,25 @@ export function useSegmentDrag({
     }
   }, []);
 
+  const beginSplit = useCallback(
+    (segmentId: string, axis: 'horizontal' | 'vertical') => {
+      cacheContainerRect();
+      setSplitRequest({ segmentId, axis });
+      setSplitPosition(null);
+    },
+    [cacheContainerRect]
+  );
+
+  const cancelSplit = useCallback(() => {
+    setSplitRequest(null);
+    setSplitPosition(null);
+  }, []);
+
   /** 빈 공간 pointerdown: Shift 면 신규 영역 생성 시작, 아니면 선택 해제. */
   const handleContainerPointerDown = useCallback(
     (e: React.PointerEvent) => {
       if (!isEditMode) return;
+      if (splitRequest) return;
       if (e.target !== containerRef.current) return;
 
       if (!isShiftDown && !e.shiftKey) {
@@ -124,7 +155,7 @@ export function useSegmentDrag({
       setCreateStart(snapped.point);
       setCreateCurrent(snapped.point);
     },
-    [isEditMode, isShiftDown, enableSnap, snapAnchors, setSelectedId, cacheContainerRect]
+    [isEditMode, isShiftDown, enableSnap, snapAnchors, setSelectedId, cacheContainerRect, splitRequest]
   );
 
   /** 박스 본체나 리사이즈 핸들 pointerdown: 이동/리사이즈 시작. */
@@ -141,8 +172,8 @@ export function useSegmentDrag({
       setResizingState({
         handle,
         segmentId: segment.id,
-        initialBox: [...segment.box_2d] as SegmentBox,
-        draftBox: [...segment.box_2d] as SegmentBox,
+        initialBox: [...segment.box] as SegmentBox,
+        draftBox: [...segment.box] as SegmentBox,
         startClientX: e.clientX,
         startClientY: e.clientY,
       });
@@ -159,10 +190,10 @@ export function useSegmentDrag({
         const newSegment: ViewerSegment = {
           id: `seg-${Date.now()}`,
           page: pageNumber,
-          type: 'section',
-          label: '새 영역 블록',
-          box_2d: box,
-          content_summary: '사용자 지정 세그먼트',
+          type: segmentTypes[0]?.id ?? 'section',
+          label: labels.newSegmentLabel,
+          box: box,
+          summary: undefined,
         };
         onCreateSegment?.(newSegment);
         setSelectedId(newSegment.id);
@@ -170,13 +201,13 @@ export function useSegmentDrag({
     }
     setCreateStart(null);
     setCreateCurrent(null);
-  }, [createStart, createCurrent, pageNumber, onCreateSegment, setSelectedId]);
+  }, [createStart, createCurrent, pageNumber, onCreateSegment, setSelectedId, segmentTypes, labels]);
 
   /** 이동/리사이즈 결과를 상위에 단 한 번 커밋합니다. */
   const commitResize = useCallback((state: ResizingState) => {
     const target = pageSegmentsRef.current.find((s) => s.id === state.segmentId);
     if (target) {
-      onUpdateSegmentRef.current?.({ ...target, box_2d: state.draftBox });
+      onUpdateSegmentRef.current?.({ ...target, box: state.draftBox });
     }
     setResizingState(null);
   }, []);
@@ -244,10 +275,54 @@ export function useSegmentDrag({
     commitResize,
   ]);
 
+  // 분할 자리 고르기: 포인터를 따라 선이 움직이고, 클릭하면 확정한다.
+  useEffect(() => {
+    if (!splitRequest) return;
+    const target = pageSegmentsRef.current.find((item) => item.id === splitRequest.segmentId);
+    if (!target) return;
+
+    const [ymin, xmin, ymax, xmax] = target.box;
+    const isHorizontal = splitRequest.axis === 'horizontal';
+
+    const handleMove = (e: PointerEvent) => {
+      const rect = containerRectRef.current;
+      if (!rect) return;
+      const raw = clientToNormalized(e.clientX, e.clientY, rect);
+      const snapped = snapPoint(raw, snapAnchors, enableSnap && !e.altKey);
+      const value = isHorizontal ? snapped.point.y : snapped.point.x;
+      const low = isHorizontal ? ymin : xmin;
+      const high = isHorizontal ? ymax : xmax;
+      // 박스 밖이나 가장자리에 붙는 자리는 의미 있는 분할이 아니다.
+      setSplitPosition(Math.min(Math.max(value, low + 1), high - 1));
+    };
+
+    const handleConfirm = (e: PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (splitPosition !== null) {
+        onSplitSegment?.(splitRequest.segmentId, splitRequest.axis, Math.round(splitPosition));
+      }
+      cancelSplit();
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cancelSplit();
+    };
+
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerdown', handleConfirm, true);
+    window.addEventListener('keydown', handleKey, true);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerdown', handleConfirm, true);
+      window.removeEventListener('keydown', handleKey, true);
+    };
+  }, [splitRequest, splitPosition, snapAnchors, enableSnap, onSplitSegment, cancelSplit]);
+
   /** 드래그 중인 세그먼트는 초안 박스로, 나머지는 원본 박스로 그립니다. */
   const boxOf = useCallback(
     (segment: ViewerSegment): SegmentBox =>
-      resizingState?.segmentId === segment.id ? resizingState.draftBox : segment.box_2d,
+      resizingState?.segmentId === segment.id ? resizingState.draftBox : segment.box,
     [resizingState]
   );
 
@@ -267,5 +342,9 @@ export function useSegmentDrag({
     handleContainerPointerDown,
     startDrag,
     boxOf,
+    splitRequest,
+    splitPosition,
+    beginSplit,
+    cancelSplit,
   };
 }

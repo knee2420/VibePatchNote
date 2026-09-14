@@ -1,13 +1,14 @@
 import { Columns2, Edit3, Rows2, Trash2, X } from 'lucide-react';
 
 import type { ViewerSegment } from '../../../types';
+import { useViewerLabels } from '../../../viewerConfig';
 import { SegmentLabelEditor } from './SegmentLabelEditor';
 import { SegmentSummaryView } from './SegmentSummaryView';
-import type { SegmentTypeStyle } from './segmentTypeStyles';
 
 interface SegmentInfoPanelProps {
   segment: ViewerSegment;
-  typeStyle: SegmentTypeStyle;
+  /** 해결된 타입 표시명. 색은 상위 박스가 CSS 변수로 내려준다. */
+  typeLabel: string;
   isSelected: boolean;
   isEditing: boolean;
   editingLabel: string;
@@ -30,7 +31,7 @@ const ACTION_BUTTON =
  */
 export function SegmentInfoPanel({
   segment,
-  typeStyle,
+  typeLabel,
   isSelected,
   isEditing,
   editingLabel,
@@ -43,18 +44,29 @@ export function SegmentInfoPanel({
   onCancelEdit,
   onChangeType,
 }: SegmentInfoPanelProps) {
+  const labels = useViewerLabels();
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
+      // **포인터도 막아야 한다.** 박스 본체가 `onPointerDown` 으로 이동 드래그를
+      // 시작하는데, 포인터 이벤트는 마우스 이벤트보다 먼저 올라간다. 여기서 막지
+      // 않으면 패널의 버튼을 누르는 순간 드래그가 시작되고, 표시 조건(`!isResizing`)
+      // 때문에 패널이 사라져 click 이 끝나지 못한다 — 버튼이 통째로 먹통이 된다.
+      onPointerDown={(e) => e.stopPropagation()}
       className="absolute left-full ml-3 top-0 z-50 min-w-[240px] max-w-[300px] rounded-xl border border-slate-200/90 bg-white/95 backdrop-blur-md p-3.5 shadow-xl shadow-slate-900/10 nodrag nopan pointer-events-auto animate-in fade-in zoom-in-95 duration-150 text-slate-800"
     >
       <div className="flex items-center justify-between gap-1 mb-2.5">
         <div className="flex items-center gap-1.5">
           <span
-            className={`px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide ${typeStyle.badgeBg} ${typeStyle.badgeText}`}
+            style={{
+              backgroundColor: 'var(--seg-badge-bg)',
+              borderColor: 'var(--seg-badge-border)',
+              color: 'var(--seg-badge-text)',
+            }}
+            className="px-1.5 py-0.5 rounded border text-[10px] font-semibold tracking-wide"
           >
-            {segment.type}
+            {typeLabel}
           </span>
           <span className="text-xs font-semibold text-slate-800 truncate max-w-[130px]">
             {segment.label}
@@ -67,7 +79,7 @@ export function SegmentInfoPanel({
               <button
                 onClick={onStartEdit}
                 className={`${ACTION_BUTTON} hover:text-indigo-600`}
-                title="라벨/타입 편집 (더블클릭)"
+                title={labels.editLabelAndType}
               >
                 <Edit3 className="w-3.5 h-3.5" />
               </button>
@@ -75,21 +87,21 @@ export function SegmentInfoPanel({
             <button
               onClick={onDelete}
               className={`${ACTION_BUTTON} hover:text-rose-600 hover:bg-rose-50`}
-              title="세그먼트 삭제 (Del)"
+              title={labels.deleteSegment}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
             {onSplit && (
               <>
-                <button onClick={() => onSplit('horizontal')} className={ACTION_BUTTON} title="가로 분할">
+                <button onClick={() => onSplit('horizontal')} className={ACTION_BUTTON} title={labels.splitHorizontal}>
                   <Rows2 className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={() => onSplit('vertical')} className={ACTION_BUTTON} title="세로 분할">
+                <button onClick={() => onSplit('vertical')} className={ACTION_BUTTON} title={labels.splitVertical}>
                   <Columns2 className="w-3.5 h-3.5" />
                 </button>
               </>
             )}
-            <button onClick={onClose} className={ACTION_BUTTON} title="선택 해제 (Esc)">
+            <button onClick={onClose} className={ACTION_BUTTON} title={labels.clearSelection}>
               <X className="w-3.5 h-3.5" />
             </button>
           </div>

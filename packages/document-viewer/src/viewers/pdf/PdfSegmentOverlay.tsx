@@ -1,8 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
 
-import type { ViewerSegment } from '../../types';
+import type { SegmentBoxTuple, ViewerSegment } from '../../types';
 import { CreateSegmentPreview } from './segment-overlay/CreateSegmentPreview';
+import { MergePreviewBox } from './segment-overlay/MergePreviewBox';
 import { SegmentBox } from './segment-overlay/SegmentBox';
+import { SplitGuideLine } from './segment-overlay/SplitGuideLine';
 import { SnapGuideLines } from './segment-overlay/SnapGuideLines';
 import { useSegmentDrag } from './segment-overlay/useSegmentDrag';
 import { useSegmentSelection } from './segment-overlay/useSegmentSelection';
@@ -11,6 +13,10 @@ interface PdfSegmentOverlayProps {
   pageNumber: number;
   segments?: ViewerSegment[];
   selectedSegmentId?: string | null;
+  mergeCandidateIds?: string[];
+  absorbedSegmentIds?: string[];
+  mergePreviewBox?: SegmentBoxTuple | null;
+  onToggleMergeCandidate?: (segmentId: string) => void;
   /** PDF 텍스트 줄의 Y 좌표. 스마트 마그넷 스냅 앵커로 씁니다. */
   textLines?: number[];
   isEditMode?: boolean;
@@ -34,6 +40,10 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
   pageNumber,
   segments = [],
   selectedSegmentId,
+  mergeCandidateIds,
+  absorbedSegmentIds,
+  mergePreviewBox,
+  onToggleMergeCandidate,
   textLines,
   isEditMode = false,
   enableSnap = true,
@@ -66,7 +76,12 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     onSelectSegment,
     onCreateSegment,
     onUpdateSegment,
+    onSplitSegment,
   });
+
+  const splitTarget = drag.splitRequest
+    ? pageSegments.find((segment) => segment.id === drag.splitRequest?.segmentId)
+    : undefined;
 
   const handleSelect = useCallback(
     (segment: ViewerSegment) => {
@@ -91,8 +106,13 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
     >
       <SnapGuideLines activeGuideX={drag.activeGuideX} activeGuideY={drag.activeGuideY} />
 
+      {mergePreviewBox && isEditMode && (
+        <MergePreviewBox box={mergePreviewBox} absorbedCount={absorbedSegmentIds?.length ?? 0} />
+      )}
+
       {pageSegments.map((segment) => {
         const isSelected = selection.selectedId === segment.id;
+        const candidateOrder = (mergeCandidateIds?.indexOf(segment.id) ?? -1) + 1;
         return (
           <SegmentBox
             key={segment.id}
@@ -100,6 +120,9 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
             box={drag.boxOf(segment)}
             isEditMode={isEditMode}
             isSelected={isSelected}
+            candidateOrder={candidateOrder}
+            isAbsorbed={absorbedSegmentIds?.includes(segment.id) ?? false}
+            onToggleMergeCandidate={onToggleMergeCandidate}
             isHovered={selection.hoveredId === segment.id}
             isResizing={drag.resizingSegmentId === segment.id}
             isCreating={drag.isCreating}
@@ -111,7 +134,7 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
             onStartLabelEdit={selection.startLabelEdit}
             onHoverChange={selection.setHoveredId}
             onDelete={selection.deleteSegment}
-            onSplit={onSplitSegment}
+            onSplit={drag.beginSplit}
             onClearSelection={selection.clearSelection}
             onEditingLabelChange={selection.setEditingLabel}
             onSaveLabel={selection.saveLabel}
@@ -123,6 +146,14 @@ export const PdfSegmentOverlay = memo(function PdfSegmentOverlay({
 
       {isEditMode && drag.isCreating && drag.createPreviewBox && (
         <CreateSegmentPreview box={drag.createPreviewBox} />
+      )}
+
+      {isEditMode && splitTarget && drag.splitRequest && (
+        <SplitGuideLine
+          box={splitTarget.box}
+          axis={drag.splitRequest.axis}
+          position={drag.splitPosition}
+        />
       )}
     </div>
   );

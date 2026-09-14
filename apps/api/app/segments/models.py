@@ -108,6 +108,10 @@ class SegmentRelationshipOverride(BaseModel):
     segment_artifact_id: str = Field(alias="segmentArtifactId")
     outline_artifact_id: str | None = Field(default=None, alias="outlineArtifactId")
     created_at: datetime = Field(default_factory=_utc_now, alias="createdAt")
+    #: 사람의 결정을 **철회**한 기록. 이력은 append-only 이므로 지우지 않고 덧붙인다.
+    #: 소속 해제(`primarySegmentId=None`)와 다르다 — 그쪽은 "어디에도 속하지 않는다"는
+    #: 결정이고, 이쪽은 그 결정 자체를 물러 자동 분석으로 되돌리는 것이다.
+    revoked: bool = False
 
 
 class SegmentMappingItem(BaseModel):

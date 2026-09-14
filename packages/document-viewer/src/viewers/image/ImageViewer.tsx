@@ -1,7 +1,8 @@
 import { useState, useCallback, memo } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 
-import type { DocumentViewerProps } from '../../types';
+import { resolveViewerLabels } from '../../labels';
+import type { DocumentViewBaseProps } from '../../types';
 
 /**
  * ImageViewer
@@ -13,9 +14,11 @@ import type { DocumentViewerProps } from '../../types';
 export const ImageViewer = memo(function ImageViewer({
   url,
   title,
+  labels: labelOverrides,
   onPageCountChange,
   onDimensionsChange,
-}: DocumentViewerProps) {
+}: DocumentViewBaseProps) {
+  const labels = resolveViewerLabels(labelOverrides);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -44,7 +47,7 @@ export const ImageViewer = memo(function ImageViewer({
 
   const handleImageError = useCallback(() => {
     setIsLoading(false);
-    setLoadError('이미지를 로드하지 못했습니다.');
+    setLoadError(labels.imageLoadError);
   }, []);
 
   if (loadError) {
@@ -62,7 +65,7 @@ export const ImageViewer = memo(function ImageViewer({
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center text-slate-400 gap-2 bg-slate-50/60 z-10">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span className="text-xs font-medium">이미지 불러오는 중...</span>
+          <span className="text-xs font-medium">{labels.imageLoading}</span>
         </div>
       )}
 

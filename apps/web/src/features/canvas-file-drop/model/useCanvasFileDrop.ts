@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useReactFlow, type Node } from '@xyflow/react';
 
+import { isFileDrag } from '@/shared/lib';
+
 import { fileDropRegistry } from './fileDropRegistry';
 import { uploadFileToNode } from './uploadFileToNode';
 
@@ -18,15 +20,18 @@ export function useCanvasFileDrop({ onNodeCreated, onUploadError }: UseCanvasFil
   const dragCounterRef = useRef(0);
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
+    // **파일 드래그만 받는다.** 캔버스 안에는 카드가 있고 그 안에서도 드래그가
+    // 일어난다(세그먼트 트리의 관계 이동 등). 그걸 파일로 오인하면 전체 화면에
+    // 드롭 오버레이가 뜨고 커서가 copy 로 바뀌어 내부 조작을 방해한다.
+    if (!isFileDrag(e.dataTransfer)) return;
     e.preventDefault();
     dragCounterRef.current += 1;
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      setIsDraggingOver(true);
-    }
+    setIsDraggingOver(true);
   }, []);
 
   const handleDragOver = useCallback(
     (e: React.DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
       if (!isDraggingOver) {
@@ -37,6 +42,7 @@ export function useCanvasFileDrop({ onNodeCreated, onUploadError }: UseCanvasFil
   );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
+    if (!isFileDrag(e.dataTransfer)) return;
     e.preventDefault();
     dragCounterRef.current -= 1;
     if (dragCounterRef.current <= 0) {
@@ -47,6 +53,7 @@ export function useCanvasFileDrop({ onNodeCreated, onUploadError }: UseCanvasFil
 
   const handleDrop = useCallback(
     async (e: React.DragEvent) => {
+      if (!isFileDrag(e.dataTransfer)) return;
       e.preventDefault();
       dragCounterRef.current = 0;
       setIsDraggingOver(false);

@@ -2,10 +2,10 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 import { followAgentRun, HttpError, type AgentRunExecution } from '@/shared/api';
 
-import { referenceDocumentApi } from '../api/referenceDocumentApi';
-import type { DocumentSegmentItem } from './types';
+import { segmentApi } from '../api/segmentApi';
+import type { DocumentSegmentItem, SegmentArtifactResponse } from './types';
 
-interface UseDocumentScanOptions {
+interface UseDocumentSegmentsOptions {
   /** 문서 식별자. 세그먼트는 이 포인터로만 조회·생성합니다. */
   docId?: string;
   onSuccess?: (segments: DocumentSegmentItem[]) => void;
@@ -18,7 +18,7 @@ interface UseDocumentScanOptions {
  * **세그먼트는 노드에 저장하지 않습니다.** 정본은 백엔드 아티팩트 저장소가 갖고 있고,
  * 이 훅이 마운트될 때 채택본을 한 번 읽어 옵니다(LLM 미개입).
  */
-export function useDocumentScan(options: UseDocumentScanOptions = {}) {
+export function useDocumentSegments(options: UseDocumentSegmentsOptions = {}) {
   const [isScanning, setIsScanning] = useState(false);
   const [segments, setSegments] = useState<DocumentSegmentItem[]>([]);
   const [artifactId, setArtifactId] = useState<string | null>(null);
@@ -40,14 +40,14 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
 
     void (async () => {
       try {
-        const adopted = await referenceDocumentApi.getSegments(docId);
+        const adopted = await segmentApi.getSegments(docId);
         setSegments(adopted.segments || []);
         setArtifactId(adopted.artifactId || null);
       } catch (err) {
         // 현재 API는 미생성 세그먼트를 빈 목록으로 돌려준다. 404는 문서가
         // 삭제되는 등의 경쟁 상태에서만 가능하므로 조용히 무시한다.
         if (err instanceof HttpError && err.status === 404) return;
-        console.error('[useDocumentScan] 채택본 조회 실패:', err);
+        console.error('[useDocumentSegments] 채택본 조회 실패:', err);
       }
     })();
   }, [docId]);
@@ -60,8 +60,8 @@ export function useDocumentScan(options: UseDocumentScanOptions = {}) {
     setExecution(null);
 
     try {
-      const accepted = await referenceDocumentApi.startSegmentScan(docId);
-      const settled = await followAgentRun<Awaited<ReturnType<typeof referenceDocumentApi.scanSegments>>>(
+      const accepted = await segmentApi.startScan(docId);
+      const settled = await followAgentRun<SegmentArtifactResponse>(
         accepted.runId,
         (current) => setExecution(current.execution ?? null),
       );

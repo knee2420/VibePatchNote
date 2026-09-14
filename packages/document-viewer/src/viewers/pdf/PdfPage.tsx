@@ -8,7 +8,8 @@ import { Loader2 } from 'lucide-react';
 // AnnotationLayer.css 는 가져오지 않는다.
 import 'react-pdf/dist/Page/TextLayer.css';
 
-import type { ViewerHighlight, ViewerSegment } from '../../types';
+import type { SegmentBoxTuple, ViewerHighlight, ViewerSegment } from '../../types';
+import { useViewerLabels } from '../../viewerConfig';
 import { PdfHighlightOverlay } from './PdfHighlightOverlay';
 import { PdfSegmentOverlay } from './PdfSegmentOverlay';
 import type { PdfPageInfo } from './usePdfTextLines';
@@ -24,7 +25,11 @@ interface PdfPageProps {
   isSpread: boolean;
   segments: ViewerSegment[];
   selectedSegmentId?: string | null;
-  highlight?: ViewerHighlight | null;
+  mergeCandidateIds?: string[];
+  absorbedSegmentIds?: string[];
+  mergePreviewBox?: SegmentBoxTuple | null;
+  onToggleMergeCandidate?: (segmentId: string) => void;
+  highlights?: ViewerHighlight[];
   textLines?: number[];
   isEditMode: boolean;
   enableSnap: boolean;
@@ -44,7 +49,11 @@ export const PdfPage = memo(function PdfPage({
   isSpread,
   segments,
   selectedSegmentId,
-  highlight,
+  mergeCandidateIds,
+  absorbedSegmentIds,
+  mergePreviewBox,
+  onToggleMergeCandidate,
+  highlights,
   textLines,
   isEditMode,
   enableSnap,
@@ -56,6 +65,7 @@ export const PdfPage = memo(function PdfPage({
   onSplitSegment,
   onSelectSegment,
 }: PdfPageProps) {
+  const labels = useViewerLabels();
   const width = isSpread ? SPREAD_PAGE_WIDTH : SINGLE_PAGE_WIDTH;
   const height = isSpread ? SPREAD_PAGE_HEIGHT : SINGLE_PAGE_HEIGHT;
 
@@ -138,6 +148,10 @@ export const PdfPage = memo(function PdfPage({
               pageNumber={pageNumber}
               segments={segments}
               selectedSegmentId={selectedSegmentId}
+              mergeCandidateIds={mergeCandidateIds}
+              absorbedSegmentIds={absorbedSegmentIds}
+              mergePreviewBox={mergePreviewBox}
+              onToggleMergeCandidate={onToggleMergeCandidate}
               textLines={textLines}
               isEditMode={isEditMode}
               enableSnap={enableSnap}
@@ -148,7 +162,7 @@ export const PdfPage = memo(function PdfPage({
               onSelectSegment={onSelectSegment}
             />
 
-            <PdfHighlightOverlay pageNumber={pageNumber} highlight={highlight} />
+            <PdfHighlightOverlay pageNumber={pageNumber} highlights={highlights} />
           </>
         ) : (
           <div
@@ -158,7 +172,7 @@ export const PdfPage = memo(function PdfPage({
             <div className="w-7 h-7 rounded-full bg-slate-200/80 flex items-center justify-center text-xs font-semibold text-slate-500 shadow-2xs">
               {pageNumber}
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">스크롤 시 자동 로드</span>
+            <span className="text-[11px] text-slate-400 font-medium">{labels.lazyPageHint}</span>
           </div>
         )}
       </div>

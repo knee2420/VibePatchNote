@@ -8,32 +8,39 @@ import {
   type Node,
 } from '@xyflow/react';
 
-import { viewerRegistry, type ViewerHighlight } from '@vibe/document-viewer';
+import { viewerRegistry, type ViewerHighlight, type ViewerSegment } from '@vibe/document-viewer';
 
 import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
 import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
-import { referenceDocumentApi } from '../api/referenceDocumentApi';
-import { useDocumentLayout } from '../lib/useDocumentLayout';
-import { useNodeResize } from '../lib/useNodeResize';
-import { useNodeWheelScroll } from '../lib/useNodeWheelScroll';
-import { useSegmentEditing } from '../model/useSegmentEditing';
-import { useDocumentScaffold } from '../model/useDocumentScaffold';
-import { useDocumentOutline } from '../model/useDocumentOutline';
-import { useSegmentStructure } from '../model/useSegmentStructure';
 import {
+  CardResizeFrame,
+  DocumentOutlinePanel,
+  NodeSpreadAnchor,
   REFERENCE_DOCUMENT_NODE_TYPE,
-  type ReferenceDocumentData,
+  ReferenceCardHeader,
+  getReferenceCardTheme,
+  referenceDocumentApi,
+  useDocumentLayout,
+  useDocumentOutline,
+  useDocumentScaffold,
+  useNodeResize,
+  useNodeWheelScroll,
   type DocumentElementItem,
+  type ReferenceDocumentData,
+} from '@/entities/reference-document';
+import {
+  DOCUMENT_SEGMENT_TYPES,
+  SegmentStructureTree,
+  fromViewerSegment,
+  mergeBlockedMessage,
+  planMerge,
+  toViewerSegments,
+  useSegmentEditing,
+  useSegmentStructure,
   type DocumentSegmentItem,
-} from '../model/types';
-import { CardResizeFrame } from './CardResizeFrame';
-import { NodeSpreadAnchor } from './NodeSpreadAnchor';
-import { ReferenceCardHeader } from './ReferenceCardHeader';
-import { DocumentOutlinePanel } from './DocumentOutlinePanel';
-import { SegmentStructurePanel } from './SegmentStructurePanel';
-import { getReferenceCardTheme } from './referenceCardTheme';
+} from '@/entities/document-segment';
 
 /**
  * 세그먼트 탭이 아닐 때 뷰어에 넘기는 빈 목록.
@@ -42,16 +49,46 @@ import { getReferenceCardTheme } from './referenceCardTheme';
  * 깨진다. 다시 그려진 `<Page>` 는 `onLoadSuccess` 를 또 부르고, 그 콜백이 상태를
  * 바꾸면 렌더가 끝나지 않는다.
  */
-const EMPTY_SEGMENTS: DocumentSegmentItem[] = [];
+const EMPTY_VIEWER_SEGMENTS: ViewerSegment[] = [];
+
+/** 뷰어 패키지는 문구를 갖지 않는다. 이 앱의 로케일은 호스트가 넘긴다. */
+const VIEWER_LABELS = {
+  pdfLoadError: 'PDF 문서를 로드하지 못했습니다.',
+  pdfLoading: 'PDF 페이지 파싱 중...',
+  imageLoadError: '이미지를 로드하지 못했습니다.',
+  imageLoading: '이미지 불러오는 중...',
+  lazyPageHint: '스크롤 시 자동 로드',
+  creatingSegment: '새 영역 생성 중',
+  newSegmentLabel: '새 영역 블록',
+  editLabelAndType: '라벨/타입 편집 (더블클릭)',
+  deleteSegment: '세그먼트 삭제 (Del)',
+  splitHorizontal: '가로 분할',
+  splitVertical: '세로 분할',
+  clearSelection: '선택 해제 (Esc)',
+  labelPlaceholder: '라벨 입력...',
+  saveLabel: '저장 (Enter)',
+  resizeTopLeft: '크기 조절 (좌상단)',
+  resizeTopRight: '크기 조절 (우상단)',
+  resizeBottomRight: '크기 조절 (우하단)',
+  resizeBottomLeft: '크기 조절 (좌하단)',
+  resizeTop: '상단 높이 조절',
+  resizeBottom: '하단 높이 조절',
+  resizeLeft: '좌측 너비 조절',
+  resizeRight: '우측 너비 조절',
+} as const;
 
 /**
- * ReferenceDocumentCard (FSD Entity UI)
+ * ReferenceDocumentWorkbench (FSD Feature UI)
  *
- * 참고 문서 도메인의 캔버스 노드 표현. 뷰어 엔진(`@vibe/document-viewer`)을 조합해
- * 크기 핏 / 휠 가로채기 / 펼침 앵커 / 마우스 리사이징 및 문서 영역 스캔을 제공합니다.
+ * 참고 문서 카드의 캔버스 노드 표현. 뷰어 엔진(`@vibe/document-viewer`)에 참고 문서
+ * 엔티티와 세그먼트 엔티티를 조합해 크기 핏 / 휠 가로채기 / 펼침 앵커 / 리사이징과
+ * 문서 구조 패널을 제공합니다.
+ *
+ * **엔티티가 아니라 feature 다.** 두 엔티티를 함께 쓰기 때문이다 — 엔티티끼리
+ * 직접 참조하면 두 슬라이스가 함께 굳는다.
  * 상태·통신 로직은 전부 훅이 소유하고, 이 컴포넌트는 조합과 렌더링만 담당합니다.
  */
-export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
+export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkbench({
   id,
   data,
   selected = false,
@@ -62,41 +99,28 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
   const enableSmartSnap = useCanvasSettings((s) => s.enableSmartSnap);
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
 
-  const [activeElement, setActiveElement] = useState<DocumentElementItem | null>(null);
+  /**
+   * 원본 위 미리보기는 **마우스를 올린 동안만** 켠다.
+   *
+   * 예전에는 클릭으로 고정됐고 비우는 코드가 없었다. 그래서 한 번 누르면 이 카드의
+   * 강조 채널을 영영 점유했고, 와이어프레임 ↔ 원본 동기화 강조가 그 뒤로 전혀
+   * 뜨지 않았다. 훑어보는 동작에 영구 상태를 만들면 안 된다.
+   */
+  const [hoveredElement, setHoveredElement] = useState<DocumentElementItem | null>(null);
+  const [hoveredSegment, setHoveredSegment] = useState<DocumentSegmentItem | null>(null);
   const [panelTab, setPanelTab] = useState<'outline' | 'segments'>('outline');
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
+  /**
+   * 병합 후보는 **선택과 다른 상태**다.
+   *
+   * 예전에는 트리 안에만 있었고 선택과 같은 색으로 칠해져서, 화면에 셋이 강조돼
+   * 있는데 실제로는 둘만 합쳐졌다. 이제 위젯이 들고 있으므로 트리와 PDF 오버레이가
+   * 같은 후보 목록을 본다.
+   */
+  const [mergeCandidateIds, setMergeCandidateIds] = useState<string[]>([]);
 
   // 이 카드가 해당 매핑의 대상이거나 아웃라인 엘리먼트가 선택되었을 때만 강조한다 (타 카드 번짐 완벽 방지)
-  const highlight = useMemo<ViewerHighlight | null>(() => {
-    if (activeElement?.box_2d) {
-      return {
-        id: activeElement.id,
-        page: activeElement.page ?? 1,
-        box_2d: activeElement.box_2d,
-        label: activeElement.label,
-      };
-    }
-    if (!activeMapping?.box_2d) return null;
-    if (activeMapping.targetNodeId) {
-      if (activeMapping.targetNodeId !== id) return null;
-    } else if (activeMapping.sourcePdfFileName) {
-      const isMatchingFile =
-        data.title === activeMapping.sourcePdfFileName ||
-        (data.url && data.url.includes(encodeURIComponent(activeMapping.sourcePdfFileName))) ||
-        (data.url && data.url.includes(activeMapping.sourcePdfFileName));
-      if (!isMatchingFile) return null;
-    } else {
-      return null;
-    }
 
-    return {
-      id: activeMapping.id,
-      page: activeMapping.page ?? 1,
-      box_2d: activeMapping.box_2d,
-      label: activeMapping.label,
-      number: activeMapping.number,
-    };
-  }, [activeElement, activeMapping, id, data.title, data.url]);
 
   const viewerDef = useMemo(
     () => viewerRegistry.get(data.fileType, data.url || data.title),
@@ -134,12 +158,87 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     error: segmentStructureError,
     refresh: refreshSegmentStructure,
     assign: assignSegmentRelationship,
+    resetToAlgorithm: resetSegmentRelationship,
   } = useSegmentStructure(data.docId, isOutlineOpen && panelTab === 'segments');
 
+  /**
+   * 원본 위에 그릴 강조들.
+   *
+   * 아웃라인 항목을 고르면 **그 항목과 소속 세그먼트를 함께** 그린다. 사람은
+   * 각주·캡션처럼 영역 밖에 있는 것도 일부러 붙이는데, 고른 것만 그리면 강조가
+   * 엉뚱한 데로 튀어 보이고 왜 그런지 알 길이 없다.
+   */
+  const highlights = useMemo<ViewerHighlight[]>(() => {
+    if (hoveredElement?.box_2d) {
+      const result: ViewerHighlight[] = [
+        {
+          id: hoveredElement.id,
+          page: hoveredElement.page ?? 1,
+          box: hoveredElement.box_2d,
+          label: hoveredElement.label,
+          variant: 'primary',
+        },
+      ];
+
+      const owner = segmentStructure?.mappings.find(
+        (item) => item.targetId === hoveredElement.id
+      )?.primarySegmentId;
+      const ownerSegment = owner
+        ? segmentStructure?.segments.find((segment) => segment.id === owner)
+        : undefined;
+      if (ownerSegment) {
+        result.push({
+          id: ownerSegment.id,
+          page: ownerSegment.page,
+          box: ownerSegment.box_2d,
+          label: ownerSegment.label,
+          variant: 'context',
+        });
+      }
+      return result;
+    }
+
+    if (hoveredSegment) {
+      return [
+        {
+          id: hoveredSegment.id,
+          page: hoveredSegment.page,
+          box: hoveredSegment.box_2d,
+          label: hoveredSegment.label,
+          variant: 'primary',
+        },
+      ];
+    }
+
+    if (!activeMapping?.box_2d) return [];
+    if (activeMapping.targetNodeId) {
+      if (activeMapping.targetNodeId !== id) return [];
+    } else if (activeMapping.sourcePdfFileName) {
+      const isMatchingFile =
+        data.title === activeMapping.sourcePdfFileName ||
+        (data.url && data.url.includes(encodeURIComponent(activeMapping.sourcePdfFileName))) ||
+        (data.url && data.url.includes(activeMapping.sourcePdfFileName));
+      if (!isMatchingFile) return [];
+    } else {
+      return [];
+    }
+
+    return [
+      {
+        id: activeMapping.id,
+        page: activeMapping.page ?? 1,
+        box: activeMapping.box_2d,
+        label: activeMapping.label,
+        number: activeMapping.number,
+        variant: 'primary',
+      },
+    ];
+  }, [hoveredElement, hoveredSegment, activeMapping, segmentStructure, id, data.title, data.url]);
+
+  // 클릭은 트리 선택 상태만 바꾼다. 강조는 호버가 담당하므로 점유가 생기지 않는다.
   const handleSelectElement = useCallback(
     (elem: DocumentElementItem) => {
       setSelectedElementId(elem.id);
-      setActiveElement(elem);
     },
     [setSelectedElementId]
   );
@@ -221,6 +320,10 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     deleteSegment,
     splitSegment,
     mergeSegments,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useSegmentEditing({
     nodeId: id,
     docId: data.docId,
@@ -230,7 +333,64 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
     },
     onScanError: () => alert('문서 영역 스캔 중 오류가 발생했습니다.'),
     onSegmentSaved: () => void refreshSegmentStructure(),
+    onMergeBlocked: (reason) => alert(mergeBlockedMessage(reason)),
   });
+
+  // 뷰어는 호스트 중립 계약을 쓴다. 백엔드 DTO 를 그대로 넘기지 않고 경계에서 바꾼다.
+  const viewerSegments = useMemo(
+    () => (panelTab === 'segments' ? toViewerSegments(segments) : EMPTY_VIEWER_SEGMENTS),
+    [panelTab, segments]
+  );
+  const handleViewerUpdate = useCallback(
+    (updated: ViewerSegment) => updateSegment(fromViewerSegment(updated)),
+    [updateSegment]
+  );
+  const handleViewerCreate = useCallback(
+    (created: ViewerSegment) => createSegment(fromViewerSegment(created)),
+    [createSegment]
+  );
+
+  /** 지금 후보로 병합하면 어떻게 되는지. 미리보기와 실행이 같은 계산을 쓴다. */
+  const mergePreview = useMemo(
+    () => planMerge(segments, mergeCandidateIds),
+    [segments, mergeCandidateIds]
+  );
+
+  const toggleMergeCandidate = useCallback((segmentId: string) => {
+    setMergeCandidateIds((prev) =>
+      prev.includes(segmentId) ? prev.filter((id) => id !== segmentId) : [...prev, segmentId]
+    );
+  }, []);
+
+  const runMerge = useCallback(() => {
+    // 합쳐진 세그먼트는 첫 후보의 자리에 남는다. 그걸 선택해 두면 라벨을 바로
+    // 고칠 수 있다 — 합친 결과의 이름은 대개 원래 것 중 하나가 아니다.
+    const mergedId = mergeCandidateIds[0] ?? null;
+    mergeSegments(mergeCandidateIds);
+    setMergeCandidateIds([]);
+    if (mergedId) setSelectedSegmentId(mergedId);
+  }, [mergeSegments, mergeCandidateIds]);
+
+  // 편집 모드를 벗어나면 후보도 비운다. 남아 있으면 다음에 들어왔을 때
+  // 의도하지 않은 것들이 이미 골라져 있다.
+  useEffect(() => {
+    if (!isEditMode) setMergeCandidateIds([]);
+  }, [isEditMode]);
+
+  // 되돌리기 단축키. 입력 중에는 브라우저 기본 동작(텍스트 되돌리기)을 막지 않는다.
+  useEffect(() => {
+    if (!isEditMode) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      event.preventDefault();
+      if (event.shiftKey) redo();
+      else undo();
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [isEditMode, undo, redo]);
 
   const handleSelectSegment = useCallback((segment: { id: string }) => {
     setSelectedSegmentId(segment.id);
@@ -244,7 +404,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       alert(`스캐폴딩 추출 완료: [${scaffoldTitle}] 노드가 캔버스에 연결되었습니다.`),
     onError: (err) => {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error('[ReferenceDocumentCard] Extract scaffold error:', err);
+      console.error('[ReferenceDocumentWorkbench] Extract scaffold error:', err);
       alert(`[Tiptap 서식 스캐폴딩 추출 오류]\n${msg}`);
     },
   });
@@ -267,7 +427,7 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
       } catch (error) {
         // 서버 정리가 실패했어도 캔버스에서 카드를 지울지 사용자에게 묻는 별도
         // 플로우는 다음 UX 개선으로 남긴다. 현재는 고아를 숨기지 않기 위해 기록한다.
-        console.error('[ReferenceDocumentCard] 문서 및 세그먼트 정리 실패:', error);
+        console.error('[ReferenceDocumentWorkbench] 문서 및 세그먼트 정리 실패:', error);
         return;
       }
       setNodes((nds) => nds.filter((node) => node.id !== id));
@@ -341,13 +501,19 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
             url={data.url}
             title={data.title}
             isSpread={isSpread}
-            segments={panelTab === 'segments' ? segments : EMPTY_SEGMENTS}
-            highlight={highlight}
+            segments={viewerSegments}
+            segmentTypes={DOCUMENT_SEGMENT_TYPES}
+            labels={VIEWER_LABELS}
+            mergeCandidateIds={mergeCandidateIds}
+            absorbedSegmentIds={mergePreview.absorbedIds}
+            mergePreviewBox={mergePreview.box}
+            onToggleMergeCandidate={toggleMergeCandidate}
+            highlights={highlights}
             selectedSegmentId={selectedSegmentId}
             isEditMode={panelTab === 'segments' && isEditMode}
             enableSmartSnap={enableSmartSnap}
-            onUpdateSegment={updateSegment}
-            onCreateSegment={createSegment}
+            onUpdateSegment={handleViewerUpdate}
+            onCreateSegment={handleViewerCreate}
             onDeleteSegment={deleteSegment}
             onSplitSegment={splitSegment}
             onSelectSegment={handleSelectSegment}
@@ -385,24 +551,35 @@ export const ReferenceDocumentCard = memo(function ReferenceDocumentCard({
                   progressMessage={outlineProgressMessage}
                   execution={outlineExecution}
                   onSelectElement={handleSelectElement}
+                  onHoverElement={setHoveredElement}
                   onClose={toggleOutlinePanel}
                   onRefresh={() => extractOutline(true)}
                   error={outlineError}
                   onConfigureLlm={requestLlmSettings}
                 />
               ) : (
-                <SegmentStructurePanel
+                <SegmentStructureTree
                   title={data.title}
                   structure={segmentStructure}
                   isLoading={isLoadingSegmentStructure}
                   error={segmentStructureError}
                   selectedSegmentId={selectedSegmentId}
                   isEditMode={isEditMode}
+                  mergeCandidateIds={mergeCandidateIds}
+                  absorbedSegmentIds={mergePreview.absorbedIds}
+                  canUndo={canUndo}
+                  canRedo={canRedo}
                   onSelectSegment={handleSelectSegment}
                   onSelectElement={handleSelectElement}
+                  onHoverElement={setHoveredElement}
+                  onHoverSegment={setHoveredSegment}
+                  onToggleMergeCandidate={toggleMergeCandidate}
                   onAssign={(kind, targetId, segmentId) => void assignSegmentRelationship(kind, targetId, segmentId)}
+                  onResetRelationship={(kind, targetId) => void resetSegmentRelationship(kind, targetId)}
                   onToggleEdit={toggleEditMode}
-                  onMerge={mergeSegments}
+                  onMerge={runMerge}
+                  onUndo={undo}
+                  onRedo={redo}
                   onClose={toggleOutlinePanel}
                 />
               )}

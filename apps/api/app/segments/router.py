@@ -96,6 +96,26 @@ async def get_segment_structure(doc_id: str, service: SegmentsServiceDep):
         raise _error(exc) from exc
 
 
+@router.delete("/{doc_id}/relationships/{target_kind}/{target_id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def reset_relationship_override(
+    doc_id: str,
+    target_kind: str,
+    target_id: str,
+    service: SegmentsServiceDep,
+):
+    """사람이 정한 관계를 물러 **자동 분석 결과로 되돌린다.**
+
+    소속 해제(`PUT ... primarySegmentId=null`)와 다르다. 해제는 "어디에도 속하지
+    않는다"는 사람의 결정이고, 이쪽은 그 결정 자체를 취소한다. 되돌릴 결정이 없으면
+    조용히 성공한다 — 같은 요청을 두 번 보내도 결과가 같아야 한다.
+    """
+    try:
+        service.reset_override(doc_id, target_kind=target_kind, target_id=target_id)
+    except Exception as exc:
+        raise _error(exc) from exc
+
+
 @router.put("/{doc_id}/relationships", response_model=RelationshipOverrideResponse)
 @inject
 async def set_relationship_override(

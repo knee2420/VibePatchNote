@@ -11,9 +11,9 @@ export function SegmentSummaryView({ segment, isSelected }: SegmentSummaryViewPr
     <div className="space-y-2">
       <p className="text-xs font-semibold text-slate-800">{segment.label}</p>
 
-      {segment.content_summary ? (
+      {segment.summary ? (
         <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 line-clamp-4">
-          {segment.content_summary}
+          {segment.summary}
         </p>
       ) : (
         <p className="text-[11px] text-slate-400 italic">내용 요약 없음</p>

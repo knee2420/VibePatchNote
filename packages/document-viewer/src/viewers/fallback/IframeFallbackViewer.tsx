@@ -1,10 +1,10 @@
 import { memo } from 'react';
-import type { DocumentViewerProps } from '../../types';
+import type { DocumentViewBaseProps } from '../../types';
 
 export const IframeFallbackViewer = memo(function IframeFallbackViewer({
   url,
   title,
-}: DocumentViewerProps) {
+}: DocumentViewBaseProps) {
   return (
     <div className="flex-1 w-full h-full p-0 overflow-hidden rounded-b-md relative bg-white">
       <iframe

@@ -1,5 +1,6 @@
 import { Sparkles } from 'lucide-react';
 
+import { useViewerLabels } from '../../../viewerConfig';
 import { toPercentStyle, type SegmentBox } from './geometry';
 
 interface CreateSegmentPreviewProps {
@@ -8,6 +9,7 @@ interface CreateSegmentPreviewProps {
 
 /** Shift + 드래그로 새 영역을 그리는 동안 보여주는 가이드 박스. */
 export function CreateSegmentPreview({ box }: CreateSegmentPreviewProps) {
+  const labels = useViewerLabels();
   return (
     <div
       style={toPercentStyle(box)}
@@ -15,7 +17,7 @@ export function CreateSegmentPreview({ box }: CreateSegmentPreviewProps) {
     >
       <div className="absolute -top-5 left-1 px-1.5 py-0.5 bg-purple-600 text-white text-[10px] rounded font-bold shadow-xs flex items-center gap-1">
         <Sparkles className="w-3 h-3" />
-        <span>새 영역 생성 중</span>
+        <span>{labels.creatingSegment}</span>
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useCanvasBoardStore } from '@/entities/canvas-board';
-import { ReferenceDocumentCard, REFERENCE_DOCUMENT_NODE_TYPE } from '@/entities/reference-document';
+import { REFERENCE_DOCUMENT_NODE_TYPE } from '@/entities/reference-document';
+import { ReferenceDocumentWorkbench } from '@/features/reference-document-workbench';
 import { ResourceCardNode, RESOURCE_CARD_NODE_TYPE } from '@/entities/resource-card';
 import { ScaffoldDocumentCard, SCAFFOLD_DOCUMENT_NODE_TYPE } from '@/entities/scaffold-document';
 import { SegmentNode, SEGMENT_NODE_TYPE } from '@/entities/segment';
@@ -22,7 +23,7 @@ import { BoardHeader } from './BoardHeader';
 const NODE_TYPES = {
   [SEGMENT_NODE_TYPE]: SegmentNode,
   [RESOURCE_CARD_NODE_TYPE]: ResourceCardNode,
-  [REFERENCE_DOCUMENT_NODE_TYPE]: ReferenceDocumentCard,
+  [REFERENCE_DOCUMENT_NODE_TYPE]: ReferenceDocumentWorkbench,
   [SCAFFOLD_DOCUMENT_NODE_TYPE]: ScaffoldDocumentCard,
 };
 

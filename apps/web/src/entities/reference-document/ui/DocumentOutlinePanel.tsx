@@ -32,6 +32,8 @@ interface DocumentOutlinePanelProps {
   progressMessage?: string;
   execution?: AgentRunExecution | null;
   onSelectElement?: (element: DocumentElementItem) => void;
+  /** 행에 마우스를 올렸을 때. 떼면 `null`. */
+  onHoverElement?: (element: DocumentElementItem | null) => void;
   onClose: () => void;
   onRefresh?: () => void;
   error?: { code: string; message: string; retryable?: boolean; requiresAction?: string };
@@ -58,6 +60,7 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
   progressMessage = '',
   execution,
   onSelectElement,
+  onHoverElement,
   onClose,
   onRefresh,
   error,
@@ -274,6 +277,7 @@ export const DocumentOutlinePanel = memo(function DocumentOutlinePanel({
               onToggleNode={handleToggleNode}
               selectedElementId={selectedElementId}
               onSelectElement={onSelectElement}
+              onHoverElement={onHoverElement}
             />
           ))
         )}
@@ -295,6 +299,8 @@ interface TreeOutlineNodeProps {
   onToggleNode: (id: string) => void;
   selectedElementId?: string | null;
   onSelectElement?: (element: DocumentElementItem) => void;
+  /** 행에 마우스를 올렸을 때. 떼면 `null`. */
+  onHoverElement?: (element: DocumentElementItem | null) => void;
 }
 
 function TreeOutlineNode({
@@ -304,6 +310,7 @@ function TreeOutlineNode({
   onToggleNode,
   selectedElementId,
   onSelectElement,
+  onHoverElement,
 }: TreeOutlineNodeProps) {
   const isOpen = expandedIds.has(node.id);
 
@@ -366,6 +373,7 @@ function TreeOutlineNode({
                 depth={depth + 1}
                 isSelected={selectedElementId === elem.id}
                 onClick={() => onSelectElement?.(elem)}
+                onHoverChange={(hovered) => onHoverElement?.(hovered ? elem : null)}
               />
             ))}
 
@@ -380,6 +388,7 @@ function TreeOutlineNode({
                 onToggleNode={onToggleNode}
                 selectedElementId={selectedElementId}
                 onSelectElement={onSelectElement}
+                onHoverElement={onHoverElement}
               />
             ))}
         </div>
@@ -393,6 +402,7 @@ interface TreeElementItemProps {
   depth: number;
   isSelected: boolean;
   onClick: () => void;
+  onHoverChange: (hovered: boolean) => void;
 }
 
 function TreeElementItem({
@@ -400,6 +410,7 @@ function TreeElementItem({
   depth,
   isSelected,
   onClick,
+  onHoverChange,
 }: TreeElementItemProps) {
   const iconConfig = ELEMENT_ICON_MAP[element.type] || {
     icon: Paperclip,
@@ -410,6 +421,8 @@ function TreeElementItem({
 
   return (
     <div
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
       onClick={(e) => {
         e.stopPropagation();
         onClick();

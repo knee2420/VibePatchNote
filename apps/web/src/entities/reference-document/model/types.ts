@@ -9,56 +9,6 @@ export const REFERENCE_DOCUMENT_NODE_TYPE = 'referenceDocument';
  */
 export const REFERENCE_CARD_SIZE = { width: 600, height: 800 } as const;
 
-export interface DocumentSegmentItem {
-  id: string;
-  page: number;
-  type: string;
-  label: string;
-  box_2d: [number, number, number, number]; // [ymin, xmin, ymax, xmax] 0~1000
-  content_summary?: string;
-}
-
-export interface SegmentArtifactResponse {
-  status: string;
-  docId: string;
-  documentTitle: string;
-  totalPages: number;
-  artifactId?: string | null;
-  segments: DocumentSegmentItem[];
-  agentRunId?: string;
-}
-
-export interface SegmentStructureTarget {
-  id: string;
-  page: number;
-  label: string;
-  type: string;
-  box_2d?: [number, number, number, number] | null;
-  artifactId?: string | null;
-  scaffoldId?: string | null;
-}
-
-export interface SegmentMappingItem {
-  targetKind: 'outline_element' | 'wireframe_block';
-  targetId: string;
-  primarySegmentId?: string | null;
-  confidence: number;
-  source: 'algorithm' | 'override' | 'unassigned';
-  reason: string;
-}
-
-export interface SegmentStructureResponse {
-  docId: string;
-  segmentArtifactId?: string | null;
-  outlineArtifactId?: string | null;
-  segments: DocumentSegmentItem[];
-  outlineElements: SegmentStructureTarget[];
-  wireframeBlocks: SegmentStructureTarget[];
-  mappings: SegmentMappingItem[];
-  staleOverrideIds: string[];
-  mappingEngineVersion: string;
-}
-
 export interface DocumentElementItem {
   id: string;
   outline_id?: string;

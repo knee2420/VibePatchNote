@@ -89,6 +89,7 @@ from app.segments.service import SegmentsService
 from app.segments.use_cases import (
     GetAdoptedSegmentsUseCase,
     GetSegmentStructureViewUseCase,
+    ResetRelationshipOverrideUseCase,
     SaveSegmentRevisionUseCase,
     SetRelationshipOverrideUseCase,
 )
@@ -404,6 +405,13 @@ class Container(containers.DeclarativeContainer):
         outlines=segment_outline_reader,
         wireframes=segment_wireframe_reader,
     )
+    reset_segment_relationship_override = providers.Factory(
+        ResetRelationshipOverrideUseCase,
+        source=segment_source_reader,
+        segments=segment_repository,
+        agreements=segment_agreement_repository,
+        cache=segment_mapping_cache,
+    )
     generate_scaffold = providers.Factory(
         GenerateWireframeUseCase,
         source=document_source_repository,
@@ -433,6 +441,7 @@ class Container(containers.DeclarativeContainer):
         save_revision=save_segment_revision,
         structure=get_segment_structure_view,
         override=set_segment_relationship_override,
+        reset_override=reset_segment_relationship_override,
         agent_runtime=agent_runtime,
     )
 

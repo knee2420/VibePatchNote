@@ -24,6 +24,7 @@ from app.segments.schemas import to_run_result
 from app.segments.use_cases import (
     GetAdoptedSegmentsUseCase,
     GetSegmentStructureViewUseCase,
+    ResetRelationshipOverrideUseCase,
     SaveSegmentRevisionUseCase,
     SetRelationshipOverrideUseCase,
 )
@@ -176,3 +177,52 @@ def test_run_result_is_recordable_by_the_agent_runtime() -> None:
     assert event.result["artifactId"] == "segment-a1"
     assert event.result["docId"] == DOC_ID
     assert len(event.result["segments"]) == 1
+
+
+def test_revoking_an_override_falls_back_to_the_algorithm(tmp_path: Path) -> None:
+    """사람이 정한 관계를 물리면 자동 분석 결과로 돌아간다.
+
+    **이력은 남는다.** 관계 합의는 append-only 이므로 철회도 기록으로 덧붙인다.
+    파일을 지워 버리면 "되돌린 적이 있다"는 사실까지 사라져 나중에 설명할 수 없다.
+    """
+    repository = LocalSegmentRepository(tmp_path / "data" / "knowledge" / "segments")
+    agreements = LocalSegmentAgreementRepository(tmp_path / "data" / "agreements")
+    cache = LocalSegmentMappingCache(tmp_path / "cache" / "segments")
+    source, outlines, wireframes = Source(), Outlines(), Wireframes()
+
+    repository.commit(_artifact("segment-a1", [
+        DocumentSegment(id="seg-top", page=1, type="paragraph", label="상단", box_2d=[0, 0, 400, 1000]),
+        DocumentSegment(id="seg-bottom", page=1, type="table", label="하단", box_2d=[400, 0, 1000, 1000]),
+    ]))
+
+    def relation_of(target_id: str):
+        view = GetSegmentStructureViewUseCase(
+            source, repository, agreements, cache, outlines, wireframes
+        ).execute(DOC_ID)
+        return next(item for item in view.mappings if item.target_id == target_id)
+
+    # 알고리즘이 고른 값
+    assert relation_of("element-1").primary_segment_id == "seg-top"
+    assert relation_of("element-1").source == "algorithm"
+
+    # 사람이 뒤집는다
+    SetRelationshipOverrideUseCase(
+        source, repository, agreements, cache, outlines, wireframes,
+    ).execute(DOC_ID, target_kind="outline_element", target_id="element-1", primary_segment_id="seg-bottom")
+    assert relation_of("element-1").primary_segment_id == "seg-bottom"
+    assert relation_of("element-1").source == "override"
+
+    # 그 결정을 물린다
+    reset = ResetRelationshipOverrideUseCase(source, repository, agreements, cache)
+    revocation = reset.execute(DOC_ID, target_kind="outline_element", target_id="element-1")
+    assert revocation is not None and revocation.revoked
+
+    assert relation_of("element-1").primary_segment_id == "seg-top", "자동 분석으로 돌아와야 한다"
+    assert relation_of("element-1").source == "algorithm"
+
+    # 결정과 철회가 모두 이력에 남는다
+    history = agreements.list_for_document(DOC_ID)
+    assert [item.revoked for item in history] == [False, True]
+
+    # 되돌릴 결정이 없으면 조용히 아무것도 하지 않는다 (같은 요청을 두 번 보내도 같다)
+    assert reset.execute(DOC_ID, target_kind="outline_element", target_id="element-1") is None
