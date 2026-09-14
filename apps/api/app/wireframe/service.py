@@ -45,6 +45,7 @@ class WireframeArchiveService:
         result: Any = None,
         page_number: int = 1,
         source_path: Optional[Path] = None,
+        total_pages: Optional[int] = None,
     ) -> WireframeArchiveMeta:
         target_path = pdf_path or source_path
         if target_path is None:
@@ -55,17 +56,45 @@ class WireframeArchiveService:
         meta_title = getattr(getattr(result, "meta", None), "title", "")
         title = meta_title or f"{target_path.stem} 서식 틀"
 
+        slots = getattr(result, "slots", [])
+        extra_vision = {}
         orig_png = None
         overlay_png = None
         render_png = None
-        slots = getattr(result, "slots", [])
+
+        doc_page_count = 1
         try:
-            orig_png = render_page_as_png(target_path, page_number=page_number, dpi=150)
+            import fitz
+            doc = fitz.open(target_path)
+            doc_page_count = len(doc)
+            doc.close()
+        except Exception:
+            doc_page_count = total_pages or 1
+
+        calc_total_pages = total_pages or doc_page_count
+
+        def _slot_page(s: Any) -> int:
+            return getattr(s, "page_number", None) or getattr(s, "pageNumber", None) or 1
+
+        try:
+            orig_png = render_page_as_png(target_path, page_number=1, dpi=150)
             overlay_png = render_slot_overlay_png(
-                target_path, slots, page_number=page_number, dpi=150
+                target_path, [s for s in slots if _slot_page(s) == 1], page_number=1, dpi=150
             )
+            # 2페이지 이상인 경우 추가 비전 에셋 렌더링
+            for p_idx in range(2, calc_total_pages + 1):
+                try:
+                    p_orig = render_page_as_png(target_path, page_number=p_idx, dpi=150)
+                    p_overlay = render_slot_overlay_png(
+                        target_path, [s for s in slots if _slot_page(s) == p_idx], page_number=p_idx, dpi=150
+                    )
+                    extra_vision[f"vision/original_p{p_idx}.png"] = p_orig
+                    extra_vision[f"vision/overlay_p{p_idx}.png"] = p_overlay
+                except Exception as p_exc:
+                    logger.warning("[WireframeArchiveService] Vision rendering skipped for page %d: %s", p_idx, p_exc)
         except Exception as exc:
             logger.warning("[WireframeArchiveService] Vision rendering skipped: %s", exc)
+
         try:
             render_png = render_scaffold_png(getattr(result, "html_content", ""), dpi=150)
         except Exception as exc:
@@ -86,6 +115,8 @@ class WireframeArchiveService:
             source_pdf_file_name=target_path.name,
             slots_count=len(slots),
             page_number=page_number,
+            total_pages=calc_total_pages,
+            pages=list(range(1, calc_total_pages + 1)),
         )
 
         self.repository.save_artifacts(
@@ -97,6 +128,7 @@ class WireframeArchiveService:
             original_png=orig_png,
             overlay_png=overlay_png,
             render_png=render_png,
+            extra_vision_pngs=extra_vision,
         )
 
         meta = self._to_meta(record)

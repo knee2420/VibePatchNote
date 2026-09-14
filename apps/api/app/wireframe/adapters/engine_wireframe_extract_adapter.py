@@ -71,6 +71,8 @@ class EngineWireframeExtractAdapter:
         doc_id: str | None = None,
         context_dir: Path | None = None,
         display_name: str | None = None,
+        pages: list[int] | None = None,
+        page_number: int | None = None,
     ) -> WireframeExtractOutput:
         self._resolve_routing(display_name=display_name)
         pipeline = ScaffoldPipeline(harness=self._harness)
@@ -81,8 +83,10 @@ class EngineWireframeExtractAdapter:
         result: ScaffoldExtractResult = await asyncio.to_thread(
             pipeline.run,
             file_path,
+            page_number=page_number,
             display_name=display_name,
             context_dir=target_context_dir,
+            page_numbers=pages,
         )
         raw_telemetry = pipeline.last_telemetry or {}
 

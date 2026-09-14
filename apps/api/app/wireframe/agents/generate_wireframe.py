@@ -59,12 +59,13 @@ class GenerateWireframeUseCase:
         file_path: Any,
         display_name: str | None = None,
         doc_id: str | None = None,
+        pages: list[int] | None = None,
     ) -> WireframeExtractOutput:
         if not self._engine:
             raise RuntimeError("WireframeExtractPort 엔진 어댑터가 구성되지 않았습니다.")
 
         raw = await self._engine.extract(
-            Path(file_path), display_name=display_name, doc_id=doc_id
+            Path(file_path), display_name=display_name, doc_id=doc_id, pages=pages
         )
         if isinstance(raw, WireframeExtractOutput):
             return raw
@@ -88,22 +89,22 @@ class GenerateWireframeUseCase:
             )
         return raw  # type: ignore
 
-    async def execute(self, doc_id: str) -> dict[str, Any]:
+    async def execute(self, doc_id: str, pages: list[int] | None = None) -> dict[str, Any]:
         meta = self._require(doc_id)
         run_id = current_run_id()
         if not run_id and self._runtime:
             agent_run, result = await self._runtime.execute(
                 self.name,
-                lambda: self._execute_internal(meta),
+                lambda: self._execute_internal(meta, pages=pages),
                 doc_id=doc_id,
                 run_input=AgentRunInput(
-                    use_case=self.name, doc_id=doc_id, payload={"docId": doc_id}
+                    use_case=self.name, doc_id=doc_id, payload={"docId": doc_id, "pages": pages}
                 ),
             )
             return result
-        return await self._execute_internal(meta)
+        return await self._execute_internal(meta, pages=pages)
 
-    async def _execute_internal(self, meta: Any) -> dict[str, Any]:
+    async def _execute_internal(self, meta: Any, pages: list[int] | None = None) -> dict[str, Any]:
         doc_id = getattr(meta, "doc_id", None) or str(meta)
         original_name = getattr(meta, "original_name", "") or getattr(meta, "title", "document")
         run_id = current_run_id() or new_id(RUN_PREFIX)
@@ -124,7 +125,7 @@ class GenerateWireframeUseCase:
             file_path = self._source.resolve_file(doc_id)
             try:
                 output: WireframeExtractOutput = await self._run_pipeline(
-                    file_path, display_name=original_name, doc_id=doc_id
+                    file_path, display_name=original_name, doc_id=doc_id, pages=pages
                 )
             except Exception as exc:
                 logger.error("[GenerateWireframe] 파이프라인 실패: %s", exc, exc_info=True)

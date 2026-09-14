@@ -31,6 +31,10 @@ export interface ScaffoldArchiveMeta {
   description?: string;
   /** 아카이빙된 원본 페이지 번호(1-based). */
   pageNumber?: number;
+  /** 총 페이지 수 */
+  totalPages?: number;
+  /** 포함된 페이지 번호 목록 */
+  pages?: number[];
   overlayImageUrl: string;
   originalImageUrl: string;
   promptSpecUrl: string;
@@ -136,13 +140,13 @@ export const referenceDocumentApi = {
   startSegmentScan: (docId: string) =>
     httpClient.post<{ runId: string; status: string }>(`${BASE_PATH}/scan/runs`, { docId }),
 
-  /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. */
-  extractScaffold: (docId: string) =>
-    httpClient.post<ScaffoldExtractResponse>('/api/v1/wireframes/extract', { docId }),
+  /** PDF 원본으로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다. (pages 미지정 시 전체 페이지) */
+  extractScaffold: (docId: string, pages?: number[]) =>
+    httpClient.post<ScaffoldExtractResponse>('/api/v1/wireframes/extract', { docId, pages }),
 
-  /** 스캐폴드 생성을 백그라운드 실행으로 접수합니다. */
-  startScaffold: (docId: string) =>
-    httpClient.post<{ runId: string; status: string }>('/api/v1/wireframes/runs', { docId }),
+  /** 스캐폴드 생성을 백그라운드 실행으로 접수합니다. (pages 미지정 시 전체 페이지) */
+  startScaffold: (docId: string, pages?: number[]) =>
+    httpClient.post<{ runId: string; status: string }>('/api/v1/wireframes/runs', { docId, pages }),
 
   /** 아웃라인 분석을 동기로 실행합니다(채택본이 있으면 그대로 반환). */
   extractOutline: (docId: string, forceRefresh = false) =>

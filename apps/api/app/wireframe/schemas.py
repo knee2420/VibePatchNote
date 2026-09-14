@@ -34,6 +34,8 @@ class WireframeArchiveRecord(BaseModel):
     target_doc: str = Field(default="", description="엔진 타겟 문서 유형")
     description: str = Field(default="", description="서식 설명")
     page_number: int = Field(default=1, description="아카이빙된 원본 페이지 번호")
+    total_pages: int = Field(default=1, description="총 페이지 수")
+    pages: List[int] = Field(default_factory=lambda: [1], description="포함된 페이지 번호 목록")
     revision: int = Field(default=1, description="작업본 편집 횟수")
     updated_at: Optional[str] = Field(default=None, description="마지막 작업본 편집 일시")
 
@@ -42,6 +44,9 @@ class WireframeArchiveMeta(WireframeArchiveRecord):
     """프런트엔드 전송용 메타 모델."""
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+
+    total_pages: int = Field(default=1, description="총 페이지 수")
+    pages: List[int] = Field(default_factory=lambda: [1], description="포함된 페이지 번호 목록")
 
     overlay_image_url: str = Field(default="", description="슬롯 오버레이 이미지 URL")
     original_image_url: str = Field(default="", description="원본 렌더 이미지 URL")
@@ -87,6 +92,7 @@ class WireframeGenerateRequest(BaseModel):
     """와이어프레임 생성 요청."""
 
     doc_id: str = Field(..., alias="docId", description="대상 문서 식별자")
+    pages: Optional[List[int]] = Field(default=None, description="처리할 대상 페이지 번호 목록 (None이면 전체)")
 
     model_config = {"populate_by_name": True}
 

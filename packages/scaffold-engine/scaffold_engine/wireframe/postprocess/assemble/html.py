@@ -33,23 +33,30 @@ class HtmlAssembler:
         pdf_path: Path,
         page: "PageGeometry",
         decisions: Dict[str, Any],
+        start_slot_number: int = 1,
     ) -> Tuple[str, str, List[Dict[str, Any]]]:
         """(html, markdown, slots) 을 돌려준다."""
         doc = fitz.open(pdf_path)
         try:
-            return self._build(doc[page.page - 1], page, decisions)
+            return self._build(doc[page.page - 1], page, decisions, start_counter=max(0, start_slot_number - 1))
         finally:
             doc.close()
 
     # --- 내부 ---
 
-    def _build(self, fitz_page, page: "PageGeometry", decisions: Dict[str, Any]):
+    def _build(
+        self,
+        fitz_page,
+        page: "PageGeometry",
+        decisions: Dict[str, Any],
+        start_counter: int = 0,
+    ):
         width, height = page.width, page.height
         decided = {d["id"]: d for d in decisions.get("blocks", [])}
         by_id = {b.id: b for b in page.blocks}
         slots: List[Dict[str, Any]] = []
         md_lines: List[str] = []
-        counter = 0
+        counter = start_counter
 
         def emit(block: "Block") -> Tuple[str, bool]:
             """블록 하나를 인라인 조각으로. (조각, 슬롯이_박스를_채움) 반환."""

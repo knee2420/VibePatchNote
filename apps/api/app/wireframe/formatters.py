@@ -79,6 +79,8 @@ class ManifestFormatter:
         source_pdf_file_name: str,
         slots_count: int,
         page_number: int = 1,
+        total_pages: int = 1,
+        pages: Optional[List[int]] = None,
     ) -> WireframeArchiveRecord:
         now_iso = datetime.now(timezone.utc).isoformat()
         return WireframeArchiveRecord(
@@ -93,6 +95,8 @@ class ManifestFormatter:
             target_doc=meta.target_doc,
             description=meta.description,
             page_number=page_number,
+            total_pages=total_pages,
+            pages=pages or [page_number],
         )
 
     @staticmethod
@@ -122,6 +126,8 @@ class ManifestFormatter:
             target_doc=record.target_doc,
             description=record.description,
             page_number=record.page_number,
+            total_pages=record.total_pages,
+            pages=record.pages,
             revision=record.revision,
             updated_at=record.updated_at,
             overlay_image_url=f"{route}/{ASSET_VISION_OVERLAY}",

@@ -66,6 +66,7 @@ class LocalWireframeRepository:
         original_png: Optional[bytes] = None,
         overlay_png: Optional[bytes] = None,
         render_png: Optional[bytes] = None,
+        extra_vision_pngs: Optional[Dict[str, bytes]] = None,
     ) -> Path:
         archive_dir = self._new_archive_dir(record)
         created_now = not archive_dir.exists()
@@ -86,6 +87,12 @@ class LocalWireframeRepository:
                 (archive_dir / ASSET_VISION_OVERLAY).write_bytes(overlay_png)
             if render_png:
                 (archive_dir / ASSET_VISION_RENDER).write_bytes(render_png)
+
+            if extra_vision_pngs:
+                for subpath, p_bytes in extra_vision_pngs.items():
+                    target_file = archive_dir / subpath
+                    target_file.parent.mkdir(parents=True, exist_ok=True)
+                    target_file.write_bytes(p_bytes)
 
             self._write_manifest(archive_dir, record)
         except Exception:

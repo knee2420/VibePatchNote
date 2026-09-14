@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import {
   FileText,
@@ -8,6 +8,7 @@ import {
   Loader2,
   Layers,
   AlertCircle,
+  X,
 } from 'lucide-react';
 
 import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
@@ -42,6 +43,8 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 }: NodeProps<ScaffoldDocumentNode>) {
   const { setNodes, setEdges } = useReactFlow();
   const openFocus = useScaffoldFocusStore((s) => s.openFocus);
+
+  const [showTaskBanner, setShowTaskBanner] = useState(true);
 
   const editorContainerRef = useRef<HTMLDivElement>(null);
 
@@ -84,6 +87,17 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   }, [activeMapping, data.sourceNodeId, data.sourcePdfFileName]);
 
   const activeNumberForEditor = isMappingForThisCard ? activeMapping?.number : null;
+
+  const totalPages = useMemo(() => {
+    if (data.archive?.totalPages && data.archive.totalPages > 1) {
+      return data.archive.totalPages;
+    }
+    const maxPageInSlots = (data.slots as SlotMappingItem[] | undefined)?.reduce(
+      (max, s) => Math.max(max, s.pageNumber ?? 1),
+      1
+    );
+    return maxPageInSlots && maxPageInSlots > 1 ? maxPageInSlots : 1;
+  }, [data.archive?.totalPages, data.slots]);
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -221,6 +235,62 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
         </div>
       </div>
 
+      {/* 1.5. 카드 상단: 에이전트 상태 및 작업 내용 요약 바 (사용자 요청 위치) */}
+      {status === 'completed' && showTaskBanner && (
+        <div className="px-4 py-2 bg-indigo-50/70 border-b border-indigo-100/80 flex items-center justify-between text-xs text-slate-700 shrink-0 gap-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <ProviderExecutionBadge execution={data.execution} />
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-semibold text-indigo-900 shrink-0 text-[11px] bg-indigo-100/90 border border-indigo-200/60 px-1.5 py-0.5 rounded">
+                작업 내용
+              </span>
+              <span
+                className="text-[11px] text-slate-700 truncate font-medium"
+                title={
+                  data.taskSummary ||
+                  data.description ||
+                  `원본 실측 기하 기반 와이어프레임 · 전체 ${totalPages}페이지 · 슬롯 ${
+                    (data.slots as SlotMappingItem[] | undefined)?.length ?? 0
+                  }개 구조화 완료`
+                }
+              >
+                {data.taskSummary ||
+                  data.description ||
+                  `원본 실측 기하 기반 와이어프레임 · 전체 ${totalPages}페이지 · 슬롯 ${
+                    (data.slots as SlotMappingItem[] | undefined)?.length ?? 0
+                  }개 구조화 완료`}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowTaskBanner(false)}
+            className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-200/50 transition-colors shrink-0 cursor-pointer"
+            title="작업 내용 배너 숨기기"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {status === 'generating' && (
+        <div className="px-4 py-2 bg-amber-50/90 border-b border-amber-200/80 flex items-center justify-between text-xs text-amber-900 shrink-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <ProviderExecutionBadge execution={data.execution} />
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-semibold text-amber-900 shrink-0 text-[11px] bg-amber-200/80 border border-amber-300/60 px-1.5 py-0.5 rounded">
+                작업 내용
+              </span>
+              <span className="text-[11px] text-amber-800 truncate font-medium">
+                {data.taskSummary || data.progressMessage || '문서 전체 페이지 기하 실측 및 서식 슬롯 구조화'}
+              </span>
+            </div>
+          </div>
+          <span className="text-[10px] text-amber-700 font-mono animate-pulse shrink-0 font-medium">
+            AI 분석 중...
+          </span>
+        </div>
+      )}
+
       {/* 2. 카드 본문 뷰포트 (상태에 따른 분기) */}
       <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-50/50 relative">
         {/* CASE 1: AI 프로세스 진행 중 (Thinking & Generating) */}
@@ -242,11 +312,26 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
-                <ProviderExecutionBadge execution={data.execution} />
-                <span className="text-[11px] text-slate-600">
-                  {providerExecutionMessage(data.execution)}
-                </span>
+              <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ProviderExecutionBadge execution={data.execution} />
+                    <span className="text-xs font-semibold text-slate-800">
+                      {data.execution?.model || 'gemini-3.8-flash-low'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                    {providerExecutionMessage(data.execution)}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-600 border-t border-slate-100 pt-2 flex items-start gap-1.5">
+                  <span className="font-semibold text-slate-700 shrink-0 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
+                    작업 내용
+                  </span>
+                  <span className="text-slate-700 font-medium leading-relaxed">
+                    {data.taskSummary || '문서 전체 페이지 기하 실측 및 비전 멀티모달 서식 구조화'}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
@@ -310,6 +395,16 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
       <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
         <div className="flex items-center gap-2">
           <span>연동: {data.sourcePdfFileName || 'PDF'}</span>
+          {totalPages > 1 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
+              전체 {totalPages}페이지
+            </span>
+          )}
+          {data.slots && data.slots.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-medium">
+              슬롯 {data.slots.length}개
+            </span>
+          )}
           {data.difficulty && (
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 uppercase font-mono font-medium">
               {data.difficulty}

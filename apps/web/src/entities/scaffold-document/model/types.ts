@@ -32,6 +32,10 @@ export interface ScaffoldArchiveMeta {
   description?: string;
   /** 아카이빙된 원본 페이지 번호(1-based). */
   pageNumber?: number;
+  /** 총 페이지 수 */
+  totalPages?: number;
+  /** 포함된 페이지 번호 목록 */
+  pages?: number[];
   /** 사용자 편집 저장 횟수. 0이면 엔진 원본 그대로. */
   revision?: number;
   updatedAt?: string;
@@ -81,6 +85,7 @@ export interface ScaffoldDocumentData extends Record<string, unknown> {
   status?: ScaffoldStatus;
   progressStep?: number;
   progressMessage?: string;
+  taskSummary?: string;
   execution?: AgentRunExecution | null;
   runId?: string;
   errorMessage?: string;

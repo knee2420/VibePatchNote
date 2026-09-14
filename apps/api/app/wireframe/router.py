@@ -43,7 +43,7 @@ async def extract_wireframe(
 ):
     """문서로부터 Tiptap 스캐폴딩(HTML & Markdown) 와이어프레임을 추출합니다."""
     try:
-        result = await generator.execute(payload.doc_id)
+        result = await generator.execute(payload.doc_id, pages=payload.pages)
         return WireframeGenerateResponse(**result)
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="문서를 찾을 수 없습니다.")
@@ -61,12 +61,12 @@ async def start_wireframe_run(
     """긴 AI 서식 추출 분석을 비동기 Agent Runtime 작업으로 접수합니다."""
     run = await runtime.submit(
         generator.name,
-        lambda: generator.execute(payload.doc_id),
+        lambda: generator.execute(payload.doc_id, pages=payload.pages),
         doc_id=payload.doc_id,
         run_input=AgentRunInput(
             use_case=generator.name,
             doc_id=payload.doc_id,
-            payload={"docId": payload.doc_id},
+            payload={"docId": payload.doc_id, "pages": payload.pages},
         ),
     )
     return {"runId": run.run_id, "status": run.status}

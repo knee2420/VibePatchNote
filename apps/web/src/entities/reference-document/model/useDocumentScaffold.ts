@@ -34,10 +34,10 @@ export function useDocumentScaffold({
   const [isExtractingScaffold, setIsExtractingScaffold] = useState(false);
   const { getNode, setNodes, setEdges } = useReactFlow();
 
-  const extractScaffold = useCallback(async () => {
+  const extractScaffold = useCallback(async (pages?: number[]) => {
     if (!docId || isExtractingScaffold) return;
 
-    console.info('[useDocumentScaffold] Starting extractScaffold -> docId:', docId, 'title:', title);
+    console.info('[useDocumentScaffold] Starting extractScaffold -> docId:', docId, 'title:', title, 'pages:', pages);
 
     setIsExtractingScaffold(true);
 
@@ -60,6 +60,11 @@ export function useDocumentScaffold({
           ? parseInt(sourceNode.style.height, 10)
           : 800);
 
+    const initialTaskSummary =
+      pages && pages.length > 0
+        ? `지정 ${pages.length}개 페이지(p${pages.join(', p')}) 기하 실측 및 서식 슬롯 구조화`
+        : '문서 전체 페이지 기하 실측 및 서식 슬롯 구조화';
+
     // 넉넉한 180px 오프셋으로 엣지가 찌그러지지 않고 우아하게 이어지도록 배치
     const posX = (sourceNode?.position?.x ?? 100) + nodeWidth + 180;
     const posY = sourceNode?.position?.y ?? 100;
@@ -81,7 +86,8 @@ export function useDocumentScaffold({
         markdownContent: '',
         status: 'generating' as const,
         progressStep: 1,
-        progressMessage: '원본 페이지 기하 실측 준비...',
+        progressMessage: '문서 전체 페이지 기하 실측 및 와이어프레임 생성 준비...',
+        taskSummary: initialTaskSummary,
         execution: null,
         width: nodeWidth,
         height: nodeHeight,
@@ -110,7 +116,7 @@ export function useDocumentScaffold({
     setEdges((eds) => [...eds, newEdge]);
 
     try {
-      const accepted = await referenceDocumentApi.startScaffold(docId);
+      const accepted = await referenceDocumentApi.startScaffold(docId, pages);
       setNodes((nds) =>
         nds.map((node) =>
           node.id === newScaffoldId
@@ -127,6 +133,7 @@ export function useDocumentScaffold({
           accepted.runId,
           (current) => {
             const execution = current.execution as AgentRunExecution | null | undefined;
+            const provMsg = providerExecutionMessage(execution);
             setNodes((nds) =>
               nds.map((node) =>
                 node.id === newScaffoldId
@@ -134,9 +141,10 @@ export function useDocumentScaffold({
                       ...node,
                       data: {
                         ...node.data,
-                        execution,
-                        progressStep: 1,
-                        progressMessage: providerExecutionMessage(execution),
+                        execution: execution ?? node.data.execution,
+                        progressStep: 2,
+                        progressMessage: provMsg,
+                        taskSummary: node.data.taskSummary || initialTaskSummary,
                       },
                     }
                   : node
@@ -150,11 +158,18 @@ export function useDocumentScaffold({
         throw new Error(settled.errorCode || '서식 생성 작업이 완료되지 않았습니다.');
       }
       const res = settled.result;
+      const settledExecution = (settled.execution as AgentRunExecution | null | undefined) ?? null;
 
       // 5. 완료 시 최종본 노드 데이터 반영 (status: 'completed')
       setNodes((nds) =>
         nds.map((n) => {
           if (n.id === newScaffoldId) {
+            const totalP = res.archive?.totalPages ?? 1;
+            const slotsCount = res.slots?.length ?? 0;
+            const finalTaskSummary =
+              res.meta.description ||
+              `원본 실측 기하 기반 와이어프레임 · 전체 ${totalP}페이지 · 슬롯 ${slotsCount}개 구조화 완료`;
+
             return {
               ...n,
               data: {
@@ -172,7 +187,8 @@ export function useDocumentScaffold({
                 status: 'completed',
                 progressStep: 4,
                 progressMessage: '서식 생성 완료',
-                execution: res.agentRunId ? n.data?.execution : null,
+                taskSummary: finalTaskSummary,
+                execution: settledExecution ?? n.data?.execution ?? null,
               },
             };
           }
@@ -183,7 +199,6 @@ export function useDocumentScaffold({
       onSuccess?.(res.meta.title || title);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
-      console.error('[useDocumentScaffold] Error extracting scaffold for', docId, ':', err);
 
       // 실패 시 노드에 실제 에러 상세 메시지 기록
       setNodes((nds) =>

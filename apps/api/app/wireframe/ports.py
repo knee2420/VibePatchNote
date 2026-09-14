@@ -57,13 +57,15 @@ class WireframeExtractPort(Protocol):
         doc_id: str | None = None,
         context_dir: Path | None = None,
         display_name: str | None = None,
+        pages: list[int] | None = None,
+        page_number: int | None = None,
     ) -> WireframeExtractOutput: ...
 
 
 class WireframeArchivePort(Protocol):
     """와이어프레임 아티팩트 보관 계약."""
 
-    def archive_scaffold(self, doc_id: str, source_path: Path, result: Any) -> Any: ...
+    def archive_scaffold(self, doc_id: str, source_path: Path, result: Any, **kwargs: Any) -> Any: ...
 
     def delete_for_document(self, doc_id: str) -> int: ...
 
@@ -81,6 +83,7 @@ class WireframeRepository(Protocol):
         original_png: Optional[bytes] = None,
         overlay_png: Optional[bytes] = None,
         render_png: Optional[bytes] = None,
+        extra_vision_pngs: Optional[dict[str, bytes]] = None,
     ) -> Path: ...
 
     def save_render(
