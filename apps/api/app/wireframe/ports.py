@@ -17,11 +17,13 @@ __all__ = [
     "ScaffoldExtractPort",
     "ScaffoldRepository",
     "WireframeArchivePort",
+    "WireframeArchiveRepositoryPort",
     "WireframeDocumentSourcePort",
     "WireframeExtractOutput",
     "WireframeExtractPort",
     "WireframeRepository",
     "WireframeTelemetryPort",
+    "WireframeUrlResolverPort",
     "current_run_id",
 ]
 
@@ -162,8 +164,34 @@ class WireframeTelemetryPort(Protocol):
     ) -> Any: ...
 
 
+class WireframeUrlResolverPort(Protocol):
+    """와이어프레임 에셋 URL 및 메타 DTO 변환 계약 (프레젠테이션/웹 어댑터 연동)."""
+
+    def resolve_asset_url(
+        self,
+        scaffold_id: str,
+        asset_name: str,
+        base_url: Optional[str] = None,
+    ) -> str:
+        """단일 에셋의 클라이언트 접근 URL을 반환한다."""
+        ...
+
+    def to_meta(
+        self,
+        record: Any,
+        archive_dir: str,
+        has_render: bool = False,
+        has_render_image: bool = False,
+        base_url: Optional[str] = None,
+    ) -> Any:
+        """WireframeArchiveRecord 에 URL 및 디렉터리 경로를 결합하여 전송용 WireframeArchiveMeta 를 조립한다."""
+        ...
+
+
 # 하위 호환성 alias
 ScaffoldExtractOutput = WireframeExtractOutput
 ScaffoldExtractPort = WireframeExtractPort
 ScaffoldArchivePort = WireframeArchivePort
 ScaffoldRepository = WireframeRepository
+WireframeArchiveRepositoryPort = WireframeRepository
+

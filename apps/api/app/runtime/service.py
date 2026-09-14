@@ -50,6 +50,27 @@ class RuntimeService:
             for agreement in self._approvals.list_pending()
         ]
 
-    def decide_agreement(self, agreement_id: str, approved: bool) -> dict[str, Any] | None:
+    async def decide_agreement(self, agreement_id: str, approved: bool) -> dict[str, Any] | None:
+        """사람의 결정을 기록하고, 승인이면 그 결정이 막고 있던 실행을 이어간다.
+
+        기록만 하고 끝내면 사용자는 "승인했는데 아무 일도 일어나지 않는" 상태를
+        만난다. 대기 토큰은 정의상 실행 하나를 막고 있으므로, 승인의 의미는
+        곧 그 실행의 재개다.
+
+        **이번 호출이 실제로 상태를 바꿨을 때만** 재개한다. `decide` 는 이미
+        내려진 결정을 그대로 돌려주므로(결정 기록은 불변), 반환값만 보면 같은
+        승인을 두 번 눌렀을 때도 재개가 두 번 일어난다.
+        """
+        before = self._approvals.get(agreement_id)
+        if before is None:
+            return None
+        was_pending = before.status == "pending"
+
         agreement = self._approvals.decide(agreement_id, approved)
-        return agreement.model_dump(mode="json") if agreement else None
+        if agreement is None:
+            return None
+
+        if was_pending and agreement.status == "approved" and agreement.run_id:
+            await self._runtime.resume(agreement.run_id)
+
+        return agreement.model_dump(mode="json")

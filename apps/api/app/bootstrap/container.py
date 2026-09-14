@@ -45,6 +45,13 @@ from app.documents.use_cases import (
     ListDocumentArtifactsUseCase,
     RegisterDocumentUseCase,
 )
+from app.inspector.adapters import (
+    DocumentTargetNameAdapter,
+    LocalRunArchive,
+    LocalSourceArchive,
+    RegistryModelMatrixAdapter,
+)
+from app.inspector.service import InspectorService
 from app.llm_settings.adapters import (
     AgyUsageReader,
     GoogleModelCatalog,
@@ -68,6 +75,7 @@ from app.outline.service import OutlineService
 from app.runtime.service import RuntimeService
 from app.wireframe.adapters import (
     EngineWireframeExtractAdapter,
+    HttpWireframeUrlResolver,
     LocalWireframeRepository,
     WireframeTelemetryAdapter,
 )
@@ -174,6 +182,24 @@ class Container(containers.DeclarativeContainer):
     )
     execution_recorder = providers.Singleton(LedgerExecutionRecorder, ledger=ledger)
 
+    # --- [A Observation] 조회 (inspector) ----------------------------------
+    # 관측 콘솔은 읽기 전용이지만 디스크 레이아웃을 알아서는 안 된다. 예전에는
+    # 이 도메인만 컨테이너를 거치지 않고 `InspectorService()` 를 직접 만들었고,
+    # 서비스가 `settings.storage.runs` 를 열어 run 디렉터리를 손으로 훑었다.
+    run_archive = providers.Singleton(
+        LocalRunArchive,
+        runs_dir=providers.Object(_storage.runs),
+        ledger_dir=providers.Object(_storage.ledger),
+    )
+    source_archive = providers.Singleton(
+        LocalSourceArchive, repo_root=providers.Object(settings.base_dir.parents[1])
+    )
+    model_matrix = providers.Singleton(
+        RegistryModelMatrixAdapter,
+        primary_provider=providers.Object(settings.primary_provider),
+        fallback_provider=providers.Object(settings.fallback_provider),
+    )
+
     # --- [4 Knowledge] 저장소 ----------------------------------------------
     document_source_repository = providers.Singleton(
         LocalDocumentSourceRepository,
@@ -187,12 +213,18 @@ class Container(containers.DeclarativeContainer):
         LocalDocumentCacheRepository,
         root_dir=providers.Object(_storage.cache_of("documents")),
     )
+    wireframe_url_resolver = providers.Singleton(
+        HttpWireframeUrlResolver,
+        asset_route_prefix=providers.Object("/api/v1/scaffolds"),
+    )
     scaffold_repository = providers.Singleton(
         LocalWireframeRepository,
         root_dir=providers.Object(_storage.knowledge_of("scaffolds")),
     )
     scaffold_archive_service = providers.Singleton(
-        WireframeArchiveService, repository=scaffold_repository
+        WireframeArchiveService,
+        repository=scaffold_repository,
+        url_resolver=wireframe_url_resolver,
     )
 
     # --- [6 Models] · Runner 정의 ------------------------------------------
@@ -286,3 +318,16 @@ class Container(containers.DeclarativeContainer):
         LocalWorkspaceRepository, base_dir=providers.Object(_storage.sessions)
     )
     workspace_service = providers.Factory(WorkspaceService, repository=workspace_repository)
+
+    # inspector 는 문서 저장소를 import 하지 않는다. 식별자를 이름으로 옮기는 일은
+    # 그 애그리거트를 소유한 쪽에 묻고, 어느 저장소인지는 여기서 정한다.
+    inspector_target_names = providers.Singleton(
+        DocumentTargetNameAdapter, source=document_source_repository
+    )
+    inspector_service = providers.Factory(
+        InspectorService,
+        runs=run_archive,
+        target_names=inspector_target_names,
+        sources=source_archive,
+        matrix=model_matrix,
+    )

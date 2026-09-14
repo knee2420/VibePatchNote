@@ -174,3 +174,22 @@ def test_workspaces_route_resolves_injected_service() -> None:
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_every_resumable_use_case_is_registered_at_boot() -> None:
+    """재개는 '이름 + 입력 스냅샷'으로만 가능하다. 이름이 없으면 대기가 막다른 길이 된다.
+
+    `AgentRunInput` 에 payload 를 남기는 유스케이스는 재개 핸들러도 있어야 한다.
+    예전에는 등록이 `DocumentService.__init__` 안에 있어 세 개 중 하나만 등록됐고,
+    그나마도 documents API 를 한 번 부른 뒤에야 등록됐다.
+    """
+    from app.bootstrap.resume_handlers import register_resume_handlers
+
+    registered = register_resume_handlers(main.container)
+
+    assert registered == [
+        "documents.extract_outline",
+        "documents.generate_scaffold",
+        "documents.scan_segments",
+    ]
+    assert set(main.container.agent_runtime()._resume_handlers) >= set(registered)

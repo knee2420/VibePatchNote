@@ -62,8 +62,8 @@ async def decide_agreement(
     payload: AgreementDecisionRequest,
     service: RuntimeServiceDep,
 ):
-    """사람의 결정 (승인/거절)을 반영합니다."""
-    result = service.decide_agreement(agreement_id, payload.approved)
+    """사람의 결정 (승인/거절)을 반영합니다. 승인이면 막혀 있던 실행을 이어갑니다."""
+    result = await service.decide_agreement(agreement_id, payload.approved)
     if result is None:
         raise HTTPException(status_code=404, detail="Agreement token was not found")
     return AgreementView(**result)

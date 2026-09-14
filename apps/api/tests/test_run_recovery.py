@@ -12,6 +12,7 @@ import pytest
 from agent_runtime import (
     INTERRUPTED_CODE,
     AgentRunEvent,
+    AgentRunInput,
     AgentRuntime,
     ApprovalService,
     LedgerEntry,
@@ -183,3 +184,87 @@ def test_operation_failure_is_not_overwritten_by_submit_success(runtime: AgentRu
         assert failed.error_code == "PIPELINE_FAILED"
 
     asyncio.run(scenario())
+
+
+def test_approval_resumes_the_run_it_was_blocking(runtime: AgentRuntime, roots: StorageRoots) -> None:
+    """승인은 기록이 아니라 재개다.
+
+    대기 토큰은 정의상 실행 하나를 막고 있다. 결정만 파일에 적고 끝내면
+    사용자는 "승인했는데 아무 일도 일어나지 않는" 상태를 만난다.
+    """
+    from app.runtime.service import RuntimeService
+
+    calls: list[str] = []
+
+    async def handler(payload: dict) -> dict:
+        calls.append(payload["docId"])
+        return {"ok": True}
+
+    runtime.register_use_case("documents.extract_outline", handler)
+    runtime._runs.save_input(
+        "run-1",
+        AgentRunInput(
+            use_case="documents.extract_outline", doc_id="doc-1", payload={"docId": "doc-1"}
+        ),
+    )
+    runtime._runs.append("run-1", AgentRunEvent(type="started", agent_name="outline"))
+    waiting = runtime.mark_waiting(
+        "run-1", failure_code="QUOTA_EXHAUSTED", doc_id="doc-1", reason="한도 소진"
+    )
+    assert waiting is not None and waiting.status == "waiting_for_configuration"
+    agreement_id = waiting.agreement_id
+    assert agreement_id
+
+    approvals = ApprovalService(LocalAgreementRepository(roots.agreements))
+    service = RuntimeService(agent_runtime=runtime, approvals=approvals)
+
+    async def scenario() -> None:
+        decided = await service.decide_agreement(agreement_id, approved=True)
+        assert decided is not None and decided["status"] == "approved"
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+
+        # 같은 승인을 다시 눌러도 재개는 한 번뿐이다. 결정 기록은 불변이다.
+        await service.decide_agreement(agreement_id, approved=True)
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+
+    asyncio.run(scenario())
+    assert calls == ["doc-1"]
+
+
+def test_declined_agreement_does_not_resume(runtime: AgentRuntime, roots: StorageRoots) -> None:
+    """거절은 '이어가지 않기로 한 결정'이다."""
+    from app.runtime.service import RuntimeService
+
+    calls: list[str] = []
+
+    async def handler(payload: dict) -> dict:
+        calls.append(payload["docId"])
+        return {"ok": True}
+
+    runtime.register_use_case("documents.extract_outline", handler)
+    runtime._runs.save_input(
+        "run-2",
+        AgentRunInput(
+            use_case="documents.extract_outline", doc_id="doc-2", payload={"docId": "doc-2"}
+        ),
+    )
+    runtime._runs.append("run-2", AgentRunEvent(type="started", agent_name="outline"))
+    waiting = runtime.mark_waiting(
+        "run-2", failure_code="AUTH_EXPIRED", doc_id="doc-2", reason="인증 만료"
+    )
+    assert waiting is not None and waiting.agreement_id
+
+    service = RuntimeService(
+        agent_runtime=runtime,
+        approvals=ApprovalService(LocalAgreementRepository(roots.agreements)),
+    )
+
+    async def scenario() -> None:
+        await service.decide_agreement(waiting.agreement_id, approved=False)
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+
+    asyncio.run(scenario())
+    assert calls == []

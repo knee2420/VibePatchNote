@@ -13,35 +13,14 @@ for _pkg in ("scaffold-engine", "agent-core", "agent-telemetry"):
 
 from app.core.config import settings
 from app.core.logging_config import purge_expired_logs, setup_logging
-
-# 로그 파일도 state/ 아래에 놓이므로 등급 디렉터리를 먼저 만든다.
-settings.ensure_directories()
-_LOGS_DIR = setup_logging()
-logger = logging.getLogger("vibe.api")
-logger.info("================ MULTI-TARGET LOGGING INITIALIZED ================")
-logger.info("Base logs directory: %s", _LOGS_DIR)
-
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-
-from app.bootstrap.container import Container
-from app.core.llm import purge_expired_traces
 from app.core.storage import STORAGE_VERSION
-from app.documents import router as documents_router
-from app.inspector import router as inspector_router
-from app.llm_settings import router as llm_settings_router
-from app.outline import router as outline_router
-from app.runtime import router as runtime_router
-from app.wireframe import router as wireframe_router
-from app.workspaces import router as workspaces_router
 
 
 class StorageVersionError(RuntimeError):
     """저장소 레이아웃이 코드와 맞지 않을 때. 조용히 변환하지 않는다."""
 
 
-def verify_storage_version() -> None:
+def _verify_storage_version() -> None:
     """부팅 시 저장소 레이아웃 버전을 확인한다.
 
     맞지 않으면 **거부하고 명령을 안내한다.** 읽는 김에 조용히 변환하는 방식은
@@ -57,7 +36,9 @@ def verify_storage_version() -> None:
     if current is None and storage.is_empty():
         # 새 설치다. 변환할 것이 없으므로 현재 버전으로 표시하고 시작한다.
         storage.write_version(STORAGE_VERSION)
-        logger.info("[Storage] 새 저장소를 v%d 로 초기화했습니다.", STORAGE_VERSION)
+        logging.getLogger("vibe.api").info(
+            "[Storage] 새 저장소를 v%d 로 초기화했습니다.", STORAGE_VERSION
+        )
         return
 
     raise StorageVersionError(
@@ -67,13 +48,44 @@ def verify_storage_version() -> None:
     )
 
 
+# 순서가 중요하다. `ensure_directories()` 가 먼저 돌면 등급 루트가 생겨서
+# 새 설치가 "비어 있지 않은데 버전이 없는 저장소"로 보이고, 부팅이 거부된다.
+# 그래서 **판정을 먼저 하고 디렉터리를 만든다.**
+_verify_storage_version()
+settings.ensure_directories()
+_LOGS_DIR = setup_logging()
+logger = logging.getLogger("vibe.api")
+logger.info("================ MULTI-TARGET LOGGING INITIALIZED ================")
+logger.info("Base logs directory: %s", _LOGS_DIR)
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from app.bootstrap.container import Container
+from app.bootstrap.resume_handlers import register_resume_handlers
+from app.core.llm import purge_expired_traces
+from app.documents import router as documents_router
+from app.inspector import router as inspector_router
+from app.llm_settings import router as llm_settings_router
+from app.outline import router as outline_router
+from app.runtime import router as runtime_router
+from app.wireframe import router as wireframe_router
+from app.workspaces import router as workspaces_router
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """부팅 복구와 보존정책 집행.
 
+    - 재개 핸들러 등록: 이름으로만 재개할 수 있으므로 부팅 시 빠짐없이 등록한다.
     - 끊긴 실행 정리: 프로세스와 함께 사라진 run 이 영원히 "분석 중"으로 남지 않게 한다.
     - 만료 트레이스 정리: 앱이 요청마다 파일을 회전시키는 대신 여기서 일괄 처리한다.
     """
+    # 재개 핸들러 등록이 고아 정리보다 먼저다. 정리 대상이 곧 재개 후보이고,
+    # 등록되지 않은 유스케이스는 재개할 수 없다.
+    register_resume_handlers(app.container)
+
     runtime = app.container.agent_runtime()
     swept = runtime.sweep_orphans()
     if swept:
@@ -90,7 +102,6 @@ async def lifespan(app: FastAPI):
     yield
 
 
-verify_storage_version()
 
 app = FastAPI(
     title="Document Builder Backend Harness",

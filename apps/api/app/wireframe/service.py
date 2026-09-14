@@ -13,8 +13,9 @@ from scaffold_engine.tools import (
 
 from app.core.storage import new_id
 
-from .formatters import ManifestFormatter, PromptSpecFormatter
-from .ports import WireframeRepository
+from .adapters.http_url_resolver import HttpWireframeUrlResolver
+from .ports import WireframeRepository, WireframeUrlResolverPort
+from .renderers import PromptSpecRenderer
 from .schemas import (
     ASSET_VISION_RENDER,
     WireframeArchiveDetail,
@@ -26,10 +27,15 @@ logger = logging.getLogger(__name__)
 
 
 class WireframeArchiveService:
-    """와이어프레임/스캐폴드 아카이빙 비즈니스 로직 조율자."""
+    """와이어프레임/스캐폴드 아카이빙 비즈니스 로직 조율자 (Domain/Service)."""
 
-    def __init__(self, repository: WireframeRepository) -> None:
+    def __init__(
+        self,
+        repository: WireframeRepository,
+        url_resolver: Optional[WireframeUrlResolverPort] = None,
+    ) -> None:
         self.repository = repository
+        self._url_resolver = url_resolver or HttpWireframeUrlResolver()
 
     @traceable(
         name="ScaffoldArtifactCommit",
@@ -100,7 +106,7 @@ class WireframeArchiveService:
         except Exception as exc:
             logger.warning("[WireframeArchiveService] Scaffold render skipped: %s", exc)
 
-        prompt_spec_md = PromptSpecFormatter.format(
+        prompt_spec_md = PromptSpecRenderer.render(
             title=title,
             source_name=target_path.name,
             slots=slots,
@@ -108,9 +114,10 @@ class WireframeArchiveService:
             created_at=now_iso,
         )
 
-        record = ManifestFormatter.to_record(
+        record = WireframeArchiveRecord.create(
             scaffold_id=scaffold_id,
             doc_id=doc_id,
+            title=title,
             meta=getattr(result, "meta", None),
             source_pdf_file_name=target_path.name,
             slots_count=len(slots),
@@ -157,8 +164,8 @@ class WireframeArchiveService:
         return meta
 
     def _to_meta(self, record: WireframeArchiveRecord) -> WireframeArchiveMeta:
-        return ManifestFormatter.to_meta(
-            record,
+        return self._url_resolver.to_meta(
+            record=record,
             archive_dir=str(self.repository.resolve_dir(record.scaffold_id)),
             has_render_image=self.repository.has_asset(record.scaffold_id, ASSET_VISION_RENDER),
         )

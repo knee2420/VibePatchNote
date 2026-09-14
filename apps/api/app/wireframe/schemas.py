@@ -1,4 +1,5 @@
 """wireframe 도메인의 Pydantic 스키마 정의 (SSOT)."""
+from datetime import datetime, timezone
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -38,6 +39,48 @@ class WireframeArchiveRecord(BaseModel):
     pages: List[int] = Field(default_factory=lambda: [1], description="포함된 페이지 번호 목록")
     revision: int = Field(default=1, description="작업본 편집 횟수")
     updated_at: Optional[str] = Field(default=None, description="마지막 작업본 편집 일시")
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        scaffold_id: str,
+        doc_id: str,
+        title: str = "",
+        source_pdf_file_name: str,
+        slots_count: int = 0,
+        meta: Optional[Any] = None,
+        difficulty: Optional[str] = None,
+        engine_scaffold_id: Optional[str] = None,
+        target_doc: Optional[str] = None,
+        description: Optional[str] = None,
+        page_number: int = 1,
+        total_pages: int = 1,
+        pages: Optional[List[int]] = None,
+    ) -> "WireframeArchiveRecord":
+        """추출 결과 또는 원본 정보를 바탕으로 새로운 도메인 아카이브 레코드를 생성하는 팩토리 메서드."""
+        now_iso = datetime.now(timezone.utc).isoformat()
+        meta_title = getattr(meta, "title", "") if meta else ""
+        meta_diff = getattr(meta, "difficulty", "easy") if meta else "easy"
+        meta_eng_id = getattr(meta, "id", "") if meta else ""
+        meta_target = getattr(meta, "target_doc", "") if meta else ""
+        meta_desc = getattr(meta, "description", "") if meta else ""
+
+        return cls(
+            scaffold_id=scaffold_id,
+            doc_id=doc_id,
+            title=meta_title or title or f"{source_pdf_file_name} 서식 틀",
+            source_pdf_file_name=source_pdf_file_name,
+            created_at=now_iso,
+            slots_count=slots_count,
+            difficulty=difficulty or meta_diff,
+            engine_scaffold_id=engine_scaffold_id or meta_eng_id,
+            target_doc=target_doc or meta_target,
+            description=description or meta_desc,
+            page_number=page_number,
+            total_pages=total_pages,
+            pages=pages or [page_number],
+        )
 
 
 class WireframeArchiveMeta(WireframeArchiveRecord):

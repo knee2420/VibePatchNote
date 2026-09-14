@@ -4,6 +4,9 @@
 1. 요청이 준 식별자(`docId` 또는 레거시 `filename`)를 `doc_id` 로 정규화한다.
 2. 알맞은 유스케이스로 위임한다.
 3. 세그먼트 스캔 비동기 실행을 Agent Runtime 에 연계한다.
+
+재개 핸들러 등록은 여기가 아니라 `bootstrap/resume_handlers.py` 가 부팅 시 한다.
+생성자에 두면 이 서비스가 처음 만들어질 때까지 재개가 불가능해진다.
 """
 from __future__ import annotations
 
@@ -43,12 +46,6 @@ class DocumentService:
         self._artifacts = artifacts
         self._scan_segments = scan_segments
         self._runtime = agent_runtime
-
-        # 세그먼트 스캔 재개 핸들러 등록
-        self._runtime.register_use_case(
-            self._scan_segments.name,
-            lambda payload: self._scan_segments.execute(payload["docId"]),
-        )
 
     # --- 원본 문서 관리 ---------------------------------------------------
 

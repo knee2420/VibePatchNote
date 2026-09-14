@@ -1,10 +1,10 @@
 """인스펙터 라우터 (관측 콘솔 전용 API)."""
-from __future__ import annotations
+from typing import Annotated, Optional
 
-from typing import Optional
-
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Query
 
+from app.bootstrap.container import Container
 from app.inspector.schemas import (
     MatrixResponse,
     RunDetailResponse,
@@ -16,25 +16,28 @@ from app.inspector.service import InspectorService
 
 router = APIRouter()
 
-
-def get_inspector_service() -> InspectorService:
-    return InspectorService()
+InspectorServiceDep = Annotated[
+    InspectorService,
+    Depends(Provide[Container.inspector_service]),
+]
 
 
 @router.get("/runs", response_model=list[RunSummaryResponse])
+@inject
 def list_runs(
+    service: InspectorServiceDep,
     limit: int = Query(50, ge=1, le=200),
     doc_id: Optional[str] = Query(None),
-    service: InspectorService = Depends(get_inspector_service),
 ):
     """실행(Run) 이력 목록을 반환합니다."""
     return service.list_runs(limit=limit, doc_id=doc_id)
 
 
 @router.get("/runs/{run_id}", response_model=RunDetailResponse)
+@inject
 def get_run(
     run_id: str,
-    service: InspectorService = Depends(get_inspector_service),
+    service: InspectorServiceDep,
 ):
     """특정 Run의 전체 원장(ledger)과 단계별 스냅샷을 반환합니다."""
     run_detail = service.get_run(run_id)
@@ -44,9 +47,10 @@ def get_run(
 
 
 @router.delete("/runs/{run_id}")
+@inject
 def delete_run(
     run_id: str,
-    service: InspectorService = Depends(get_inspector_service),
+    service: InspectorServiceDep,
 ):
     """특정 Run의 이력을 영구 삭제합니다."""
     success = service.delete_run(run_id)
@@ -56,10 +60,11 @@ def delete_run(
 
 
 @router.get("/runs/{run_id}/payloads/{digest}")
+@inject
 def get_payload(
     run_id: str,
     digest: str,
-    service: InspectorService = Depends(get_inspector_service),
+    service: InspectorServiceDep,
 ):
     """스팬 페이로드의 대용량 본문을 반환합니다.
 
@@ -73,8 +78,9 @@ def get_payload(
 
 
 @router.get("/workflows", response_model=list[WorkflowInfo])
+@inject
 def list_workflows(
-    service: InspectorService = Depends(get_inspector_service),
+    service: InspectorServiceDep,
 ):
     """시스템이 실행한 적 있는 워크플로우와 그 단계 구조를 반환합니다.
 
@@ -86,15 +92,18 @@ def list_workflows(
 
 
 @router.get("/matrix", response_model=MatrixResponse)
+@inject
 def get_matrix(
-    service: InspectorService = Depends(get_inspector_service),
+    service: InspectorServiceDep,
 ):
     """모델 지원 레지스트리 및 라우팅 상태를 반환합니다."""
     return service.get_matrix()
 
 
 @router.get("/source", response_model=SourceCodeResponse)
+@inject
 def get_source_code(
+    service: InspectorServiceDep,
     module: Optional[str] = Query(
         None,
         description="import 가능한 모듈 이름 (예: scaffold_engine.outline.pipeline). 가장 정확하다",
@@ -104,7 +113,6 @@ def get_source_code(
         description="저장소 루트 기준 **정확 경로**. 파일명만 주는 탐색은 지원하지 않는다",
     ),
     symbol: Optional[str] = Query(None, description="클래스명 또는 Class.method"),
-    service: InspectorService = Depends(get_inspector_service),
 ):
     """지정된 코드 지점의 원본을 반환합니다.
 

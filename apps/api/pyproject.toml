@@ -56,6 +56,10 @@ forbidden_modules = [
 # 저장 경로를 전역으로 공개하면 누구나 어댑터를 건너뛰고 디스크에 직접 쓸 수 있다.
 # 경로를 아는 것은 저장 게이트(core.storage)와 조립 지점(bootstrap), 그리고
 # 각 도메인의 adapters 뿐이다.
+#
+# **도메인을 열거하지 않고 세그먼트로 쓴다.** 예전에는 도메인마다 손으로 적었고,
+# 그래서 목록에 없던 `inspector` 는 서비스가 `settings.storage.runs` 를 직접 열어도
+# 아무 경고가 없었다. 허용목록은 새 도메인이 생길 때마다 조용히 낡는다.
 [[tool.importlinter.contracts]]
 name = "Storage paths are known only to adapters and bootstrap"
 type = "forbidden"
@@ -63,50 +67,154 @@ type = "forbidden"
 # 규칙의 뜻("경로를 스스로 만들지 마라")이 아니라 그래프 모양을 규제하게 된다.
 allow_indirect_imports = true
 source_modules = [
-    "app.documents.use_cases",
-    "app.documents.experimental",
-    "app.documents.service",
-    "app.outline.service",
-    "app.outline.agents",
-    "app.wireframe.service",
-    "app.wireframe.agents",
-    "app.workspaces.service",
+    "app.*.service",
+    "app.*.use_cases",
+    "app.*.agents",
+    "app.*.experimental",
 ]
 forbidden_modules = ["app.core.config"]
+# 아래 셋은 **알려진 미해결 위반**이다. 세그먼트 계약으로 바꾸자마자 드러났다.
+# `update_runtime_policy` 는 경로를 읽는 정도가 아니라 **전역 `settings` 객체를
+# 런타임에 덮어쓴다** (`settings.primary_provider = ...`). 프로세스 전체가 공유하는
+# 설정을 유스케이스가 변경하는 구조라, 포트를 하나 끼우는 것으로 끝나지 않고
+# 실행 정책 흐름 전체를 손봐야 한다. 그때까지 **보이는 곳에** 남겨 둔다 —
+# source_modules 에서 조용히 빼면 다시 보이지 않게 된다.
+ignore_imports = [
+    "app.llm_settings.service -> app.core.config",
+    "app.llm_settings.use_cases.resolve_next_execution -> app.core.config",
+    "app.llm_settings.use_cases.update_runtime_policy -> app.core.config",
+]
+
+# 도메인 간 직접 참조는 전부 금지한다. 다른 도메인의 동작이 필요하면 자기
+# `ports.py` 에 계약을 정의하고 컨테이너가 구현체를 주입한다.
+#
+# `router.py` 는 source 에서 뺀다. 라우터는 조립 지점(`bootstrap.container`)을
+# 통해 주입을 받고, 컨테이너는 정의상 모든 도메인을 안다 — 그 경유까지 막으면
+# DI 자체가 위반이 된다.
+#
+# **계약 목록이 실제 도메인 디렉터리와 일치하는지는
+# `tests/test_architecture_contracts.py` 가 지킨다.** 예전에는 여기에 적힌 네
+# 도메인만 검사했고, 그래서 목록에 없던 `inspector` 는 다른 도메인의 저장
+# 레이아웃을 직접 읽어도 아무 경고가 없었다. 허용목록은 조용히 낡는다.
 
 [[tool.importlinter.contracts]]
-name = "Documents must not depend on other domains"
+name = "documents must not depend on other domains"
 type = "forbidden"
 source_modules = [
     "app.documents.service",
     "app.documents.use_cases",
-    "app.documents.experimental",
     "app.documents.adapters",
+    "app.documents.experimental",
+    "app.documents.ports",
 ]
-forbidden_modules = ["app.workspaces", "app.wireframe", "app.outline"]
+forbidden_modules = [
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
+    "app.wireframe",
+    "app.workspaces",
+]
 
 [[tool.importlinter.contracts]]
-name = "Outline must not depend on other domains"
+name = "inspector must not depend on other domains"
+type = "forbidden"
+source_modules = [
+    "app.inspector.service",
+    "app.inspector.adapters",
+    "app.inspector.ports",
+]
+forbidden_modules = [
+    "app.documents",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
+    "app.wireframe",
+    "app.workspaces",
+]
+
+[[tool.importlinter.contracts]]
+name = "llm_settings must not depend on other domains"
+type = "forbidden"
+source_modules = [
+    "app.llm_settings.service",
+    "app.llm_settings.use_cases",
+    "app.llm_settings.adapters",
+    "app.llm_settings.ports",
+]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.outline",
+    "app.runtime",
+    "app.wireframe",
+    "app.workspaces",
+]
+
+[[tool.importlinter.contracts]]
+name = "outline must not depend on other domains"
 type = "forbidden"
 source_modules = [
     "app.outline.service",
     "app.outline.adapters",
     "app.outline.agents",
+    "app.outline.ports",
 ]
-forbidden_modules = ["app.documents", "app.wireframe", "app.workspaces"]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.runtime",
+    "app.wireframe",
+    "app.workspaces",
+]
 
 [[tool.importlinter.contracts]]
-name = "Wireframe must not depend on other domains"
+name = "runtime must not depend on other domains"
+type = "forbidden"
+source_modules = [
+    "app.runtime.service",
+]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.wireframe",
+    "app.workspaces",
+]
+
+[[tool.importlinter.contracts]]
+name = "wireframe must not depend on other domains"
 type = "forbidden"
 source_modules = [
     "app.wireframe.service",
     "app.wireframe.adapters",
     "app.wireframe.agents",
+    "app.wireframe.ports",
 ]
-forbidden_modules = ["app.documents", "app.outline", "app.workspaces"]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
+    "app.workspaces",
+]
 
 [[tool.importlinter.contracts]]
-name = "Workspaces must not depend on document domains"
+name = "workspaces must not depend on other domains"
 type = "forbidden"
-source_modules = ["app.workspaces.service", "app.workspaces.adapters"]
-forbidden_modules = ["app.documents", "app.outline", "app.wireframe"]
+source_modules = [
+    "app.workspaces.service",
+    "app.workspaces.adapters",
+    "app.workspaces.ports",
+]
+forbidden_modules = [
+    "app.documents",
+    "app.inspector",
+    "app.llm_settings",
+    "app.outline",
+    "app.runtime",
+    "app.wireframe",
+]
