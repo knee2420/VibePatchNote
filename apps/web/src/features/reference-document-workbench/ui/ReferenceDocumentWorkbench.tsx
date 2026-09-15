@@ -281,8 +281,16 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
 
   // 클릭 시 트리 선택 상태와 전역 Element 선택 상태(WinForm 스타일 속성 패널용)를 함께 갱신
   const handleSelectElement = useCallback(
-    (elem: DocumentElementItem) => {
+    (elem: DocumentElementItem, event?: React.MouseEvent) => {
       setSelectedElementId(elem.id);
+      const elemEl = document.querySelector(`[data-element-id="${elem.id}"]`);
+      const rect = elemEl?.getBoundingClientRect();
+      const anchorPos = event
+        ? { clientX: event.clientX, clientY: event.clientY }
+        : rect
+        ? { clientX: rect.left + rect.width / 2, clientY: rect.top }
+        : undefined;
+
       setSelection({
         nodeId: id,
         nodeType: REFERENCE_DOCUMENT_NODE_TYPE,
@@ -296,6 +304,7 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
           box_2d: elem.box_2d,
           content_summary: elem.content_summary,
           outline_id: elem.outline_id,
+          anchorPos,
         },
       });
     },
@@ -447,6 +456,13 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
     (segment: DocumentSegmentItem | ViewerSegment) => {
       const item: DocumentSegmentItem = 'box_2d' in segment ? segment : fromViewerSegment(segment);
       setSelectedSegmentId(item.id);
+
+      const segEl = document.querySelector(`[data-segment-id="${item.id}"]`);
+      const rect = segEl?.getBoundingClientRect();
+      const anchorPos = rect
+        ? { clientX: rect.left + rect.width / 2, clientY: rect.top }
+        : undefined;
+
       setSelection({
         nodeId: id,
         nodeType: REFERENCE_DOCUMENT_NODE_TYPE,
@@ -464,6 +480,7 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
           structured_data: {
             segmentType: item.type,
           },
+          anchorPos,
         },
       });
     },

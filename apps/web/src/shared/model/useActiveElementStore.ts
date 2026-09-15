@@ -22,6 +22,8 @@ export interface SelectedElementData {
   slotsCount?: number;
   totalPages?: number;
   structured_data?: Record<string, unknown>;
+  /** 플로팅 칩 UI가 위치할 화면 좌표 (clientX, clientY) */
+  anchorPos?: { clientX: number; clientY: number };
 }
 
 

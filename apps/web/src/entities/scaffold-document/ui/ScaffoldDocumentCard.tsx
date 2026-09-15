@@ -178,6 +178,12 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
         const slotPage = matched?.pageNumber ?? 1;
         const slotBox = matched?.box_2d;
 
+        const rect = slotEl.getBoundingClientRect();
+        const anchorPos = {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top,
+        };
+
         setSelection({
           nodeId: id,
           nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
@@ -198,6 +204,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
               slotId,
               scaffoldId: data.scaffoldId,
             },
+            anchorPos,
           },
         });
         return;

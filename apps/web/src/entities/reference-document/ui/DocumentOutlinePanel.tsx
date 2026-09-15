@@ -31,7 +31,7 @@ interface DocumentOutlinePanelProps {
   progressStep?: number;
   progressMessage?: string;
   execution?: AgentRunExecution | null;
-  onSelectElement?: (element: DocumentElementItem) => void;
+  onSelectElement?: (element: DocumentElementItem, event?: React.MouseEvent) => void;
   /** 행에 마우스를 올렸을 때. 떼면 `null`. */
   onHoverElement?: (element: DocumentElementItem | null) => void;
   onClose: () => void;
@@ -298,7 +298,7 @@ interface TreeOutlineNodeProps {
   expandedIds: Set<string>;
   onToggleNode: (id: string) => void;
   selectedElementId?: string | null;
-  onSelectElement?: (element: DocumentElementItem) => void;
+  onSelectElement?: (element: DocumentElementItem, event?: React.MouseEvent) => void;
   /** 행에 마우스를 올렸을 때. 떼면 `null`. */
   onHoverElement?: (element: DocumentElementItem | null) => void;
 }
@@ -372,7 +372,7 @@ function TreeOutlineNode({
                 element={elem}
                 depth={depth + 1}
                 isSelected={selectedElementId === elem.id}
-                onClick={() => onSelectElement?.(elem)}
+                onClick={(e) => onSelectElement?.(elem, e)}
                 onHoverChange={(hovered) => onHoverElement?.(hovered ? elem : null)}
               />
             ))}
@@ -401,7 +401,7 @@ interface TreeElementItemProps {
   element: DocumentElementItem;
   depth: number;
   isSelected: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   onHoverChange: (hovered: boolean) => void;
 }
 
@@ -425,8 +425,9 @@ function TreeElementItem({
       onMouseLeave={() => onHoverChange(false)}
       onClick={(e) => {
         e.stopPropagation();
-        onClick();
+        onClick(e);
       }}
+      data-element-id={element.id}
       style={{ paddingLeft: `${indentPx}px` }}
       className={`
         h-6.5 pr-2 flex items-center gap-1.5 cursor-pointer transition-colors group/item relative

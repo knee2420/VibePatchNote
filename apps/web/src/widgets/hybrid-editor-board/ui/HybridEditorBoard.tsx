@@ -19,6 +19,7 @@ import { InfiniteCanvas } from '@/shared/ui';
 
 import { useBoardFileUpload } from '../model/useBoardFileUpload';
 import { BoardHeader } from './BoardHeader';
+import { FloatingElementRecipeChip } from './FloatingElementRecipeChip';
 import { RecipePropertySidebar } from './RecipePropertySidebar';
 
 const NODE_TYPES = {
@@ -105,6 +106,9 @@ function HybridEditorBoardContent() {
 
           {/* Floating Node Action Toolbar (Appears when cards are selected) */}
           <CanvasNodeActionBar />
+
+          {/* Floating Element Recipe Context Chip (Appears when slots or segments are selected) */}
+          <FloatingElementRecipeChip />
 
           {/* Global Node Search Modal (Triggered by Search tool or Ctrl+K) */}
           <CanvasSearchModal />
