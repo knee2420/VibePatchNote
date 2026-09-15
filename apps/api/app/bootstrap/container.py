@@ -23,6 +23,7 @@ from llm_driver import (
     RuntimePolicyHarness,
 )
 from scaffold_engine import JsonPromptRunner, SegmentPipeline
+from scaffold_engine.recipe import RecipePipeline
 
 from app.core.config import settings
 from app.core.llm import (
@@ -72,6 +73,14 @@ from app.outline.adapters import (
 )
 from app.outline.agents import ExtractOutlineUseCase
 from app.outline.service import OutlineService
+from app.recipe.adapters import (
+    EngineRecipeExtractAdapter,
+    LocalRecipeInputReader,
+    LocalRecipeRepository,
+    RecipeTelemetryAdapter,
+)
+from app.recipe.agents import DistillRecipeUseCase
+from app.recipe.service import RecipeService
 from app.runtime.service import RuntimeService
 from app.segments.adapters import (
     EngineSegmentExtractAdapter,
@@ -265,6 +274,10 @@ class Container(containers.DeclarativeContainer):
         LocalDocumentArtifactRepository,
         root_dir=providers.Object(_storage.knowledge_of("documents")),
     )
+    recipe_repository = providers.Singleton(
+        LocalRecipeRepository,
+        root_dir=providers.Object(_storage.knowledge_of("recipes")),
+    )
     document_cache_repository = providers.Singleton(
         LocalDocumentCacheRepository,
         root_dir=providers.Object(_storage.cache_of("documents")),
@@ -298,6 +311,8 @@ class Container(containers.DeclarativeContainer):
     # --- [6 Models] · Runner 정의 ------------------------------------------
     json_prompt_runner = providers.Factory(JsonPromptRunner, harness=llm_harness)
     segment_pipeline = providers.Factory(SegmentPipeline, runner=json_prompt_runner)
+    recipe_pipeline = providers.Factory(RecipePipeline, runner=json_prompt_runner)
+    recipe_extractor = providers.Factory(EngineRecipeExtractAdapter, pipeline=recipe_pipeline)
     segment_extractor = providers.Factory(EngineSegmentExtractAdapter, pipeline=segment_pipeline)
     outline_extractor = providers.Factory(
         EngineOutlineExtractAdapter,
@@ -318,6 +333,7 @@ class Container(containers.DeclarativeContainer):
     outline_telemetry = providers.Singleton(OutlineTelemetryAdapter, store=run_observations)
     wireframe_telemetry = providers.Singleton(WireframeTelemetryAdapter, store=run_observations)
     segment_telemetry = providers.Singleton(SegmentTelemetryAdapter, store=run_observations)
+    recipe_telemetry = providers.Singleton(RecipeTelemetryAdapter, store=run_observations)
 
     # --- documents 유스케이스 ----------------------------------------------
     register_document = providers.Factory(
@@ -340,7 +356,6 @@ class Container(containers.DeclarativeContainer):
         source=document_source_repository,
         artifacts=document_artifact_repository,
         cache=document_cache_repository,
-        scaffolds=scaffold_archive_service,
         runs=document_run_archive,
         segments=segment_cleanup,
     )
@@ -426,6 +441,24 @@ class Container(containers.DeclarativeContainer):
         OutlineService,
         extract_outline=extract_outline,
     )
+    recipe_input_reader = providers.Factory(
+        LocalRecipeInputReader,
+        source=document_source_repository,
+        segments=segment_repository,
+        artifacts=document_artifact_repository,
+        scaffolds=scaffold_repository,
+        structure_view=get_segment_structure_view,
+    )
+    distill_recipe = providers.Factory(
+        DistillRecipeUseCase,
+        reader=recipe_input_reader,
+        extractor=recipe_extractor,
+        repository=recipe_repository,
+        runtime=agent_runtime,
+        telemetry=recipe_telemetry,
+        harness=llm_harness,
+    )
+    recipe_service = providers.Factory(RecipeService, repository=recipe_repository)
 
     document_service = providers.Singleton(
         DocumentService,

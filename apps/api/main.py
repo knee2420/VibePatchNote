@@ -68,6 +68,7 @@ from app.documents import router as documents_router
 from app.inspector import router as inspector_router
 from app.llm_settings import router as llm_settings_router
 from app.outline import router as outline_router
+from app.recipe import router as recipe_router
 from app.runtime import router as runtime_router
 from app.segments import router as segments_router
 from app.wireframe import router as wireframe_router
@@ -125,6 +126,7 @@ container.wire(modules=[
     inspector_router,
     runtime_router,
     segments_router,
+    recipe_router,
 ])
 app.container = container
 
@@ -179,6 +181,7 @@ app.include_router(outline_router.router, prefix="/api/v1/outlines", tags=["Outl
 app.include_router(wireframe_router.router, prefix="/api/v1/wireframes", tags=["Wireframes"])
 app.include_router(runtime_router.router, prefix="/api/v1/runtime", tags=["Agent Runtime"])
 app.include_router(segments_router.router, prefix="/api/v1/segments", tags=["Segments"])
+app.include_router(recipe_router.router, prefix="/api/v1/recipes", tags=["Document Recipes"])
 app.include_router(inspector_router.router, prefix="/api/v1/inspector", tags=["Observability & Inspector"])
 app.include_router(llm_settings_router.router, prefix="/api/v1/llm-settings", tags=["LLM Settings"])
 app.include_router(workspaces_router.router, prefix="/api/v1/workspaces", tags=["Workspaces & Sessions"])

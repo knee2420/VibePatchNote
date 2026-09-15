@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, type ReactNode } from 'react';
 import {
   Trash2,
   BookOpen,
@@ -29,6 +29,7 @@ interface ReferenceCardHeaderProps {
   onExtractOutline?: () => void;
   onToggleOutlinePanel?: () => void;
   onDelete: () => void;
+  extraActions?: ReactNode;
 }
 
 export const ReferenceCardHeader = memo(function ReferenceCardHeader({
@@ -49,6 +50,7 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
   onExtractOutline,
   onToggleOutlinePanel,
   onDelete,
+  extraActions,
 }: ReferenceCardHeaderProps) {
   return (
     <div
@@ -73,6 +75,7 @@ export const ReferenceCardHeader = memo(function ReferenceCardHeader({
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
+        {extraActions}
         {/* Extract Outline Button (문서 아웃라인 & 엘리먼트 추출) */}
         {onExtractOutline && (
           <button

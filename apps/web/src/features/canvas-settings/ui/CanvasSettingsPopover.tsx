@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Eye, Grid, Lock, Magnet, Map, RotateCcw, Settings, Unlock } from 'lucide-react';
+import { Eye, Grid, Lock, Magnet, Map, PanelRight, RotateCcw, Settings, Unlock } from 'lucide-react';
 
 import { useCanvasSettings } from '@/shared/model';
 import { SettingsToggleRow } from './SettingsToggleRow';
@@ -18,11 +18,13 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
     showMiniMap,
     isReadOnly,
     enableSmartSnap,
+    showRecipeInspector,
     toggleSnapToGrid,
     toggleShowDots,
     toggleShowMiniMap,
     toggleReadOnly,
     toggleEnableSmartSnap,
+    toggleShowRecipeInspector,
   } = useCanvasSettings();
 
   // Close when clicking outside
@@ -87,6 +89,12 @@ export function CanvasSettingsPopover({ onClearSession }: CanvasSettingsPopoverP
               label="미니맵 표시"
               checked={showMiniMap}
               onToggle={toggleShowMiniMap}
+            />
+            <SettingsToggleRow
+              icon={PanelRight}
+              label="저작 규격 패널 보기"
+              checked={showRecipeInspector}
+              onToggle={toggleShowRecipeInspector}
             />
 
             <div className="my-1 border-t border-slate-100" />

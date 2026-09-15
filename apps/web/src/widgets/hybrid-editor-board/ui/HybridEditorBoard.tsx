@@ -19,6 +19,7 @@ import { InfiniteCanvas } from '@/shared/ui';
 
 import { useBoardFileUpload } from '../model/useBoardFileUpload';
 import { BoardHeader } from './BoardHeader';
+import { RecipePropertySidebar } from './RecipePropertySidebar';
 
 const NODE_TYPES = {
   [SEGMENT_NODE_TYPE]: SegmentNode,
@@ -45,7 +46,15 @@ function HybridEditorBoardContent() {
   useSessionSync();
   const { closeSession } = useSessionActions();
 
-  const { snapToGrid, snapGrid, showDots, showMiniMap, isReadOnly } = useCanvasSettings();
+  const {
+    snapToGrid,
+    snapGrid,
+    showDots,
+    showMiniMap,
+    isReadOnly,
+    showRecipeInspector,
+    setShowRecipeInspector,
+  } = useCanvasSettings();
   const { mode } = useCanvasMode();
 
   const {
@@ -88,44 +97,52 @@ function HybridEditorBoardContent() {
       />
 
       {/* Canvas Viewport Area */}
-      <div className="flex-1 relative overflow-hidden">
-        {/* Heptabase Left Tool Dock (Select, Hand, Upload, Cards, Search) */}
-        <CanvasLeftToolbar onUploadClick={openFilePicker} />
+      <div className="flex-1 relative overflow-hidden flex flex-row">
+        {/* Left Canvas Main Area */}
+        <div className="flex-1 relative h-full overflow-hidden">
+          {/* Heptabase Left Tool Dock (Select, Hand, Upload, Cards, Search) */}
+          <CanvasLeftToolbar onUploadClick={openFilePicker} />
 
-        {/* Floating Node Action Toolbar (Appears when cards are selected) */}
-        <CanvasNodeActionBar />
+          {/* Floating Node Action Toolbar (Appears when cards are selected) */}
+          <CanvasNodeActionBar />
 
-        {/* Global Node Search Modal (Triggered by Search tool or Ctrl+K) */}
-        <CanvasSearchModal />
+          {/* Global Node Search Modal (Triggered by Search tool or Ctrl+K) */}
+          <CanvasSearchModal />
 
-        <InfiniteCanvas
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={NODE_TYPES}
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          snapToGrid={snapToGrid}
-          snapGrid={snapGrid}
-          showDots={showDots}
-          showMiniMap={showMiniMap}
-          isReadOnly={isReadOnly}
-          canvasMode={mode}
-        />
-        <CanvasDropOverlay
-          isDraggingOver={isDraggingOver}
-          supportedExtensions={supportedExtensions}
-        />
-        <SessionListSheet
-          isOpen={isSessionSheetOpen}
-          onClose={() => setIsSessionSheetOpen(false)}
-        />
-        <ScaffoldFocusModal />
-        <LlmSettingsDialog />
+          <InfiniteCanvas
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={NODE_TYPES}
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            snapToGrid={snapToGrid}
+            snapGrid={snapGrid}
+            showDots={showDots}
+            showMiniMap={showMiniMap}
+            isReadOnly={isReadOnly}
+            canvasMode={mode}
+          />
+          <CanvasDropOverlay
+            isDraggingOver={isDraggingOver}
+            supportedExtensions={supportedExtensions}
+          />
+          <SessionListSheet
+            isOpen={isSessionSheetOpen}
+            onClose={() => setIsSessionSheetOpen(false)}
+          />
+          <ScaffoldFocusModal />
+          <LlmSettingsDialog />
+        </div>
+
+        {/* Right Property Sidebar (첨부 3, 4: 저작 규격 속성창) */}
+        {showRecipeInspector && (
+          <RecipePropertySidebar onClose={() => setShowRecipeInspector(false)} />
+        )}
       </div>
     </div>
   );

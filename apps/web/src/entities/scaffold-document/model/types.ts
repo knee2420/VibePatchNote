@@ -21,6 +21,7 @@ export interface ScaffoldSlot {
 /** 백엔드 아카이브 요약 메타. `GET /api/v1/scaffolds` 응답 항목과 1:1 대응합니다. */
 export interface ScaffoldArchiveMeta {
   scaffoldId: string;
+  docId?: string;
   title: string;
   sourcePdfFileName: string;
   createdAt: string;

@@ -17,7 +17,6 @@ from ..ports import (
     DocumentSourceRepository,
     RunArchivePort,
     SegmentArchivePort,
-    WireframeArchivePort,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,14 +30,12 @@ class DeleteDocumentUseCase:
         source: DocumentSourceRepository,
         artifacts: DocumentArtifactRepository,
         cache: DocumentCacheRepository,
-        scaffolds: WireframeArchivePort,
         runs: RunArchivePort,
         segments: SegmentArchivePort | None = None,
     ) -> None:
         self._source = source
         self._artifacts = artifacts
         self._cache = cache
-        self._scaffolds = scaffolds
         self._runs = runs
         self._segments = segments
 
@@ -46,7 +43,9 @@ class DeleteDocumentUseCase:
         if self._source.get(doc_id) is None:
             raise FileNotFoundError(f"Document not found: {doc_id}")
 
-        removed_scaffolds = self._scaffolds.delete_for_document(doc_id)
+        # A wireframe and a DocumentRecipe are independent reusable knowledge.
+        # Both retain source IDs only, so the deleted source is shown as unavailable.
+        removed_scaffolds = 0
         if self._segments is not None:
             self._segments.delete_for_document(doc_id)
         self._artifacts.delete_all(doc_id)
@@ -55,7 +54,7 @@ class DeleteDocumentUseCase:
         removed_source = self._source.delete(doc_id)
 
         logger.info(
-            "[DeleteDocument] %s 삭제 (scaffolds=%d, runs=%d)",
+            "[DeleteDocument] %s 삭제 (preserved wireframes, runs=%d)",
             doc_id, removed_scaffolds, removed_runs,
         )
         return {

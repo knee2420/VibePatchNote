@@ -46,6 +46,7 @@ def register_resume_handlers(container: "Container") -> list[str]:
     extract_outline = container.extract_outline()
     generate_scaffold = container.generate_scaffold()
     extract_segments = container.extract_segments()
+    distill_recipe = container.distill_recipe()
 
     handlers: dict[str, ResumeHandler] = {
         extract_outline.name: lambda payload: extract_outline.execute(
@@ -59,6 +60,7 @@ def register_resume_handlers(container: "Container") -> list[str]:
         extract_segments.name: lambda payload: _extract_segments_result(
             extract_segments, payload["docId"]
         ),
+        distill_recipe.name: distill_recipe.resume,
     }
 
     for name, handler in handlers.items():

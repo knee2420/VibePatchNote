@@ -22,6 +22,7 @@ from . import (
     v0003_readable_scaffold_archives,
     v0004_ledger_single_schema,
     v0005_segments_aggregate,
+    v0006_recipe_aggregate,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,7 @@ MIGRATIONS: tuple[Migration, ...] = (
     Migration(3, "readable_scaffold_archives", v0003_readable_scaffold_archives.run),
     Migration(4, "ledger_single_schema", v0004_ledger_single_schema.run),
     Migration(5, "segments_aggregate", v0005_segments_aggregate.run),
+    Migration(6, "recipe_aggregate", v0006_recipe_aggregate.run),
 )
 
 TARGET_VERSION = MIGRATIONS[-1].version

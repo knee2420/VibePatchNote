@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { Bot, Loader2 } from 'lucide-react';
 import {
   Handle,
   Position,
@@ -10,7 +11,7 @@ import {
 
 import { viewerRegistry, type ViewerHighlight, type ViewerSegment } from '@vibe/document-viewer';
 
-import { useCanvasSettings, useSyncMappingStore } from '@/shared/model';
+import { useActiveElementStore, useCanvasSettings, useSyncMappingStore } from '@/shared/model';
 import { requestLlmSettings } from '@/shared/lib/llmSettingsEvent';
 import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
@@ -41,6 +42,7 @@ import {
   useSegmentStructure,
   type DocumentSegmentItem,
 } from '@/entities/document-segment';
+import { useRecipeDistill } from '../model/useRecipeDistill';
 
 /**
  * 세그먼트 탭이 아닐 때 뷰어에 넘기는 빈 목록.
@@ -240,14 +242,6 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
     ];
   }, [hoveredElement, hoveredSegment, activeMapping, segmentStructure, panelTab, id, data.title, data.url]);
 
-  // 클릭은 트리 선택 상태만 바꾼다. 강조는 호버가 담당하므로 점유가 생기지 않는다.
-  const handleSelectElement = useCallback(
-    (elem: DocumentElementItem) => {
-      setSelectedElementId(elem.id);
-    },
-    [setSelectedElementId]
-  );
-
   const {
     isSpread,
     isFitContent,
@@ -262,6 +256,51 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
     viewerDefId: viewerDef.id,
     isOutlineOpen: isOutlineOpen && (hasOutline || isExtractingOutline),
   });
+
+  const setSelection = useActiveElementStore((state) => state.setSelection);
+
+  // 노드가 선택될 때 전역 활성 선택 스토어와 동기화
+  useEffect(() => {
+    if (selected) {
+      setSelection({
+        nodeId: id,
+        nodeType: REFERENCE_DOCUMENT_NODE_TYPE,
+        docId: data.docId,
+        docTitle: (data.title as string) || (data.fileName as string) || '참조 문서',
+        selectedElement: {
+          id: data.docId || id,
+          label: (data.title as string) || (data.fileName as string) || '참조 문서',
+          type: 'document_card',
+          sourceFile: (data.fileName as string) || (data.title as string),
+          totalPages: pageCount ?? undefined,
+          content_summary: `${(data.title as string) || '참조 문서'} 원본 PDF 문서`,
+        },
+      });
+    }
+  }, [selected, id, data.docId, data.title, data.fileName, pageCount, setSelection]);
+
+  // 클릭 시 트리 선택 상태와 전역 Element 선택 상태(WinForm 스타일 속성 패널용)를 함께 갱신
+  const handleSelectElement = useCallback(
+    (elem: DocumentElementItem) => {
+      setSelectedElementId(elem.id);
+      setSelection({
+        nodeId: id,
+        nodeType: REFERENCE_DOCUMENT_NODE_TYPE,
+        docId: data.docId,
+        docTitle: (data.title as string) || (data.fileName as string) || '참조 문서',
+        selectedElement: {
+          id: elem.id,
+          label: elem.label,
+          type: elem.type,
+          page: elem.page,
+          box_2d: elem.box_2d,
+          content_summary: elem.content_summary,
+          outline_id: elem.outline_id,
+        },
+      });
+    },
+    [id, data.docId, data.title, data.fileName, setSelection, setSelectedElementId]
+  );
 
   // 노드 DOM 크기 변화를 실시간 감지하여 React Flow Handle 위치 캐시를 즉각 갱신
   // React 19 / BatchProvider 렌더 사이클 충돌을 방지하기 위해 반드시 rAF로 다음 프레임에 스케줄링합니다.
@@ -404,9 +443,32 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [isEditMode, undo, redo]);
 
-  const handleSelectSegment = useCallback((segment: { id: string }) => {
-    setSelectedSegmentId(segment.id);
-  }, []);
+  const handleSelectSegment = useCallback(
+    (segment: DocumentSegmentItem | ViewerSegment) => {
+      const item: DocumentSegmentItem = 'box_2d' in segment ? segment : fromViewerSegment(segment);
+      setSelectedSegmentId(item.id);
+      setSelection({
+        nodeId: id,
+        nodeType: REFERENCE_DOCUMENT_NODE_TYPE,
+        docId: data.docId,
+        docTitle: (data.title as string) || (data.fileName as string) || '참조 문서',
+        selectedElement: {
+          id: item.id,
+          label: item.label || `세그먼트 ${item.id}`,
+          type: 'document_segment',
+          segmentType: item.type,
+          page: item.page,
+          box_2d: item.box_2d,
+          content_summary: item.content_summary,
+          purpose: `논리 세그먼트 (${item.type})`,
+          structured_data: {
+            segmentType: item.type,
+          },
+        },
+      });
+    },
+    [id, data.docId, data.title, data.fileName, setSelection, setSelectedSegmentId]
+  );
 
   const { isExtractingScaffold, extractScaffold } = useDocumentScaffold({
     nodeId: id,
@@ -420,6 +482,16 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
       alert(`[Tiptap 서식 스캐폴딩 추출 오류]\n${msg}`);
     },
   });
+  const onRecipeError = useCallback((msg: string) => {
+    console.error('[ReferenceDocumentWorkbench] Recipe distill error:', msg);
+    alert(`[저작 규격 추출 오류]\n${msg}`);
+  }, []);
+  const onRecipeDone = useCallback(
+    (blockCount: number) =>
+      alert(`저작 규격 추출 완료: 총 ${blockCount}개의 작성 블록이 정리되었습니다.`),
+    [],
+  );
+  const recipe = useRecipeDistill(data.docId, onRecipeError, onRecipeDone);
 
   // 프리셋 토글 시에는 수동 크기를 버리고 자동 맞춤 우선권을 복원합니다.
   const onToggleSpreadWithReset = useCallback(() => {
@@ -493,6 +565,13 @@ export const ReferenceDocumentWorkbench = memo(function ReferenceDocumentWorkben
         onExtractOutline={() => extractOutline(hasOutline)}
         onToggleOutlinePanel={toggleOutlinePanel}
         onDelete={handleDelete}
+        extraActions={<button
+          onClick={(event) => { event.stopPropagation(); void recipe.start(); }}
+          disabled={!recipe.isReady || recipe.isRunning}
+          className={`p-1.5 rounded-md nodrag flex items-center justify-center ${recipe.isReady ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-300 bg-slate-50 cursor-not-allowed'}`}
+          title={recipe.isRunning ? '저작 규격 추출 중...' : recipe.isReady ? '저작 규격 초안 추출' : `추출 조건 누락: ${recipe.missing.join(', ')}`}
+          aria-label="저작 규격 초안 추출"
+        >{recipe.isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Bot className="w-3.5 h-3.5" />}</button>}
       />
 
       {isScanning && (

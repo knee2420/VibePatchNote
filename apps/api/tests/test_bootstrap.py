@@ -180,6 +180,7 @@ def test_every_resumable_use_case_is_registered_at_boot() -> None:
     assert registered == [
         "documents.extract_outline",
         "documents.generate_scaffold",
+        "recipes.distill",
         "segments.extract",
     ]
     assert set(main.container.agent_runtime()._resume_handlers) >= set(registered)

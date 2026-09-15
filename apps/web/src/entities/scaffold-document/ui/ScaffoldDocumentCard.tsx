@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import {
   FileText,
@@ -13,12 +13,12 @@ import {
 
 import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
 
-import { useSyncMappingStore } from '@/shared/model';
+import { useActiveElementStore, useSyncMappingStore } from '@/shared/model';
 import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
 
 import { useScaffoldArchive, type ScaffoldArchiveSyncState } from '../model/useScaffoldArchive';
 import { useScaffoldFocusStore } from '../model/useScaffoldFocusStore';
-import { type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
+import { SCAFFOLD_DOCUMENT_NODE_TYPE, type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
 
 /**
  * ScaffoldDocumentCard (FSD Entity UI)
@@ -53,6 +53,71 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
   const setActiveMapping = useSyncMappingStore((s) => s.setActiveMapping);
   const activeMapping = useSyncMappingStore((s) => s.activeMapping);
+  const setSelection = useActiveElementStore((s) => s.setSelection);
+
+  const totalPages = useMemo(() => {
+    if (typeof data.archive?.totalPages === 'number' && data.archive.totalPages > 0) {
+      return data.archive.totalPages;
+    }
+    const maxPageInSlots = (data.slots as SlotMappingItem[] | undefined)?.reduce(
+      (max, s) => Math.max(max, s.pageNumber ?? 1),
+      1
+    );
+    if (maxPageInSlots && maxPageInSlots > 1) return maxPageInSlots;
+    const match = data.description?.match(/(\d+)\s*페이지/);
+    if (match) return parseInt(match[1], 10);
+    return 1;
+  }, [data.archive?.totalPages, data.slots, data.description]);
+
+  const slotsCount = useMemo(() => {
+    if (Array.isArray(data.slots) && data.slots.length > 0) {
+      return data.slots.length;
+    }
+    if (typeof data.archive?.slotsCount === 'number' && data.archive.slotsCount > 0) {
+      return data.archive.slotsCount;
+    }
+    const match = data.description?.match(/슬롯\s*(\d+)개/);
+    if (match) return parseInt(match[1], 10);
+    return 0;
+  }, [data.slots, data.archive?.slotsCount, data.description]);
+
+  // 노드가 선택될 때 전역 활성 선택 스토어와 동기화 (WinForm 스타일 속성창 연동)
+  useEffect(() => {
+    if (selected) {
+      setSelection({
+        nodeId: id,
+        nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+        docId: data.docId || (data.archive?.docId as string) || undefined,
+        docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+        scaffoldId: data.scaffoldId,
+        selectedElement: {
+          id: data.scaffoldId || id,
+          label: data.title || '와이어프레임 서식',
+          type: 'scaffold_card',
+          totalPages,
+          slotsCount,
+          difficulty: data.difficulty || 'medium',
+          sourceFile: data.sourcePdfFileName,
+          content_summary: data.description || data.taskSummary,
+        },
+      });
+    }
+  }, [
+    selected,
+    id,
+    data.docId,
+    data.archive?.docId,
+    data.title,
+    data.sourcePdfFileName,
+    data.scaffoldId,
+    data.slots,
+    data.difficulty,
+    data.description,
+    data.taskSummary,
+    totalPages,
+    slotsCount,
+    setSelection,
+  ]);
 
   const handleHoverSlot = useCallback(
     (slot: SlotMappingItem | null) => {
@@ -74,7 +139,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
     [setActiveMapping, data.sourceNodeId, data.sourcePdfFileName]
   );
 
-  // 활성 매핑이 이 스캐폴드 카드의 원본 문서와 일치하는 경우에만 하이라이트 번호를 전달한다 (타 카드 교차 번짐 완벽 방지)
+  // 활성 매핑이 이 스캐폴드 카드의 원본 문서와 일치하는 경우에만 하이라이트 번호를 전달한다
   const isMappingForThisCard = useMemo(() => {
     if (!activeMapping) return false;
     if (activeMapping.targetNodeId && data.sourceNodeId) {
@@ -88,16 +153,92 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
 
   const activeNumberForEditor = isMappingForThisCard ? activeMapping?.number : null;
 
-  const totalPages = useMemo(() => {
-    if (data.archive?.totalPages && data.archive.totalPages > 1) {
-      return data.archive.totalPages;
-    }
-    const maxPageInSlots = (data.slots as SlotMappingItem[] | undefined)?.reduce(
-      (max, s) => Math.max(max, s.pageNumber ?? 1),
-      1
-    );
-    return maxPageInSlots && maxPageInSlots > 1 ? maxPageInSlots : 1;
-  }, [data.archive?.totalPages, data.slots]);
+  // 카드 클릭 시 (슬롯 개별 클릭 또는 카드 본체 클릭) 속성 인스펙터 동기화
+  // 방안 B: e.stopPropagation()을 호출하지 않아 에디터 커서(Caret) 포커스와 속성창 동기화가 동시에 자연스럽게 동작함!
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent) => {
+      // 슬롯 클릭 여부 확인 (Tiptap 슬롯 요소: span[data-type="scaffold-slot"])
+      const slotEl = (e.target as HTMLElement).closest('span[data-type="scaffold-slot"]');
+      if (slotEl) {
+        const rawNum = slotEl.getAttribute('data-mapping-num');
+        const num = rawNum ? Number.parseInt(rawNum, 10) : null;
+        const rawId = slotEl.getAttribute('data-slot-id');
+
+        const slots = (data.slots as SlotMappingItem[] | undefined) || [];
+        const matched = slots.find(
+          (s) => (num !== null && s.number === num) || (rawId && s.id === rawId)
+        );
+
+        const slotId = matched?.id || rawId || (num !== null ? `s${num}` : 'slot');
+        const slotLabel =
+          matched?.label ||
+          slotEl.textContent?.replace(/[\][]/g, '').trim() ||
+          `슬롯 #${num ?? ''}`;
+        const slotNumber = matched?.number ?? num ?? 1;
+        const slotPage = matched?.pageNumber ?? 1;
+        const slotBox = matched?.box_2d;
+
+        setSelection({
+          nodeId: id,
+          nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+          docId: data.docId || (data.archive?.docId as string) || undefined,
+          docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+          scaffoldId: data.scaffoldId,
+          selectedElement: {
+            id: slotId,
+            label: slotLabel,
+            type: 'wireframe_slot',
+            page: slotPage,
+            box_2d: slotBox,
+            slotNumber,
+            slotId,
+            purpose: `와이어프레임 #${slotNumber} 슬롯 (${slotLabel})`,
+            structured_data: {
+              slotNumber,
+              slotId,
+              scaffoldId: data.scaffoldId,
+            },
+          },
+        });
+        return;
+      }
+
+      // 슬롯이 아닌 카드 본체 영역 클릭 시: 서식 카드 전체 속성 선택
+      setSelection({
+        nodeId: id,
+        nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+        docId: data.docId || (data.archive?.docId as string) || undefined,
+        docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+        scaffoldId: data.scaffoldId,
+        selectedElement: {
+          id: data.scaffoldId || id,
+          label: data.title || '와이어프레임 서식',
+          type: 'scaffold_card',
+          totalPages,
+          slotsCount,
+          difficulty: data.difficulty || 'medium',
+          sourceFile: data.sourcePdfFileName,
+          content_summary: data.description || data.taskSummary,
+        },
+      });
+    },
+    [
+      id,
+      data.docId,
+      data.archive?.docId,
+      data.title,
+      data.sourcePdfFileName,
+      data.scaffoldId,
+      data.slots,
+      data.difficulty,
+      data.description,
+      data.taskSummary,
+      totalPages,
+      slotsCount,
+      setSelection,
+    ]
+  );
+
 
   const handleDelete = useCallback(
     (e: React.MouseEvent) => {
@@ -172,6 +313,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   return (
     <div
       style={cardStyle}
+      onClick={handleCardClick}
       className={`
         rounded-2xl border-2 transition-all duration-300 select-none
         flex flex-col overflow-hidden bg-white text-slate-800 shadow-md relative [contain:layout_style]

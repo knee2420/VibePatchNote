@@ -14,6 +14,7 @@ import { ScaffoldCanvasEditor } from '@vibe/tiptap-scaffold';
 import { useCanvasBoardStore } from '@/entities/canvas-board';
 import { type ScaffoldDocumentData } from '@/entities/scaffold-document';
 import { useScaffoldFocusStore } from '@/entities/scaffold-document';
+import { recipeApi, type RecipeRevision } from '@/entities/recipe';
 
 /**
  * ScaffoldFocusModal (FSD Feature / Modal UI)
@@ -38,6 +39,24 @@ function ScaffoldFocusModalContent({
   const [liveHtml, setLiveHtml] = useState<string>(scaffoldData.htmlContent || '');
   const [liveMarkdown, setLiveMarkdown] = useState<string>(scaffoldData.markdownContent || '');
   const [copied, setCopied] = useState<boolean>(false);
+  const [sideTab, setSideTab] = useState<'markdown' | 'recipe'>('markdown');
+  const [recipe, setRecipe] = useState<RecipeRevision | null>(null);
+  useEffect(() => {
+    if (!scaffoldData.scaffoldId) return;
+    // 목록은 오래된 순으로 온다. Matrix 는 가장 최근 저작 규격을 보여야 한다.
+    void recipeApi.listByScaffold(scaffoldData.scaffoldId)
+      .then((items) => setRecipe(
+        items.reduce<RecipeRevision | null>(
+          (newest, item) => (
+            !newest || item.recipe.provenance.createdAt > newest.provenance.createdAt
+              ? item.recipe
+              : newest
+          ),
+          null,
+        ),
+      ))
+      .catch(() => setRecipe(null));
+  }, [scaffoldData.scaffoldId]);
 
   // 캔버스 복귀 시 노드 데이터 저장
   const handleBackToCanvas = useCallback(() => {
@@ -203,14 +222,12 @@ function ScaffoldFocusModalContent({
               <span>{copied ? '복사됨!' : '복사'}</span>
             </button>
           </div>
-
-          <p className="text-[10px] text-slate-500 my-2">
-            에이전트가 MCP 도구로 읽고 쓸 순수 마크다운 데이터입니다.
-          </p>
-
-          <div className="flex-1 bg-slate-950 rounded-lg p-3 border border-slate-800/80 font-mono text-[11px] text-slate-300 leading-relaxed overflow-y-auto whitespace-pre-wrap selection:bg-purple-500/30">
-            {liveMarkdown || scaffoldData.markdownContent}
+          <div className="mt-3 flex gap-1 rounded-lg bg-slate-800 p-1 text-[10px]">
+            <button onClick={() => setSideTab('markdown')} className={`flex-1 rounded px-2 py-1 ${sideTab === 'markdown' ? 'bg-slate-700 text-white' : 'text-slate-400'}`}>Markdown</button>
+            <button onClick={() => setSideTab('recipe')} className={`flex-1 rounded px-2 py-1 ${sideTab === 'recipe' ? 'bg-purple-600 text-white' : 'text-slate-400'}`}>저작 규격</button>
           </div>
+
+          {sideTab === 'markdown' ? <><p className="text-[10px] text-slate-500 my-2">에이전트가 MCP 도구로 읽고 쓸 순수 마크다운 데이터입니다.</p><div className="flex-1 bg-slate-950 rounded-lg p-3 border border-slate-800/80 font-mono text-[11px] text-slate-300 leading-relaxed overflow-y-auto whitespace-pre-wrap selection:bg-purple-500/30">{liveMarkdown || scaffoldData.markdownContent}</div></> : <div className="mt-3 flex-1 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950 p-3 text-[11px] text-slate-300"><p className="mb-2 font-bold text-purple-300">Recipe Matrix</p>{recipe ? <pre className="whitespace-pre-wrap text-[10px] leading-relaxed">{JSON.stringify(recipe.spec, null, 2)}</pre> : <p className="text-slate-500">연결된 저작 규격이 없습니다.</p>}</div>}
         </aside>
       </div>
     </div>
