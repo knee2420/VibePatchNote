@@ -2,12 +2,46 @@ import { useState, useMemo } from 'react';
 import {
   ArrowLeft,
   FileText,
-  CheckCircle2,
-  Loader2,
   Table,
   Sparkles,
   AlertCircle,
+  LayoutGrid,
+  FileSpreadsheet,
+  Layers,
+  History,
+  TableProperties,
+  Target,
 } from 'lucide-react';
+
+import {
+  WorkspaceShell,
+  TopMenuBar,
+  SyncStatusBadge,
+  WorkspacePanel,
+  BinderToolbar,
+  BinderTree,
+  CorkboardView,
+  OutlinerTable,
+  SnapshotInspector,
+  MetadataInspector,
+  DocumentCompilerModal,
+  BreadcrumbBar,
+  WordCountBadge,
+  PaginationBar,
+  PagedCanvasContainer,
+  QuickTabSwitcher,
+  type BinderItem,
+  type CorkboardCard,
+  type OutlinerRow,
+  type DocumentSnapshot,
+  type DocumentMetadata,
+  type CompilerSection,
+  type CompilerOptions,
+  type BreadcrumbItem,
+  type SyncStatusType,
+  type PageLayoutMode,
+  type QuickTabItem,
+} from '@vibe/editor-workspace';
 
 import { useScaffoldDocumentDetail, type ScaffoldDocumentData } from '@/entities/scaffold-document';
 import { useScaffoldRecipe } from '@/entities/recipe';
@@ -20,18 +54,45 @@ interface DocumentEditorWorkspaceProps {
   onBack?: () => void;
 }
 
+type EditorViewMode = 'editor' | 'matrix' | 'corkboard' | 'outliner';
+type InspectorTab = 'mcp' | 'meta' | 'snapshots' | 'matrix';
+
 /**
  * DocumentEditorWorkspace (Widget)
  *
- * 승격된 독립 에디터 상세 편집 워크스페이스 위젯.
- * 좌측: 서식 메타 정보 / 중앙: Tiptap 캔버스 에디터 or 2D Recipe Matrix / 우측: 실시간 MCP 마크다운 연동 뷰
- * 백엔드 스캐폴드 아카이브(SSOT) 및 Recipe와 실시간 양방향 동기화됩니다.
+ * @vibe/editor-workspace 모듈형 엔진으로 구축된 고도화된 문서 편집 상세 워크스페이스.
+ * - 상단: TopMenuBar + QuickTabSwitcher (단축키 Ctrl+1~4 지원) + SyncStatusBadge + 컴파일러
+ * - 좌측: WorkspacePanel + BinderToolbar + BinderTree (슬롯/섹션 네비게이션)
+ * - 중앙: 에디터 캔버스(A4 낱장 / 연속 / 양면 펼침 / 젠 모드) ⇄ 2D 규격 Matrix ⇄ 코르크보드 ⇄ 아웃라이너
+ * - 우측: 4단 인스펙터 (MCP 마크다운 / 메타데이터&목표진행도 / 세그먼트 스냅샷 / 저작 규격)
+ * - 하단: BreadcrumbBar + PaginationBar (페이지 점프 및 줌) + WordCountBadge 실시간 상태바
  */
 export function DocumentEditorWorkspace({
   scaffoldId,
   onBack,
 }: DocumentEditorWorkspaceProps) {
-  const [viewMode, setViewMode] = useState<'editor' | 'matrix'>('editor');
+  const [viewMode, setViewMode] = useState<EditorViewMode>('editor');
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('mcp');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [isCompilerOpen, setIsCompilerOpen] = useState(false);
+
+  // 문서 뷰 형태 (페이지네이션 레이아웃 & 줌) 상태
+  const [layoutMode, setLayoutMode] = useState<PageLayoutMode>('continuous');
+  const [zoom, setZoom] = useState<number>(100);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // 메타데이터 및 목표 분량 상태
+  const [docMetadata, setDocMetadata] = useState<DocumentMetadata>({
+    status: '작성중',
+    label: '기본',
+    targetWordCount: 3000,
+    tags: ['스캐폴드', '정본서식'],
+    notes: '',
+  });
+
+  // 로컬 스냅샷 메모리 상태 (세그먼트 복원점 관리)
+  const [snapshots, setSnapshots] = useState<DocumentSnapshot[]>([]);
 
   const {
     detail,
@@ -50,6 +111,15 @@ export function DocumentEditorWorkspace({
     resolvedDocId
   );
 
+  // 총 페이지 수 계산
+  const totalPages = Math.max(1, detail?.slots?.length || 1);
+
+  // 글자 수 및 단어 수 통계
+  const charCount = liveMarkdown.length;
+  const wordCount = useMemo(() => {
+    return liveMarkdown.trim() ? liveMarkdown.trim().split(/\s+/).length : 0;
+  }, [liveMarkdown]);
+
   // RecipeMatrixView에 전달할 최소 ScaffoldDocumentData 어댑터
   const matrixScaffoldData: ScaffoldDocumentData = useMemo(() => {
     return {
@@ -64,10 +134,199 @@ export function DocumentEditorWorkspace({
     };
   }, [detail, scaffoldId, liveHtml, liveMarkdown]);
 
+  // 4대 뷰 모드 탭 목록 (QuickTabSwitcher 연동: Ctrl+1~4 단축키 자동 지원)
+  const viewTabs: QuickTabItem[] = useMemo(() => [
+    {
+      id: 'editor',
+      label: '에디터 캔버스',
+      icon: <FileText className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'matrix',
+      label: '저작 규격 Matrix',
+      icon: <Table className="w-3.5 h-3.5" />,
+      badge: recipe ? <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> : undefined,
+    },
+    {
+      id: 'corkboard',
+      label: '코르크보드 2D',
+      icon: <LayoutGrid className="w-3.5 h-3.5" />,
+    },
+    {
+      id: 'outliner',
+      label: '아웃라이너',
+      icon: <TableProperties className="w-3.5 h-3.5" />,
+    },
+  ], [recipe]);
+
+  // 바인더 트리 데이터
+  const binderItems: BinderItem[] = useMemo(() => {
+    if (!detail?.slots || detail.slots.length === 0) {
+      return [
+        {
+          id: scaffoldId,
+          name: detail?.title || '기본 본문 섹션',
+          isFolder: false,
+        },
+      ];
+    }
+    return [
+      {
+        id: 'root-document',
+        name: detail.title || '문서 섹션 구조',
+        isFolder: true,
+        children: detail.slots.map((slot) => ({
+          id: slot.id,
+          name: slot.label || `슬롯 #${slot.number}`,
+          isFolder: false,
+          data: { number: slot.number, pageNumber: slot.pageNumber },
+        })),
+      },
+    ];
+  }, [detail, scaffoldId]);
+
+  // 코르크보드 카드 데이터
+  const corkboardCards: CorkboardCard[] = useMemo(() => {
+    if (!detail?.slots || detail.slots.length === 0) {
+      return [
+        {
+          id: scaffoldId,
+          title: detail?.title || '메인 본문',
+          synopsis: detail?.description || '본문 콘텐츠 전체 영역입니다.',
+          status: '초안',
+          labelColor: '#a855f7',
+        },
+      ];
+    }
+    return detail.slots.map((slot) => ({
+      id: slot.id,
+      title: slot.label || `슬롯 #${slot.number}`,
+      synopsis: slot.pageNumber
+        ? `페이지 ${slot.pageNumber} 서식 영역 (No. ${slot.number})`
+        : `서식 영역 (No. ${slot.number})`,
+      status: `No. ${slot.number}`,
+      labelColor: '#a855f7',
+    }));
+  }, [detail, scaffoldId]);
+
+  // 아웃라이너 테이블 행 데이터
+  const outlinerRows: OutlinerRow[] = useMemo(() => {
+    if (!detail?.slots || detail.slots.length === 0) {
+      return [
+        {
+          id: scaffoldId,
+          number: 1,
+          title: detail?.title || '메인 본문',
+          synopsis: detail?.description || '전체 문서 영역',
+          wordCount: charCount,
+          status: docMetadata.status,
+          label: docMetadata.label,
+        },
+      ];
+    }
+    const perSlotWords = Math.round(charCount / (detail.slots.length || 1));
+    return detail.slots.map((slot) => ({
+      id: slot.id,
+      number: slot.number,
+      title: slot.label || `슬롯 #${slot.number}`,
+      synopsis: slot.pageNumber
+        ? `페이지 ${slot.pageNumber} 영역 (No. ${slot.number})`
+        : `서식 영역 #${slot.number}`,
+      wordCount: perSlotWords,
+      status: docMetadata.status,
+      label: docMetadata.label,
+    }));
+  }, [detail, scaffoldId, charCount, docMetadata.status, docMetadata.label]);
+
+  // 컴파일러용 섹션 데이터
+  const compilerSections: CompilerSection[] = useMemo(() => {
+    if (!detail?.slots || detail.slots.length === 0) {
+      return [
+        {
+          id: scaffoldId,
+          title: detail?.title || '전체 본문',
+          depth: 0,
+          selected: true,
+          contentLength: charCount,
+        },
+      ];
+    }
+    return detail.slots.map((slot) => ({
+      id: slot.id,
+      title: slot.label || `섹션 #${slot.number}`,
+      depth: 1,
+      selected: true,
+      contentLength: Math.round(charCount / (detail.slots.length || 1)),
+    }));
+  }, [detail, scaffoldId, charCount]);
+
+  // 브레드크럼 경로 항목
+  const breadcrumbItems: BreadcrumbItem[] = useMemo(() => {
+    const items: BreadcrumbItem[] = [
+      { id: 'home', label: '서식 보관함' },
+      { id: 'doc', label: detail?.title || '문서 상세' },
+    ];
+    if (selectedSlotId) {
+      const matched = detail?.slots?.find((s) => s.id === selectedSlotId);
+      if (matched) {
+        items.push({
+          id: matched.id,
+          label: matched.label || `슬롯 #${matched.number}`,
+        });
+      }
+    }
+    return items;
+  }, [detail, selectedSlotId]);
+
+  // 스냅샷 생성 핸들러
+  const handleTakeSnapshot = () => {
+    const newSnapshot: DocumentSnapshot = {
+      id: `snap-${Date.now()}`,
+      title: `${detail?.title || '본문'} 스냅샷 #${snapshots.length + 1}`,
+      timestamp: Date.now(),
+      previewText: liveMarkdown.slice(0, 120) || '내용 없음',
+      fullContent: liveMarkdown,
+    };
+    setSnapshots([newSnapshot, ...snapshots]);
+  };
+
+  // 스냅샷 복원 핸들러
+  const handleRestoreSnapshot = (snap: DocumentSnapshot) => {
+    if (snap.fullContent) {
+      setLiveMarkdown(snap.fullContent);
+      setLiveHtml(`<p>${snap.fullContent.replace(/\n/g, '<br/>')}</p>`);
+    }
+  };
+
+  // 컴파일 실행 핸들러
+  const handleCompile = (_options: CompilerOptions, selectedIds: string[]) => {
+    const compiledText = `# ${detail?.title || '합성 문서'}\n\n` +
+      `> 컴파일 일시: ${new Date().toLocaleString()} (선택된 섹션: ${selectedIds.length}개)\n\n` +
+      liveMarkdown;
+
+    const blob = new Blob([compiledText], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${detail?.title || 'document'}-compiled.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setIsCompilerOpen(false);
+  };
+
+  const syncStatus: SyncStatusType =
+    syncState === 'saving'
+      ? 'saving'
+      : syncState === 'saved'
+      ? 'saved'
+      : syncState === 'error'
+      ? 'error'
+      : 'idle';
+
   if (isLoadingDetail) {
     return (
       <div className="w-full h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+        <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
         <p className="text-sm font-medium">서식 보관함에서 문서를 불러오는 중입니다...</p>
       </div>
     );
@@ -100,154 +359,265 @@ export function DocumentEditorWorkspace({
   }
 
   return (
-    <div className="w-full h-screen flex flex-col bg-slate-950 text-slate-100 font-sans select-none">
-      {/* 1. 상단 네비게이션 헤더 */}
-      <header className="h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-20">
-        <div className="flex items-center gap-4">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-600/30 hover:text-purple-300 text-slate-300 border border-slate-700 transition-all cursor-pointer text-xs font-semibold"
-              title="캔버스 보드로 돌아가기"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>캔버스로 돌아가기</span>
-            </button>
-          )}
-
-          {onBack && <div className="h-4 w-px bg-slate-800" />}
-
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shadow-md">
-              <FileText className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>{detail.title || '문서 상세 편집'}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono border border-purple-500/30">
-                  Workspace
-                </span>
-              </h2>
-            </div>
-          </div>
-        </div>
-
-        {/* 중앙 뷰 모드 스위치 (에디터 뷰 ⇄ 저작 규격 Matrix) */}
-        <div className="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80">
-          <button
-            type="button"
-            onClick={() => setViewMode('editor')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              viewMode === 'editor'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+    <>
+      <WorkspaceShell
+        showSidebar={layoutMode !== 'zen'}
+        showInspector={layoutMode !== 'zen'}
+        /* 1. 상단 글로벌 탑 메뉴바 */
+        header={
+          <TopMenuBar
+            leftSlot={
+              <div className="flex items-center gap-3">
+                {onBack && (
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-600/30 hover:text-purple-300 text-slate-300 border border-slate-700 transition-all cursor-pointer text-xs font-semibold"
+                    title="캔버스 보드로 돌아가기"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>캔버스</span>
+                  </button>
+                )}
+                <div className="h-4 w-px bg-slate-800" />
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white shadow-xs">
+                    <FileText className="w-3.5 h-3.5" />
+                  </div>
+                  <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>{detail.title || '문서 상세 편집'}</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono border border-purple-500/30">
+                      SSOT
+                    </span>
+                  </h2>
+                </div>
+              </div>
+            }
+            centerSlot={
+              <QuickTabSwitcher
+                tabs={viewTabs}
+                activeId={viewMode}
+                onChange={(id) => setViewMode(id as EditorViewMode)}
+                showShortcutHints={true}
+              />
+            }
+            rightSlot={
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsCompilerOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-purple-600/30 hover:text-purple-300 text-slate-300 border border-slate-700 transition-all cursor-pointer text-xs font-semibold"
+                  title="바인더 섹션 합성 및 출력"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-purple-400" />
+                  <span>문서 합성</span>
+                </button>
+                <SyncStatusBadge status={syncStatus} />
+              </div>
+            }
+          />
+        }
+        /* 2. 좌측 바인더 탐색 패널 */
+        sidebar={
+          <WorkspacePanel
+            title="문서 바인더"
+            subtitle="서식 섹션 트리"
+            actions={
+              <span className="text-[10px] font-mono text-purple-400 font-semibold px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-800/40">
+                {detail.slots?.length || 0} Slots
+              </span>
+            }
+            toolbar={
+              <BinderToolbar
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+            }
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>에디터 캔버스</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('matrix')}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-              viewMode === 'matrix'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
+            <div className="p-2 flex flex-col gap-3">
+              <BinderTree
+                data={binderItems}
+                searchTerm={searchTerm}
+                selectedId={selectedSlotId}
+                onSelect={(item) => setSelectedSlotId(item ? item.id : null)}
+                height={280}
+              />
+
+              {/* 서식 골격 요약 카드 */}
+              <div className="mt-2 p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 flex flex-col gap-1.5 text-xs">
+                <div className="flex items-center gap-1.5 text-purple-400 font-bold text-[11px]">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>인라인 스캐폴드 슬롯</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  보라색 점선 테두리 칸을 클릭하여 실제 서식 본문을 채워 넣으세요.
+                </p>
+              </div>
+            </div>
+          </WorkspacePanel>
+        }
+        /* 3. 우측 다기능 인스펙터 패널 */
+        inspector={
+          <WorkspacePanel
+            title="속성 & 관측 인스펙터"
+            toolbar={
+              <div className="flex items-center gap-1 p-1 bg-slate-900/80 border-b border-slate-800/60 w-full text-xs">
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab('mcp')}
+                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] ${
+                    inspectorTab === 'mcp'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  MCP 마크다운
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab('meta')}
+                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
+                    inspectorTab === 'meta'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Target className="w-3 h-3" />
+                  <span>메타데이터</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab('snapshots')}
+                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
+                    inspectorTab === 'snapshots'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <History className="w-3 h-3" />
+                  <span>스냅샷 ({snapshots.length})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab('matrix')}
+                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] ${
+                    inspectorTab === 'matrix'
+                      ? 'bg-purple-600 text-white'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  저작 규격
+                </button>
+              </div>
+            }
           >
-            <Table className="w-3.5 h-3.5" />
-            <span>저작 규격 Matrix</span>
-            {recipe && (
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-xs"
-                title="저작 규격(Recipe) 연동 완료"
+            {inspectorTab === 'mcp' && (
+              <McpMarkdownPanel
+                markdown={liveMarkdown}
+                extraTabLabel="저작 규격"
+                renderExtraTab={() => (
+                  <RecipeMatrixView
+                    recipe={recipe}
+                    scaffoldData={matrixScaffoldData}
+                    docId={resolvedDocId}
+                    mode="compact"
+                    isLoading={isLoadingRecipe}
+                    onRecipeUpdated={(up) => setRecipe(up)}
+                  />
+                )}
               />
             )}
-          </button>
-        </div>
 
-        {/* 우측 동기화 상태 인디케이터 */}
-        <div className="flex items-center gap-3 text-xs">
-          {syncState === 'saving' && (
-            <span className="px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 font-medium">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              아카이브 저장 중...
-            </span>
-          )}
-          {syncState === 'saved' && (
-            <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              보관함 저장 완료
-            </span>
-          )}
-          {syncState === 'idle' && (
-            <span className="px-2.5 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              실시간 동기화 대기
-            </span>
-          )}
-          {syncState === 'error' && (
-            <span className="px-2.5 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1.5 font-medium">
-              <AlertCircle className="w-3.5 h-3.5" />
-              동기화 오류
-            </span>
-          )}
-        </div>
-      </header>
+            {inspectorTab === 'meta' && (
+              <MetadataInspector
+                metadata={{
+                  ...docMetadata,
+                  currentWordCount: charCount,
+                }}
+                onChange={(up) => setDocMetadata(up)}
+              />
+            )}
 
-      {/* 2. 본문 3단 레이아웃 */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* [좌측 사이드 패널] 문서 메타 정보 및 서식 가이드 */}
-        <aside className="w-72 border-r border-slate-800/80 bg-slate-900/50 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto">
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase">
-              서식 상세 정보
-            </span>
-            <p className="text-[11px] text-slate-500 mt-1">
-              백엔드 아카이브에 영속화된 정본 와이어프레임입니다.
-            </p>
-          </div>
+            {inspectorTab === 'snapshots' && (
+              <SnapshotInspector
+                snapshots={snapshots}
+                currentContent={liveMarkdown}
+                onTakeSnapshot={handleTakeSnapshot}
+                onRestoreSnapshot={handleRestoreSnapshot}
+                onDeleteSnapshot={(id) => setSnapshots(snapshots.filter((s) => s.id !== id))}
+              />
+            )}
 
-          <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col gap-2">
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase">식별자 (ID)</span>
-              <p className="text-xs font-mono text-slate-200 truncate mt-0.5" title={scaffoldId}>
-                {scaffoldId}
-              </p>
+            {inspectorTab === 'matrix' && (
+              <div className="p-3 h-full overflow-y-auto">
+                <RecipeMatrixView
+                  recipe={recipe}
+                  scaffoldData={matrixScaffoldData}
+                  docId={resolvedDocId}
+                  mode="compact"
+                  isLoading={isLoadingRecipe}
+                  onRecipeUpdated={(up) => setRecipe(up)}
+                />
+              </div>
+            )}
+          </WorkspacePanel>
+        }
+        /* 4. 하단 고도화 상태바 (Breadcrumb + PaginationBar + WordCount) */
+        statusBar={
+          <div className="h-7 px-4 flex items-center justify-between text-[11px] text-slate-400">
+            {/* 좌측 브레드크럼 네비게이터 */}
+            <BreadcrumbBar
+              items={breadcrumbItems}
+              onSelect={(item) => setSelectedSlotId(item.id === 'doc' || item.id === 'home' ? null : item.id)}
+            />
+
+            {/* 중앙 페이지네이션 & 뷰 레이아웃 컨트롤러 (연속/A4/양면/젠 & 줌 배율) */}
+            {viewMode === 'editor' && (
+              <PaginationBar
+                currentPage={currentPage}
+                totalPages={totalPages}
+                zoom={zoom}
+                layoutMode={layoutMode}
+                onPageChange={setCurrentPage}
+                onZoomChange={setZoom}
+                onLayoutModeChange={setLayoutMode}
+              />
+            )}
+
+            {/* 우측 실시간 분량 통계 & 뷰 모드 배지 */}
+            <div className="flex items-center gap-4">
+              <WordCountBadge
+                charCount={charCount}
+                wordCount={wordCount}
+                targetCount={docMetadata.targetWordCount}
+              />
+              <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
+                <Layers className="w-3 h-3 text-purple-400" />
+                <span className="capitalize">{viewMode}</span>
+              </div>
             </div>
-            {detail.docId && (
-              <div className="mt-1 pt-2 border-t border-slate-800/80">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">문서 앵커 ID</span>
-                <p className="text-xs font-mono text-slate-300 truncate mt-0.5">
-                  {detail.docId}
-                </p>
-              </div>
-            )}
-            {detail.description && (
-              <div className="mt-1 pt-2 border-t border-slate-800/80">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">골격 설명</span>
-                <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
-                  {detail.description}
-                </p>
-              </div>
-            )}
           </div>
+        }
+      >
+        {/* 5. 중앙 메인 뷰포트 (선택된 4대 뷰 모드에 따라 전환) */}
+        {viewMode === 'editor' && (
+          <PagedCanvasContainer
+            layoutMode={layoutMode}
+            zoom={zoom}
+            currentPage={currentPage}
+            totalPages={totalPages}
+          >
+            <DocumentWireframeEditor
+              documentKey={scaffoldId}
+              initialHtml={liveHtml}
+              onChangeHtml={(html) => setLiveHtml(html)}
+              onChangeMarkdown={(md) => setLiveMarkdown(md)}
+            />
+          </PagedCanvasContainer>
+        )}
 
-          <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/40 text-purple-300 text-xs flex flex-col gap-1.5">
-            <span className="font-bold flex items-center gap-1.5 text-purple-400 text-xs">
-              <Sparkles className="w-3.5 h-3.5" />
-              Tiptap 인라인 슬롯 편집
-            </span>
-            <p className="text-[11px] text-purple-300/80 leading-relaxed">
-              보라색 점선 테두리 칸을 클릭하여 실제 본문 내용을 직접 입력하고 채워 넣으세요.
-            </p>
-          </div>
-        </aside>
-
-        {/* [중앙 패널] 뷰 모드에 따른 분기 (A4 에디터 캔버스 or 2D Recipe Matrix) */}
-        {viewMode === 'matrix' ? (
-          <main className="flex-1 bg-slate-900 p-8 overflow-y-auto">
+        {viewMode === 'matrix' && (
+          <div className="flex-1 h-full bg-slate-900 p-8 overflow-y-auto">
             <RecipeMatrixView
               recipe={recipe}
               scaffoldData={matrixScaffoldData}
@@ -256,34 +626,40 @@ export function DocumentEditorWorkspace({
               isLoading={isLoadingRecipe}
               onRecipeUpdated={(up) => setRecipe(up)}
             />
-          </main>
-        ) : (
-          <main className="flex-1 bg-slate-900 p-6 overflow-y-auto flex flex-col items-center">
-            <DocumentWireframeEditor
-              documentKey={scaffoldId}
-              initialHtml={liveHtml}
-              onChangeHtml={(html) => setLiveHtml(html)}
-              onChangeMarkdown={(md) => setLiveMarkdown(md)}
-            />
-          </main>
+          </div>
         )}
 
-        {/* [우측 패널] MCP 실시간 마크다운 연동 뷰 */}
-        <McpMarkdownPanel
-          markdown={liveMarkdown}
-          extraTabLabel="저작 규격"
-          renderExtraTab={() => (
-            <RecipeMatrixView
-              recipe={recipe}
-              scaffoldData={matrixScaffoldData}
-              docId={resolvedDocId}
-              mode="compact"
-              isLoading={isLoadingRecipe}
-              onRecipeUpdated={(up) => setRecipe(up)}
+        {viewMode === 'corkboard' && (
+          <div className="flex-1 h-full">
+            <CorkboardView
+              cards={corkboardCards}
+              selectedId={selectedSlotId}
+              onSelect={(card) => setSelectedSlotId(card.id)}
             />
-          )}
+          </div>
+        )}
+
+        {viewMode === 'outliner' && (
+          <div className="flex-1 h-full">
+            <OutlinerTable
+              rows={outlinerRows}
+              selectedId={selectedSlotId}
+              onSelect={(row) => setSelectedSlotId(row.id)}
+            />
+          </div>
+        )}
+      </WorkspaceShell>
+
+      {/* 6. 복합 문서 컴파일러 모달 */}
+      {isCompilerOpen && (
+        <DocumentCompilerModal
+          sections={compilerSections}
+          onToggleSection={(_id, _sel) => {}}
+          onToggleAll={(_sel) => {}}
+          onCompile={handleCompile}
+          onClose={() => setIsCompilerOpen(false)}
         />
-      </div>
-    </div>
+      )}
+    </>
   );
 }
