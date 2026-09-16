@@ -1,14 +1,39 @@
-// Binder Tree & Binder Toolbar (react-arborist 기반 가상 스크롤 아웃라인/트리 엔진)
+// Binder Tree & Interactive Socket Binder (스크리브너를 넘어서는 루브릭 뼈대 ↔ 다차원 에셋 소켓 시스템)
 export { BinderTree } from './binder/BinderTree';
 export { BinderNode } from './binder/BinderNode';
 export { BinderToolbar } from './binder/BinderToolbar';
+export { InteractiveSocketBinder } from './binder/InteractiveSocketBinder';
+export { SpineSwitcher } from './binder/spine';
+export { SocketNodeRenderer, SocketStateBadge } from './binder/socket';
+export { AssetStagingTray, StagingCard } from './binder/staging';
+export { CoverageRing, ProvenanceChipList } from './binder/provenance';
+export { CrossDomainBridgeTag } from './binder/bridge';
+export { NodeActionBar } from './binder/actions';
 export type {
   BinderItem,
   BinderTreeProps,
   BinderMoveEvent,
   BinderRenameEvent,
   BinderToolbarProps,
-} from './binder/types';
+  InteractiveSocketBinderProps,
+  SpineOption,
+  SpineSwitcherProps,
+  SocketFillingState,
+  SocketAcceptType,
+  SocketNodeData,
+  SocketStateBadgeProps,
+  SocketNodeRendererProps,
+  StagingAssetItem,
+  StagingCardProps,
+  AssetStagingTrayProps,
+  ProvenanceItem,
+  CoverageRingProps,
+  ProvenanceChipListProps,
+  BridgeTagItem,
+  CrossDomainBridgeTagProps,
+  NodeActionItem,
+  NodeActionBarProps,
+} from './binder';
 
 // Editor Dock Shell & Tab Actions (dockview 기반 멀티 스플릿 탭 & 도킹 에디터 엔진)
 export { EditorDockShell } from './dock/EditorDockShell';
@@ -121,3 +146,63 @@ export type {
 // Workspace Shell (Antigravity IDE / Scrivener 스타일 3단 레이아웃 셸)
 export { WorkspaceShell } from './workspace/WorkspaceShell';
 export type { WorkspaceShellProps } from './workspace/WorkspaceShell';
+
+// AI Assistant & Agent Inspector Panel (컨텍스트 하네스, 추론 관측, HITL Diff 승인, 그라운딩 역추적)
+export {
+  AgentWorkspacePanel,
+  PromptComposer,
+  ContextTagBar,
+  ModelConfigBadge,
+  AgentStepStream,
+  StepThinkingAccordion,
+  ToolCallCard,
+  ProviderExecutionBadge as AiProviderExecutionBadge,
+  DiffApprovalView,
+  InlineDiffViewer,
+  ChunkActionGroup,
+  SafetyApprovalGate,
+  GroundingCitationBar,
+  CitationBadge,
+  FaithfulnessScoreCard,
+  MissingEvidenceAlert,
+  RunHistoryTimeline,
+  AttemptStepNavigator,
+} from './ai-panel';
+// Antigravity-Inspired AI Workspace Intelligence Suite
+export {
+  // Inline AI
+  InlinePromptModal,
+  InlineDiffOverlay,
+  GhostTextPredictor,
+  // Lenses & QuickFix
+  DocumentInlineLens,
+  DiagnosticQuickFix,
+  // Mentions
+  ContextMentionMenu,
+  useWorkspaceMention,
+  // Planning Mode
+  ExecutionPlanModal,
+  PlanApprovalGate,
+  // Bridge & Checkpointing
+  WorkspaceAiBridge,
+  usePreAiSnapshot,
+} from './ai';
+
+export type {
+  InlinePromptModalProps,
+  InlineDiffOverlayProps,
+  GhostTextPredictorProps,
+  DocumentLensAction,
+  DocumentInlineLensProps,
+  DiagnosticQuickFixProps,
+  MentionItem,
+  ContextMentionMenuProps,
+  UseWorkspaceMentionReturn,
+  PlanStepItem,
+  PlanDecision,
+  PlanApprovalGateProps,
+  ExecutionPlanModalProps,
+  AiViewerJumpPayload,
+  PreAiSnapshotOptions,
+  UsePreAiSnapshotReturn,
+} from './ai';

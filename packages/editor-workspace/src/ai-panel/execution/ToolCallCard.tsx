@@ -1,0 +1,85 @@
+import { memo, useState } from 'react';
+import { Wrench, ChevronDown, ChevronRight, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import type { ToolCallCardProps } from './types';
+
+/**
+ * ToolCallCard (도구 호출 카드)
+ *
+ * 에이전트가 호출한 외부 도구(도구명, 인자 Args, 반환 Result, 소요시간)를 인라인으로 시각화.
+ */
+export const ToolCallCard = memo(function ToolCallCard({
+  toolCall,
+  className = '',
+}: ToolCallCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const getStatusIcon = () => {
+    switch (toolCall.status) {
+      case 'calling':
+        return <Loader2 className="w-3 h-3 text-indigo-400 animate-spin" />;
+      case 'success':
+        return <CheckCircle2 className="w-3 h-3 text-emerald-400" />;
+      case 'error':
+        return <AlertCircle className="w-3 h-3 text-rose-400" />;
+    }
+  };
+
+  const formatPayload = (payload?: Record<string, unknown> | string) => {
+    if (!payload) return '';
+    if (typeof payload === 'string') return payload;
+    try {
+      return JSON.stringify(payload, null, 2);
+    } catch {
+      return String(payload);
+    }
+  };
+
+  return (
+    <div className={`flex flex-col rounded-lg bg-slate-950 border border-slate-800 text-xs overflow-hidden ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center justify-between p-2 hover:bg-slate-900/80 transition-colors text-left select-none cursor-pointer"
+      >
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Wrench className="w-3 h-3 text-amber-400 shrink-0" />
+          <span className="font-mono font-medium text-slate-200 truncate">{toolCall.toolName}</span>
+          {toolCall.durationMs !== undefined && (
+            <span className="text-[10px] text-slate-500 font-mono">({toolCall.durationMs}ms)</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {getStatusIcon()}
+          {isExpanded ? (
+            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+          ) : (
+            <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+          )}
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="p-2 pt-0 space-y-2 border-t border-slate-900 bg-slate-950/90 text-[11px] font-mono">
+          {toolCall.arguments && (
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500">Arguments:</span>
+              <pre className="mt-0.5 p-1.5 rounded bg-slate-900 text-slate-300 overflow-x-auto max-h-32 text-[10px] leading-relaxed no-scrollbar">
+                {formatPayload(toolCall.arguments)}
+              </pre>
+            </div>
+          )}
+
+          {toolCall.result && (
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500">Result:</span>
+              <pre className="mt-0.5 p-1.5 rounded bg-slate-900 text-emerald-300/90 overflow-x-auto max-h-36 text-[10px] leading-relaxed no-scrollbar">
+                {formatPayload(toolCall.result)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});

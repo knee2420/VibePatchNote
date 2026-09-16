@@ -1,56 +1,150 @@
 # @vibe/editor-workspace
 
-> **Host-Agnostic, Domain-Neutral Workspace Engine**  
-> VS Code 스타일의 무한 분할 도킹 에디터(`dockview-react`)와 Scrivener 스타일의 가상 스크롤 바인더 트리(`react-arborist`), 그리고 Antigravity IDE 감성의 3단 워크스페이스 레이아웃(`WorkspaceShell`), 아웃라이너 테이블, 코르크보드, 스냅샷, 컴파일러, 메타데이터 인스펙터를 하나로 묶은 독립 재사용 패키지입니다.
+> **Host-Agnostic, Domain-Neutral Workspace & AI Intelligence Engine**  
+> VS Code 스타일의 무한 분할 도킹 셸(`dockview-react`), Scrivener 스타일의 다차원 소켓 바인더 트리(`react-arborist`), 4대 문서 뷰 캔버스(`view-layout`), 그리고 Antigravity(AGY) 영감의 **인라인 AI 플로팅 프롬프트·진단 퀵픽스·@ 멘션·계획 승인 거버넌스(`ai/`)**를 하나의 독립 모듈로 제공하는 차세대 범용 에디터 워크스페이스 패키지입니다.
 
 ---
 
-## 특징 및 레이어별 구성
+## 🏛️ 2중 계층 아키텍처 (Two-Tier Architecture)
 
-1. **완벽한 호스트 비의존성 (Host-Agnostic)**:
-   - 특정 백엔드 API나 비즈니스 도메인 DTO에 결합되지 않으며, 순수 제네릭(`BinderItem<T>`, `OutlinerRow<T>`, `CorkboardCard<T>`)과 React 컴포넌트 맵으로만 동작합니다.
-   - 다른 웹 애플리케이션 및 모노레포 프로젝트에 즉시 설치하여 에디터 셸로 활용할 수 있습니다.
-2. **Top Menu Bar & Global Toolbar (`toolbar/`)**:
-   - `TopMenuBar`: 좌(뒤로가기/문서명), 중(뷰모드 스위처), 우(상태/도구) 3단 슬롯을 갖춘 전역 상단 바.
-   - `ViewModeSwitch`: 에디터 ⇄ 규격 Matrix ⇄ 코르크보드 ⇄ 아웃라이너 등 다양한 화면 모드를 전환하는 세련된 알약형 스위처.
-   - `SyncStatusBadge`: `'idle' | 'saving' | 'saved' | 'error'` 상태를 표현하는 실시간 동기화 인디케이터.
-3. **Workspace Panels (`panels/`)**:
-   - `WorkspacePanel`: 사이드바/인스펙터의 표준 프레임 (제목, 서브타이틀, 액션 버튼, 접기/펼침 내장).
-   - `PanelToolbar`: 패널 상단에 컴팩트하게 장착되는 가로 툴바.
-4. **Scrivener 스타일 Binder Tree & Toolbar (`binder/`)**:
-   - `BinderTree`: `react-arborist` 기반 초고속 가상 스크롤 트리 (수만 개의 노드도 부드럽게 렌더링).
-   - `BinderToolbar`: 검색 필터링창, `+ 새 문서`, `+ 새 폴더`, `모두 접기` 버튼이 내장된 바인더 전용 액션 바.
-   - `BinderNode`: 폴더/문서 아이콘, 인라인 이름 변경(더블 클릭/엔터), 선택 하이라이트.
-5. **VS Code 스타일 Split Editor & Tab Actions (`dock/`)**:
-   - `EditorDockShell`: `dockview-react` 기반 무한 상하/좌우 분할(Split), 탭 드래그 앤 드롭, 도킹 셸.
-   - `DockTabActions`: 에디터 탭 우측의 `[참조 뷰포트 고정(Pin)]`, `[우측 분할]`, `[최대화/복원]`, `[탭 닫기]` 버튼 툴바.
-   - Antigravity / Slate 다크 테마 기본 내장(`dockview-theme.css`).
-6. **2D 코르크보드 인덱스 카드 뷰 (`corkboard/`)**:
-   - `CorkboardView`, `CorkboardCardItem`: 하위 섹션 노드들을 2D 그리드 인덱스 카드로 조감하고 드래그 앤 드롭으로 순서를 재배치.
-7. **아웃라이너 테이블 뷰 (`outliner/`)**:
-   - `OutlinerTable`: 섹션 번호, 제목, 요약, 분량, 진행 상태를 스프레드시트 형태로 일괄 조회하고 인라인 편집.
-8. **문서 메타데이터 & 목표 진행도 인스펙터 (`metadata/`)**:
-   - `MetadataInspector`: 목표 글자 수 대비 달성률 프로그레스 바, 상태/라벨 드롭다운, 태그 칩 관리, 섹션 메모.
-9. **문서 조립 & 합성 컴파일러 (`compiler/`)**:
-   - `DocumentCompilerModal`: 바인더 섹션 선택 체크박스, 넘버링 스타일, 페이지 나눔 옵션을 지정하여 단일 산출물(Markdown/HTML/Text) 다운로드.
-10. **세그먼트 단위 스냅샷 (`snapshots/`)**:
-    - `SnapshotInspector`: 섹션 단위 타임스탬프 스냅샷 기록, 복원, diff 비교 슬롯.
-11. **상태 표시줄 위젯 (`statusbar/`)**:
-    - `BreadcrumbBar`: 계층형 브레드크럼 네비게이터.
-    - `WordCountBadge`: 실시간 글자수/단어수/목표 달성률 배지.
-12. **Antigravity IDE 3단 레이아웃 (`workspace/`)**:
-    - `WorkspaceShell`: 상단 헤더, 좌측 바인더, 중앙 에디터, 우측 인스펙터, 하단 상태바 5대 영역 및 드래그 리사이징 핸들 지원.
+본 패키지는 **순수 에디터 렌더러인 `[CORE]`**와 **에디터와 1:1 결합되어 작동하는 `[AI]`**의 관심사를 엄격히 분리하여, AI가 필요 없는 환경에서는 순수 코어만 경량으로 import하고 AI가 필요한 환경에서는 지능형 하네스를 즉시 플러그인할 수 있습니다.
+
+```text
+packages/editor-workspace/
+├── README.md               # 패키지 소개 및 빠른 시작
+├── index.md                # 전체 컴포넌트 & API 카탈로그 인덱스
+├── src/
+│   ├── [CORE UI]           # 순수 워크스페이스 코어 (호스트 비의존적 Headless)
+│   │   ├── workspace/      # 3단/4단 셸 레이아웃 (WorkspaceShell, WorkspacePanel)
+│   │   ├── dock/           # 무한 분할 탭 도킹 뷰포트 (EditorDockShell, DockTabActions)
+│   │   ├── view-layout/    # 4대 뷰(연속/A4낱장/양면/젠) & 줌/페이지 (PagedCanvasContainer, PaginationBar)
+│   │   ├── navigation/     # 키보드 핫키(Ctrl+1~9) 고속 탭 전환 (QuickTabSwitcher, useKeyboardTabSwitch)
+│   │   ├── binder/         # 루브릭 뼈대 ↔ 다차원 에셋 소켓 트리 (InteractiveSocketBinder, SpineSwitcher)
+│   │   ├── outliner/       # 메타데이터 스프레드시트 뷰 (OutlinerTable)
+│   │   ├── corkboard/      # 2D 인덱스 카드 조감 뷰 (CorkboardView, CorkboardCardItem)
+│   │   ├── scrivenings/    # 다중 청크 연속 결합 스크롤 뷰 (ScriveningsView)
+│   │   ├── metadata/       # 목표 분량 및 상태 인스펙터 (MetadataInspector)
+│   │   ├── snapshots/      # 버전 복원점 스냅샷 관리자 (SnapshotInspector)
+│   │   ├── compiler/       # 문서 일괄 조립 & 최종 포맷 컴파일러 (DocumentCompilerModal)
+│   │   └── statusbar/      # 브레드크럼 & 글자수 상태바 (BreadcrumbBar, WordCountBadge)
+│   │
+│   └── [AI HARNESS]        # 안티그래비티 영감 AI 인텔리전스 스위트
+│       └── ai/
+│           ├── panel/      # 사이드바 AI 패널 종합 위젯 (AgentWorkspacePanel)
+│           ├── inline/     # Ctrl+I 플로팅 인풋, 인라인 Diff 오버레이, 고스트 텍스트 (InlinePromptModal)
+│           ├── lenses/     # 단락 플로팅 스마트 액션 렌즈 & 규격 충돌 AI 자동 수복 (DiagnosticQuickFix)
+│           ├── mentions/   # 전역 컨텍스트 바인딩 @ 멘션 메뉴 & 훅 (ContextMentionMenu)
+│           ├── planning/   # 파괴적 작업 전 계획 검토 & Proceed 3단 승인 (ExecutionPlanModal, PlanApprovalGate)
+│           └── bridge/     # AI 인용 클릭 ➔ 원본 PDF 바운딩박스 자동 점프 & 사전 스냅샷 (WorkspaceAiBridge)
+```
 
 ---
 
-## 설치
+## 🚀 빠른 시작 (Quick Start)
+
+### 1. 설치
 
 ```bash
-# 모노레포 내부에서 설치
+# 모노레포 내부 설치
 pnpm add @vibe/editor-workspace --filter <your-app>
 
-# 일반 프로젝트에서 설치
+# 타 프로젝트 독립 설치
 npm install @vibe/editor-workspace
 # 또는
 pnpm add @vibe/editor-workspace
 ```
+
+### 2. 코어 워크스페이스 조립 예시
+
+```tsx
+import {
+  WorkspaceShell,
+  WorkspacePanel,
+  TopMenuBar,
+  PagedCanvasContainer,
+  PaginationBar,
+  InteractiveSocketBinder,
+} from '@vibe/editor-workspace';
+
+export function MyEditor() {
+  return (
+    <WorkspaceShell
+      header={<TopMenuBar title="프로젝트 사업계획서" />}
+      leftSidebar={
+        <WorkspacePanel title="루브릭 소켓 바인더">
+          <InteractiveSocketBinder
+            spines={[{ id: 'outline', label: 'Outline' }, { id: 'wireframe', label: 'Wireframe' }]}
+            activeSpine="outline"
+            onChangeSpine={(spine) => console.log(spine)}
+            treeData={[]}
+            stagingAssets={[]}
+          />
+        </WorkspacePanel>
+      }
+      center={
+        <PagedCanvasContainer layoutMode="paged" zoom={100}>
+          <div className="a4-document-paper">문서 본문 캔버스</div>
+        </PagedCanvasContainer>
+      }
+      footer={<PaginationBar totalPages={10} currentPage={1} />}
+    />
+  );
+}
+```
+
+### 3. 안티그래비티 AI 하네스 결합 예시
+
+```tsx
+import {
+  AgentWorkspacePanel,
+  InlinePromptModal,
+  DocumentInlineLens,
+  DiagnosticQuickFix,
+} from '@vibe/editor-workspace';
+
+export function MyAiEnabledEditor() {
+  const [isInlineOpen, setIsInlineOpen] = useState(false);
+
+  return (
+    <>
+      {/* 1. 단락 상단 스마트 렌즈 */}
+      <DocumentInlineLens
+        slotNumber={1}
+        onTriggerAction={(actionId) => console.log(actionId)}
+      />
+
+      {/* 2. 규격 충돌 시 원클릭 AI 수복 버튼 */}
+      <DiagnosticQuickFix
+        issueType="conflict"
+        issueMessage="원본 서식 규격과 세그먼트 데이터 충돌"
+        onApplyFix={() => console.log('Auto fix applied')}
+      />
+
+      {/* 3. Ctrl + I 플로팅 지시창 */}
+      <InlinePromptModal
+        isOpen={isInlineOpen}
+        selectedText="분석할 본문 단락..."
+        onSubmit={(prompt) => console.log(prompt)}
+        onClose={() => setIsInlineOpen(false)}
+      />
+
+      {/* 4. 우측 도킹 사이드바 AI 허브 */}
+      <AgentWorkspacePanel
+        activeTab="stream"
+        onChangeTab={(tab) => console.log(tab)}
+        composerProps={{
+          value: '',
+          onChange: () => {},
+          onSubmit: (prompt) => console.log(prompt),
+        }}
+      />
+    </>
+  );
+}
+```
+
+---
+
+## 📖 전체 컴포넌트 및 상세 명세
+
+모든 컴포넌트의 Props 인터페이스, 제네릭 타입 규격, 이벤트 훅 명세는 **[`index.md`](./index.md)** 문서를 참조하십시오.
