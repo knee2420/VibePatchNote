@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import {
   FileText,
@@ -42,6 +43,7 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   selected = false,
 }: NodeProps<ScaffoldDocumentNode>) {
   const { setNodes, setEdges } = useReactFlow();
+  const navigate = useNavigate();
   const openFocus = useScaffoldFocusStore((s) => s.openFocus);
 
   const [showTaskBanner, setShowTaskBanner] = useState(true);
@@ -259,9 +261,18 @@ export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
   const handleOpenFocus = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      openFocus(id);
+      const targetScaffoldId =
+        data.scaffoldId ||
+        data.archive?.scaffoldId ||
+        ((data as Record<string, unknown>).archiveId as string | undefined);
+
+      if (targetScaffoldId) {
+        navigate(`/editor/${encodeURIComponent(targetScaffoldId)}`);
+      } else {
+        openFocus(id);
+      }
     },
-    [id, openFocus]
+    [data, id, navigate, openFocus]
   );
 
   // 카드 본문에서 Tiptap 내용이 편집될 때 노드 데이터 실시간 동기화

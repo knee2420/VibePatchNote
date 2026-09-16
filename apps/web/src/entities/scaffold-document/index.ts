@@ -12,6 +12,7 @@ export {
   useScaffoldArchive,
   type ScaffoldArchiveSyncState,
 } from './model/useScaffoldArchive';
+export { useScaffoldDocumentDetail } from './model/useScaffoldDocumentDetail';
 export {
   scaffoldArchiveApi,
   type ScaffoldArchiveDetail,

@@ -92,10 +92,16 @@ export const PdfViewer = memo(function PdfViewer({
     [onPageCountChange]
   );
 
-  const handleDocumentLoadError = useCallback((error: Error) => {
-    console.error('Failed to load PDF:', error);
-    setLoadError(labels.pdfLoadError);
-  }, []);
+  const handleDocumentLoadError = useCallback(
+    (error: Error) => {
+      if (error?.message?.includes('Worker was terminated')) {
+        return;
+      }
+      console.error('Failed to load PDF:', error);
+      setLoadError(labels.pdfLoadError);
+    },
+    [labels.pdfLoadError]
+  );
 
   const handlePageLoadSuccess = useCallback(
     (page: PdfPageInfo, pageNumber: number) => {
@@ -126,10 +132,11 @@ export const PdfViewer = memo(function PdfViewer({
     <ViewerConfigProvider labels={labelOverrides} segmentTypes={segmentTypes}>
       <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-100/70 rounded-b-md">
         <Document
-        file={url}
-        onLoadSuccess={handleDocumentLoadSuccess}
-        onLoadError={handleDocumentLoadError}
-        loading={
+          file={url}
+          onLoadSuccess={handleDocumentLoadSuccess}
+          onLoadError={handleDocumentLoadError}
+          onSourceError={handleDocumentLoadError}
+          loading={
           <div className="flex-1 flex items-center justify-center min-h-[400px] text-slate-400 gap-2">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-xs font-medium">{labels.pdfLoading}</span>

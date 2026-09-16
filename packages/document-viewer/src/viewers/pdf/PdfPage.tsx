@@ -71,14 +71,11 @@ export const PdfPage = memo(function PdfPage({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [renderWidth, setRenderWidth] = useState(width);
-  // 1페이지는 종횡비 계산 및 초기 로드를 위해 즉시 노출
-  const [isVisible, setIsVisible] = useState(pageNumber === 1);
+  // 1페이지는 즉시 렌더링, 그 외 페이지는 최초 시야 진입 시 렌더링 시작 후 영구 유지 (화면 이동 시 언마운트-리마운트 루프 방지)
+  const [hasRendered, setHasRendered] = useState(pageNumber === 1);
 
   useEffect(() => {
-    if (pageNumber === 1) {
-      setIsVisible(true);
-      return;
-    }
+    if (pageNumber === 1 || hasRendered) return;
 
     const element = containerRef.current;
     if (!element) return;
@@ -87,12 +84,14 @@ export const PdfPage = memo(function PdfPage({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setHasRendered(true);
+        }
       },
       {
         root,
-        // 상하좌우 350px 여유를 두어 스크롤 시 부드럽게 사전 렌더링
-        rootMargin: '350px',
+        // 상하좌우 400px 여유를 두어 스크롤/팬 시 부드럽게 사전 렌더링
+        rootMargin: '400px',
         threshold: 0,
       }
     );
@@ -101,7 +100,7 @@ export const PdfPage = memo(function PdfPage({
     return () => {
       observer.disconnect();
     };
-  }, [scrollContainerRef, pageNumber, isSpread]);
+  }, [scrollContainerRef, pageNumber, hasRendered, isSpread]);
 
   useEffect(() => {
     const parent = scrollContainerRef?.current ?? containerRef.current?.parentElement;
@@ -109,7 +108,10 @@ export const PdfPage = memo(function PdfPage({
       setRenderWidth(width);
       return;
     }
-    const update = () => setRenderWidth(Math.max(280, Math.min(width, parent.clientWidth - 32)));
+    const update = () => {
+      const nextWidth = Math.round(Math.max(280, Math.min(width, parent.clientWidth - 32)));
+      setRenderWidth((prev) => (Math.abs(prev - nextWidth) >= 4 ? nextWidth : prev));
+    };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(parent);
@@ -126,7 +128,7 @@ export const PdfPage = memo(function PdfPage({
         className="relative bg-white rounded-md shadow-md border border-slate-200 overflow-visible transition-shadow group-hover/page:shadow-lg"
         style={{ width: renderWidth, minHeight: placeholderHeight }}
       >
-        {isVisible ? (
+        {hasRendered ? (
           <>
             <Page
               pageNumber={pageNumber}
@@ -134,6 +136,14 @@ export const PdfPage = memo(function PdfPage({
               renderTextLayer={!isEditMode}
               renderAnnotationLayer={false}
               onLoadSuccess={(page) => onLoadSuccess(page, pageNumber)}
+              onLoadError={(err) => {
+                if (err?.message?.includes('Worker was terminated')) return;
+                console.error(`Page ${pageNumber} load error:`, err);
+              }}
+              onRenderError={(err) => {
+                if (err?.message?.includes('Worker was terminated')) return;
+                console.error(`Page ${pageNumber} render error:`, err);
+              }}
               loading={
                 <div
                   className="bg-white flex items-center justify-center text-slate-300"
