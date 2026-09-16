@@ -1,33 +1,37 @@
 /**
  * @vibe/editor-workspace
- * Dockview Antigravity / Slate Dark Theme
+ * Dockview Origin UI Light Theme
  */
 
-.dockview-theme-dark {
-  --dv-drag-over-background-color: rgba(168, 85, 247, 0.15);
-  --dv-drag-over-border-color: rgba(168, 85, 247, 0.6);
+.dockview-theme-dark,
+.dockview-theme-light {
+  --dv-drag-over-background-color: rgba(99, 102, 241, 0.12);
+  --dv-drag-over-border-color: rgba(99, 102, 241, 0.6);
   --dv-tabs-and-actions-container-height: 36px;
-  --dv-tabs-and-actions-container-background-color: #0b0f19;
-  --dv-activegroup-visiblepanel-tab-background-color: #020617;
-  --dv-activegroup-visiblepanel-tab-color: #f8fafc;
-  --dv-inactivegroup-visiblepanel-tab-background-color: #090d16;
-  --dv-inactivegroup-visiblepanel-tab-color: #94a3b8;
-  --dv-activegroup-hiddenpanel-tab-background-color: #0b0f19;
+  --dv-tabs-and-actions-container-background-color: #f8fafc;
+  --dv-activegroup-visiblepanel-tab-background-color: #ffffff;
+  --dv-activegroup-visiblepanel-tab-color: #0f172a;
+  --dv-inactivegroup-visiblepanel-tab-background-color: #f1f5f9;
+  --dv-inactivegroup-visiblepanel-tab-color: #64748b;
+  --dv-activegroup-hiddenpanel-tab-background-color: #f8fafc;
   --dv-activegroup-hiddenpanel-tab-color: #64748b;
-  --dv-inactivegroup-hiddenpanel-tab-background-color: #0b0f19;
+  --dv-inactivegroup-hiddenpanel-tab-background-color: #f8fafc;
   --dv-inactivegroup-hiddenpanel-tab-color: #64748b;
-  --dv-tab-divider-color: #1e293b;
-  --dv-separator-border: 1px solid #1e293b;
-  --dv-sash-color: #1e293b;
-  --dv-active-sash-color: #a855f7;
-  --dv-tabs-container-scrollbar-color: #334155;
-  --dv-icon-hover-background-color: rgba(255, 255, 255, 0.08);
+  --dv-tab-divider-color: #e2e8f0;
+  --dv-separator-border: 1px solid #e2e8f0;
+  --dv-sash-color: #e2e8f0;
+  --dv-active-sash-color: #6366f1;
+  --dv-tabs-container-scrollbar-color: #cbd5e1;
+  --dv-icon-hover-background-color: rgba(0, 0, 0, 0.05);
 }
 
-.dockview-theme-dark .dv-tab.dv-active-tab {
-  border-top: 2px solid #a855f7;
+.dockview-theme-dark .dv-tab.dv-active-tab,
+.dockview-theme-light .dv-tab.dv-active-tab {
+  border-top: 2px solid #6366f1;
+  font-weight: 600;
 }
 
-.dockview-theme-dark .dv-tab:hover {
-  color: #f1f5f9;
+.dockview-theme-dark .dv-tab:hover,
+.dockview-theme-light .dv-tab:hover {
+  color: #0f172a;
 }

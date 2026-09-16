@@ -22,9 +22,9 @@ export function CorkboardView<T = Record<string, unknown>>({
 
   if (!cards || cards.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-3 p-8">
-        <LayoutGrid className="w-8 h-8 stroke-[1.5] opacity-50 text-slate-600" />
-        <p className="text-xs font-medium">{emptyText}</p>
+      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2 p-8 bg-slate-100/70">
+        <LayoutGrid className="w-8 h-8 stroke-[1.5] opacity-40 text-slate-400" />
+        <p className="text-xs font-medium text-slate-500">{emptyText}</p>
       </div>
     );
   }
@@ -53,7 +53,7 @@ export function CorkboardView<T = Record<string, unknown>>({
     : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
 
   return (
-    <div className={`w-full h-full overflow-y-auto p-6 bg-slate-950/80 ${className}`}>
+    <div className={`w-full h-full overflow-y-auto p-6 bg-slate-100/70 ${className}`}>
       <div className={`grid gap-4 ${gridColsClass}`}>
         {cards.map((card, index) => (
           <CorkboardCardItem<T>

@@ -35,17 +35,17 @@ export const ProvenanceChipList = memo(function ProvenanceChipList({
               onSelect?.(item);
             }}
             title={`출처 점프: ${item.sourceDocTitle || ''} (Page ${item.page || 1})`}
-            className="group flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800/90 hover:bg-indigo-950/80 border border-slate-700/70 hover:border-indigo-500/50 text-[10px] font-mono text-slate-300 hover:text-indigo-200 transition-colors cursor-pointer"
+            className="group flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 border border-slate-200/80 hover:border-indigo-200 text-[10px] font-mono text-slate-600 hover:text-indigo-700 transition-colors cursor-pointer"
           >
             <span className="truncate max-w-[80px]">{chipText}</span>
-            <ExternalLink className="w-2.5 h-2.5 opacity-40 group-hover:opacity-100 shrink-0 text-indigo-400" />
+            <ExternalLink className="w-2.5 h-2.5 opacity-50 group-hover:opacity-100 shrink-0 text-indigo-600" />
           </button>
         );
       })}
 
       {remainder > 0 && (
         <span
-          className="text-[9px] px-1 py-0.5 rounded bg-slate-800/60 border border-slate-700/50 text-slate-400 font-mono"
+          className="text-[9px] px-1 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-mono"
           title={`추가 출처 ${remainder}개`}
         >
           +{remainder}

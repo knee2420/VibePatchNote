@@ -17,13 +17,13 @@ export const PlanApprovalGate = memo(function PlanApprovalGate({
 }: PlanApprovalGateProps) {
   return (
     <div
-      className={`flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 border border-indigo-500/70 shadow-xl text-xs ${className}`}
+      className={`flex items-center justify-between gap-3 p-3 rounded-xl bg-white border border-slate-200 shadow-xs text-xs text-slate-800 ${className}`}
     >
       <div className="flex items-center gap-2 min-w-0">
-        <FileSpreadsheet className="w-4 h-4 text-indigo-400 shrink-0" />
+        <FileSpreadsheet className="w-4 h-4 text-indigo-600 shrink-0" />
         <div className="min-w-0">
-          <div className="font-bold text-slate-200 truncate">{planTitle}</div>
-          <div className="text-[11px] text-slate-400">총 {totalSteps}개 세부 실행 단계 수립됨 (승인 대기)</div>
+          <div className="font-bold text-slate-900 truncate">{planTitle}</div>
+          <div className="text-[11px] text-slate-500">총 {totalSteps}개 세부 실행 단계 수립됨 (승인 대기)</div>
         </div>
       </div>
 
@@ -31,7 +31,7 @@ export const PlanApprovalGate = memo(function PlanApprovalGate({
         <button
           type="button"
           onClick={onReject}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-200 transition-colors cursor-pointer"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
         >
           <XCircle className="w-3.5 h-3.5" />
           <span>거절</span>
@@ -41,9 +41,9 @@ export const PlanApprovalGate = memo(function PlanApprovalGate({
           <button
             type="button"
             onClick={onRequestChanges}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors cursor-pointer shadow-2xs"
           >
-            <MessageSquare className="w-3.5 h-3.5" />
+            <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
             <span>수정 요청</span>
           </button>
         )}
@@ -51,7 +51,7 @@ export const PlanApprovalGate = memo(function PlanApprovalGate({
         <button
           type="button"
           onClick={onProceed}
-          className="flex items-center gap-1 px-3.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-sm"
+          className="flex items-center gap-1 px-3.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer shadow-xs"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
           <span>Proceed (실행)</span>

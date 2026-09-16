@@ -61,11 +61,11 @@ export const PromptComposer = memo(function PromptComposer({
   return (
     <form
       onSubmit={handleFormSubmit}
-      className={`flex flex-col gap-2 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 shadow-md ${className}`}
+      className={`flex flex-col gap-2 p-2.5 rounded-xl bg-white border border-slate-200 shadow-xs ${className}`}
     >
       {/* 1. 컨텍스트 태그 바 */}
       {contextTags.length > 0 && (
-        <div className="pb-1 border-b border-slate-800/80">
+        <div className="pb-1 border-b border-slate-100">
           <ContextTagBar
             tags={contextTags}
             onRemoveTag={onRemoveContextTag}
@@ -84,12 +84,12 @@ export const PromptComposer = memo(function PromptComposer({
           placeholder={placeholder}
           rows={2}
           disabled={isLoading}
-          className="w-full resize-none text-xs text-slate-100 placeholder-slate-500 bg-transparent focus:outline-none leading-relaxed font-sans"
+          className="w-full resize-none text-xs text-slate-800 placeholder-slate-400 bg-transparent focus:outline-none leading-relaxed font-sans"
         />
       </div>
 
       {/* 3. 하단 툴바 (레시피 프리셋 + 모델 선택기 + 전송 버튼) */}
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-100">
         <div className="flex items-center gap-1.5 min-w-0">
           {/* 레시피 프리셋 선택 */}
           {recipes.length > 0 && (
@@ -103,7 +103,7 @@ export const PromptComposer = memo(function PromptComposer({
                   }
                 }}
                 defaultValue=""
-                className="text-[11px] px-2 py-1 rounded bg-slate-950 border border-slate-800 text-slate-300 focus:outline-none cursor-pointer"
+                className="text-[11px] px-2 py-1 rounded bg-slate-50 border border-slate-200 text-slate-700 focus:outline-none cursor-pointer shadow-2xs"
               >
                 <option value="" disabled>
                   ⚡ 레시피 템플릿...
@@ -122,9 +122,9 @@ export const PromptComposer = memo(function PromptComposer({
             <button
               type="button"
               onClick={onAddContextTag}
-              className="text-[10px] text-slate-400 hover:text-slate-200 px-1.5 py-0.5 rounded border border-dashed border-slate-800 hover:border-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+              className="text-[10px] text-slate-500 hover:text-slate-800 px-1.5 py-0.5 rounded border border-dashed border-slate-200 hover:border-slate-300 transition-colors flex items-center gap-1 cursor-pointer bg-slate-50/50"
             >
-              <Sparkles className="w-2.5 h-2.5 text-indigo-400" />
+              <Sparkles className="w-2.5 h-2.5 text-indigo-600" />
               <span>컨텍스트 연결</span>
             </button>
           )}

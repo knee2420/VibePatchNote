@@ -17,10 +17,10 @@ export const SocketStateBadge = memo(function SocketStateBadge({
     case 'filled':
       return (
         <span
-          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-950/80 border border-emerald-600/70 text-emerald-300 ${className}`}
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium ${className}`}
           title={`매핑 완료: 근거 ${count ?? 1}건`}
         >
-          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
           <span>{count !== undefined ? `${count}` : 'Filled'}</span>
         </span>
       );
@@ -28,10 +28,10 @@ export const SocketStateBadge = memo(function SocketStateBadge({
     case 'conflict':
       return (
         <span
-          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-rose-950/90 border border-rose-600/80 text-rose-300 animate-pulse ${className}`}
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-rose-50 border border-rose-200 text-rose-700 font-medium animate-pulse ${className}`}
           title={reason || '규격 불일치 또는 출처 데이터 충돌'}
         >
-          <AlertTriangle className="w-2.5 h-2.5 text-rose-400" />
+          <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
           <span>Conflict</span>
         </span>
       );
@@ -39,10 +39,10 @@ export const SocketStateBadge = memo(function SocketStateBadge({
     case 'partial':
       return (
         <span
-          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-950/80 border border-amber-600/70 text-amber-300 ${className}`}
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-50 border border-amber-200 text-amber-700 font-medium ${className}`}
           title={`부분 매핑: ${count ?? 0}건`}
         >
-          <Clock className="w-2.5 h-2.5 text-amber-400" />
+          <Clock className="w-2.5 h-2.5 text-amber-600" />
           <span>{count !== undefined ? `${count}건` : 'Partial'}</span>
         </span>
       );
@@ -51,10 +51,10 @@ export const SocketStateBadge = memo(function SocketStateBadge({
     default:
       return (
         <span
-          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-900 border border-dashed border-slate-700 text-slate-400 ${className}`}
+          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-slate-100 border border-dashed border-slate-300 text-slate-500 font-medium ${className}`}
           title="미할당 빈 뼈대 (에셋 드롭 가능)"
         >
-          <CircleDashed className="w-2.5 h-2.5 text-slate-500" />
+          <CircleDashed className="w-2.5 h-2.5 text-slate-400" />
           <span>Empty</span>
         </span>
       );

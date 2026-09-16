@@ -19,7 +19,7 @@ export function BinderToolbar({
 
   return (
     <div
-      className={`px-3 py-1.5 flex flex-col gap-1.5 border-b border-slate-800/80 bg-slate-900/40 select-none ${className}`}
+      className={`px-3 py-1.5 flex flex-col gap-1.5 border-b border-slate-200 bg-white select-none ${className}`}
     >
       {/* 1. 상단 액션 버튼 행 */}
       <div className="flex items-center justify-between gap-1">
@@ -28,10 +28,10 @@ export function BinderToolbar({
             <button
               type="button"
               onClick={onAddDocument}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               title="새 문서 추가"
             >
-              <FilePlus className="w-3.5 h-3.5 text-purple-400" />
+              <FilePlus className="w-3.5 h-3.5 text-indigo-600" />
             </button>
           )}
 
@@ -39,10 +39,10 @@ export function BinderToolbar({
             <button
               type="button"
               onClick={onAddFolder}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               title="새 폴더 추가"
             >
-              <FolderPlus className="w-3.5 h-3.5 text-amber-400" />
+              <FolderPlus className="w-3.5 h-3.5 text-amber-500" />
             </button>
           )}
 
@@ -50,7 +50,7 @@ export function BinderToolbar({
             <button
               type="button"
               onClick={onCollapseAll}
-              className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               title="모두 접기"
             >
               <ChevronsDownUp className="w-3.5 h-3.5" />
@@ -70,10 +70,10 @@ export function BinderToolbar({
                   onSearchChange('');
                 }
               }}
-              className={`p-1 rounded transition-colors cursor-pointer ${
+              className={`p-1 rounded-lg transition-colors cursor-pointer ${
                 isSearching
-                  ? 'bg-purple-600/30 text-purple-300'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/60'
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
               }`}
               title="검색창 열기/닫기"
             >
@@ -86,20 +86,20 @@ export function BinderToolbar({
       {/* 2. 검색 인풋창 (토글 시 표시) */}
       {showSearch && isSearching && onSearchChange && (
         <div className="relative flex items-center">
-          <Search className="w-3 h-3 text-slate-500 absolute left-2 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="바인더 노드 검색..."
             autoFocus
-            className="w-full bg-slate-950 border border-slate-700/80 rounded-md pl-6 pr-6 py-1 text-xs text-white placeholder-slate-500 focus:border-purple-500 outline-none"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-6 pr-6 py-1 text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:bg-white outline-none transition-colors"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={() => onSearchChange('')}
-              className="absolute right-1.5 text-slate-500 hover:text-slate-300 p-0.5 cursor-pointer"
+              className="absolute right-1.5 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
             >
               <X className="w-3 h-3" />
             </button>

@@ -20,19 +20,19 @@ export const SafetyApprovalGate = memo(function SafetyApprovalGate({
   const getRiskTheme = () => {
     switch (riskLevel) {
       case 'high':
-        return 'bg-rose-950/80 border-rose-600 text-rose-200';
+        return 'bg-rose-50/80 border-rose-200 text-rose-900';
       case 'medium':
-        return 'bg-amber-950/80 border-amber-600 text-amber-200';
+        return 'bg-amber-50/80 border-amber-200 text-amber-900';
       case 'low':
       default:
-        return 'bg-indigo-950/80 border-indigo-600 text-indigo-200';
+        return 'bg-indigo-50/80 border-indigo-200 text-indigo-900';
     }
   };
 
   return (
-    <div className={`flex flex-col gap-2 p-3 rounded-xl border shadow-lg ${getRiskTheme()} ${className}`}>
+    <div className={`flex flex-col gap-2 p-3 rounded-xl border shadow-xs ${getRiskTheme()} ${className}`}>
       <div className="flex items-start gap-2">
-        <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5" />
+        <ShieldAlert className="w-5 h-5 shrink-0 mt-0.5 text-rose-600" />
         <div className="flex-1 min-w-0">
           <h5 className="font-bold text-xs">{title}</h5>
           <p className="text-[11px] opacity-90 mt-0.5 leading-relaxed">{description}</p>
@@ -43,7 +43,7 @@ export const SafetyApprovalGate = memo(function SafetyApprovalGate({
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-900/80 hover:bg-slate-800 text-slate-300 transition-colors cursor-pointer"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
         >
           <XCircle className="w-3.5 h-3.5" />
           <span>{cancelLabel}</span>

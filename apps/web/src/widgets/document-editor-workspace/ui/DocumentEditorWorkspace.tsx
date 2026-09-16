@@ -325,22 +325,22 @@ export function DocumentEditorWorkspace({
 
   if (isLoadingDetail) {
     return (
-      <div className="w-full h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-        <p className="text-sm font-medium">서식 보관함에서 문서를 불러오는 중입니다...</p>
+      <div className="w-full h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-600 gap-4">
+        <div className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+        <p className="text-sm font-medium text-slate-700">서식 보관함에서 문서를 불러오는 중입니다...</p>
       </div>
     );
   }
 
   if (detailError || !detail) {
     return (
-      <div className="w-full h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300 gap-4 p-6">
-        <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+      <div className="w-full h-screen bg-slate-50 flex flex-col items-center justify-center text-slate-700 gap-4 p-6">
+        <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shadow-2xs">
           <AlertCircle className="w-6 h-6" />
         </div>
         <div className="text-center max-w-md">
-          <h3 className="text-base font-bold text-white mb-1">문서를 불러올 수 없습니다</h3>
-          <p className="text-xs text-slate-400">
+          <h3 className="text-base font-bold text-slate-900 mb-1">문서를 불러올 수 없습니다</h3>
+          <p className="text-xs text-slate-500">
             {detailError?.message || `스캐폴드 ID [${scaffoldId}]에 해당하는 보관본을 찾지 못했습니다.`}
           </p>
         </div>
@@ -348,7 +348,7 @@ export function DocumentEditorWorkspace({
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold cursor-pointer transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold cursor-pointer shadow-xs transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>캔버스 보드로 돌아가기</span>
@@ -372,21 +372,21 @@ export function DocumentEditorWorkspace({
                   <button
                     type="button"
                     onClick={onBack}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-purple-600/30 hover:text-purple-300 text-slate-300 border border-slate-700 transition-all cursor-pointer text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 shadow-2xs transition cursor-pointer text-xs font-semibold"
                     title="캔버스 보드로 돌아가기"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>캔버스</span>
                   </button>
                 )}
-                <div className="h-4 w-px bg-slate-800" />
+                <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white shadow-xs">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 shadow-2xs">
                     <FileText className="w-3.5 h-3.5" />
                   </div>
-                  <h2 className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <h2 className="text-sm font-bold text-slate-800 leading-tight flex items-center gap-1.5">
                     <span>{detail.title || '문서 상세 편집'}</span>
-                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono border border-purple-500/30">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono border border-indigo-200/80 font-medium">
                       SSOT
                     </span>
                   </h2>
@@ -406,10 +406,10 @@ export function DocumentEditorWorkspace({
                 <button
                   type="button"
                   onClick={() => setIsCompilerOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800 hover:bg-purple-600/30 hover:text-purple-300 text-slate-300 border border-slate-700 transition-all cursor-pointer text-xs font-semibold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition cursor-pointer text-xs font-semibold"
                   title="바인더 섹션 합성 및 출력"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-purple-400" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-indigo-600" />
                   <span>문서 합성</span>
                 </button>
                 <SyncStatusBadge status={syncStatus} />
@@ -423,7 +423,7 @@ export function DocumentEditorWorkspace({
             title="문서 바인더"
             subtitle="서식 섹션 트리"
             actions={
-              <span className="text-[10px] font-mono text-purple-400 font-semibold px-1.5 py-0.5 rounded bg-purple-950/60 border border-purple-800/40">
+              <span className="text-[10px] font-mono text-indigo-700 font-semibold px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200/80">
                 {detail.slots?.length || 0} Slots
               </span>
             }
@@ -444,13 +444,13 @@ export function DocumentEditorWorkspace({
               />
 
               {/* 서식 골격 요약 카드 */}
-              <div className="mt-2 p-3 rounded-xl bg-slate-900/90 border border-slate-800/80 flex flex-col gap-1.5 text-xs">
-                <div className="flex items-center gap-1.5 text-purple-400 font-bold text-[11px]">
+              <div className="mt-2 p-3 rounded-xl bg-indigo-50/60 border border-indigo-100 flex flex-col gap-1.5 text-xs">
+                <div className="flex items-center gap-1.5 text-indigo-700 font-bold text-[11px]">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>인라인 스캐폴드 슬롯</span>
                 </div>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  보라색 점선 테두리 칸을 클릭하여 실제 서식 본문을 채워 넣으세요.
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  슬롯 테두리 칸을 클릭하여 실제 서식 본문을 채워 넣으세요.
                 </p>
               </div>
             </div>
@@ -461,14 +461,14 @@ export function DocumentEditorWorkspace({
           <WorkspacePanel
             title="속성 & 관측 인스펙터"
             toolbar={
-              <div className="flex items-center gap-1 p-1 bg-slate-900/80 border-b border-slate-800/60 w-full text-xs">
+              <div className="flex items-center gap-1 p-1 bg-slate-100 border-b border-slate-200 w-full text-xs">
                 <button
                   type="button"
                   onClick={() => setInspectorTab('mcp')}
-                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] ${
+                  className={`flex-1 py-1 px-1.5 rounded-lg font-medium transition-all cursor-pointer text-center text-[10px] ${
                     inspectorTab === 'mcp'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                   }`}
                 >
                   MCP 마크다운
@@ -476,34 +476,34 @@ export function DocumentEditorWorkspace({
                 <button
                   type="button"
                   onClick={() => setInspectorTab('meta')}
-                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
+                  className={`flex-1 py-1 px-1.5 rounded-lg font-medium transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
                     inspectorTab === 'meta'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                   }`}
                 >
-                  <Target className="w-3 h-3" />
+                  <Target className="w-3 h-3 text-indigo-600" />
                   <span>메타데이터</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setInspectorTab('snapshots')}
-                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
+                  className={`flex-1 py-1 px-1.5 rounded-lg font-medium transition-all cursor-pointer text-center text-[10px] flex items-center justify-center gap-1 ${
                     inspectorTab === 'snapshots'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                   }`}
                 >
-                  <History className="w-3 h-3" />
+                  <History className="w-3 h-3 text-indigo-600" />
                   <span>스냅샷 ({snapshots.length})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setInspectorTab('matrix')}
-                  className={`flex-1 py-1 px-1.5 rounded-md font-semibold transition-all cursor-pointer text-center text-[10px] ${
+                  className={`flex-1 py-1 px-1.5 rounded-lg font-medium transition-all cursor-pointer text-center text-[10px] ${
                     inspectorTab === 'matrix'
-                      ? 'bg-purple-600 text-white'
-                      : 'text-slate-400 hover:text-slate-200'
+                      ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                   }`}
                 >
                   저작 규격
@@ -564,7 +564,7 @@ export function DocumentEditorWorkspace({
         }
         /* 4. 하단 고도화 상태바 (Breadcrumb + PaginationBar + WordCount) */
         statusBar={
-          <div className="h-7 px-4 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="h-7 px-4 flex items-center justify-between text-[11px] text-slate-500 bg-white">
             {/* 좌측 브레드크럼 네비게이터 */}
             <BreadcrumbBar
               items={breadcrumbItems}
@@ -591,8 +591,8 @@ export function DocumentEditorWorkspace({
                 wordCount={wordCount}
                 targetCount={docMetadata.targetWordCount}
               />
-              <div className="flex items-center gap-1.5 border-l border-slate-800 pl-3">
-                <Layers className="w-3 h-3 text-purple-400" />
+              <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3 text-slate-600">
+                <Layers className="w-3 h-3 text-indigo-600" />
                 <span className="capitalize">{viewMode}</span>
               </div>
             </div>
@@ -617,7 +617,7 @@ export function DocumentEditorWorkspace({
         )}
 
         {viewMode === 'matrix' && (
-          <div className="flex-1 h-full bg-slate-900 p-8 overflow-y-auto">
+          <div className="flex-1 h-full bg-slate-100/70 p-8 overflow-y-auto">
             <RecipeMatrixView
               recipe={recipe}
               scaffoldData={matrixScaffoldData}

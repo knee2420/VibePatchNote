@@ -40,8 +40,8 @@ export function BinderNode<T>({
       onClick={() => node.select()}
       className={`group flex items-center gap-1.5 px-2 py-1 rounded-md text-xs cursor-pointer select-none transition-colors ${
         node.isSelected
-          ? 'bg-purple-600/30 text-purple-200 font-semibold'
-          : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+          ? 'bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200/80 shadow-2xs'
+          : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
       } ${node.state.isDragging ? 'opacity-50' : ''}`}
     >
       {/* 1. 폴더 화살표 토글 버튼 */}
@@ -52,7 +52,7 @@ export function BinderNode<T>({
             e.stopPropagation();
             node.toggle();
           }}
-          className="p-0.5 rounded hover:bg-slate-700/50 text-slate-400 hover:text-slate-200 transition-colors shrink-0"
+          className="p-0.5 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-600 transition-colors shrink-0"
         >
           {node.isOpen ? (
             <ChevronDown className="w-3.5 h-3.5" />
@@ -65,15 +65,15 @@ export function BinderNode<T>({
       )}
 
       {/* 2. 아이콘 (폴더 vs 문서) */}
-      <span className="shrink-0 text-slate-400 group-hover:text-slate-200">
+      <span className="shrink-0 text-slate-400 group-hover:text-slate-600">
         {isFolder ? (
           node.isOpen ? (
-            <FolderOpen className="w-3.5 h-3.5 text-amber-400" />
+            <FolderOpen className="w-3.5 h-3.5 text-amber-500" />
           ) : (
-            <Folder className="w-3.5 h-3.5 text-amber-400" />
+            <Folder className="w-3.5 h-3.5 text-amber-500" />
           )
         ) : (
-          <FileText className="w-3.5 h-3.5 text-purple-400" />
+          <FileText className="w-3.5 h-3.5 text-indigo-500" />
         )}
       </span>
 
@@ -88,7 +88,7 @@ export function BinderNode<T>({
             onBlur={() => node.submit(editValue)}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-            className="w-full bg-slate-900 border border-purple-500 rounded px-1.5 py-0.5 text-xs text-white outline-none"
+            className="w-full bg-white border border-indigo-500 rounded px-1.5 py-0.5 text-xs text-slate-800 outline-none"
           />
         ) : (
           <span className="truncate" onDoubleClick={() => node.edit()}>

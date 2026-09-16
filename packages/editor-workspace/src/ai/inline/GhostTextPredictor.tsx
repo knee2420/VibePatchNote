@@ -29,14 +29,14 @@ export const GhostTextPredictor = memo(function GhostTextPredictor({
   if (!ghostText) return null;
 
   return (
-    <span className={`inline font-sans text-slate-500 opacity-60 select-none ${className}`}>
+    <span className={`inline font-sans text-slate-400 select-none ${className}`}>
       {/* 유령 텍스트 */}
-      <span>{ghostText}</span>
+      <span className="italic">{ghostText}</span>
 
       {/* Tab 키 힌트 뱃지 */}
-      <span className="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700 select-none align-middle not-italic">
+      <span className="inline-flex items-center gap-1 ml-1.5 px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-100 text-slate-600 border border-slate-200 select-none align-middle not-italic shadow-2xs">
         <kbd className="font-semibold">Tab</kbd>
-        <CornerDownLeft className="w-2.5 h-2.5" />
+        <CornerDownLeft className="w-2.5 h-2.5 text-slate-500" />
       </span>
 
       {/* 다음 슬롯 Tab to Jump 힌트 (있을 때) */}
@@ -44,7 +44,7 @@ export const GhostTextPredictor = memo(function GhostTextPredictor({
         <button
           type="button"
           onClick={onNextJump}
-          className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.2 rounded text-[9px] font-mono text-indigo-400 bg-indigo-950/60 border border-indigo-800/40 hover:bg-indigo-900 transition-colors cursor-pointer select-none"
+          className="inline-flex items-center gap-0.5 ml-1 px-1.5 py-0.2 rounded text-[10px] font-mono text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 transition-colors cursor-pointer select-none"
         >
           <span>{jumpHint}</span>
           <ArrowRight className="w-2 h-2" />

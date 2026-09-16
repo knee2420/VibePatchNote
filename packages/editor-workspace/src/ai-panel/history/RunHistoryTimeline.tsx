@@ -21,14 +21,14 @@ function RunHistoryTimelineInner<TResult = string>({
 
   if (!attempts || attempts.length === 0) {
     return (
-      <div className={`p-6 text-center text-slate-500 text-xs ${className}`}>
+      <div className={`p-6 text-center text-slate-400 text-xs ${className}`}>
         실행 이력이 존재하지 않습니다.
       </div>
     );
   }
 
   return (
-    <div className={`flex flex-col gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 ${className}`}>
+    <div className={`flex flex-col gap-2.5 p-3 rounded-xl bg-white border border-slate-200 shadow-2xs ${className}`}>
       {/* 1. 상단 네비게이터 */}
       <AttemptStepNavigator
         attempts={attempts}
@@ -39,16 +39,16 @@ function RunHistoryTimelineInner<TResult = string>({
 
       {/* 2. 선택된 시도의 상세 정보 */}
       {activeAttempt && (
-        <div className="flex flex-col gap-2 p-2.5 rounded-lg bg-slate-950 border border-slate-800/80 text-xs">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 pb-1 border-b border-slate-800/80 font-mono">
+        <div className="flex flex-col gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 pb-1.5 border-b border-slate-200/80 font-mono">
             <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+              <Clock className="w-3 h-3 text-slate-400" />
               <span>{new Date(activeAttempt.timestamp).toLocaleTimeString()}</span>
             </span>
 
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 text-indigo-300">
-                <Cpu className="w-3 h-3" />
+              <span className="flex items-center gap-1 text-indigo-700 font-semibold">
+                <Cpu className="w-3 h-3 text-indigo-600" />
                 <span>{activeAttempt.modelName}</span>
               </span>
 
@@ -56,7 +56,7 @@ function RunHistoryTimelineInner<TResult = string>({
                 <button
                   type="button"
                   onClick={() => onRollbackToAttempt(activeAttempt)}
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-2.5 h-2.5" />
                   <span>이 시점으로 롤백</span>
@@ -68,7 +68,7 @@ function RunHistoryTimelineInner<TResult = string>({
           {/* 프롬프트 */}
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-500 font-mono">Prompt:</span>
-            <p className="mt-0.5 text-slate-300 italic bg-slate-900/60 p-1.5 rounded leading-relaxed">
+            <p className="mt-0.5 text-slate-700 italic bg-white p-2 rounded-lg border border-slate-200/80 leading-relaxed font-sans shadow-2xs">
               "{activeAttempt.prompt}"
             </p>
           </div>
@@ -76,7 +76,7 @@ function RunHistoryTimelineInner<TResult = string>({
           {/* 결과물 렌더링 */}
           <div>
             <span className="text-[10px] uppercase font-bold text-slate-500 font-mono">Result:</span>
-            <div className="mt-0.5 p-2 rounded bg-slate-900 text-slate-200 leading-relaxed font-sans max-h-48 overflow-y-auto no-scrollbar">
+            <div className="mt-0.5 p-2 rounded-lg bg-white border border-slate-200/80 text-slate-800 leading-relaxed font-sans max-h-48 overflow-y-auto shadow-2xs">
               {renderResult ? (
                 renderResult(activeAttempt.result)
               ) : (

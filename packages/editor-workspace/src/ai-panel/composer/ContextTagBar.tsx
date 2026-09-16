@@ -34,16 +34,16 @@ export const ContextTagBar = memo(function ContextTagBar({
       {tags.map((tag) => (
         <span
           key={tag.id}
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono bg-slate-800 border border-slate-700 text-slate-200 select-none shadow-xs group"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 border border-slate-200 text-slate-700 select-none shadow-2xs group"
           title={tag.detail || tag.label}
         >
           {getTagIcon(tag)}
-          <span className="truncate max-w-[120px]">{tag.label}</span>
+          <span className="truncate max-w-[120px] font-medium">{tag.label}</span>
           {onRemoveTag && (
             <button
               type="button"
               onClick={() => onRemoveTag(tag.id)}
-              className="p-0.2 rounded hover:bg-slate-700 text-slate-400 hover:text-slate-200 transition-colors"
+              className="p-0.2 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               <X className="w-2.5 h-2.5" />
             </button>
@@ -55,9 +55,9 @@ export const ContextTagBar = memo(function ContextTagBar({
         <button
           type="button"
           onClick={onAddTagClick}
-          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-900 hover:bg-slate-800 border border-dashed border-slate-700 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer select-none"
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-50 hover:bg-slate-100 border border-dashed border-slate-300 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer select-none"
         >
-          <Plus className="w-2.5 h-2.5" />
+          <Plus className="w-2.5 h-2.5 text-slate-500" />
           <span>컨텍스트 추가</span>
         </button>
       )}

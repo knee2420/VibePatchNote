@@ -39,16 +39,16 @@ export const StepThinkingAccordion = memo(function StepThinkingAccordion({
   };
 
   return (
-    <div className={`flex flex-col rounded-xl bg-slate-900/80 border border-slate-800 text-xs overflow-hidden ${className}`}>
+    <div className={`flex flex-col rounded-xl bg-white border border-slate-200 text-xs overflow-hidden shadow-2xs ${className}`}>
       {/* 헤더 바 */}
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between p-2.5 hover:bg-slate-800/60 transition-colors text-left select-none cursor-pointer"
+        className="flex items-center justify-between p-2.5 bg-slate-50/60 hover:bg-slate-100/80 transition-colors text-left select-none cursor-pointer"
       >
         <div className="flex items-center gap-2 min-w-0">
           {getStatusIcon()}
-          <span className="font-semibold text-slate-200 truncate">
+          <span className="font-semibold text-slate-800 truncate">
             Step {step.stepNumber}: {step.title}
           </span>
         </div>
@@ -65,19 +65,19 @@ export const StepThinkingAccordion = memo(function StepThinkingAccordion({
 
       {/* 펼쳐진 본문 (생각 내용 + 도구 호출들) */}
       {isExpanded && (
-        <div className="p-3 pt-0 space-y-2.5 border-t border-slate-800/80 bg-slate-950/40">
+        <div className="p-3 pt-0 space-y-2.5 border-t border-slate-100 bg-white">
           {/* 에이전트 생각 (CoT) */}
           {step.thought && (
-            <div className="flex items-start gap-2 pt-2 text-slate-300 leading-relaxed text-xs">
-              <Brain className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
-              <div className="flex-1 whitespace-pre-wrap font-sans opacity-90">{step.thought}</div>
+            <div className="flex items-start gap-2 pt-2 text-slate-700 leading-relaxed text-xs">
+              <Brain className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+              <div className="flex-1 whitespace-pre-wrap font-sans">{step.thought}</div>
             </div>
           )}
 
           {/* 도구 호출 목록 */}
           {step.toolCalls && step.toolCalls.length > 0 && (
             <div className="space-y-1.5 pt-1">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                 Tool Calls ({step.toolCalls.length})
               </div>
               {step.toolCalls.map((tc) => (

@@ -14,7 +14,7 @@ export function BreadcrumbBar({
   return (
     <nav
       aria-label="Breadcrumb"
-      className={`flex items-center gap-1 text-[11px] text-slate-400 select-none overflow-hidden ${className}`}
+      className={`flex items-center gap-1 text-[11px] text-slate-500 select-none overflow-hidden ${className}`}
     >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
@@ -22,7 +22,7 @@ export function BreadcrumbBar({
         return (
           <div key={item.id} className="flex items-center gap-1 min-w-0">
             {index > 0 && (
-              <ChevronRight className="w-3 h-3 text-slate-600 shrink-0" />
+              <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
             )}
             <button
               type="button"
@@ -30,8 +30,8 @@ export function BreadcrumbBar({
               onClick={() => onSelect?.(item)}
               className={`flex items-center gap-1 truncate transition-colors ${
                 isLast
-                  ? 'text-slate-200 font-semibold cursor-default'
-                  : 'hover:text-purple-300 cursor-pointer'
+                  ? 'text-slate-800 font-semibold cursor-default'
+                  : 'text-slate-500 hover:text-blue-600 cursor-pointer'
               }`}
             >
               {item.icon && <span className="shrink-0">{item.icon}</span>}

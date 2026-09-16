@@ -12,7 +12,7 @@ export function TopMenuBar({
 }: TopMenuBarProps) {
   return (
     <div
-      className={`h-14 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between shrink-0 select-none z-20 ${className}`}
+      className={`h-13 border-b border-slate-200 bg-white/95 backdrop-blur-md px-4 flex items-center justify-between shrink-0 select-none z-20 text-slate-800 shadow-xs ${className}`}
     >
       {/* 1. 좌측 슬롯 */}
       <div className="flex items-center gap-3 min-w-0">

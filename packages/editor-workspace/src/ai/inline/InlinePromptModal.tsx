@@ -67,18 +67,18 @@ export const InlinePromptModal = memo(function InlinePromptModal({
 
   return (
     <div style={style} className={`w-[420px] max-w-[90vw] animate-in fade-in zoom-in-95 duration-150 ${className}`}>
-      <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-slate-900/95 border border-indigo-500/70 shadow-2xl backdrop-blur-md text-xs">
+      <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-white/95 border border-indigo-200/80 shadow-2xl ring-1 ring-black/5 backdrop-blur-md text-xs">
         {/* 선택된 텍스트 프리뷰 (컴팩트) */}
         {selectedText && (
-          <div className="flex items-center justify-between px-1 text-[10px] text-slate-400 font-mono">
+          <div className="flex items-center justify-between px-1 text-[10px] text-slate-500 font-mono">
             <span className="truncate max-w-[320px] italic">"{selectedText.trim()}"</span>
             <span className="shrink-0">{selectedText.length}자 선택됨</span>
           </div>
         )}
 
         {/* 인풋 바 */}
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-800 focus-within:border-indigo-500 transition-colors">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500/20 transition-colors">
+          <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -87,17 +87,17 @@ export const InlinePromptModal = memo(function InlinePromptModal({
             onKeyDown={handleKeyDown}
             disabled={isLoading}
             placeholder={placeholder}
-            className="flex-1 bg-transparent text-xs text-slate-100 placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent text-xs text-slate-800 placeholder-slate-400 focus:outline-none"
           />
 
           {isLoading ? (
-            <Loader2 className="w-3.5 h-3.5 text-indigo-400 animate-spin shrink-0" />
+            <Loader2 className="w-3.5 h-3.5 text-indigo-600 animate-spin shrink-0" />
           ) : (
             <button
               type="button"
               disabled={!prompt.trim()}
               onClick={() => onSubmit(prompt.trim(), selectedText)}
-              className="p-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white transition-colors cursor-pointer"
+              className="p-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white transition-colors cursor-pointer shadow-xs"
             >
               <Send className="w-3 h-3" />
             </button>
@@ -106,7 +106,7 @@ export const InlinePromptModal = memo(function InlinePromptModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+            className="p-1 rounded text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
           >
             <X className="w-3 h-3" />
           </button>
@@ -122,9 +122,9 @@ export const InlinePromptModal = memo(function InlinePromptModal({
                 setPrompt(qa.prompt);
                 onSubmit(qa.prompt, selectedText);
               }}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/80 hover:bg-indigo-950 hover:text-indigo-200 border border-slate-700/60 hover:border-indigo-600/60 text-[10px] text-slate-300 transition-colors whitespace-nowrap cursor-pointer select-none"
+              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 border border-slate-200 hover:border-indigo-200 text-[11px] text-slate-600 font-medium transition-colors whitespace-nowrap cursor-pointer select-none"
             >
-              {qa.icon || <Wand2 className="w-2.5 h-2.5 text-indigo-400" />}
+              {qa.icon || <Wand2 className="w-2.5 h-2.5 text-indigo-600" />}
               <span>{qa.label}</span>
             </button>
           ))}

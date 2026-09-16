@@ -80,12 +80,12 @@ export const SocketNodeRenderer = memo(function SocketNodeRenderer<T = Record<st
         group relative flex items-center justify-between gap-1.5 px-2 py-1 rounded-md text-xs cursor-pointer select-none transition-all
         ${
           isSelected
-            ? 'bg-indigo-950/70 border border-indigo-500/70 text-indigo-100 font-medium'
-            : 'text-slate-300 hover:bg-slate-800/60 hover:text-white border border-transparent'
+            ? 'bg-indigo-50 border border-indigo-200 text-indigo-900 font-semibold shadow-2xs'
+            : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-transparent'
         }
         ${
           isDragOver
-            ? 'ring-2 ring-indigo-400 bg-indigo-900/60 border-indigo-400 shadow-lg scale-[1.01]'
+            ? 'ring-2 ring-indigo-500 bg-indigo-50/80 border-indigo-500 shadow-md scale-[1.01]'
             : ''
         }
         ${className}
@@ -100,7 +100,7 @@ export const SocketNodeRenderer = memo(function SocketNodeRenderer<T = Record<st
               e.stopPropagation();
               node.toggle();
             }}
-            className="p-0.5 rounded text-slate-500 hover:text-slate-300 transition-colors"
+            className="p-0.5 rounded text-slate-400 hover:text-slate-700 transition-colors"
           >
             {isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
@@ -109,11 +109,11 @@ export const SocketNodeRenderer = memo(function SocketNodeRenderer<T = Record<st
         )}
 
         {/* 타입별 아이콘 */}
-        <span className="shrink-0 text-slate-400 group-hover:text-slate-200">
+        <span className="shrink-0 text-slate-400 group-hover:text-slate-600">
           {isFolder ? (
-            isOpen ? <FolderOpen className="w-3.5 h-3.5 text-amber-400" /> : <Folder className="w-3.5 h-3.5 text-amber-400/80" />
+            isOpen ? <FolderOpen className="w-3.5 h-3.5 text-amber-500" /> : <Folder className="w-3.5 h-3.5 text-amber-500/80" />
           ) : slotNumber !== undefined ? (
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-indigo-300 font-semibold">
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-slate-100 border border-slate-200 text-[10px] font-mono text-indigo-700 font-semibold">
               #{slotNumber}
             </span>
           ) : (
@@ -122,13 +122,13 @@ export const SocketNodeRenderer = memo(function SocketNodeRenderer<T = Record<st
         </span>
 
         {/* 이름 */}
-        <span className="truncate font-medium text-xs text-slate-200">{data.name}</span>
+        <span className="truncate font-medium text-xs text-slate-800">{data.name}</span>
 
         {/* 허용 타입 태그 (Slot Spec 힌트) */}
         {acceptTypes.length > 0 && (
           <div className="hidden sm:flex items-center gap-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
             {acceptTypes.map((t) => (
-              <span key={t} className="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 font-mono" title={`허용: ${t}`}>
+              <span key={t} className="text-[9px] px-1 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-500 font-mono" title={`허용: ${t}`}>
                 {t}
               </span>
             ))}

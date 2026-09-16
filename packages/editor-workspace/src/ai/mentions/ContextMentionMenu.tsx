@@ -62,16 +62,16 @@ export const ContextMentionMenu = memo(function ContextMentionMenu({
   const getCategoryIcon = (category: MentionItem['category']) => {
     switch (category) {
       case 'slot':
-        return <Hash className="w-3 h-3 text-indigo-400 shrink-0" />;
+        return <Hash className="w-3 h-3 text-indigo-600 shrink-0" />;
       case 'doc':
-        return <BookOpen className="w-3 h-3 text-emerald-400 shrink-0" />;
+        return <BookOpen className="w-3 h-3 text-emerald-600 shrink-0" />;
       case 'segment':
-        return <Layers className="w-3 h-3 text-amber-400 shrink-0" />;
+        return <Layers className="w-3 h-3 text-amber-600 shrink-0" />;
       case 'snapshot':
-        return <History className="w-3 h-3 text-rose-400 shrink-0" />;
+        return <History className="w-3 h-3 text-rose-600 shrink-0" />;
       case 'section':
       default:
-        return <FileText className="w-3 h-3 text-blue-400 shrink-0" />;
+        return <FileText className="w-3 h-3 text-blue-600 shrink-0" />;
     }
   };
 
@@ -87,9 +87,9 @@ export const ContextMentionMenu = memo(function ContextMentionMenu({
   return (
     <div
       style={style}
-      className={`w-64 max-h-56 overflow-y-auto rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-1 text-xs no-scrollbar animate-in fade-in zoom-in-95 duration-100 ${className}`}
+      className={`w-64 max-h-56 overflow-y-auto rounded-xl bg-white border border-slate-200/80 shadow-2xl ring-1 ring-black/5 p-1 text-xs no-scrollbar animate-in fade-in zoom-in-95 duration-100 ${className}`}
     >
-      <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-800">
+      <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
         Workspace Context (@)
       </div>
 
@@ -106,8 +106,8 @@ export const ContextMentionMenu = memo(function ContextMentionMenu({
                 w-full flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-lg text-left transition-colors cursor-pointer select-none
                 ${
                   isSelected
-                    ? 'bg-indigo-600 text-white font-medium'
-                    : 'text-slate-300 hover:bg-slate-800'
+                    ? 'bg-indigo-600 text-white font-medium shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }
               `}
             >
@@ -118,7 +118,7 @@ export const ContextMentionMenu = memo(function ContextMentionMenu({
 
               <span
                 className={`text-[9px] font-mono px-1 py-0.2 rounded shrink-0 uppercase ${
-                  isSelected ? 'bg-indigo-800 text-indigo-100' : 'bg-slate-800 text-slate-400'
+                  isSelected ? 'bg-indigo-700/80 text-indigo-100' : 'bg-slate-100 text-slate-500 border border-slate-200/60'
                 }`}
               >
                 {item.category}

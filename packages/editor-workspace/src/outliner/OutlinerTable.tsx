@@ -24,9 +24,9 @@ export function OutlinerTable<T = Record<string, unknown>>({
 
   if (!rows || rows.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 gap-2 p-8 select-none">
-        <TableProperties className="w-8 h-8 stroke-[1.5] opacity-50 text-slate-600" />
-        <p className="text-xs font-medium">{emptyText}</p>
+      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2 p-8 select-none bg-slate-100/70">
+        <TableProperties className="w-8 h-8 stroke-[1.5] opacity-40 text-slate-400" />
+        <p className="text-xs font-medium text-slate-500">{emptyText}</p>
       </div>
     );
   }
@@ -47,13 +47,13 @@ export function OutlinerTable<T = Record<string, unknown>>({
   };
 
   return (
-    <div className={`w-full h-full flex flex-col bg-slate-950/90 overflow-hidden select-none ${className}`}>
+    <div className={`w-full h-full flex flex-col bg-white overflow-hidden select-none ${className}`}>
       {/* 1. 테이블 헤더 & 스크롤 본문 */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full border-collapse text-left text-xs text-slate-300">
-          <thead className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <table className="w-full border-collapse text-left text-xs text-slate-700">
+          <thead className="sticky top-0 z-10 bg-slate-50/90 backdrop-blur-xs border-b border-slate-200 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
             <tr>
-              <th className="py-2.5 px-4 w-12 text-center">#</th>
+              <th className="py-2.5 px-4 w-12 text-center font-mono">#</th>
               <th className="py-2.5 px-4 min-w-[180px]">섹션 제목</th>
               <th className="py-2.5 px-4 min-w-[240px]">시놉시스 / 요약</th>
               <th className="py-2.5 px-4 w-24 text-right">분량</th>
@@ -61,7 +61,7 @@ export function OutlinerTable<T = Record<string, unknown>>({
               <th className="py-2.5 px-4 w-24">라벨</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60">
+          <tbody className="divide-y divide-slate-100">
             {rows.map((row, index) => {
               const isSelected = row.id === selectedId;
               const isEditingTitle = editingCell?.id === row.id && editingCell?.field === 'title';
@@ -73,19 +73,19 @@ export function OutlinerTable<T = Record<string, unknown>>({
                   onClick={() => onSelect?.(row)}
                   className={`group transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-purple-950/30 text-white font-medium'
-                      : 'hover:bg-slate-900/60'
+                      ? 'bg-indigo-50/70 text-slate-900 font-medium'
+                      : 'hover:bg-slate-50/80 text-slate-700'
                   }`}
                 >
                   {/* 번호 */}
-                  <td className="py-2 px-4 text-center font-mono text-slate-500 text-[11px]">
+                  <td className="py-2.5 px-4 text-center font-mono text-slate-400 text-[11px]">
                     {row.number ?? index + 1}
                   </td>
 
                   {/* 제목 */}
                   <td
                     onDoubleClick={() => handleStartEdit(row, 'title')}
-                    className="py-2 px-4 text-slate-200"
+                    className="py-2.5 px-4 text-slate-800 font-medium"
                   >
                     {isEditingTitle ? (
                       <input
@@ -95,11 +95,11 @@ export function OutlinerTable<T = Record<string, unknown>>({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={() => handleFinishEdit(row)}
                         onKeyDown={(e) => e.key === 'Enter' && handleFinishEdit(row)}
-                        className="w-full bg-slate-900 border border-purple-500 rounded px-1.5 py-0.5 text-xs text-white outline-none"
+                        className="w-full bg-white border border-indigo-500 rounded px-1.5 py-0.5 text-xs text-slate-900 outline-none shadow-2xs"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
-                        <FileText className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
                         <span className="truncate">{row.title}</span>
                       </div>
                     )}
@@ -108,7 +108,7 @@ export function OutlinerTable<T = Record<string, unknown>>({
                   {/* 시놉시스 */}
                   <td
                     onDoubleClick={() => handleStartEdit(row, 'synopsis')}
-                    className="py-2 px-4 text-slate-400 text-[11px]"
+                    className="py-2.5 px-4 text-slate-500 text-[11px]"
                   >
                     {isEditingSynopsis ? (
                       <input
@@ -118,17 +118,17 @@ export function OutlinerTable<T = Record<string, unknown>>({
                         onChange={(e) => setEditValue(e.target.value)}
                         onBlur={() => handleFinishEdit(row)}
                         onKeyDown={(e) => e.key === 'Enter' && handleFinishEdit(row)}
-                        className="w-full bg-slate-900 border border-purple-500 rounded px-1.5 py-0.5 text-xs text-white outline-none"
+                        className="w-full bg-white border border-indigo-500 rounded px-1.5 py-0.5 text-xs text-slate-900 outline-none shadow-2xs"
                       />
                     ) : (
-                      <span className="truncate block max-w-md text-slate-400">
-                        {row.synopsis || <em className="text-slate-600 not-italic">요약 없음</em>}
+                      <span className="truncate block max-w-md text-slate-500">
+                        {row.synopsis || <em className="text-slate-400 not-italic">요약 없음</em>}
                       </span>
                     )}
                   </td>
 
                   {/* 분량 */}
-                  <td className="py-2 px-4 text-right font-mono text-[11px] text-slate-400">
+                  <td className="py-2.5 px-4 text-right font-mono text-[11px] text-slate-500">
                     {row.wordCount !== undefined ? (
                       `${row.wordCount.toLocaleString()}자`
                     ) : (
@@ -137,13 +137,13 @@ export function OutlinerTable<T = Record<string, unknown>>({
                   </td>
 
                   {/* 상태 드롭다운 */}
-                  <td className="py-2 px-4" onClick={(e) => e.stopPropagation()}>
+                  <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
                     <select
                       value={row.status || statusOptions[0]}
                       onChange={(e) =>
                         onChangeRow?.({ ...row, status: e.target.value })
                       }
-                      className="bg-slate-900 border border-slate-700/80 rounded px-2 py-0.5 text-[11px] text-slate-200 outline-none focus:border-purple-500 cursor-pointer"
+                      className="bg-white border border-slate-200 rounded px-2 py-0.5 text-[11px] text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs"
                     >
                       {statusOptions.map((st) => (
                         <option key={st} value={st}>
@@ -154,13 +154,13 @@ export function OutlinerTable<T = Record<string, unknown>>({
                   </td>
 
                   {/* 라벨 */}
-                  <td className="py-2 px-4">
+                  <td className="py-2.5 px-4">
                     {row.label ? (
-                      <span className="px-1.5 py-0.5 rounded bg-slate-800 text-purple-300 border border-purple-800/40 text-[10px] font-mono">
+                      <span className="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/80 text-[10px] font-mono font-medium">
                         {row.label}
                       </span>
                     ) : (
-                      <span className="text-slate-600 text-[10px]">-</span>
+                      <span className="text-slate-400 text-[10px]">-</span>
                     )}
                   </td>
                 </tr>
@@ -171,13 +171,13 @@ export function OutlinerTable<T = Record<string, unknown>>({
       </div>
 
       {/* 2. 하단 아웃라이너 통계 푸터 */}
-      <div className="h-9 px-4 border-t border-slate-800 bg-slate-900/80 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+      <div className="h-9 px-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
         <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           <span>총 <strong>{rows.length}</strong>개 섹션</span>
         </div>
         <div className="flex items-center gap-4 font-mono">
-          <span>합계 분량: <strong className="text-slate-200">{totalWords.toLocaleString()}</strong>자</span>
+          <span>합계 분량: <strong className="text-slate-700 font-semibold">{totalWords.toLocaleString()}</strong>자</span>
         </div>
       </div>
     </div>

@@ -114,12 +114,12 @@ export function WorkspaceShell({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-screen flex flex-col bg-slate-950 text-slate-100 font-sans overflow-hidden ${
+      className={`w-full h-screen flex flex-col bg-slate-100/70 text-slate-800 font-sans overflow-hidden ${
         isDraggingSidebar || isDraggingInspector ? 'select-none cursor-col-resize' : 'select-none'
       } ${className}`}
     >
       {/* 1. 상단 헤더 슬롯 */}
-      {header && <header className="shrink-0 z-20">{header}</header>}
+      {header && <header className="shrink-0 z-20 bg-white border-b border-slate-200 shadow-xs">{header}</header>}
 
       {/* 2. 본문 3단 레이아웃 */}
       <div className="flex-1 flex flex-row overflow-hidden relative">
@@ -128,23 +128,23 @@ export function WorkspaceShell({
           <>
             <aside
               style={{ width: `${currentSidebarWidth}px` }}
-              className="h-full shrink-0 bg-slate-900/60 flex flex-col overflow-hidden z-10 transition-none"
+              className="h-full shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden z-10 transition-none"
             >
               {sidebar}
             </aside>
             {/* 좌측 리사이저 핸들 */}
             <div
               onMouseDown={handleSidebarMouseDown}
-              className="w-1.5 -ml-1 h-full cursor-col-resize z-20 hover:bg-purple-500/60 transition-colors flex items-center justify-center group shrink-0"
+              className="w-1.5 -ml-1 h-full cursor-col-resize z-20 hover:bg-blue-500/30 transition-colors flex items-center justify-center group shrink-0"
               title="드래그하여 사이드바 너비 조절"
             >
-              <div className="w-[1px] h-full bg-slate-800/90 group-hover:bg-purple-400 transition-colors" />
+              <div className="w-[1px] h-full bg-slate-200 group-hover:bg-blue-500 transition-colors" />
             </div>
           </>
         )}
 
         {/* [중앙 워크스페이스 도킹 영역] */}
-        <main className="flex-1 h-full overflow-hidden relative flex flex-col bg-slate-950 min-w-0">
+        <main className="flex-1 h-full overflow-hidden relative flex flex-col bg-slate-100/60 min-w-0">
           {children}
         </main>
 
@@ -154,14 +154,14 @@ export function WorkspaceShell({
             {/* 우측 리사이저 핸들 */}
             <div
               onMouseDown={handleInspectorMouseDown}
-              className="w-1.5 -mr-1 h-full cursor-col-resize z-20 hover:bg-purple-500/60 transition-colors flex items-center justify-center group shrink-0"
+              className="w-1.5 -mr-1 h-full cursor-col-resize z-20 hover:bg-blue-500/30 transition-colors flex items-center justify-center group shrink-0"
               title="드래그하여 패널 너비 조절"
             >
-              <div className="w-[1px] h-full bg-slate-800/90 group-hover:bg-purple-400 transition-colors" />
+              <div className="w-[1px] h-full bg-slate-200 group-hover:bg-blue-500 transition-colors" />
             </div>
             <aside
               style={{ width: `${currentInspectorWidth}px` }}
-              className="h-full shrink-0 bg-slate-900/60 flex flex-col overflow-hidden z-10 transition-none"
+              className="h-full shrink-0 bg-white border-l border-slate-200 flex flex-col overflow-hidden z-10 transition-none"
             >
               {inspector}
             </aside>
@@ -171,7 +171,7 @@ export function WorkspaceShell({
 
       {/* 3. 하단 상태 바 슬롯 */}
       {statusBar && (
-        <footer className="shrink-0 z-20 border-t border-slate-800 bg-slate-900/80">
+        <footer className="shrink-0 z-20 border-t border-slate-200 bg-white text-slate-600">
           {statusBar}
         </footer>
       )}

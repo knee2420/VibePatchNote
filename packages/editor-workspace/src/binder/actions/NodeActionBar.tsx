@@ -19,18 +19,18 @@ export const NodeActionBar = memo(function NodeActionBar({
 
   return (
     <div
-      className={`flex items-center gap-0.5 p-0.5 rounded bg-slate-900/90 border border-slate-700/80 shadow-sm backdrop-blur-sm ${className}`}
+      className={`flex items-center gap-0.5 p-0.5 rounded-md bg-white/95 border border-slate-200 shadow-2xs backdrop-blur-xs ${className}`}
       onClick={(e) => e.stopPropagation()}
     >
       {actions.map((act) => {
         const variantClass =
           act.variant === 'primary'
-            ? 'text-indigo-400 hover:text-indigo-200 hover:bg-indigo-950'
+            ? 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50'
             : act.variant === 'danger'
-              ? 'text-rose-400 hover:text-rose-200 hover:bg-rose-950'
+              ? 'text-rose-600 hover:text-rose-800 hover:bg-rose-50'
               : act.variant === 'warning'
-                ? 'text-amber-400 hover:text-amber-200 hover:bg-amber-950'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800';
+                ? 'text-amber-600 hover:text-amber-800 hover:bg-amber-50'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100';
 
         return (
           <button

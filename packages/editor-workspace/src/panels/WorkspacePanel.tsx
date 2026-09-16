@@ -18,15 +18,15 @@ export function WorkspacePanel({
   bodyClassName = '',
 }: WorkspacePanelProps) {
   return (
-    <div className={`w-full h-full flex flex-col overflow-hidden select-none ${className}`}>
+    <div className={`w-full h-full flex flex-col overflow-hidden select-none bg-white text-slate-800 ${className}`}>
       {/* 1. 패널 상단 헤더 */}
-      <div className="h-11 px-3.5 border-b border-slate-800/80 bg-slate-900/50 flex items-center justify-between shrink-0">
+      <div className="h-10 px-3.5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
           {collapsible && (
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors cursor-pointer shrink-0"
+              className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 transition-colors cursor-pointer shrink-0"
               title={isCollapsed ? '펼치기' : '접기'}
             >
               {isCollapsed ? (
@@ -38,11 +38,11 @@ export function WorkspacePanel({
           )}
 
           <div className="min-w-0">
-            <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider truncate">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider truncate">
               {title}
             </h3>
             {subtitle && (
-              <p className="text-[10px] text-slate-500 truncate -mt-0.5">
+              <p className="text-[10px] text-slate-400 truncate -mt-0.5">
                 {subtitle}
               </p>
             )}
@@ -55,7 +55,7 @@ export function WorkspacePanel({
 
       {/* 2. 패널 전용 가로 툴바 (옵션) */}
       {!isCollapsed && toolbar && (
-        <div className="border-b border-slate-800/60 bg-slate-900/30 shrink-0">
+        <div className="border-b border-slate-200 bg-slate-50/50 shrink-0">
           {toolbar}
         </div>
       )}

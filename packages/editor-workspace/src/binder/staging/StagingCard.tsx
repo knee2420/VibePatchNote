@@ -43,31 +43,31 @@ function StagingCardInner<T = Record<string, unknown>>({
       onDragStart={handleDragStart}
       onClick={() => onSelect?.(asset)}
       className={`
-        group relative flex flex-col gap-1 p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-indigo-500/80
-        shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none text-left
+        group relative flex flex-col gap-1 p-2 rounded-lg bg-white border border-slate-200 hover:border-indigo-400
+        shadow-2xs hover:shadow-xs transition-all cursor-grab active:cursor-grabbing select-none text-left
         ${className}
       `}
     >
       <div className="flex items-center justify-between gap-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
-          <GripVertical className="w-3 h-3 text-slate-600 group-hover:text-slate-400 shrink-0" />
+          <GripVertical className="w-3 h-3 text-slate-400 group-hover:text-slate-600 shrink-0" />
           {getIcon()}
-          <span className="font-medium text-xs text-slate-200 truncate">{asset.title}</span>
+          <span className="font-semibold text-xs text-slate-800 truncate">{asset.title}</span>
         </div>
-        <span className="text-[9px] px-1.5 py-0.2 rounded font-mono uppercase bg-slate-800 text-slate-400 shrink-0">
+        <span className="text-[9px] px-1.5 py-0.2 rounded font-mono uppercase bg-slate-100 text-slate-600 border border-slate-200/60 shrink-0">
           {asset.type}
         </span>
       </div>
 
       {asset.summary && (
-        <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-sans">
           {asset.summary}
         </p>
       )}
 
       {/* 출처 태그 */}
       {asset.sourceDocTitle && (
-        <div className="flex items-center justify-between gap-1 mt-1 pt-1 border-t border-slate-800/80 text-[10px] text-slate-500 font-mono">
+        <div className="flex items-center justify-between gap-1 mt-1 pt-1 border-t border-slate-100 text-[10px] text-slate-400 font-mono">
           <span className="truncate max-w-[120px]">{asset.sourceDocTitle}</span>
           {asset.sourcePage !== undefined && <span>p.{asset.sourcePage}</span>}
         </div>

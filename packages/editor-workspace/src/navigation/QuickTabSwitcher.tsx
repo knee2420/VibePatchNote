@@ -24,7 +24,7 @@ export function QuickTabSwitcher({
   return (
     <div
       role="tablist"
-      className={`flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 select-none ${className}`}
+      className={`flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 select-none ${className}`}
     >
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeId;
@@ -38,10 +38,10 @@ export function QuickTabSwitcher({
             disabled={tab.disabled}
             onClick={() => onChange(tab.id)}
             title={shortcutNum ? `${tab.label} (${shortcutNum})` : tab.label}
-            className={`flex items-center font-semibold rounded-lg transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${sizeClasses} ${
+            className={`flex items-center font-medium rounded-lg transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${sizeClasses} ${
               isActive
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             }`}
           >
             {tab.icon && <span className="shrink-0">{tab.icon}</span>}
@@ -52,8 +52,8 @@ export function QuickTabSwitcher({
               <kbd
                 className={`ml-1 text-[9px] font-mono px-1 rounded transition-colors hidden sm:inline-block ${
                   isActive
-                    ? 'bg-purple-700/80 text-purple-200'
-                    : 'bg-slate-800 text-slate-500'
+                    ? 'bg-slate-100 text-slate-500 border border-slate-200/60'
+                    : 'bg-slate-200/60 text-slate-400'
                 }`}
               >
                 ^{index + 1}

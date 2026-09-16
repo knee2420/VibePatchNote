@@ -19,11 +19,11 @@ export const ChunkActionGroup = memo(function ChunkActionGroup({
   return (
     <div className={`flex items-center gap-1 shrink-0 ${className}`}>
       {status === 'accepted' ? (
-        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 border border-emerald-700/60 text-emerald-300">
+        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 border border-emerald-200 text-emerald-700">
           ✓ 수락됨
         </span>
       ) : status === 'rejected' ? (
-        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950 border border-rose-800 text-rose-300">
+        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 border border-rose-200 text-rose-700">
           ✕ 거절됨
         </span>
       ) : (
@@ -43,9 +43,9 @@ export const ChunkActionGroup = memo(function ChunkActionGroup({
               type="button"
               onClick={() => onEdit(chunkId)}
               title="직접 수정 후 반영"
-              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/60 transition-colors cursor-pointer"
             >
-              <Edit3 className="w-3 h-3" />
+              <Edit3 className="w-3 h-3 text-slate-500" />
               <span>수정</span>
             </button>
           )}
@@ -55,7 +55,7 @@ export const ChunkActionGroup = memo(function ChunkActionGroup({
               type="button"
               onClick={() => onRetry(chunkId)}
               title="이 부분만 재시도"
-              className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <RotateCw className="w-3 h-3" />
             </button>
@@ -65,7 +65,7 @@ export const ChunkActionGroup = memo(function ChunkActionGroup({
             type="button"
             onClick={() => onReject(chunkId)}
             title="제안 거절"
-            className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-slate-800 hover:bg-rose-950 hover:text-rose-300 text-slate-400 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 border border-slate-200/60 transition-colors cursor-pointer"
           >
             <X className="w-3 h-3" />
             <span>거절</span>

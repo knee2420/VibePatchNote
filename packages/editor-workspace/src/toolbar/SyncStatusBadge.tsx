@@ -22,7 +22,7 @@ export function SyncStatusBadge({
     case 'saving':
       return (
         <span
-          className={`px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 text-xs font-medium ${className}`}
+          className={`px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5 text-xs font-medium ${className}`}
         >
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
           <span>{mergedLabels.saving}</span>
@@ -31,18 +31,18 @@ export function SyncStatusBadge({
     case 'saved':
       return (
         <span
-          className={`px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5 text-xs font-medium ${className}`}
+          className={`px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 text-xs font-medium ${className}`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           <span>{mergedLabels.saved}</span>
         </span>
       );
     case 'error':
       return (
         <span
-          className={`px-2.5 py-1 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1.5 text-xs font-medium ${className}`}
+          className={`px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5 text-xs font-medium ${className}`}
         >
-          <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+          <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
           <span>{mergedLabels.error}</span>
         </span>
       );
@@ -50,9 +50,9 @@ export function SyncStatusBadge({
     default:
       return (
         <span
-          className={`px-2.5 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5 text-xs font-medium ${className}`}
+          className={`px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 border border-slate-200 flex items-center gap-1.5 text-xs font-medium ${className}`}
         >
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           <span>{mergedLabels.idle}</span>
         </span>
       );

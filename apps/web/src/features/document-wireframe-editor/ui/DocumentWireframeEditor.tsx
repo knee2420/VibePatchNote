@@ -21,18 +21,18 @@ export function DocumentWireframeEditor({
     <div className="w-full max-w-4xl flex flex-col items-center">
       <div className="w-full max-w-3xl mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-md bg-purple-500/20 text-purple-400">
+          <span className="p-1.5 rounded-lg bg-indigo-50 border border-indigo-200/80 text-indigo-600 shadow-2xs">
             <Layers className="w-4 h-4" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-white">와이어프레임 편집 캔버스</h3>
-            <p className="text-[11px] text-slate-400">
+            <h3 className="text-sm font-bold text-slate-800">와이어프레임 편집 캔버스</h3>
+            <p className="text-[11px] text-slate-500">
               A4 용지 규격의 Tiptap 다단 그리드 레이아웃
             </p>
           </div>
         </div>
 
-        <div className="text-[11px] text-slate-400 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+        <div className="text-[11px] text-slate-600 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-2xs">
           💡 수정 즉시 백엔드 아카이브 및 MCP 마크다운에 실시간 저장됩니다
         </div>
       </div>

@@ -26,30 +26,32 @@ export function McpMarkdownPanel({
   }, [markdown]);
 
   return (
-    <aside className="w-80 border-l border-slate-800/80 bg-slate-900/60 p-4 flex flex-col shrink-0 h-full">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-          <Terminal className="w-4 h-4 text-indigo-400" />
+    <aside className="w-full bg-white p-4 flex flex-col shrink-0 h-full text-slate-800">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200 shrink-0">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+          <Terminal className="w-4 h-4 text-indigo-600" />
           <span>에이전트 MCP Markdown</span>
         </div>
         <button
           type="button"
           onClick={handleCopyMarkdown}
-          className="p-1 px-2 rounded bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 flex items-center gap-1 transition-colors cursor-pointer"
+          className="p-1 px-2.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-[10px] font-medium text-slate-700 shadow-2xs flex items-center gap-1 transition-colors cursor-pointer"
           title="마크다운 복사"
         >
-          {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+          {copied ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
           <span>{copied ? '복사됨!' : '복사'}</span>
         </button>
       </div>
 
       {extraTabLabel && renderExtraTab && (
-        <div className="mt-3 flex gap-1 rounded-lg bg-slate-800 p-1 text-[10px] shrink-0">
+        <div className="mt-3 flex gap-1 rounded-xl bg-slate-100 p-1 text-[10px] shrink-0 border border-slate-200/60">
           <button
             type="button"
             onClick={() => setActiveTab('markdown')}
-            className={`flex-1 rounded px-2 py-1 transition-colors cursor-pointer ${
-              activeTab === 'markdown' ? 'bg-slate-700 text-white font-semibold' : 'text-slate-400'
+            className={`flex-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${
+              activeTab === 'markdown'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 font-medium'
             }`}
           >
             Markdown
@@ -57,8 +59,10 @@ export function McpMarkdownPanel({
           <button
             type="button"
             onClick={() => setActiveTab('extra')}
-            className={`flex-1 rounded px-2 py-1 transition-colors cursor-pointer ${
-              activeTab === 'extra' ? 'bg-purple-600 text-white font-semibold' : 'text-slate-400'
+            className={`flex-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${
+              activeTab === 'extra'
+                ? 'bg-white text-slate-900 font-semibold shadow-2xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 font-medium'
             }`}
           >
             {extraTabLabel}
@@ -68,10 +72,10 @@ export function McpMarkdownPanel({
 
       {activeTab === 'markdown' ? (
         <div className="flex-1 flex flex-col min-h-0 mt-2">
-          <p className="text-[10px] text-slate-500 mb-2 shrink-0">
+          <p className="text-[10px] text-slate-400 mb-2 shrink-0">
             에이전트가 MCP 도구로 읽고 쓸 순수 마크다운 데이터입니다.
           </p>
-          <div className="flex-1 bg-slate-950 rounded-lg p-3 border border-slate-800/80 font-mono text-[11px] text-slate-300 leading-relaxed overflow-y-auto whitespace-pre-wrap selection:bg-purple-500/30">
+          <div className="flex-1 bg-slate-50 rounded-xl p-3 border border-slate-200 font-mono text-[11px] text-slate-800 leading-relaxed overflow-y-auto whitespace-pre-wrap selection:bg-blue-100 selection:text-blue-900 shadow-2xs">
             {markdown || '(작성된 내용이 없습니다)'}
           </div>
         </div>

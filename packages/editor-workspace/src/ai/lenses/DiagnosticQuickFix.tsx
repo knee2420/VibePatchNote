@@ -18,22 +18,22 @@ export const DiagnosticQuickFix = memo(function DiagnosticQuickFix({
   const getTheme = () => {
     switch (issueType) {
       case 'conflict':
-        return 'bg-rose-950/80 border-rose-700/80 text-rose-200';
+        return 'bg-rose-50 border-rose-200 text-rose-800';
       case 'empty':
-        return 'bg-indigo-950/80 border-indigo-700/80 text-indigo-200';
+        return 'bg-indigo-50 border-indigo-200 text-indigo-800';
       case 'unverified':
       case 'length_exceeded':
       default:
-        return 'bg-amber-950/80 border-amber-700/80 text-amber-200';
+        return 'bg-amber-50 border-amber-200 text-amber-850';
     }
   };
 
   return (
     <div
-      className={`inline-flex items-center gap-2 p-1.5 px-2.5 rounded-lg border shadow-lg text-xs font-sans animate-in fade-in slide-in-from-top-1 duration-150 ${getTheme()} ${className}`}
+      className={`inline-flex items-center gap-2 p-1.5 px-2.5 rounded-lg border shadow-sm text-xs font-sans animate-in fade-in slide-in-from-top-1 duration-150 ${getTheme()} ${className}`}
     >
       <div className="flex items-center gap-1.5 font-medium">
-        <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+        <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0 animate-pulse" />
         <span className="truncate max-w-[200px]" title={issueMessage}>
           {issueMessage}
         </span>
@@ -52,7 +52,7 @@ export const DiagnosticQuickFix = memo(function DiagnosticQuickFix({
         <button
           type="button"
           onClick={onDismiss}
-          className="p-0.5 rounded hover:bg-black/20 text-slate-400 hover:text-slate-200 transition-colors"
+          className="p-0.5 rounded hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors"
         >
           <X className="w-3 h-3" />
         </button>

@@ -17,9 +17,9 @@ function AttemptStepNavigatorInner<TResult = string>({
   if (!attempts || attempts.length === 0) return null;
 
   return (
-    <div className={`flex items-center justify-between gap-1 p-1 bg-slate-900 rounded-lg border border-slate-800 ${className}`}>
+    <div className={`flex items-center justify-between gap-1 p-1 bg-slate-100 rounded-lg border border-slate-200/80 ${className}`}>
       <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-        <History className="w-3.5 h-3.5 text-slate-500 shrink-0 ml-1 mr-0.5" />
+        <History className="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1 mr-0.5" />
         {attempts.map((att) => {
           const isActive = att.id === activeAttemptId;
           return (
@@ -31,13 +31,13 @@ function AttemptStepNavigatorInner<TResult = string>({
                 flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono transition-colors whitespace-nowrap cursor-pointer select-none
                 ${
                   isActive
-                    ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                    ? 'bg-white text-slate-900 font-bold shadow-xs border border-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                 }
               `}
             >
               <span>Attempt #{att.attemptNumber}</span>
-              {att.isAccepted && <Check className="w-2.5 h-2.5 text-emerald-300 shrink-0" />}
+              {att.isAccepted && <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" />}
             </button>
           );
         })}
@@ -48,7 +48,7 @@ function AttemptStepNavigatorInner<TResult = string>({
           type="button"
           onClick={() => onForkBranch(activeAttemptId)}
           title="이 시점부터 새로운 대안 브랜치 분기"
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-indigo-300 hover:bg-indigo-950 border border-indigo-700/60 hover:border-indigo-500 transition-colors shrink-0 cursor-pointer"
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-colors shrink-0 cursor-pointer font-medium"
         >
           <GitBranch className="w-2.5 h-2.5" />
           <span>Fork</span>

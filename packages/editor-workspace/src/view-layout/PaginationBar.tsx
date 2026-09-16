@@ -54,22 +54,22 @@ export function PaginationBar({
 
   return (
     <div
-      className={`flex items-center gap-3 text-xs text-slate-400 select-none ${className}`}
+      className={`flex items-center gap-3 text-xs text-slate-500 select-none ${className}`}
     >
       {/* 1. 페이지 넘김 네비게이터 */}
       {onPageChange && (
-        <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-lg p-0.5 shadow-2xs">
           <button
             type="button"
             disabled={safeCurrentPage <= 1}
             onClick={handlePrev}
-            className="p-1 rounded hover:bg-slate-800 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-white hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
             title="이전 페이지 (Page Up)"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
-          <span className="px-2 font-mono text-[11px] text-slate-300">
+          <span className="px-2 font-mono text-[11px] text-slate-700">
             <strong>{safeCurrentPage}</strong> / {safeTotalPages} 쪽
           </span>
 
@@ -77,7 +77,7 @@ export function PaginationBar({
             type="button"
             disabled={safeCurrentPage >= safeTotalPages}
             onClick={handleNext}
-            className="p-1 rounded hover:bg-slate-800 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-white hover:text-slate-900 disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer"
             title="다음 페이지 (Page Down)"
           >
             <ChevronRight className="w-3.5 h-3.5" />
@@ -87,12 +87,12 @@ export function PaginationBar({
 
       {/* 2. 줌 배율 조절기 */}
       {showZoom && onZoomChange && (
-        <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 rounded-lg p-0.5 shadow-2xs">
           <button
             type="button"
             disabled={zoom <= 50}
             onClick={handleZoomOut}
-            className="p-1 rounded hover:bg-slate-800 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-white hover:text-slate-900 disabled:opacity-30 transition-colors cursor-pointer"
             title="축소 (Zoom Out)"
           >
             <Minus className="w-3 h-3" />
@@ -101,8 +101,8 @@ export function PaginationBar({
           <button
             type="button"
             onClick={() => onZoomChange(100)}
-            className="px-1.5 font-mono text-[11px] text-slate-300 hover:text-purple-300 transition-colors cursor-pointer"
-            title="100% 배율로 리셋"
+            className="px-1.5 py-0.5 rounded font-mono text-[11px] text-slate-700 hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+            title="100% 원본 배율로 리셋"
           >
             {zoom}%
           </button>
@@ -111,7 +111,7 @@ export function PaginationBar({
             type="button"
             disabled={zoom >= 200}
             onClick={handleZoomIn}
-            className="p-1 rounded hover:bg-slate-800 hover:text-white disabled:opacity-30 transition-colors cursor-pointer"
+            className="p-1 rounded hover:bg-white hover:text-slate-900 disabled:opacity-30 transition-colors cursor-pointer"
             title="확대 (Zoom In)"
           >
             <Plus className="w-3 h-3" />
@@ -121,14 +121,14 @@ export function PaginationBar({
 
       {/* 3. 4대 뷰 레이아웃 모드 토글 */}
       {showLayoutModes && onLayoutModeChange && (
-        <div className="flex items-center gap-0.5 bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+        <div className="flex items-center gap-0.5 bg-slate-100 border border-slate-200/80 rounded-lg p-0.5 shadow-2xs">
           <button
             type="button"
             onClick={() => onLayoutModeChange('continuous')}
             className={`p-1 rounded transition-colors cursor-pointer ${
               layoutMode === 'continuous'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
             }`}
             title="연속 스크롤 뷰 (웹 레이아웃)"
           >
@@ -140,8 +140,8 @@ export function PaginationBar({
             onClick={() => onLayoutModeChange('paged')}
             className={`p-1 rounded transition-colors cursor-pointer ${
               layoutMode === 'paged'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
             }`}
             title="A4 낱장 분할 인쇄 뷰"
           >
@@ -153,8 +153,8 @@ export function PaginationBar({
             onClick={() => onLayoutModeChange('spread')}
             className={`p-1 rounded transition-colors cursor-pointer ${
               layoutMode === 'spread'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
             }`}
             title="2쪽 나란히 보기 (양면 스프레드)"
           >
@@ -166,8 +166,8 @@ export function PaginationBar({
             onClick={() => onLayoutModeChange('zen')}
             className={`p-1 rounded transition-colors cursor-pointer ${
               layoutMode === 'zen'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                ? 'bg-white text-slate-900 font-semibold shadow-xs border border-slate-200/80'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
             }`}
             title="방해요소 없는 집중 모드 (Zen Mode)"
           >

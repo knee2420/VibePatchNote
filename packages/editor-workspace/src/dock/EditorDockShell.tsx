@@ -14,7 +14,7 @@ export function EditorDockShell({
   components,
   tabComponents,
   rightHeaderActionsComponent,
-  theme = 'dockview-theme-dark',
+  theme = 'dockview-theme-light',
   className = '',
   disableFloatingGroups = true,
 }: EditorDockShellProps) {

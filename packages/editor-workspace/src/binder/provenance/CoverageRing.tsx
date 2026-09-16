@@ -21,10 +21,10 @@ export const CoverageRing = memo(function CoverageRing({
 
   const colorClass =
     clamped >= 80
-      ? 'text-emerald-500'
+      ? 'text-emerald-600'
       : clamped >= 40
-        ? 'text-indigo-400'
-        : 'text-amber-500';
+        ? 'text-indigo-600'
+        : 'text-amber-600';
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
@@ -35,7 +35,7 @@ export const CoverageRing = memo(function CoverageRing({
             cx={size / 2}
             cy={size / 2}
             r={radius}
-            className="text-slate-800"
+            className="text-slate-200"
             strokeWidth={strokeWidth}
             stroke="currentColor"
             fill="transparent"
@@ -55,7 +55,7 @@ export const CoverageRing = memo(function CoverageRing({
           />
         </svg>
         {showPercent && (
-          <span className="absolute text-[10px] font-bold font-mono text-slate-200">
+          <span className="absolute text-[10px] font-bold font-mono text-slate-800">
             {Math.round(clamped)}%
           </span>
         )}
@@ -63,7 +63,7 @@ export const CoverageRing = memo(function CoverageRing({
 
       {label && (
         <div className="flex flex-col min-w-0">
-          <span className="text-[11px] font-medium text-slate-300 truncate">{label}</span>
+          <span className="text-[11px] font-medium text-slate-700 truncate">{label}</span>
           <span className="text-[10px] text-slate-500 font-mono">
             {clamped >= 100 ? '전체 에셋 소화 완료' : `${Math.round(clamped)}% 반영`}
           </span>

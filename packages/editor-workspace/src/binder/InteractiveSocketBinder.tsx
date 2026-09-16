@@ -73,7 +73,7 @@ function InteractiveSocketBinderInner<
   className = '',
 }: InteractiveSocketBinderProps<TMode, TNode, TAsset>) {
   return (
-    <div className={`flex flex-col h-full w-full bg-slate-950 text-slate-100 overflow-hidden ${className}`}>
+    <div className={`flex flex-col h-full w-full bg-white text-slate-800 overflow-hidden ${className}`}>
       {/* 1. 상단: 척추 스위처 + 소화율 게이지 */}
       <div className="shrink-0">
         <SpineSwitcher

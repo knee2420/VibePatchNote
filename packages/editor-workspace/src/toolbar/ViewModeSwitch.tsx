@@ -12,7 +12,7 @@ export function ViewModeSwitch<T extends string = string>({
 }: ViewModeSwitchProps<T>) {
   return (
     <div
-      className={`flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 select-none ${className}`}
+      className={`flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 select-none ${className}`}
     >
       {options.map((option) => {
         const isActive = option.id === activeId;
@@ -21,10 +21,10 @@ export function ViewModeSwitch<T extends string = string>({
             key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs transition-all cursor-pointer ${
               isActive
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                : 'text-slate-500 hover:text-slate-800 font-medium'
             }`}
           >
             {option.icon && <span className="shrink-0">{option.icon}</span>}

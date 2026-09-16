@@ -18,20 +18,20 @@ function SpineSwitcherInner<TMode extends string = string>({
   const isSm = size === 'sm';
 
   return (
-    <div className={`flex flex-col gap-1.5 p-2 bg-slate-900/90 border-b border-slate-800 ${className}`}>
+    <div className={`flex flex-col gap-1.5 p-2 bg-slate-50/70 border-b border-slate-200 ${className}`}>
       <div className="flex items-center justify-between gap-1">
-        <span className="text-[10px] font-semibold tracking-wider uppercase text-slate-400">
+        <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500">
           Spine Perspective
         </span>
         {typeof coverage === 'number' && (
-          <span className="text-[10px] font-medium text-emerald-400 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[10px] font-medium text-emerald-600 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Coverage {Math.round(coverage)}%
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-1 p-0.5 bg-slate-950/80 rounded-lg border border-slate-800/80 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded-lg border border-slate-200/80 overflow-x-auto no-scrollbar">
         {options.map((opt) => {
           const isActive = opt.id === activeSpine;
           return (
@@ -41,12 +41,12 @@ function SpineSwitcherInner<TMode extends string = string>({
               onClick={() => onChangeSpine(opt.id)}
               title={opt.description || opt.label}
               className={`
-                flex-1 flex items-center justify-center gap-1.5 rounded-md font-medium transition-all select-none whitespace-nowrap
+                flex-1 flex items-center justify-center gap-1.5 rounded-md font-medium transition-all select-none whitespace-nowrap cursor-pointer
                 ${isSm ? 'px-2 py-1 text-[11px]' : 'px-2.5 py-1.5 text-xs'}
                 ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-sm font-semibold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    ? 'bg-white text-slate-900 shadow-xs font-semibold border border-slate-200/80'
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                 }
               `}
             >
@@ -56,7 +56,7 @@ function SpineSwitcherInner<TMode extends string = string>({
                 <span
                   className={`
                     text-[10px] px-1.5 py-0.2 rounded-full font-mono shrink-0
-                    ${isActive ? 'bg-indigo-800/80 text-indigo-100' : 'bg-slate-800 text-slate-400'}
+                    ${isActive ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'bg-slate-200 text-slate-600'}
                   `}
                 >
                   {opt.badge}

@@ -35,36 +35,36 @@ export const ToolCallCard = memo(function ToolCallCard({
   };
 
   return (
-    <div className={`flex flex-col rounded-lg bg-slate-950 border border-slate-800 text-xs overflow-hidden ${className}`}>
+    <div className={`flex flex-col rounded-xl bg-white border border-slate-200 text-xs overflow-hidden shadow-2xs ${className}`}>
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between p-2 hover:bg-slate-900/80 transition-colors text-left select-none cursor-pointer"
+        className="flex items-center justify-between p-2 bg-slate-50/60 hover:bg-slate-100/80 transition-colors text-left select-none cursor-pointer"
       >
         <div className="flex items-center gap-1.5 min-w-0">
-          <Wrench className="w-3 h-3 text-amber-400 shrink-0" />
-          <span className="font-mono font-medium text-slate-200 truncate">{toolCall.toolName}</span>
+          <Wrench className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <span className="font-mono font-semibold text-slate-800 truncate">{toolCall.toolName}</span>
           {toolCall.durationMs !== undefined && (
-            <span className="text-[10px] text-slate-500 font-mono">({toolCall.durationMs}ms)</span>
+            <span className="text-[10px] text-slate-400 font-mono">({toolCall.durationMs}ms)</span>
           )}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           {getStatusIcon()}
           {isExpanded ? (
-            <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
           ) : (
-            <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           )}
         </div>
       </button>
 
       {isExpanded && (
-        <div className="p-2 pt-0 space-y-2 border-t border-slate-900 bg-slate-950/90 text-[11px] font-mono">
+        <div className="p-2 space-y-2 border-t border-slate-100 bg-white text-[11px] font-mono">
           {toolCall.arguments && (
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Arguments:</span>
-              <pre className="mt-0.5 p-1.5 rounded bg-slate-900 text-slate-300 overflow-x-auto max-h-32 text-[10px] leading-relaxed no-scrollbar">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Arguments:</span>
+              <pre className="mt-0.5 p-2 rounded-lg bg-slate-50 border border-slate-200/80 text-slate-700 overflow-x-auto max-h-32 text-[10px] leading-relaxed">
                 {formatPayload(toolCall.arguments)}
               </pre>
             </div>
@@ -72,8 +72,8 @@ export const ToolCallCard = memo(function ToolCallCard({
 
           {toolCall.result && (
             <div>
-              <span className="text-[10px] uppercase font-bold text-slate-500">Result:</span>
-              <pre className="mt-0.5 p-1.5 rounded bg-slate-900 text-emerald-300/90 overflow-x-auto max-h-36 text-[10px] leading-relaxed no-scrollbar">
+              <span className="text-[10px] uppercase font-bold text-slate-400">Result:</span>
+              <pre className="mt-0.5 p-2 rounded-lg bg-slate-50 border border-slate-200/80 text-emerald-700 overflow-x-auto max-h-36 text-[10px] leading-relaxed">
                 {formatPayload(toolCall.result)}
               </pre>
             </div>
