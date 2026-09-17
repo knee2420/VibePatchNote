@@ -168,6 +168,38 @@ export {
   RunHistoryTimeline,
   AttemptStepNavigator,
 } from './ai-panel';
+export type {
+  ContextTagItem,
+  RecipePresetItem,
+  ModelConfig,
+  ContextTagBarProps,
+  ModelConfigBadgeProps,
+  PromptComposerProps,
+  ToolCallItem,
+  ProviderExecutionInfo,
+  AgentExecutionStep,
+  StepThinkingAccordionProps,
+  ToolCallCardProps,
+  ProviderExecutionBadgeProps,
+  AgentStepStreamProps,
+  DiffStatus,
+  DiffChunkItem,
+  InlineDiffViewerProps,
+  ChunkActionGroupProps,
+  SafetyApprovalGateProps,
+  DiffApprovalViewProps,
+  CitationItem,
+  GroundingScoreItem,
+  CitationBadgeProps,
+  FaithfulnessScoreCardProps,
+  MissingEvidenceAlertProps,
+  GroundingCitationBarProps,
+  RunAttemptItem,
+  AttemptStepNavigatorProps,
+  RunHistoryTimelineProps,
+  AgentPanelTab,
+  AgentWorkspacePanelProps,
+} from './ai-panel';
 // Antigravity-Inspired AI Workspace Intelligence Suite
 export {
   // Inline AI
