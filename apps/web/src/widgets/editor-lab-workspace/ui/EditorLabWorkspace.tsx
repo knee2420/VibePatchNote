@@ -1,13 +1,18 @@
+import { useCallback, useState } from 'react';
 import { useIdeWorkspaceState } from '../model/useIdeWorkspaceState';
 import { IdeWindowHeader } from './IdeWindowHeader';
 import { IdeActivityBar } from './IdeActivityBar';
-import { IdePrimarySidebar } from './IdePrimarySidebar';
+import { IdeBinderSidebar } from './IdeBinderSidebar';
 import { IdeMainEditor } from './IdeMainEditor';
 import { IdeResourceManager } from './IdeResourceManager';
 import { IdeResourceModal } from './IdeResourceModal';
 import { IdeBottomPanel } from './IdeBottomPanel';
 import { IdeSecondarySidebar } from './IdeSecondarySidebar';
+import { IdeSecondaryActivityBar, type AiPanelMode } from './IdeSecondaryActivityBar';
 import { IdeStatusBar } from './IdeStatusBar';
+import { IdeReferenceDocDrawer } from './IdeReferenceDocDrawer';
+import { FloatingReferenceWindow } from './FloatingReferenceWindow';
+import { IdeRecipeSidebar } from './IdeRecipeSidebar';
 
 export interface EditorLabWorkspaceProps {
   scaffoldId?: string;
@@ -75,11 +80,25 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
 
     // 헵타베이스 스타일 우측 리소스 모달
     resourceModalResource,
+    resourceModalProvenance,
     isResourceModalOpen,
     resourceModalWidth,
     handleOpenResourceModal,
     handleCloseResourceModal,
     handleMouseDownResourceModalResizer,
+
+    // 좌측 레퍼런스 원본 패널 & 플로팅 레퍼런스 창
+    isLeftReferenceOpen,
+    leftReferenceWidth,
+    isFloatingReferenceOpen,
+    referenceDocuments,
+    activeReferenceDoc,
+    handleToggleLeftReference,
+    handlePopoutToFloating,
+    handleDockFloatingToPanel,
+    handleCloseReference,
+    handleSelectReferenceDoc,
+    handleMouseDownLeftReferenceResizer,
 
     // 탭
     activeActivityTab,
@@ -89,8 +108,9 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
 
     // 파일 트리
     fileTree,
-    handleToggleFolder,
     handleOpenFile,
+    handleOpenPageTab,
+    handleOpenScrivenings,
 
     // 멀티 Pane 에디터
     isSplitEditor,
@@ -128,7 +148,49 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
     setSelectedModel,
     isAiStreaming,
     handleSendPrompt,
+
+    // 슬롯 소켓 바인딩 (스캐폴드 슬롯 ↔ 백데이터 리소스 매핑)
+    slotBindings,
+    handleBindSlot,
+    handleUnbindSlot,
+    handleApplySuggested,
+    handleApplyAllSuggestions,
+    handleResetAllSlots,
+    handleOpenSlotProvenance,
   } = useIdeWorkspaceState(scaffoldId);
+
+  // 슬롯 선택 및 포커스 동기화 상태 (바인더 트리 ↔ 메인 캔버스 슬롯 상호작용)
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedSlotNumber, setSelectedSlotNumber] = useState<number | null>(null);
+  const [aiPanelMode, setAiPanelMode] = useState<AiPanelMode>('audit');
+
+  const handleSelectSlot = useCallback(
+    (slotId: string, pageNumber: number, slotNumber?: number) => {
+      setSelectedSlotId(slotId);
+      const parsed = slotNumber ?? (parseInt(slotId.replace(/\D/g, ''), 10) || null);
+      setSelectedSlotNumber(parsed);
+      handleOpenPageTab(pageNumber, 'pane1');
+    },
+    [handleOpenPageTab]
+  );
+
+  const handleSelectSlotFromAi = useCallback(
+    (slotId: string) => {
+      const num = parseInt(slotId.replace(/\D/g, ''), 10) || 1;
+      const page = num > 7 ? 2 : 1;
+      handleSelectSlot(slotId, page, num);
+    },
+    [handleSelectSlot]
+  );
+
+  const handleJumpToSourceAnchor = useCallback(
+    (_slotId: string) => {
+      if (!isLeftReferenceOpen) {
+        handleToggleLeftReference();
+      }
+    },
+    [isLeftReferenceOpen, handleToggleLeftReference]
+  );
 
   return (
     <div
@@ -175,14 +237,58 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
               style={{ width: `${primarySidebarWidth}px` }}
               className="h-full shrink-0 border-r border-slate-850 flex flex-col overflow-hidden z-10 transition-none"
             >
-              <IdePrimarySidebar
-                activeTab={activeActivityTab}
-                fileTree={fileTree}
-                activeFileId={pane1ActiveId}
-                onOpenFile={(node) => handleOpenFile(node, 'pane1')}
-                onToggleFolder={handleToggleFolder}
-              />
+              {activeActivityTab === 'recipes' ? (
+                <IdeRecipeSidebar
+                  onClose={() => handleSelectActivityTab('explorer')}
+                  onOpenReferenceDoc={handleToggleLeftReference}
+                  currentDocId={detail?.docId}
+                  currentScaffoldId={resolvedScaffoldId}
+                />
+              ) : (
+                <IdeBinderSidebar
+                  scaffoldId={resolvedScaffoldId}
+                  docId={detail?.docId}
+                  documentTitle={detail?.title}
+                  slots={detail?.slots}
+                  fileTree={fileTree}
+                  activeNodeId={pane1ActiveId}
+                  activeTab={pane1ActiveTab}
+                  activePageNumber={pane1ActiveTab?.pageNumber}
+                  onOpenFile={(node) => handleOpenFile(node, 'pane1')}
+                  onSelectPage={(pageNum) => handleOpenPageTab(pageNum, 'pane1')}
+                  onOpenPageTab={(pageNum, pane) => handleOpenPageTab(pageNum, pane || 'pane1')}
+                  selectedSlotId={selectedSlotId}
+                  onSelectSlot={handleSelectSlot}
+                  onOpenScrivenings={handleOpenScrivenings}
+                  onOpenResourceModal={handleOpenResourceModal}
+                  stagingResources={resources.filter(
+                    (r) => r.category === 'linked' || r.format === 'png' || r.format === 'hwp' || r.format === 'pdf'
+                  )}
+                  slotBindings={slotBindings}
+                  onBindSlot={handleBindSlot}
+                  onUnbindSlot={handleUnbindSlot}
+                  onApplySuggested={handleApplySuggested}
+                  onApplyAllSuggestions={handleApplyAllSuggestions}
+                  onResetAllSlots={handleResetAllSlots}
+                  onOpenSlotProvenance={handleOpenSlotProvenance}
+                  onToggleReferenceDoc={handleToggleLeftReference}
+                  isReferenceDocOpen={isLeftReferenceOpen}
+                />
+              )}
             </aside>
+
+            {/* 좌측 레퍼런스 원본 슬라이드 모달 (BINDER 옆에서 튀어나오는 패널) */}
+            <IdeReferenceDocDrawer
+              isOpen={isLeftReferenceOpen}
+              onClose={handleToggleLeftReference}
+              onPopoutToFloating={handlePopoutToFloating}
+              referenceDocuments={referenceDocuments}
+              currentDoc={activeReferenceDoc}
+              onSelectDoc={handleSelectReferenceDoc}
+              width={leftReferenceWidth}
+              leftOffset={48 + (showPrimarySidebar ? primarySidebarWidth : 0)}
+              onMouseDownResizer={handleMouseDownLeftReferenceResizer}
+            />
 
             {/* 좌측 사이드바 마우스 리사이저 핸들 */}
             <div
@@ -228,6 +334,13 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
             scaffoldSlotsCount={detail?.slots?.length}
             syncState={syncState}
             liveHtml={liveHtml}
+            selectedSlotId={selectedSlotId}
+            selectedSlotNumber={selectedSlotNumber}
+            onSlotClick={handleSelectSlot}
+            onBindSlot={handleBindSlot}
+            onJumpToSourceAnchor={handleJumpToSourceAnchor}
+            onAcceptSlotSuggestion={handleApplySuggested}
+            slotBindings={slotBindings}
             onWireframeChangeHtml={handleWireframeChangeHtml}
             onPageWireframeChangeHtml={handlePageWireframeChangeHtml}
             onWireframeChangeMarkdown={handleWireframeChangeMarkdown}
@@ -317,6 +430,8 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
               className="h-full shrink-0 border-l border-slate-850 flex flex-col overflow-hidden z-10 transition-none"
             >
               <IdeSecondarySidebar
+                activeMode={aiPanelMode}
+                onSelectMode={setAiPanelMode}
                 messages={chatMessages}
                 promptInput={promptInput}
                 onChangePromptInput={setPromptInput}
@@ -325,14 +440,33 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
                 onSelectModel={setSelectedModel}
                 isStreaming={isAiStreaming}
                 onClose={() => setShowSecondarySidebar(false)}
+                slotBindings={slotBindings}
+                onApplySuggested={handleApplySuggested}
+                onApplyAllSuggestions={handleApplyAllSuggestions}
+                onSelectSlot={handleSelectSlotFromAi}
+                onBindSlot={handleBindSlot}
               />
             </aside>
           </>
         )}
 
+        {/* [우측 전역 AI 도크 액티비티 바 (Grammarly 스타일)] */}
+        <IdeSecondaryActivityBar
+          isOpen={showSecondarySidebar}
+          activeMode={aiPanelMode}
+          onSelectMode={(mode) => {
+            setAiPanelMode(mode);
+            setShowSecondarySidebar(true);
+          }}
+          onToggleOpen={() => setShowSecondarySidebar((v) => !v)}
+          score={85}
+          issueCount={2}
+        />
+
         {/* 헵타베이스 스타일 우측 슬라이드오버 리소스 모달 (중앙 에디터를 덮지 않고 우측에서 열림) */}
         <IdeResourceModal
           resource={resourceModalResource}
+          provenance={resourceModalProvenance}
           isOpen={isResourceModalOpen}
           onClose={handleCloseResourceModal}
           width={resourceModalWidth}
@@ -341,6 +475,16 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
             handleOpenResource(res, 'pane1');
             handleCloseResourceModal();
           }}
+        />
+
+        {/* 프로크리에이트 스타일 플로팅 레퍼런스 창 (화면 위에 계속 떠 있는 창) */}
+        <FloatingReferenceWindow
+          isOpen={isFloatingReferenceOpen}
+          onClose={handleCloseReference}
+          onDockToPanel={handleDockFloatingToPanel}
+          referenceDocuments={referenceDocuments}
+          currentDoc={activeReferenceDoc}
+          onSelectDoc={handleSelectReferenceDoc}
         />
       </div>
 

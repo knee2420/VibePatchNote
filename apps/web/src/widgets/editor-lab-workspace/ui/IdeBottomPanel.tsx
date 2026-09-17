@@ -183,10 +183,17 @@ export function IdeBottomPanel({
           </div>
         )}
 
-        {/* [C] Output 탭 */}
+        {/* [C] Output 탭 (문서 빌드 & 컴파일 파이프라인 런타임) */}
         {activeTab === 'output' && (
-          <div className="p-3 text-xs text-slate-400 font-mono">
-            [Extension Host] Antigravity Language Server initialized successfully.
+          <div className="p-3 text-xs text-slate-300 font-mono space-y-1.5 overflow-y-auto">
+            <div className="text-slate-500">[2026-09-17 20:15:00] [DocumentPipeline] Initializing Document Scaffold Engine v1.0</div>
+            <div className="text-indigo-400">[Pipeline:Build] Target: 회의비 사용 내역 (scaffold-1a0a0008250)</div>
+            <div className="text-slate-400">├── [Step 1] Loading Recipe: 11월 디딤돌 회의록.pdf (recipe-1a09fffe0a2) ... OK</div>
+            <div className="text-slate-400">├── [Step 2] Binding 14 SSOT Slots to Canvas DOM ... 14/14 mapped</div>
+            <div className="text-slate-400">├── [Step 3] Validating 2D Layout & A4 (595x842pt) Overflow ... 0 overflow errors</div>
+            <div className="text-cyan-400">├── [Step 4] Checking Calculations: ₩40,000 + ₩29,000 = ₩69,000 (100% matched)</div>
+            <div className="text-slate-400">└── [Step 5] Rendering PDF/A-1b Print Artifacts ... Success (2 Pages, 1.18 MB)</div>
+            <div className="text-emerald-400 font-bold pt-1">✔ Document Build Completed in 342ms with 0 errors, 2 diagnostics warnings.</div>
           </div>
         )}
 

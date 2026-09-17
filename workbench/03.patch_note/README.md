@@ -100,6 +100,7 @@ workbench/03.patch_note/
 | **01** | [`patch_note_resource_manager_scrollbar_and_thumbnails.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_resource_manager_scrollbar_and_thumbnails.md) | `v1.7.0-res-visual` | 리소스 매니저 캔바 뷰 가로 스크롤바 상시 노출, 마우스 휠 수평 스크롤 연동 및 이미지 실물 썸네일 복원 |
 | **02** | [`patch_note_resource_manager_rectangular_styling.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_resource_manager_rectangular_styling.md) | `v1.7.1-res-rectangular` | 디렉토리 컨테이너 및 비주얼 타일/썸네일 둥근 모서리(`rounded-xl`)를 각진 직사각형(`rounded-none`)으로 정돈 |
 | **03** | [`patch_note_heptabase_style_a4_document_viewer.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_heptabase_style_a4_document_viewer.md) | `v1.8.0-heptabase-viewer` | 헵타베이스 스타일 리소스 모달 실물 A4 서식([서식 1] 디딤돌 지원신청서) 및 슬라이드 덱 원본 뷰어 구현 |
+| **04** | [`patch_note_scrivener_binder_outline_segment_wireframe_integration.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_scrivener_binder_outline_segment_wireframe_integration.md) | `v1.9.0-binder-integration` | 스크리브너식 바인더 패널 교체 및 Outline-Segment-Wireframe 실데이터 3자 연동 |
 
 ---
 

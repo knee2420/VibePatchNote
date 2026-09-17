@@ -13,8 +13,11 @@ import {
   Sparkles,
   Maximize2,
   Minimize2,
+  MapPin,
+  CheckCircle2,
+  Bookmark,
 } from 'lucide-react';
-import type { ResourceItem } from '../model/types';
+import type { ResourceItem, ResourceProvenanceInfo } from '../model/types';
 import { A4DocumentViewer } from './A4DocumentViewer';
 
 export interface IdeResourceModalProps {
@@ -24,6 +27,7 @@ export interface IdeResourceModalProps {
   onOpenInEditor?: (resource: ResourceItem) => void;
   width?: number;
   onMouseDownResizer?: (e: React.MouseEvent) => void;
+  provenance?: ResourceProvenanceInfo | null;
 }
 
 export function IdeResourceModal({
@@ -33,6 +37,7 @@ export function IdeResourceModal({
   onOpenInEditor,
   width = 620,
   onMouseDownResizer,
+  provenance,
 }: IdeResourceModalProps) {
   const [copied, setCopied] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -194,6 +199,56 @@ export function IdeResourceModal({
           <span>{resource.updatedAt}</span>
         </div>
       </div>
+
+      {/* 2-1. 출처 표시 (Provenance Inspector Banner) */}
+      {provenance && (
+        <div className="mx-3.5 mt-2.5 p-3 rounded-xl bg-gradient-to-br from-indigo-950/90 via-slate-900/95 to-slate-950 border border-indigo-500/40 shadow-xl text-xs space-y-2.5 shrink-0 select-text animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 font-bold text-indigo-200">
+              <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="text-xs tracking-wide">출처 표시 (Provenance Info)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-mono border border-emerald-500/40 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                <span>신뢰도 {provenance.confidence}</span>
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 font-mono text-[10px] border border-indigo-500/40">
+                슬롯 #{provenance.slotNumber}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1.5 border-t border-indigo-500/20">
+            <div className="flex items-center gap-1.5">
+              <Bookmark className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+              <span className="text-slate-400">매핑 슬롯:</span>
+              <span className="font-semibold text-slate-100">
+                #{provenance.slotNumber} {provenance.slotLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400">인용 위치:</span>
+              <span className="font-mono font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 shadow-inner">
+                {provenance.sourceName} - {provenance.sourceLocation}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-2.5 rounded-lg bg-slate-950/90 border border-slate-800/80 text-[11px] font-mono space-y-1">
+            <div className="flex items-center justify-between text-[10px] text-slate-500">
+              <span className="flex items-center gap-1">
+                <FileText className="w-3 h-3 text-indigo-400" />
+                <span>원문 발췌 내용</span>
+              </span>
+              <span className="text-emerald-400/90 text-[9px]">✓ Provenance Verified</span>
+            </div>
+            <p className="text-emerald-300 font-medium whitespace-pre-wrap leading-relaxed">
+              "{provenance.value || provenance.highlightText}"
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 3. 본문 뷰어 영역 (헵타베이스 스타일 실물 뷰어) */}
       <div className="flex-1 overflow-y-auto p-3 scrollbar-thin text-slate-200">

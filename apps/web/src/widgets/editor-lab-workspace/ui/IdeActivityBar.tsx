@@ -26,7 +26,7 @@ export function IdeActivityBar({
     { id: 'search', label: 'Search (Ctrl+Shift+F)', icon: <Search className="w-5 h-5" /> },
     { id: 'sourceControl', label: 'Source Control (Ctrl+Shift+G)', icon: <GitBranch className="w-5 h-5" />, badge: '2' },
     { id: 'runDebug', label: 'Run & Debug (Ctrl+Shift+D)', icon: <Play className="w-5 h-5" /> },
-    { id: 'extensions', label: 'Extensions (Ctrl+Shift+X)', icon: <Layers className="w-5 h-5" /> },
+    { id: 'recipes', label: 'Recipes (문서 저작 규격 속성)', icon: <Layers className="w-5 h-5 text-indigo-400" /> },
     { id: 'antigravity', label: 'Antigravity AI Agent', icon: <Sparkles className="w-5 h-5 text-indigo-400" /> },
   ];
 

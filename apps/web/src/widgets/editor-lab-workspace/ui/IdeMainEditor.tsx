@@ -47,10 +47,17 @@ interface IdeMainEditorProps {
   scaffoldSlotsCount?: number;
   syncState?: string;
   liveHtml?: string;
+  selectedSlotId?: string | null;
+  selectedSlotNumber?: number | null;
+  onSlotClick?: (slotId: string, pageNumber: number, slotNumber?: number) => void;
+  onBindSlot?: (slotId: string, value: string, resourceName?: string, resourceId?: string) => void;
   onWireframeChangeHtml?: (html: string) => void;
   onPageWireframeChangeHtml?: (pageNumber: number, html: string) => void;
   onWireframeChangeMarkdown?: (md: string) => void;
   onSaveImmediately?: () => Promise<void>;
+  onJumpToSourceAnchor?: (slotId: string) => void;
+  onAcceptSlotSuggestion?: (slotId: string) => void;
+  slotBindings?: Record<string, any>;
 }
 
 export function IdeMainEditor({
@@ -83,10 +90,17 @@ export function IdeMainEditor({
   scaffoldSlotsCount,
   syncState,
   liveHtml,
+  selectedSlotId,
+  selectedSlotNumber,
+  onSlotClick,
+  onBindSlot,
   onWireframeChangeHtml,
   onPageWireframeChangeHtml,
   onWireframeChangeMarkdown,
   onSaveImmediately,
+  onJumpToSourceAnchor,
+  onAcceptSlotSuggestion,
+  slotBindings,
 }: IdeMainEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -277,6 +291,13 @@ export function IdeMainEditor({
               activeTab={activeTab}
               scaffoldId={scaffoldId}
               liveHtml={liveHtml}
+              selectedSlotId={selectedSlotId}
+              selectedSlotNumber={selectedSlotNumber}
+              onSlotClick={onSlotClick}
+              onBindSlot={onBindSlot}
+              onJumpToSourceAnchor={onJumpToSourceAnchor}
+              onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+              slotBindings={slotBindings}
               onWireframeChangeHtml={onWireframeChangeHtml}
               onPageWireframeChangeHtml={onPageWireframeChangeHtml}
               onWireframeChangeMarkdown={onWireframeChangeMarkdown}

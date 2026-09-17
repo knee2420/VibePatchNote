@@ -5,6 +5,7 @@ export type ActivityBarTab =
   | 'search'
   | 'sourceControl'
   | 'runDebug'
+  | 'recipes'
   | 'extensions'
   | 'antigravity';
 
@@ -111,5 +112,39 @@ export interface ResourceItem {
   bundleId?: string;
   bundleName?: string;
   thumbnailUrl?: string;
+  docId?: string;
 }
+
+/** 슬롯 소켓 바인딩 상태 */
+export type SlotBindingStatus = 'unbound' | 'suggested' | 'bound';
+
+/** 슬롯 소켓 바인딩 정보 모델 */
+export interface SlotBindingInfo {
+  slotId: string;
+  slotNumber: number;
+  label: string;
+  pageNumber: number;
+  status: SlotBindingStatus;
+  currentValue: string; // 현재 실제 슬롯 내용
+  suggestedValue: string; // 레퍼런스/AI 추천 데이터
+  confidence?: string; // e.g. "98%"
+  resourceName?: string; // 출처 리소스명 (e.g. "사전 계획서.pdf", "회의록_초안.md")
+  resourceId?: string;
+  resourcePath?: string;
+  sourceLocation?: string; // 출처 세부 위치 (e.g. "2p 17L", "1p 12L", "영수증 전문")
+  highlightText?: string; // 원본 리소스 뷰어에서 하이라이트할 원문 텍스트
+}
+
+/** 리소스 원본 출처(Provenance) 검증 뷰어 모델 */
+export interface ResourceProvenanceInfo {
+  slotId: string;
+  slotNumber?: number;
+  slotLabel: string;
+  value: string;
+  sourceName: string;
+  sourceLocation: string; // e.g. "2p 17L"
+  confidence?: string; // e.g. "98%"
+  highlightText?: string;
+}
+
 

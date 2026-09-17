@@ -93,3 +93,69 @@ export function extractAllPages(fullHtml: string): Array<{ pageNumber: number; h
   return [{ pageNumber: 1, html: fullHtml }];
 }
 
+/**
+ * 전체 HTML 내의 특정 슬롯(slotId)의 텍스트 내용을 주입/교체합니다.
+ */
+export function injectSlotValueInHtml(fullHtml: string, slotId: string, value: string): string {
+  if (!fullHtml) return fullHtml;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHtml, 'text/html');
+    const slotEl = doc.querySelector(`span[data-type="scaffold-slot"][data-slot-id="${slotId}"]`);
+    if (slotEl) {
+      slotEl.textContent = value;
+      return doc.body.innerHTML;
+    }
+  } catch (err) {
+    console.error(`[injectSlotValueInHtml] Failed to inject slot ${slotId}:`, err);
+  }
+  return fullHtml;
+}
+
+/**
+ * 전체 HTML 내의 여러 슬롯을 한 번에 일괄 주입/교체합니다 (전체 추천 적용 등).
+ */
+export function injectMultipleSlotsInHtml(fullHtml: string, updates: Record<string, string>): string {
+  if (!fullHtml) return fullHtml;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHtml, 'text/html');
+    let hasChanges = false;
+    Object.entries(updates).forEach(([slotId, val]) => {
+      const slotEl = doc.querySelector(`span[data-type="scaffold-slot"][data-slot-id="${slotId}"]`);
+      if (slotEl) {
+        slotEl.textContent = val;
+        hasChanges = true;
+      }
+    });
+    if (hasChanges) {
+      return doc.body.innerHTML;
+    }
+  } catch (err) {
+    console.error('[injectMultipleSlotsInHtml] Error:', err);
+  }
+  return fullHtml;
+}
+
+/**
+ * 전체 HTML에서 각 슬롯(slotId)에 현재 채워져 있는 텍스트 내용을 추출합니다.
+ */
+export function extractSlotValuesFromHtml(fullHtml: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!fullHtml) return result;
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHtml, 'text/html');
+    const slotEls = doc.querySelectorAll('span[data-type="scaffold-slot"][data-slot-id]');
+    slotEls.forEach((el) => {
+      const id = el.getAttribute('data-slot-id');
+      if (id) {
+        result[id] = el.textContent?.trim() || '';
+      }
+    });
+  } catch (err) {
+    console.error('[extractSlotValuesFromHtml] Error:', err);
+  }
+  return result;
+}
+

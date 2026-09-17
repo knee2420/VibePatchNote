@@ -21,6 +21,13 @@ export interface WireframeCanvasViewportProps {
   gridCols: 2 | 3 | 4;
   gridScale: number;
   onSelectPage?: (pageNumber: number) => void;
+  selectedSlotId?: string | null;
+  selectedSlotNumber?: number | null;
+  onSlotClick?: (slotId: string, pageNumber: number, slotNumber?: number) => void;
+  onBindSlot?: (slotId: string, value: string, resourceName?: string, resourceId?: string) => void;
+  onJumpToSourceAnchor?: (slotId: string) => void;
+  onAcceptSlotSuggestion?: (slotId: string) => void;
+  slotBindings?: Record<string, any>;
 }
 
 export function WireframeCanvasViewport({
@@ -37,6 +44,13 @@ export function WireframeCanvasViewport({
   gridCols,
   gridScale,
   onSelectPage,
+  selectedSlotId,
+  selectedSlotNumber,
+  onSlotClick,
+  onBindSlot,
+  onJumpToSourceAnchor,
+  onAcceptSlotSuggestion,
+  slotBindings,
 }: WireframeCanvasViewportProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
@@ -124,6 +138,13 @@ export function WireframeCanvasViewport({
             documentKey={`${activeTab.scaffoldId || scaffoldId}-horiz`}
             containerWidth={horizontalSpread === 2 ? containerWidth / 2 : containerWidth}
             customScale={spreadScale}
+            activeSlotId={selectedSlotId}
+            activeMappingNumber={selectedSlotNumber}
+            onSlotClick={onSlotClick}
+            onBindSlot={onBindSlot}
+            onJumpToSourceAnchor={onJumpToSourceAnchor}
+            onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+            slotBindings={slotBindings}
             onChangeHtml={handlePageChange}
             onChangeMarkdown={onWireframeChangeMarkdown}
             onOpenSoloTab={onSelectPage}
@@ -139,6 +160,13 @@ export function WireframeCanvasViewport({
                 documentKey={`${activeTab.scaffoldId || scaffoldId}-horiz`}
                 containerWidth={containerWidth / 2}
                 customScale={spreadScale}
+                activeSlotId={selectedSlotId}
+                activeMappingNumber={selectedSlotNumber}
+                onSlotClick={onSlotClick}
+                onBindSlot={onBindSlot}
+                onJumpToSourceAnchor={onJumpToSourceAnchor}
+                onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+                slotBindings={slotBindings}
                 onChangeHtml={handlePageChange}
                 onChangeMarkdown={onWireframeChangeMarkdown}
                 onOpenSoloTab={onSelectPage}
@@ -190,6 +218,13 @@ export function WireframeCanvasViewport({
               documentKey={`grid-${activeTab.scaffoldId || scaffoldId}`}
               containerWidth={containerWidth / gridCols}
               customScale={gridScale}
+              activeSlotId={selectedSlotId}
+              activeMappingNumber={selectedSlotNumber}
+              onSlotClick={onSlotClick}
+              onBindSlot={onBindSlot}
+              onJumpToSourceAnchor={onJumpToSourceAnchor}
+              onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+              slotBindings={slotBindings}
               onChangeHtml={handlePageChange}
               onChangeMarkdown={onWireframeChangeMarkdown}
               onOpenSoloTab={onSelectPage}
@@ -214,6 +249,13 @@ export function WireframeCanvasViewport({
           pageHtml={extractPageHtml(liveHtml, activeTab.pageNumber)}
           documentKey={`${activeTab.scaffoldId || scaffoldId}-solo`}
           containerWidth={containerWidth}
+          activeSlotId={selectedSlotId}
+          activeMappingNumber={selectedSlotNumber}
+          onSlotClick={onSlotClick}
+          onBindSlot={onBindSlot}
+          onJumpToSourceAnchor={onJumpToSourceAnchor}
+          onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+          slotBindings={slotBindings}
           onChangeHtml={handlePageChange}
           onChangeMarkdown={onWireframeChangeMarkdown}
         />
@@ -228,6 +270,13 @@ export function WireframeCanvasViewport({
               pageHtml={html}
               documentKey={`${activeTab.scaffoldId || scaffoldId}-full`}
               containerWidth={containerWidth}
+              activeSlotId={selectedSlotId}
+              activeMappingNumber={selectedSlotNumber}
+              onSlotClick={onSlotClick}
+              onBindSlot={onBindSlot}
+              onJumpToSourceAnchor={onJumpToSourceAnchor}
+              onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+              slotBindings={slotBindings}
               onChangeHtml={handlePageChange}
               onChangeMarkdown={onWireframeChangeMarkdown}
               onOpenSoloTab={onSelectPage}

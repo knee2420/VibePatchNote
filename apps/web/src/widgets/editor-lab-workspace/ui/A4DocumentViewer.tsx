@@ -21,11 +21,14 @@ export function A4DocumentViewer({ resource, onOpenInEditor }: A4DocumentViewerP
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const name = resource.name.toLowerCase();
-  const isPptOrPdf = name.includes('ppt') || name.includes('발표') || resource.format.toLowerCase() === 'pdf';
+  const format = resource.format.toLowerCase();
+  const isPresentation = name.includes('ppt') || name.includes('발표') || name.includes('슬라이드');
   const isMeetingNote = name.includes('회의록');
-  const isReport = name.includes('결과보고') || name.includes('종합보고');
+  const isReport = name.includes('결과보고') || name.includes('종합보고') || name.includes('보고서');
+  const isPlan = name.includes('계획서') || name.includes('사전');
+  const isLogOrText = format === 'txt' || format === 'log' || format === 'csv';
 
-  const totalPages = isPptOrPdf ? 2 : isReport ? 2 : 1;
+  const totalPages = isPresentation ? 2 : isReport ? 2 : isPlan ? 2 : 1;
 
   const handleZoomIn = () => setZoom((prev) => Math.min(prev + 15, 140));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 15, 70));
@@ -36,7 +39,7 @@ export function A4DocumentViewer({ resource, onOpenInEditor }: A4DocumentViewerP
       {/* 1. 상단 헵타베이스 스타일 문서 뷰어 제어 툴바 */}
       <div className="h-10 px-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300 shrink-0 select-none">
         <div className="flex items-center gap-2">
-          {isPptOrPdf ? (
+          {isPresentation ? (
             <Presentation className="w-4 h-4 text-rose-400" />
           ) : (
             <FileText className="w-4 h-4 text-emerald-400" />
@@ -45,7 +48,7 @@ export function A4DocumentViewer({ resource, onOpenInEditor }: A4DocumentViewerP
             {resource.name}
           </span>
           <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
-            {isPptOrPdf ? 'SLIDE DECK' : 'A4 DOCUMENT'}
+            {isPresentation ? 'SLIDE DECK (16:9)' : 'A4 DOCUMENT (210×297mm)'}
           </span>
         </div>
 
@@ -128,7 +131,7 @@ export function A4DocumentViewer({ resource, onOpenInEditor }: A4DocumentViewerP
           className="shrink-0"
         >
           {/* A. 프레젠테이션 슬라이드 (16:9 와이드) */}
-          {isPptOrPdf ? (
+          {isPresentation ? (
             <div className="w-[620px] aspect-[16/9] bg-slate-900 text-white rounded-lg shadow-2xl border border-slate-700 p-8 flex flex-col justify-between relative overflow-hidden select-text">
               {/* 슬라이드 1: 표지 */}
               {currentPage === 1 ? (
@@ -273,8 +276,158 @@ export function A4DocumentViewer({ resource, onOpenInEditor }: A4DocumentViewerP
                 </div>
               </div>
             </div>
+          ) : isReport ? (
+            /* C. 종합 활동 및 성과보고서 A4 서식 */
+            <div className="w-[560px] min-h-[780px] bg-white text-slate-900 shadow-2xl border border-slate-300 p-8 sm:p-10 flex flex-col justify-between select-text font-serif">
+              <div>
+                <div className="text-right text-[11px] text-slate-500 font-sans mb-1">[서식 4]</div>
+                <h1 className="text-xl font-bold text-center text-slate-950 mb-6 tracking-tight font-sans">
+                  창의미래설계 디딤돌 사업 최종 종합보고서
+                </h1>
+
+                <table className="w-full border-collapse border border-slate-800 text-xs font-sans mb-4">
+                  <tbody>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 w-24 text-center font-medium text-slate-800">
+                        팀명
+                      </th>
+                      <td className="border border-slate-800 p-2 font-bold text-slate-900">딥드론 (DeepDrone)</td>
+                      <th className="border border-slate-800 bg-slate-50 p-2 w-20 text-center font-medium text-slate-800">
+                        팀장
+                      </th>
+                      <td className="border border-slate-800 p-2">김진우 (전기컴퓨터공학부)</td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800">
+                        과제명
+                      </th>
+                      <td colSpan={3} className="border border-slate-800 p-2 font-semibold text-slate-900">
+                        딥러닝 기반 실내외 자율주행 및 충돌회피 드론 플랫폼 개발
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800">
+                        수행기간
+                      </th>
+                      <td colSpan={3} className="border border-slate-800 p-2 text-[11px]">
+                        2018년 04월 01일 ~ 2018년 11월 30일 (총 8개월)
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800">
+                        예산 집행
+                      </th>
+                      <td colSpan={3} className="border border-slate-800 p-2 font-mono text-[11px]">
+                        지원금 3,500,000원 / 집행 3,440,000원 (집행률 98.3%) / 잔액 60,000원 반납
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800 align-top h-44">
+                        핵심 성과<br />요약
+                      </th>
+                      <td colSpan={3} className="border border-slate-800 p-3 align-top leading-relaxed text-slate-800 text-[11px]">
+                        <strong>1. 자율 충돌회피 쿼드콥터 기체 시제품 완성</strong><br />
+                        - 3D 프린팅 프레임 기반 450급 경량 쿼드콥터 설계 및 호버링 안정성 확보 (런타임 18분)<br />
+                        - ROS 기반 비전 SLAM + 초음파/2D LiDAR 센서 퓨전 (0.1m 정밀 장애물 탐지)<br /><br />
+                        <strong>2. 실증 테스트 및 검증 결과</strong><br />
+                        - 실내 비행 테스트 50회 중 47회 회피 성공 (성공률 94.2%)<br />
+                        - 교내 ACE+ 창의미래설계 성과발표회 18번 부스 실물 전시 및 시연 완료<br /><br />
+                        <strong>3. 오픈소스 산출물 공개</strong><br />
+                        - 펌웨어 및 센서 노드 소스코드 GitHub 공개, 부품 회로도 및 3D 모델링 STL 파일 아카이빙
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="text-center font-sans space-y-4 pt-2 border-t border-slate-300">
+                <p className="text-xs text-slate-900 font-medium">위와 같이 디딤돌 사업 활동 최종 보고서를 제출합니다.</p>
+                <p className="text-xs text-slate-800 font-mono tracking-widest my-2">2018 년 &nbsp; 11 월 &nbsp; 28 일</p>
+                <div className="flex justify-between items-center px-6 text-xs text-slate-800">
+                  <span>지도교수: ACE 디딤돌 사업단장</span>
+                  <span>보고자(팀장): 김진우 (인)</span>
+                </div>
+              </div>
+            </div>
+          ) : isPlan ? (
+            /* D. 팀 활동 계획서 A4 서식 */
+            <div className="w-[560px] min-h-[780px] bg-white text-slate-900 shadow-2xl border border-slate-300 p-8 sm:p-10 flex flex-col justify-between select-text font-serif">
+              <div>
+                <div className="text-right text-[11px] text-slate-500 font-sans mb-1">[서식 1-1]</div>
+                <h1 className="text-xl font-bold text-center text-slate-950 mb-6 tracking-tight font-sans">
+                  창의미래설계 디딤돌 사업 사전 계획서
+                </h1>
+
+                <table className="w-full border-collapse border border-slate-800 text-xs font-sans mb-4">
+                  <tbody>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 w-24 text-center font-medium text-slate-800">팀명</th>
+                      <td className="border border-slate-800 p-2 font-bold text-slate-900">딥드론 (DeepDrone)</td>
+                      <th className="border border-slate-800 bg-slate-50 p-2 w-20 text-center font-medium text-slate-800">인원</th>
+                      <td className="border border-slate-800 p-2">김진우 외 3명 (총 4명)</td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800">과제명</th>
+                      <td colSpan={3} className="border border-slate-800 p-2 font-semibold text-slate-900">
+                        딥러닝 기반 실내외 자율주행 및 충돌회피 드론 플랫폼 개발
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800 align-top h-40">월별 계획</th>
+                      <td colSpan={3} className="border border-slate-800 p-2.5 text-[11px] leading-relaxed">
+                        - 04월: 팀 빌딩, 요구사항 정의 및 부품 목록 작성<br />
+                        - 05~06월: 기체 프레임 3D 모델링, 모터/배터리 기초 테스트<br />
+                        - 07~08월: ROS 환경 셋업, LiDAR 및 카메라 센서 인터페이스 구축<br />
+                        - 09~10월: 비전 기반 장애물 회피 알고리즘 개발 및 실내 비행 실증<br />
+                        - 11월: 최종 성과발표회 참가, 시제품 부스 전시 및 정산 보고
+                      </td>
+                    </tr>
+                    <tr>
+                      <th className="border border-slate-800 bg-slate-50 p-2 text-center font-medium text-slate-800">예산안</th>
+                      <td colSpan={3} className="border border-slate-800 p-2 font-mono text-[11px]">
+                        재료비 2,800,000원 + 다과비 400,000원 + 인쇄비 300,000원 = 총 3,500,000원
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="text-center font-sans space-y-3 pt-2 border-t border-slate-300">
+                <p className="text-xs text-slate-900">위 계획에 따라 충실히 과제를 수행하겠습니다.</p>
+                <p className="text-xs text-slate-800 font-mono">2018년 04월 05일</p>
+                <div className="text-right pr-6 text-xs text-slate-800">팀장: 김진우 (인)</div>
+              </div>
+            </div>
+          ) : isLogOrText ? (
+            /* E. 로그 / 텍스트 원문 뷰어 */
+            <div className="w-[560px] min-h-[780px] bg-slate-950 text-slate-200 shadow-2xl border border-slate-800 p-6 rounded-lg flex flex-col justify-between font-mono text-xs select-text">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2 text-slate-400 text-[11px]">
+                  <span>FILE: {resource.name}</span>
+                  <span>ENCODING: UTF-8</span>
+                </div>
+                <div className="p-3 bg-slate-900 rounded border border-slate-800/80 font-mono text-[11px] leading-relaxed text-emerald-400/90 overflow-x-auto">
+                  <p className="text-slate-500"># Flight Telemetry Sensor Log - DeepDrone 2018-11-05</p>
+                  <p className="text-slate-500"># Sample Rate: 50Hz, Sensors: LiDAR + OpticalFlow + IMU</p>
+                  <br />
+                  <p>[00:00.012] INFO: System arming initiated... SUCCESS</p>
+                  <p>[00:00.104] INFO: Quadcopter thrust 14.2N, takeoff altitude target 1.20m</p>
+                  <p>[00:01.320] STAB: Altitude hold stable at 1.19m (±0.02m)</p>
+                  <p>[00:03.450] SENS: LiDAR front obstacle detected at 2.45m, angle +12.4 deg</p>
+                  <p>[00:04.110] PLAN: Generating collision avoidance waypoint [x: 1.2, y: -0.8, z: 1.2]</p>
+                  <p>[00:05.780] NAV: Waypoint reached. Obstacle cleared with margin 0.94m</p>
+                  <p>[00:08.920] INFO: Battery status: 15.8V (92%), Current draw: 18.4A</p>
+                  <p>[00:12.400] SENS: Optical flow confidence 0.98, indoor drift: 0.03m/s</p>
+                  <p className="text-indigo-400">[00:15.000] LOG END: Test sequence 18-A completed without incident</p>
+                </div>
+              </div>
+              <div className="text-slate-500 text-[10px] border-t border-slate-800 pt-2 flex justify-between">
+                <span>LINES: 420 | BYTES: 28.4 KB</span>
+                <span>STATUS: VERIFIED CHECKSUM</span>
+              </div>
+            </div>
           ) : (
-            /* C. [서식 1] 지원신청서 실물 A4 서식 (첨부 2 헵타베이스 화면 100% 일치 구현) */
+            /* F. [서식 1] 지원신청서 실물 A4 서식 (기본 서식) */
             <div className="w-[560px] min-h-[780px] bg-white text-slate-900 shadow-2xl border border-slate-300 p-8 sm:p-10 flex flex-col justify-between select-text font-serif">
               <div>
                 {/* [서식 1] 헤더 */}
