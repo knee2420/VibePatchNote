@@ -5,6 +5,7 @@ import {
   Play,
   Layers,
   Sparkles,
+  FolderKanban,
   User,
   Settings,
 } from 'lucide-react';
@@ -21,6 +22,7 @@ export function IdeActivityBar({
 }: IdeActivityBarProps) {
   const topNavItems: { id: ActivityBarTab; label: string; icon: React.ReactNode; badge?: string }[] = [
     { id: 'explorer', label: 'Explorer (Ctrl+Shift+E)', icon: <Files className="w-5 h-5" /> },
+    { id: 'resources', label: 'Resource Manager (Ctrl+Shift+R)', icon: <FolderKanban className="w-5 h-5 text-amber-400" /> },
     { id: 'search', label: 'Search (Ctrl+Shift+F)', icon: <Search className="w-5 h-5" /> },
     { id: 'sourceControl', label: 'Source Control (Ctrl+Shift+G)', icon: <GitBranch className="w-5 h-5" />, badge: '2' },
     { id: 'runDebug', label: 'Run & Debug (Ctrl+Shift+D)', icon: <Play className="w-5 h-5" /> },

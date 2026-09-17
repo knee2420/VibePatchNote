@@ -1,6 +1,7 @@
 /** Activity Bar 활성 탭 */
 export type ActivityBarTab =
   | 'explorer'
+  | 'resources'
   | 'search'
   | 'sourceControl'
   | 'runDebug'
@@ -67,4 +68,48 @@ export interface ChatMessageItem {
 /** 드래그 앤 드롭 전송 페이로드 */
 export type DragPayload =
   | { type: 'tab'; tabId: string; sourcePane: 'pane1' | 'pane2' }
-  | { type: 'file'; fileId: string };
+  | { type: 'file'; fileId: string }
+  | { type: 'resource'; resourceId: string; path: string; name: string };
+
+/** 와이어프레임 4가지 페이지 뷰 모드 */
+export type WireframeViewMode =
+  | 'vertical' // 세로 연속 뷰 (기본값)
+  | 'horizontal' // 가로 페이징 뷰 (1P/2P 스프레드)
+  | 'pure-editor' // 순수 Tiptap 에디터 모드
+  | 'grid'; // 그리드 조망 모드 (3~4열 바둑판)
+
+/** 리소스 매니저 뷰 모드 (동일한 데이터를 서로 다른 관점으로 투영) */
+export type ResourceViewMode = 'directories' | 'categories' | 'recent' | 'list';
+
+/** 하위 호환을 위한 리소스 매니저 활성 탭 */
+export type ResourceManagerTab = 'pipelines' | 'assets' | 'schemas' | 'linked' | ResourceViewMode;
+
+/** 디렉토리 묶음 (Directory Bundle) 모델 */
+export interface DirectoryBundle {
+  id: string;
+  name: string; // e.g. "업무 자동화 샘플", "96.data_pipeline", "에셋 라이브러리"
+  path: string;
+  sourceType: 'local' | 'pipeline' | 'builtin';
+  isCollapsed?: boolean;
+  items: ResourceItem[];
+}
+
+/** 리소스 아이템 모델 */
+export interface ResourceItem {
+  id: string;
+  name: string;
+  category: 'pipelines' | 'assets' | 'schemas' | 'linked';
+  pipelineSource: string; // e.g. '96.data_pipeline', 'pdf_ingestion', 'telemetry_archive', 'scaffold_store', 'local_folder'
+  format: string; // 'json', 'md', 'html', 'png', 'svg', 'ts', 'hwp', 'pdf'
+  size: string;
+  updatedAt: string;
+  description?: string;
+  path: string;
+  content?: string;
+  slotsCount?: number;
+  isLocal?: boolean;
+  bundleId?: string;
+  bundleName?: string;
+  thumbnailUrl?: string;
+}
+

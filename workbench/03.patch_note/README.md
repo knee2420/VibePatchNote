@@ -87,9 +87,22 @@ workbench/03.patch_note/
 | **04** | [`patch_note_document_viewer_package.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_document_viewer_package.md) | `v1.3.0-viewer-package` | PDF 가로 스프레드 엔진 및 `@vibe/document-viewer` 공용 워크스페이스 패키지 추출 (Turborepo 솔루션 준수) |
 | **05** | [`patch_note_rules_skills_packages_sync.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_rules_skills_packages_sync.md) | `v1.3.1-rules-sync` | `.agents` Rules & Skills 전수 조사 및 모노레포(`packages/*`) 사양 거버넌스 동기화 |
 | **06** | [`patch_note_node_spread_anchor.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_node_spread_anchor.md) | `v1.4.0-spread-anchor` | 독립형 `<NodeSpreadAnchor>` 컴포넌트 분리 및 2페이지 이상 조건부 노출 인터랙션 고도화 |
-| **07** | [`patch_note_autofit_and_wheel_scroll.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-03/patch_note_autofit_and_wheel_scroll.md) | `v1.5.0-fit-wheel-refactor` | 콘텐츠 크기 자동 맞춤(Auto-fit), 선택 노드 휠 스크롤 연동 및 공용 패키지-호스트 관심사 분리 |
+| **07** | [`patch_note_autofit_and_wheel_scroll.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_resource_manager_scrollbar_and_thumbnails.md) | `v1.5.0-fit-wheel-refactor` | 콘텐츠 크기 자동 맞춤(Auto-fit), 선택 노드 휠 스크롤 연동 및 공용 패키지-호스트 관심사 분리 |
+
+### 📅 `2026-09-14`
+| 번호 | 카드 파일명 | 버전 | 주제 요약 |
+| :---: | :--- | :---: | :--- |
+| **01** | [`document_recipe_checkpoints.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-14/document_recipe_checkpoints.md) | `v1.6.0-recipe-aggregate` | DocumentRecipe 5대 체크포인트 구현 및 수명주기 격리, 원천 삭제 시 레시피 보존 거버넌스 |
+
+### 📅 `2026-09-17`
+| 번호 | 카드 파일명 | 버전 | 주제 요약 |
+| :---: | :--- | :---: | :--- |
+| **01** | [`patch_note_resource_manager_scrollbar_and_thumbnails.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_resource_manager_scrollbar_and_thumbnails.md) | `v1.7.0-res-visual` | 리소스 매니저 캔바 뷰 가로 스크롤바 상시 노출, 마우스 휠 수평 스크롤 연동 및 이미지 실물 썸네일 복원 |
+| **02** | [`patch_note_resource_manager_rectangular_styling.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_resource_manager_rectangular_styling.md) | `v1.7.1-res-rectangular` | 디렉토리 컨테이너 및 비주얼 타일/썸네일 둥근 모서리(`rounded-xl`)를 각진 직사각형(`rounded-none`)으로 정돈 |
+| **03** | [`patch_note_heptabase_style_a4_document_viewer.md`](file:///c:/AI_Projects/WebNovelAssistant/VibePatchNote/workbench/03.patch_note/2026-09-17/patch_note_heptabase_style_a4_document_viewer.md) | `v1.8.0-heptabase-viewer` | 헵타베이스 스타일 리소스 모달 실물 A4 서식([서식 1] 디딤돌 지원신청서) 및 슬라이드 덱 원본 뷰어 구현 |
 
 ---
 
 * **최초 제정일**: 2026-09-03
+* **최근 갱신일**: 2026-09-17
 * **관리 주체**: VibePatchNote Core Development Team & Antigravity Pair Programmer

@@ -1,14 +1,14 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import {
   ChevronRight,
   Save,
-  Layers,
   ArrowRightLeft,
 } from 'lucide-react';
-import { DocumentWireframeEditor } from '@/features/document-wireframe-editor';
-import { extractPageHtml } from '../lib/scaffoldPageUtils';
+import { extractAllPages } from '../lib/scaffoldPageUtils';
 import { IdeTabBar } from './IdeTabBar';
-import type { EditorTabItem, DragPayload } from '../model/types';
+import { WireframeViewModeBar } from './WireframeViewModeBar';
+import { WireframeCanvasViewport } from './WireframeCanvasViewport';
+import type { EditorTabItem, DragPayload, WireframeViewMode } from '../model/types';
 
 interface IdeMainEditorProps {
   pane1Tabs: EditorTabItem[];
@@ -90,6 +90,25 @@ export function IdeMainEditor({
 }: IdeMainEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // 각 Pane별 4가지 뷰 모드 상태 (vertical, horizontal, pure-editor, grid)
+  const [viewMode1, setViewMode1] = useState<WireframeViewMode>('vertical');
+  const [viewMode2, setViewMode2] = useState<WireframeViewMode>('vertical');
+
+  const [horizPage1, setHorizPage1] = useState<number>(1);
+  const [horizPage2, setHorizPage2] = useState<number>(1);
+  const [horizSpread1, setHorizSpread1] = useState<1 | 2>(1);
+  const [horizSpread2, setHorizSpread2] = useState<1 | 2>(1);
+
+  const [gridCols1, setGridCols1] = useState<2 | 3 | 4>(3);
+  const [gridCols2, setGridCols2] = useState<2 | 3 | 4>(3);
+  const [gridScale1, setGridScale1] = useState<number>(0.6);
+  const [gridScale2, setGridScale2] = useState<number>(0.6);
+
+  // 전체 페이지 수
+  const totalPages = useMemo(() => {
+    return extractAllPages(liveHtml || '').length;
+  }, [liveHtml]);
+
   // 드롭 타겟 하이라이트 상태
   const [isDragOverPane1, setIsDragOverPane1] = useState(false);
   const [isDragOverPane2, setIsDragOverPane2] = useState(false);
@@ -135,6 +154,17 @@ export function IdeMainEditor({
     const linesCount = activeTab ? activeTab.content.split('\n').length : 1;
     const lineNumbers = Array.from({ length: Math.max(linesCount, 25) }, (_, i) => i + 1);
 
+    const viewMode = pane === 'pane1' ? viewMode1 : viewMode2;
+    const setViewMode = pane === 'pane1' ? setViewMode1 : setViewMode2;
+    const horizPage = pane === 'pane1' ? horizPage1 : horizPage2;
+    const setHorizPage = pane === 'pane1' ? setHorizPage1 : setHorizPage2;
+    const horizSpread = pane === 'pane1' ? horizSpread1 : horizSpread2;
+    const setHorizSpread = pane === 'pane1' ? setHorizSpread1 : setHorizSpread2;
+    const gridCols = pane === 'pane1' ? gridCols1 : gridCols2;
+    const setGridCols = pane === 'pane1' ? setGridCols1 : setGridCols2;
+    const gridScale = pane === 'pane1' ? gridScale1 : gridScale2;
+    const setGridScale = pane === 'pane1' ? setGridScale1 : setGridScale2;
+
     return (
       <div
         style={style}
@@ -172,24 +202,33 @@ export function IdeMainEditor({
           </div>
         )}
 
-        {/* 3. 에디터 뷰포트 (와이어프레임 캔버스 vs 코드 에디터) */}
+        {/* 3. 에디터 뷰포트 (와이어프레임 4가지 뷰모드 vs 코드 에디터) */}
         {activeTab?.type === 'wireframe' ? (
           <div className="flex-1 flex flex-col overflow-hidden bg-slate-950 select-text">
-            {/* 와이어프레임 전용 보조 툴바 */}
-            <div className="h-8.5 px-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300 shrink-0 select-none">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-800/60 font-medium text-[11px]">
-                  <Layers className="w-3 h-3 text-purple-400" />
-                  <span>
-                    {activeTab.pageNumber ? `페이지 #${activeTab.pageNumber} 단독 편집` : '전체 페이지 연속 뷰'}
+            {/* 와이어프레임 전용 보조 툴바: 4가지 뷰 모드 전환 바 */}
+            <div className="h-9 px-3 bg-slate-900/95 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300 shrink-0 select-none gap-2 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-2 shrink-0">
+                {scaffoldTitle && (
+                  <span className="text-[11px] text-slate-300 font-medium px-2 py-0.5 rounded bg-slate-800/80 border border-slate-700/80 font-sans shrink-0 hidden md:inline-block">
+                    {scaffoldTitle}
                   </span>
-                </span>
-                <span className="text-[11px] text-slate-400 font-sans">
-                  {scaffoldTitle || '회의비 사용 내역'} · {activeTab.pageNumber ? 'A4 단일 페이지 규격' : 'A4 다단 연속 규격'}
-                </span>
+                )}
+                <WireframeViewModeBar
+                  viewMode={viewMode}
+                  onChangeViewMode={setViewMode}
+                  horizontalPage={horizPage}
+                  totalHorizontalPages={Math.max(totalPages, 2)}
+                  onChangeHorizontalPage={setHorizPage}
+                  horizontalSpread={horizSpread}
+                  onChangeHorizontalSpread={setHorizSpread}
+                  gridCols={gridCols}
+                  onChangeGridCols={setGridCols}
+                  gridScale={gridScale}
+                  onChangeGridScale={setGridScale}
+                />
               </div>
 
-              <div className="flex items-center gap-3 font-sans">
+              <div className="flex items-center gap-3 font-sans shrink-0 ml-auto">
                 <span className="text-[11px] text-slate-400">
                   {activeTab.pageNumber ? `P.${activeTab.pageNumber} 슬롯` : '총 슬롯'}{' '}
                   <strong className="text-slate-200">{scaffoldSlotsCount ?? 14}</strong>개
@@ -233,29 +272,28 @@ export function IdeMainEditor({
               </div>
             </div>
 
-            {/* A4 캔버스 스크롤러 영역 */}
-            <div className="flex-1 overflow-y-auto p-6 flex justify-center items-start bg-slate-900/50">
-              <div className="w-full max-w-4xl bg-white text-slate-900 rounded-xl shadow-2xl p-8 border border-slate-200 min-h-[850px]">
-                <DocumentWireframeEditor
-                  documentKey={
-                    activeTab.pageNumber
-                      ? `${activeTab.scaffoldId || scaffoldId}-p${activeTab.pageNumber}`
-                      : activeTab.scaffoldId || scaffoldId || 'wireframe-canvas'
-                  }
-                  initialHtml={
-                    activeTab.pageNumber
-                      ? extractPageHtml(liveHtml || '', activeTab.pageNumber)
-                      : liveHtml || activeTab.content || ''
-                  }
-                  onChangeHtml={(html) =>
-                    activeTab.pageNumber
-                      ? onPageWireframeChangeHtml?.(activeTab.pageNumber, html)
-                      : (onWireframeChangeHtml || onContentChange)(html)
-                  }
-                  onChangeMarkdown={onWireframeChangeMarkdown || (() => {})}
-                />
-              </div>
-            </div>
+            {/* 4가지 뷰 모드를 지원하는 반응형 캔버스 뷰포트 */}
+            <WireframeCanvasViewport
+              activeTab={activeTab}
+              scaffoldId={scaffoldId}
+              liveHtml={liveHtml}
+              onWireframeChangeHtml={onWireframeChangeHtml}
+              onPageWireframeChangeHtml={onPageWireframeChangeHtml}
+              onWireframeChangeMarkdown={onWireframeChangeMarkdown}
+              onContentChange={onContentChange}
+              viewMode={viewMode}
+              horizontalPage={horizPage}
+              horizontalSpread={horizSpread}
+              gridCols={gridCols}
+              gridScale={gridScale}
+              onSelectPage={(pageNum) => {
+                const targetTabId = `tab-wireframe-p${pageNum}`;
+                const exists = tabs.find((t) => t.id === targetTabId);
+                if (exists) {
+                  onSelectTab(targetTabId);
+                }
+              }}
+            />
           </div>
         ) : (
           <div className="flex-1 flex overflow-hidden relative select-text font-mono text-[13px] leading-6 bg-slate-950">

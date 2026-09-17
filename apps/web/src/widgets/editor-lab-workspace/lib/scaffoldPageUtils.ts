@@ -64,3 +64,32 @@ export function updatePageInFullHtml(
 
   return fullHtml;
 }
+
+/**
+ * 전체 HTML에서 모든 페이지 DOM 엘리먼트 및 번호 목록을 추출합니다.
+ */
+export function extractAllPages(fullHtml: string): Array<{ pageNumber: number; html: string }> {
+  if (!fullHtml || !fullHtml.includes('data-type="scaffold-page"')) {
+    return [{ pageNumber: 1, html: fullHtml }];
+  }
+
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHtml, 'text/html');
+    const pageEls = doc.querySelectorAll('[data-type="scaffold-page"]');
+    if (pageEls.length > 0) {
+      return Array.from(pageEls).map((el, idx) => {
+        const pNum = parseInt(el.getAttribute('data-page') || String(idx + 1), 10);
+        return {
+          pageNumber: isNaN(pNum) ? idx + 1 : pNum,
+          html: el.outerHTML,
+        };
+      });
+    }
+  } catch (err) {
+    console.error('[extractAllPages] Error parsing pages:', err);
+  }
+
+  return [{ pageNumber: 1, html: fullHtml }];
+}
+

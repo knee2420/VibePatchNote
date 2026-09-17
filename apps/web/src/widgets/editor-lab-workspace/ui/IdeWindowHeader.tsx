@@ -3,6 +3,7 @@ import {
   PanelLeft,
   PanelBottom,
   PanelRight,
+  FolderKanban,
   Minus,
   Square,
   X,
@@ -15,6 +16,8 @@ interface IdeWindowHeaderProps {
   onTogglePrimarySidebar: () => void;
   showBottomPanel: boolean;
   onToggleBottomPanel: () => void;
+  showResourceManager: boolean;
+  onToggleResourceManager: () => void;
   showSecondarySidebar: boolean;
   onToggleSecondarySidebar: () => void;
   onBack?: () => void;
@@ -28,6 +31,8 @@ export function IdeWindowHeader({
   onTogglePrimarySidebar,
   showBottomPanel,
   onToggleBottomPanel,
+  showResourceManager,
+  onToggleResourceManager,
   showSecondarySidebar,
   onToggleSecondarySidebar,
 }: IdeWindowHeaderProps) {
@@ -114,6 +119,20 @@ export function IdeWindowHeader({
           title="하단 터미널 패널 토글"
         >
           <PanelBottom className="w-3.5 h-3.5" />
+        </button>
+
+        {/* 리소스 매니저 패널 토글 버튼 (사용자 지정 위치) */}
+        <button
+          type="button"
+          onClick={onToggleResourceManager}
+          className={`p-1 rounded transition-colors cursor-pointer ${
+            showResourceManager
+              ? 'text-indigo-400 bg-slate-800'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+          title="리소스 매니저 패널 토글 (Ctrl+Shift+R)"
+        >
+          <FolderKanban className="w-3.5 h-3.5" />
         </button>
 
         <button

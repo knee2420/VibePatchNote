@@ -3,6 +3,8 @@ import { IdeWindowHeader } from './IdeWindowHeader';
 import { IdeActivityBar } from './IdeActivityBar';
 import { IdePrimarySidebar } from './IdePrimarySidebar';
 import { IdeMainEditor } from './IdeMainEditor';
+import { IdeResourceManager } from './IdeResourceManager';
+import { IdeResourceModal } from './IdeResourceModal';
 import { IdeBottomPanel } from './IdeBottomPanel';
 import { IdeSecondarySidebar } from './IdeSecondarySidebar';
 import { IdeStatusBar } from './IdeStatusBar';
@@ -20,6 +22,7 @@ export interface EditorLabWorkspaceProps {
  * 2. 탭 드래그 앤 드롭 이동 및 탐색기 파일 드롭 오픈
  * 3. 독립된 멀티 Pane 탭 그룹 에디터 제공
  * 4. 실제 백엔드 스캐폴드 아카이브 데이터 연동 및 인터랙티브 와이어프레임 캔버스 렌더링
+ * 5. 독립된 파이프라인 백데이터 & 에셋 리소스 매니저 패널 제공
  */
 export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspaceProps) {
   const {
@@ -39,8 +42,11 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
     setShowSecondarySidebar,
     showBottomPanel,
     setShowBottomPanel,
+    showResourceManager,
+    setShowResourceManager,
     primarySidebarWidth,
     secondarySidebarWidth,
+    resourceManagerWidth,
     bottomPanelHeight,
     splitRatio,
     isDraggingAnyResizer,
@@ -48,8 +54,32 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
     // 리사이저 마우스 핸들러
     handleMouseDownPrimaryResizer,
     handleMouseDownSecondaryResizer,
+    handleMouseDownResourceResizer,
     handleMouseDownBottomResizer,
     handleMouseDownSplitResizer,
+
+    // 리소스 매니저 (다중 디렉토리 묶음 & 뷰 모드)
+    bundles,
+    resources,
+    resourceViewMode,
+    setResourceViewMode,
+    resourceSearchQuery,
+    setResourceSearchQuery,
+    linkedFolderName,
+    handleAddDirectoryBundle,
+    handleRemoveDirectoryBundle,
+    handleToggleBundleCollapse,
+    handleAddResources,
+    handleDisconnectFolder,
+    handleOpenResource,
+
+    // 헵타베이스 스타일 우측 리소스 모달
+    resourceModalResource,
+    isResourceModalOpen,
+    resourceModalWidth,
+    handleOpenResourceModal,
+    handleCloseResourceModal,
+    handleMouseDownResourceModalResizer,
 
     // 탭
     activeActivityTab,
@@ -117,6 +147,8 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
         onTogglePrimarySidebar={() => setShowPrimarySidebar((v) => !v)}
         showBottomPanel={showBottomPanel}
         onToggleBottomPanel={() => setShowBottomPanel((v) => !v)}
+        showResourceManager={showResourceManager}
+        onToggleResourceManager={() => setShowResourceManager((v) => !v)}
         showSecondarySidebar={showSecondarySidebar}
         onToggleSecondarySidebar={() => setShowSecondarySidebar((v) => !v)}
         onBack={onBack}
@@ -127,7 +159,13 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
         {/* [좌측 전역 액티비티 바] */}
         <IdeActivityBar
           activeTab={activeActivityTab}
-          onSelectTab={handleSelectActivityTab}
+          onSelectTab={(tab) => {
+            if (tab === 'resources') {
+              setShowResourceManager((v) => !v);
+            } else {
+              handleSelectActivityTab(tab);
+            }
+          }}
         />
 
         {/* [좌측 기본 사이드바 / Explorer & Views] */}
@@ -226,6 +264,42 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
           )}
         </main>
 
+        {/* [리소스 매니저 독립 패널 (중앙 에디터와 우측 AI 패널 사이)] */}
+        {showResourceManager && (
+          <>
+            {/* 리소스 매니저 마우스 리사이저 핸들 */}
+            <div
+              onMouseDown={handleMouseDownResourceResizer}
+              className="w-1.5 -mr-1 h-full cursor-col-resize z-20 hover:bg-amber-500/50 transition-colors flex items-center justify-center group shrink-0"
+              title="드래그하여 리소스 매니저 너비 조절"
+            >
+              <div className="w-[1px] h-full bg-slate-800 group-hover:bg-amber-400" />
+            </div>
+
+            <aside
+              style={{ width: `${resourceManagerWidth}px` }}
+              className="h-full shrink-0 border-l border-slate-850 flex flex-col overflow-hidden z-10 transition-none"
+            >
+              <IdeResourceManager
+                bundles={bundles}
+                resources={resources}
+                viewMode={resourceViewMode}
+                onChangeViewMode={setResourceViewMode}
+                searchQuery={resourceSearchQuery}
+                onChangeSearchQuery={setResourceSearchQuery}
+                onOpenResource={(res) => handleOpenResourceModal(res)}
+                onClose={() => setShowResourceManager(false)}
+                onAddBundle={handleAddDirectoryBundle}
+                onRemoveBundle={handleRemoveDirectoryBundle}
+                onToggleBundleCollapse={handleToggleBundleCollapse}
+                linkedFolderName={linkedFolderName}
+                onAddResources={handleAddResources}
+                onDisconnectFolder={handleDisconnectFolder}
+              />
+            </aside>
+          </>
+        )}
+
         {/* [우측 보조 사이드바 / Antigravity AI 패널] */}
         {showSecondarySidebar && (
           <>
@@ -255,6 +329,19 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
             </aside>
           </>
         )}
+
+        {/* 헵타베이스 스타일 우측 슬라이드오버 리소스 모달 (중앙 에디터를 덮지 않고 우측에서 열림) */}
+        <IdeResourceModal
+          resource={resourceModalResource}
+          isOpen={isResourceModalOpen}
+          onClose={handleCloseResourceModal}
+          width={resourceModalWidth}
+          onMouseDownResizer={handleMouseDownResourceModalResizer}
+          onOpenInEditor={(res) => {
+            handleOpenResource(res, 'pane1');
+            handleCloseResourceModal();
+          }}
+        />
       </div>
 
       {/* 3. 최하단 전역 상태 표시줄 */}

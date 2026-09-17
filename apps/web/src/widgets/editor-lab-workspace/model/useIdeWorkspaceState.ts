@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useScaffoldDocumentDetail } from '@/entities/scaffold-document';
 import { updatePageInFullHtml } from '../lib/scaffoldPageUtils';
 import type {
@@ -9,8 +9,459 @@ import type {
   TerminalSessionItem,
   ChatMessageItem,
   DragPayload,
+  ResourceViewMode,
+  DirectoryBundle,
+  ResourceItem,
 } from './types';
 import { initialFileTree } from './mockFileSystem';
+
+const initialBundles: DirectoryBundle[] = [
+  // 1. 사용자의 실제 업무 자동화 샘플 디렉토리 묶음 (이미지, 서식, 문서, 발표자료 풀 세트)
+  {
+    id: 'bundle-automation-samples',
+    name: '업무 자동화 샘플',
+    path: 'local/automation-samples',
+    sourceType: 'local',
+    isCollapsed: false,
+    items: [
+      // [이미지 에셋류 - 캔바 스타일 실물 썸네일]
+      {
+        id: 'res-img-1',
+        name: '드론_야외비행_테스트_01.png',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'png',
+        size: '1.2 MB',
+        updatedAt: '방금 전',
+        description: '야외 시험 비행 및 센서 캘리브레이션 캡처 사진',
+        path: '업무 자동화 샘플/부산창업동아리/드론_야외비행_테스트_01.png',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%233b82f6"/><stop offset="100%" stop-color="%231d4ed8"/></linearGradient></defs><rect width="100" height="100" fill="url(%23g1)" rx="12"/><circle cx="50" cy="45" r="16" fill="%23ffffff" opacity="0.9"/><path d="M25 75 Q50 55 75 75 Z" fill="%2360a5fa"/><circle cx="50" cy="45" r="8" fill="%232563eb"/><path d="M35 30 L65 30 M50 20 L50 40" stroke="%23ffffff" stroke-width="3" stroke-linecap="round"/></svg>',
+      },
+      {
+        id: 'res-img-2',
+        name: '창업동아리_공식로고.svg',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'svg',
+        size: '14.2 KB',
+        updatedAt: '12분 전',
+        description: '동아리 메인 브랜드 벡터 심볼 마크',
+        path: '업무 자동화 샘플/부산창업동아리/창업동아리_공식로고.svg',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        content: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="%234f46e5" stroke="%23818cf8" stroke-width="4"/><polygon points="50,22 62,42 85,45 68,61 72,83 50,72 28,83 32,61 15,45 38,42" fill="%23fbbf24"/></svg>',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="%234f46e5" stroke="%23818cf8" stroke-width="4"/><polygon points="50,22 62,42 85,45 68,61 72,83 50,72 28,83 32,61 15,45 38,42" fill="%23fbbf24"/></svg>',
+      },
+      {
+        id: 'res-img-3',
+        name: '시제품_센서모듈_배선도.jpg',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'jpg',
+        size: '860 KB',
+        updatedAt: '35분 전',
+        description: '자이로 센서 및 아두이노 핀맵 실측 배선 다이어그램',
+        path: '업무 자동화 샘플/부산창업동아리/시제품_센서모듈_배선도.jpg',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230f172a" rx="12"/><rect x="20" y="25" width="60" height="50" fill="%23064e3b" stroke="%2310b981" stroke-width="2" rx="4"/><circle cx="35" cy="40" r="5" fill="%23fbbf24"/><circle cx="65" cy="40" r="5" fill="%2338bdf8"/><path d="M35 55 H65 M35 62 H55" stroke="%2334d399" stroke-width="2" stroke-linecap="round"/></svg>',
+      },
+      {
+        id: 'res-img-4',
+        name: '창의미래설계_포스터_디자인.jpg',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'jpg',
+        size: '2.1 MB',
+        updatedAt: '1시간 전',
+        description: '2018 창의미래설계 경진대회 메인 홍보 포스터 그래픽',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/디딤돌 발표 자료/창의미래설계_포스터_디자인.jpg',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="p1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%23ec4899"/><stop offset="100%" stop-color="%238b5cf6"/></linearGradient></defs><rect width="100" height="100" fill="url(%23p1)" rx="12"/><text x="50" y="45" font-size="14" font-weight="bold" fill="%23ffffff" text-anchor="middle" font-family="sans-serif">2018</text><text x="50" y="65" font-size="10" font-weight="bold" fill="%23fdf2f8" text-anchor="middle" font-family="sans-serif">POSTER</text></svg>',
+      },
+      {
+        id: 'res-img-5',
+        name: '부스배치도_도면.png',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'png',
+        size: '540 KB',
+        updatedAt: '2시간 전',
+        description: '행사장 18번 부스 규격 및 전원 콘센트 위치 평면도',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/부스배치도_도면.png',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231e1b4b" rx="12"/><rect x="15" y="20" width="30" height="25" fill="%234338ca" stroke="%23818cf8" stroke-width="1.5"/><rect x="55" y="20" width="30" height="25" fill="%234338ca" stroke="%23818cf8" stroke-width="1.5"/><rect x="15" y="55" width="70" height="30" fill="%23312e81" stroke="%236366f1" stroke-width="2"/><text x="50" y="74" font-size="9" fill="%23c7d2fe" text-anchor="middle" font-weight="bold">BOOTH 18</text></svg>',
+      },
+      {
+        id: 'res-img-6',
+        name: '지출증빙_영수증_스캔본.png',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'png',
+        size: '320 KB',
+        updatedAt: '3시간 전',
+        description: '다과 및 사무용품 구입 영수증 고해상도 스캔 이미지',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/지출증빙_영수증_스캔본.png',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9" rx="12"/><rect x="20" y="15" width="60" height="70" fill="%23ffffff" stroke="%23cbd5e1" stroke-width="2"/><line x1="28" y1="28" x2="72" y2="28" stroke="%2364748b" stroke-width="3"/><line x1="28" y1="38" x2="58" y2="38" stroke="%2394a3b8" stroke-width="2"/><line x1="28" y1="48" x2="68" y2="48" stroke="%2394a3b8" stroke-width="2"/><line x1="28" y1="65" x2="72" y2="65" stroke="%230f172a" stroke-width="2.5"/></svg>',
+      },
+      {
+        id: 'res-img-7',
+        name: '팀원_프로필_카드.png',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'png',
+        size: '480 KB',
+        updatedAt: '어제',
+        description: '발표 슬라이드용 팀원 소개 아바타 및 역할 명판',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/디딤돌 발표 자료/팀원_프로필_카드.png',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+        thumbnailUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23042f2e" rx="12"/><circle cx="50" cy="40" r="18" fill="%2314b8a6"/><path d="M22 80 C22 62 78 62 78 80 Z" fill="%230d9488"/><text x="50" y="92" font-size="8" fill="%23ccfbf1" text-anchor="middle" font-weight="bold">TEAM MEMBER</text></svg>',
+      },
+      // [문서 및 서식류]
+      {
+        id: 'res-auto-1',
+        name: '11월 디딤돌 회의록.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '42.8 KB',
+        updatedAt: '방금 전',
+        description: '디딤돌 정기 회의록 서식 원본',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/11월 디딤돌 회의록.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-2',
+        name: '2018 창의미래설계 디딤돌 종합보고.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '128.4 KB',
+        updatedAt: '10분 전',
+        description: '창의미래설계 종합 성과 보고서',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/2018 창의미래설계 디딤돌 종합보고.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-3',
+        name: '7,8월 디딤돌 회의록.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '38.2 KB',
+        updatedAt: '25분 전',
+        description: '하계 활동 회의록 서식',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/7,8월 디딤돌 회의록.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-4',
+        name: '9,10월디딤돌 회의록.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '39.6 KB',
+        updatedAt: '28분 전',
+        description: '추계 활동 회의록 서식',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/9,10월디딤돌 회의록.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-5',
+        name: '디딤돌 각종 서식.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '56.1 KB',
+        updatedAt: '1시간 전',
+        description: '표준 활동 신청 및 정산 서식 모음',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/디딤돌 각종 서식.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-6',
+        name: '디딤돌 결과보고서.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '88.3 KB',
+        updatedAt: '2시간 전',
+        description: '최종 결과보고서 양식',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/디딤돌 결과보고서.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-7',
+        name: '디딤돌 참가신청서_딥드론.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '52.4 KB',
+        updatedAt: '2시간 전',
+        description: '디딤돌 참가 신청서 서식',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/디딤돌 참가신청서_딥드론.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-8',
+        name: '수정 회의록 모음.hwp',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'hwp',
+        size: '45.0 KB',
+        updatedAt: '어제',
+        description: '피드백 반영 수정 회의록 종합본',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/Converted_docs/수정 회의록 모음.hwp',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-9',
+        name: '딥드론 최종 ppt 00.pdf',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'pdf',
+        size: '2.4 MB',
+        updatedAt: '어제',
+        description: '디딤돌 프로젝트 발표 슬라이드 파트 1',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/디딤돌 발표 자료/딥드론 최종 ppt 00.pdf',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-10',
+        name: '딥드론 최종 ppt 01.pdf',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'pdf',
+        size: '3.1 MB',
+        updatedAt: '어제',
+        description: '디딤돌 프로젝트 발표 슬라이드 파트 2 (시연 영상 포함)',
+        path: '업무 자동화 샘플/창의미래설계디딤돌18/디딤돌 발표 자료/딥드론 최종 ppt 01.pdf',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+      {
+        id: 'res-auto-11',
+        name: '젤리드론_결과보고서_final.pdf',
+        category: 'linked',
+        pipelineSource: '업무 자동화 샘플',
+        format: 'pdf',
+        size: '1.8 MB',
+        updatedAt: '2일 전',
+        description: '자율주행 드론 최종 보고서',
+        path: '업무 자동화 샘플/부산창업동아리/젤리드론_결과보고서_final.pdf',
+        isLocal: true,
+        bundleId: 'bundle-automation-samples',
+        bundleName: '업무 자동화 샘플',
+      },
+    ],
+  },
+  // 2. 파이프라인 백데이터 (Pipelines)
+  {
+    id: 'bundle-pipelines',
+    name: '96.data_pipeline (정본 지식 & 파이프라인)',
+    path: 'workbench/96.data_pipeline',
+    sourceType: 'pipeline',
+    isCollapsed: false,
+    items: [
+      {
+        id: 'res-pipe-1',
+        name: 'pipeline-run-fabfd713.json',
+        category: 'pipelines',
+        pipelineSource: 'pdf_ingestion_pipeline',
+        format: 'json',
+        size: '24.5 KB',
+        updatedAt: '방금 전',
+        description: '회의비 사용 내역 PDF 슬롯 실측 및 OCR 원천 데이터',
+        path: '96.data_pipeline/runs/pipeline-run-fabfd713.json',
+        slotsCount: 14,
+        content: '{\n  "pipeline": "pdf_ingestion",\n  "status": "completed",\n  "docId": "fabfd713",\n  "slotsExtracted": 14\n}',
+        bundleId: 'bundle-pipelines',
+        bundleName: '96.data_pipeline (정본 지식 & 파이프라인)',
+      },
+      {
+        id: 'res-pipe-2',
+        name: 'telemetry-traces-span42.json',
+        category: 'pipelines',
+        pipelineSource: 'agent_telemetry_pipeline',
+        format: 'json',
+        size: '48.1 KB',
+        updatedAt: '3분 전',
+        description: 'Agent Runtime 다중 LLM 추론 및 Step 관측 트레이스',
+        path: '96.data_pipeline/telemetry/telemetry-traces-span42.json',
+        content: '{\n  "spanId": "span-42",\n  "model": "Gemini 3.8 Flash",\n  "totalAttempts": 1,\n  "status": "success"\n}',
+        bundleId: 'bundle-pipelines',
+        bundleName: '96.data_pipeline (정본 지식 & 파이프라인)',
+      },
+      {
+        id: 'res-pipe-3',
+        name: 'workbench-96-card-spec.md',
+        category: 'pipelines',
+        pipelineSource: '96.data_pipeline',
+        format: 'md',
+        size: '12.8 KB',
+        updatedAt: '12분 전',
+        description: '고밀도 지식 파이프라인 정본 카드 인덱스 규격',
+        path: '96.data_pipeline/specs/workbench-96-card-spec.md',
+        content: '# Workbench 96 Knowledge Card Spec\n\n- Type: Dense Knowledge Index\n- Category: Pipeline Reference\n',
+        bundleId: 'bundle-pipelines',
+        bundleName: '96.data_pipeline (정본 지식 & 파이프라인)',
+      },
+      {
+        id: 'res-pipe-4',
+        name: 'extracted-slots-mapping.json',
+        category: 'pipelines',
+        pipelineSource: 'scaffold_extractor',
+        format: 'json',
+        size: '8.4 KB',
+        updatedAt: '15분 전',
+        description: 'A4 좌표계 기반 14개 슬롯 바운딩 박스 매핑',
+        path: '96.data_pipeline/scaffolds/extracted-slots-mapping.json',
+        slotsCount: 14,
+        content: '[\n  { "slotId": "slot-1", "name": "회의 일시", "x": 180, "y": 240, "w": 380, "h": 24 }\n]',
+        bundleId: 'bundle-pipelines',
+        bundleName: '96.data_pipeline (정본 지식 & 파이프라인)',
+      },
+    ],
+  },
+  // 3. 에셋 라이브러리 (Assets)
+  {
+    id: 'bundle-assets',
+    name: '서식 & 템플릿 에셋 라이브러리',
+    path: 'assets/templates',
+    sourceType: 'builtin',
+    isCollapsed: false,
+    items: [
+      {
+        id: 'res-asset-1',
+        name: 'company-seal-stamp.svg',
+        category: 'assets',
+        pipelineSource: 'asset_storage',
+        format: 'svg',
+        size: '4.2 KB',
+        updatedAt: '1시간 전',
+        description: '법인 인감 서식 직인 벡터 에셋',
+        path: 'assets/stamps/company-seal-stamp.svg',
+        content: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" stroke="#ef4444" stroke-width="4" fill="none"/></svg>',
+        bundleId: 'bundle-assets',
+        bundleName: '서식 & 템플릿 에셋 라이브러리',
+      },
+      {
+        id: 'res-asset-2',
+        name: 'receipt-voucher-sample.md',
+        category: 'assets',
+        pipelineSource: 'voucher_pipeline',
+        format: 'md',
+        size: '6.1 KB',
+        updatedAt: '2시간 전',
+        description: '신용카드 영수증 증빙 샘플 텍스트 명세',
+        path: 'assets/vouchers/receipt-voucher-sample.md',
+        content: '### 영수증 증빙 샘플\n\n- 사용처: 회의용 다과점\n- 금액: 45,000원\n- 일시: 2026-09-17\n',
+        bundleId: 'bundle-assets',
+        bundleName: '서식 & 템플릿 에셋 라이브러리',
+      },
+      {
+        id: 'res-asset-3',
+        name: 'a4-multi-column-grid.svg',
+        category: 'assets',
+        pipelineSource: 'template_generator',
+        format: 'svg',
+        size: '5.8 KB',
+        updatedAt: '어제',
+        description: 'A4 2단/3단 다단 그리드 레이아웃 템플릿',
+        path: 'assets/templates/a4-multi-column-grid.svg',
+        content: '<svg viewBox="0 0 595 842"><rect width="595" height="842" fill="#fff"/></svg>',
+        bundleId: 'bundle-assets',
+        bundleName: '서식 & 템플릿 에셋 라이브러리',
+      },
+    ],
+  },
+  // 4. 문서 스키마/원천 (Schemas)
+  {
+    id: 'bundle-schemas',
+    name: '문서 규격 & 스키마 원천',
+    path: 'schemas/documents',
+    sourceType: 'builtin',
+    isCollapsed: false,
+    items: [
+      {
+        id: 'res-schema-1',
+        name: 'meeting-expense-schema.json',
+        category: 'schemas',
+        pipelineSource: 'schema_registry',
+        format: 'json',
+        size: '16.4 KB',
+        updatedAt: '1일 전',
+        description: '회의비 정산 서식 SSOT 스키마 v2.1',
+        path: 'schemas/documents/meeting-expense-schema.json',
+        content: '{\n  "$schema": "https://vibe.io/scaffold.json",\n  "title": "회의비 사용 내역",\n  "version": "2.1"\n}',
+        bundleId: 'bundle-schemas',
+        bundleName: '문서 규격 & 스키마 원천',
+      },
+      {
+        id: 'res-schema-2',
+        name: 'a4-page-layout-spec.json',
+        category: 'schemas',
+        pipelineSource: 'scaffold_engine',
+        format: 'json',
+        size: '9.2 KB',
+        updatedAt: '2일 전',
+        description: 'A4 595x842 다단 그리드 규격 및 슬롯 제약 사양',
+        path: 'schemas/specs/a4-page-layout-spec.json',
+        content: '{\n  "pageWidth": 595,\n  "pageHeight": 842,\n  "gridCols": 2,\n  "margin": 36\n}',
+        bundleId: 'bundle-schemas',
+        bundleName: '문서 규격 & 스키마 원천',
+      },
+      {
+        id: 'res-schema-3',
+        name: 'agent-runtime-contract.ts',
+        category: 'schemas',
+        pipelineSource: 'agent_core',
+        format: 'ts',
+        size: '14.0 KB',
+        updatedAt: '3일 전',
+        description: '도메인 비의존 Agent 관측 및 승인 계약 인터페이스',
+        path: 'schemas/contracts/agent-runtime-contract.ts',
+        content: 'export interface AgentRuntimeContract {\n  sessionId: string;\n  runAttempt(prompt: string): Promise<void>;\n}\n',
+        bundleId: 'bundle-schemas',
+        bundleName: '문서 규격 & 스키마 원천',
+      },
+    ],
+  },
+];
+
 
 const DEFAULT_SCAFFOLD_ID = 'scaffold-1a0a0008250-fabfd713';
 
@@ -33,13 +484,93 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   const [showPrimarySidebar, setShowPrimarySidebar] = useState(true);
   const [showSecondarySidebar, setShowSecondarySidebar] = useState(true);
   const [showBottomPanel, setShowBottomPanel] = useState(true);
+  const [showResourceManager, setShowResourceManager] = useState(true);
 
   const [primarySidebarWidth, setPrimarySidebarWidth] = useState(260);
   const [secondarySidebarWidth, setSecondarySidebarWidth] = useState(360);
+  const [resourceManagerWidth, setResourceManagerWidth] = useState(300);
   const [bottomPanelHeight, setBottomPanelHeight] = useState(200);
   const [splitRatio, setSplitRatio] = useState(55); // 좌우 에디터 분할 비율 (와이어프레임 캔버스 55% : 소스코드 45%)
 
   const [isDraggingAnyResizer, setIsDraggingAnyResizer] = useState(false);
+
+  // 리소스 매니저 상태 (다중 디렉토리 묶음 & 통합 리소스 관리)
+  const [bundles, setBundles] = useState<DirectoryBundle[]>(initialBundles);
+  const [resourceViewMode, setResourceViewMode] = useState<ResourceViewMode>('directories');
+  const [resourceSearchQuery, setResourceSearchQuery] = useState('');
+  const [linkedFolderName, setLinkedFolderName] = useState<string | null>(null);
+
+  // 헵타베이스 스타일 우측 리소스 모달 상태
+  const [resourceModalResource, setResourceModalResource] = useState<ResourceItem | null>(null);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState<boolean>(false);
+  const [resourceModalWidth, setResourceModalWidth] = useState<number>(620);
+
+  const handleOpenResourceModal = useCallback((resource: ResourceItem) => {
+    setResourceModalResource(resource);
+    setIsResourceModalOpen(true);
+  }, []);
+
+  const handleCloseResourceModal = useCallback(() => {
+    setIsResourceModalOpen(false);
+  }, []);
+
+  // 모든 디렉토리 묶음의 리소스 통합 평면 목록 (SSOT)
+  const resources = useMemo(() => {
+    return bundles.flatMap((b) => b.items);
+  }, [bundles]);
+
+  // 새 디렉토리 묶음 추가 (밑으로 계속 추가되는 묶음 구조)
+  const handleAddDirectoryBundle = useCallback((bundle: DirectoryBundle) => {
+    setBundles((prev) => {
+      const existsIndex = prev.findIndex((b) => b.id === bundle.id);
+      if (existsIndex >= 0) {
+        const next = [...prev];
+        next[existsIndex] = bundle;
+        return next;
+      }
+      return [...prev, bundle];
+    });
+  }, []);
+
+  // 디렉토리 묶음 제거 / 연동 해제
+  const handleRemoveDirectoryBundle = useCallback((bundleId: string) => {
+    setBundles((prev) => prev.filter((b) => b.id !== bundleId));
+  }, []);
+
+  // 디렉토리 묶음 접기 / 펼치기 토글
+  const handleToggleBundleCollapse = useCallback((bundleId: string) => {
+    setBundles((prev) =>
+      prev.map((b) => (b.id === bundleId ? { ...b, isCollapsed: !b.isCollapsed } : b))
+    );
+  }, []);
+
+  // 로컬 파일 디렉토리 연결 시 새 묶음으로 하단에 추가
+  const handleAddResources = useCallback(
+    (newItems: ResourceItem[], customBundleName?: string) => {
+      const bName = customBundleName || newItems[0]?.pipelineSource || '로컬 파일 디렉토리';
+      const bundleId = `bundle-local-${Date.now()}`;
+      const newBundle: DirectoryBundle = {
+        id: bundleId,
+        name: bName,
+        path: `local/${bName}`,
+        sourceType: 'local',
+        isCollapsed: false,
+        items: newItems.map((item) => ({
+          ...item,
+          bundleId,
+          bundleName: bName,
+        })),
+      };
+      handleAddDirectoryBundle(newBundle);
+      setLinkedFolderName(bName);
+    },
+    [handleAddDirectoryBundle]
+  );
+
+  const handleDisconnectFolder = useCallback(() => {
+    setBundles((prev) => prev.filter((b) => b.sourceType !== 'local'));
+    setLinkedFolderName(null);
+  }, []);
 
   // 2. Activity Bar & Bottom Panel 활성 탭
   const [activeActivityTab, setActiveActivityTab] = useState<ActivityBarTab>('explorer');
@@ -49,7 +580,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   const [fileTree, setFileTree] = useState<FileTreeNode[]>(initialFileTree);
 
   // 4. 멀티 Pane 에디터 상태 (Pane 1: 와이어프레임 캔버스, Pane 2: 소스 코드/규격)
-  const [isSplitEditor, setIsSplitEditor] = useState<boolean>(true);
+  const [isSplitEditor, setIsSplitEditor] = useState<boolean>(false);
 
   const [pane1Tabs, setPane1Tabs] = useState<EditorTabItem[]>([
     {
@@ -434,7 +965,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
 
     setFileTree([archiveNode, ...initialFileTree]);
 
-    // 2. 초기 1회 로드 시: Pane 1에는 Page 1, Pane 2에는 Page 2를 스플릿으로 자동 배치!
+    // 2. 초기 1회 로드 시: 기본 단일 에디터 뷰 (좌우 분할 해제), 필요시 사용자가 분할
     if (!isInitialPopulatedRef.current) {
       setPane1Tabs([
         {
@@ -445,6 +976,17 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
           type: 'wireframe',
           scaffoldId: detail.scaffoldId,
           pageNumber: 1,
+          isModified: false,
+          content: '',
+        },
+        {
+          id: 'tab-wireframe-p2',
+          name: 'Page 2.canvas',
+          path: 'wireframe/page-2',
+          language: 'canvas',
+          type: 'wireframe',
+          scaffoldId: detail.scaffoldId,
+          pageNumber: 2,
           isModified: false,
           content: '',
         },
@@ -467,6 +1009,16 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
           scaffoldId: detail.scaffoldId,
           isModified: false,
           content: liveHtml || detail.htmlContent || '',
+        },
+        {
+          id: 'tab-wireframe-md',
+          name: 'content.md',
+          path: 'wireframe/content.md',
+          language: 'markdown',
+          type: 'code',
+          scaffoldId: detail.scaffoldId,
+          isModified: false,
+          content: liveMarkdown || detail.markdownContent || '',
         },
       ]);
       setPane1ActiveId('tab-wireframe-p1');
@@ -505,7 +1057,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
         },
       ]);
       setPane2ActiveId('tab-wireframe-p2');
-      setIsSplitEditor(true);
+      setIsSplitEditor(false); // 새로고침 시 기본적으로 좌우 분할 해제 (단일 에디터 뷰)
       isInitialPopulatedRef.current = true;
     } else {
       // 이후 동기화 시: render.html / content.md 내용 업데이트
@@ -583,6 +1135,38 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     }
   }, [handleToggleFolder, scaffoldId]);
 
+  // 리소스 매니저 아이템을 에디터 탭으로 열기
+  const handleOpenResource = useCallback((resource: ResourceItem, targetPane: 'pane1' | 'pane2' = 'pane2') => {
+    const tabId = `tab-res-${resource.id}`;
+    const newTab: EditorTabItem = {
+      id: tabId,
+      name: resource.name,
+      path: resource.path,
+      content: resource.content || `// ${resource.name}\n// Pipeline: ${resource.pipelineSource}\n// Format: ${resource.format}\n`,
+      language: resource.format === 'json' ? 'json' : resource.format === 'md' ? 'markdown' : resource.format === 'html' ? 'html' : 'typescript',
+      type: 'code',
+      scaffoldId,
+      isModified: false,
+    };
+
+    if (targetPane === 'pane1') {
+      setPane1Tabs((prev) => {
+        const exists = prev.find((t) => t.id === tabId);
+        if (exists) return prev;
+        return [...prev, newTab];
+      });
+      setPane1ActiveId(tabId);
+    } else {
+      setPane2Tabs((prev) => {
+        const exists = prev.find((t) => t.id === tabId);
+        if (exists) return prev;
+        return [...prev, newTab];
+      });
+      setPane2ActiveId(tabId);
+      setIsSplitEditor(true);
+    }
+  }, [scaffoldId]);
+
   // 드래그 앤 드롭 아이템 드롭 처리기
   const handleDropItem = useCallback((payload: DragPayload, targetPane: 'pane1' | 'pane2') => {
     if (payload.type === 'tab') {
@@ -592,8 +1176,13 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
       if (fileNode) {
         handleOpenFile(fileNode, targetPane);
       }
+    } else if (payload.type === 'resource') {
+      const res = resources.find((r: ResourceItem) => r.id === payload.resourceId);
+      if (res) {
+        handleOpenResource(res, targetPane);
+      }
     }
-  }, [fileTree, handleReorderTab, handleOpenFile]);
+  }, [fileTree, resources, handleReorderTab, handleOpenFile, handleOpenResource]);
 
   // 특정 페이지(pageNumber)에서 HTML 편집 시 전체 문서(SSOT)에 병합 반영
   const handlePageWireframeChangeHtml = useCallback(
@@ -702,6 +1291,52 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   }, [secondarySidebarWidth]);
+
+  // B-2. 리소스 매니저 패널 리사이징 (너비)
+  const handleMouseDownResourceResizer = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingAnyResizer(true);
+    const startX = e.clientX;
+    const startWidth = resourceManagerWidth;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      const delta = startX - ev.clientX;
+      const newWidth = Math.max(200, Math.min(550, startWidth + delta));
+      setResourceManagerWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingAnyResizer(false);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [resourceManagerWidth]);
+
+  // B-3. 헵타베이스 스타일 리소스 모달 리사이징 (너비)
+  const handleMouseDownResourceModalResizer = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingAnyResizer(true);
+    const startX = e.clientX;
+    const startWidth = resourceModalWidth;
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      const delta = startX - ev.clientX;
+      const newWidth = Math.max(320, Math.min(800, startWidth + delta));
+      setResourceModalWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingAnyResizer(false);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [resourceModalWidth]);
 
   // C. 하단 패널 리사이징 (높이)
   const handleMouseDownBottomResizer = useCallback((e: React.MouseEvent) => {
@@ -833,8 +1468,11 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     setShowSecondarySidebar,
     showBottomPanel,
     setShowBottomPanel,
+    showResourceManager,
+    setShowResourceManager,
     primarySidebarWidth,
     secondarySidebarWidth,
+    resourceManagerWidth,
     bottomPanelHeight,
     splitRatio,
     isDraggingAnyResizer,
@@ -842,8 +1480,34 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     // 리사이저 마우스 핸들러
     handleMouseDownPrimaryResizer,
     handleMouseDownSecondaryResizer,
+    handleMouseDownResourceResizer,
     handleMouseDownBottomResizer,
     handleMouseDownSplitResizer,
+
+    // 리소스 매니저 (다중 디렉토리 묶음 & 통합 리소스)
+    bundles,
+    setBundles,
+    resources,
+    resourceViewMode,
+    setResourceViewMode,
+    resourceSearchQuery,
+    setResourceSearchQuery,
+    linkedFolderName,
+    setLinkedFolderName,
+    handleAddDirectoryBundle,
+    handleRemoveDirectoryBundle,
+    handleToggleBundleCollapse,
+    handleAddResources,
+    handleDisconnectFolder,
+    handleOpenResource,
+
+    // 헵타베이스 스타일 우측 리소스 모달
+    resourceModalResource,
+    isResourceModalOpen,
+    resourceModalWidth,
+    handleOpenResourceModal,
+    handleCloseResourceModal,
+    handleMouseDownResourceModalResizer,
 
     // 탭
     activeActivityTab,
