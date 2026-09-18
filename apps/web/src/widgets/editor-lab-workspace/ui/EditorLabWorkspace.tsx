@@ -13,6 +13,7 @@ import { IdeStatusBar } from './IdeStatusBar';
 import { IdeReferenceDocDrawer } from './IdeReferenceDocDrawer';
 import { FloatingReferenceWindow } from './FloatingReferenceWindow';
 import { IdeRecipeSidebar } from './IdeRecipeSidebar';
+import { IdeReasoningModal } from './IdeReasoningModal';
 
 export interface EditorLabWorkspaceProps {
   scaffoldId?: string;
@@ -87,6 +88,12 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
     handleCloseResourceModal,
     handleMouseDownResourceModalResizer,
 
+    // 좌측 Reasoning 모달 (Prompt + 바인더 아웃라인 맥락 + 레시피 규격)
+    isReasoningModalOpen,
+    reasoningFocusedSlotId,
+    handleOpenReasoningModal,
+    handleCloseReasoningModal,
+
     // 좌측 레퍼런스 원본 패널 & 플로팅 레퍼런스 창
     isLeftReferenceOpen,
     leftReferenceWidth,
@@ -105,12 +112,15 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
     handleSelectActivityTab,
     activeBottomTab,
     setActiveBottomTab,
+    activeSpine,
+    setActiveSpine,
 
     // 파일 트리
     fileTree,
     handleOpenFile,
     handleOpenPageTab,
     handleOpenScrivenings,
+    handleOpenArtifactStageTab,
 
     // 멀티 Pane 에디터
     isSplitEditor,
@@ -162,11 +172,13 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
   // 슬롯 선택 및 포커스 동기화 상태 (바인더 트리 ↔ 메인 캔버스 슬롯 상호작용)
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedSlotNumber, setSelectedSlotNumber] = useState<number | null>(null);
+  const [selectedSlotIds, setSelectedSlotIds] = useState<string[]>([]);
   const [aiPanelMode, setAiPanelMode] = useState<AiPanelMode>('audit');
 
   const handleSelectSlot = useCallback(
     (slotId: string, pageNumber: number, slotNumber?: number) => {
       setSelectedSlotId(slotId);
+      setSelectedSlotIds([slotId]);
       const parsed = slotNumber ?? (parseInt(slotId.replace(/\D/g, ''), 10) || null);
       setSelectedSlotNumber(parsed);
       handleOpenPageTab(pageNumber, 'pane1');
@@ -273,6 +285,8 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
                   onOpenSlotProvenance={handleOpenSlotProvenance}
                   onToggleReferenceDoc={handleToggleLeftReference}
                   isReferenceDocOpen={isLeftReferenceOpen}
+                  activeSpine={activeSpine}
+                  onChangeSpine={setActiveSpine}
                 />
               )}
             </aside>
@@ -341,10 +355,14 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
             onJumpToSourceAnchor={handleJumpToSourceAnchor}
             onAcceptSlotSuggestion={handleApplySuggested}
             slotBindings={slotBindings}
+            onSelectSlotsChange={setSelectedSlotIds}
             onWireframeChangeHtml={handleWireframeChangeHtml}
             onPageWireframeChangeHtml={handlePageWireframeChangeHtml}
             onWireframeChangeMarkdown={handleWireframeChangeMarkdown}
             onSaveImmediately={saveImmediately}
+            onUnbindSlot={handleUnbindSlot}
+            onOpenSlotProvenance={handleOpenSlotProvenance}
+            onOpenReasoning={handleOpenReasoningModal}
           />
 
           {/* 하단 패널 리사이저 핸들 (가로) */}
@@ -372,6 +390,16 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
                 onChangeCommandInput={setTerminalCommandInput}
                 onSubmitCommand={handleTerminalSubmit}
                 onClose={() => setShowBottomPanel(false)}
+                activeSpine={activeSpine}
+                onChangeSpine={setActiveSpine}
+                selectedSlotId={selectedSlotId}
+                selectedSlotNumber={selectedSlotNumber}
+                onSelectSlot={handleSelectSlot}
+                slotBindings={slotBindings}
+                onBindSlot={handleBindSlot}
+                onOpenSoloTab={(page) => handleOpenPageTab(page, 'pane1')}
+                scaffoldId={resolvedScaffoldId}
+                docId={detail?.docId}
               />
             </div>
           )}
@@ -445,6 +473,9 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
                 onApplyAllSuggestions={handleApplyAllSuggestions}
                 onSelectSlot={handleSelectSlotFromAi}
                 onBindSlot={handleBindSlot}
+                selectedSlotIds={selectedSlotIds}
+                onClearSelectedSlots={() => setSelectedSlotIds([])}
+                onOpenArtifactStage={handleOpenArtifactStageTab}
               />
             </aside>
           </>
@@ -474,6 +505,22 @@ export function EditorLabWorkspace({ scaffoldId, onBack }: EditorLabWorkspacePro
           onOpenInEditor={(res) => {
             handleOpenResource(res, 'pane1');
             handleCloseResourceModal();
+          }}
+        />
+
+        {/* 좌측 에이전트 추론 근거(Reasoning) 슬라이드 모달: Prompt(Goal) + 바인더 아웃라인(시계열 맥락) + 레시피 규격 */}
+        <IdeReasoningModal
+          isOpen={isReasoningModalOpen}
+          onClose={handleCloseReasoningModal}
+          focusedSlotId={reasoningFocusedSlotId}
+          onSelectSlot={(slotId) => handleSelectSlot(slotId, 1)}
+          onOpenProvenanceDoc={(docName) => {
+            const matched = resources.find(
+              (r) => r.name.includes(docName) || docName.includes(r.name)
+            );
+            if (matched) {
+              handleOpenResourceModal(matched);
+            }
           }}
         />
 

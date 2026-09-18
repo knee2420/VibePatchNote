@@ -20,6 +20,7 @@ import type {
   SlotBindingInfo,
   SlotBindingStatus,
   ResourceProvenanceInfo,
+  BinderSpineMode,
 } from './types';
 import { initialFileTree } from './mockFileSystem';
 
@@ -596,6 +597,22 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   }, []);
 
   // -------------------------------------------------------------------------
+  // 좌측 Reasoning 모달 상태 (Prompt + 바인더 아웃라인 맥락 + 레시피 규격)
+  // -------------------------------------------------------------------------
+  const [isReasoningModalOpen, setIsReasoningModalOpen] = useState<boolean>(false);
+  const [reasoningFocusedSlotId, setReasoningFocusedSlotId] = useState<string | null>(null);
+
+  const handleOpenReasoningModal = useCallback((slotId?: string) => {
+    setReasoningFocusedSlotId(slotId || null);
+    setIsReasoningModalOpen(true);
+  }, []);
+
+  const handleCloseReasoningModal = useCallback(() => {
+    setIsReasoningModalOpen(false);
+    setReasoningFocusedSlotId(null);
+  }, []);
+
+  // -------------------------------------------------------------------------
   // 좌측 레퍼런스 원본 패널 & 프로크리에이트 스타일 플로팅 레퍼런스 창 상태
   // -------------------------------------------------------------------------
   const [isLeftReferenceOpen, setIsLeftReferenceOpen] = useState<boolean>(false);
@@ -972,7 +989,8 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
 
   // 2. Activity Bar & Bottom Panel 활성 탭
   const [activeActivityTab, setActiveActivityTab] = useState<ActivityBarTab>('explorer');
-  const [activeBottomTab, setActiveBottomTab] = useState<BottomPanelTab>('terminal');
+  const [activeBottomTab, setActiveBottomTab] = useState<BottomPanelTab>('recipe');
+  const [activeSpine, setActiveSpine] = useState<BinderSpineMode>('outline');
 
   // 3. 파일 트리 상태
   const [fileTree, setFileTree] = useState<FileTreeNode[]>(initialFileTree);
@@ -1005,6 +1023,16 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   const [pane1ActiveId, setPane1ActiveId] = useState<string>('tab-wireframe-canvas');
 
   const [pane2Tabs, setPane2Tabs] = useState<EditorTabItem[]>([
+    {
+      id: 'tab-artifact-v1',
+      name: '📦 Artifact: 회의록 데이터 초안 (v1)',
+      path: 'artifact/stage-v1',
+      language: 'diff',
+      type: 'artifact',
+      scaffoldId,
+      isModified: true,
+      content: '',
+    },
     {
       id: 'tab-wireframe-md',
       name: 'content.md',
@@ -1423,6 +1451,16 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
 
       setPane2Tabs([
         {
+          id: 'tab-artifact-v1',
+          name: '📦 Artifact: 회의록 데이터 초안 (v1)',
+          path: 'artifact/stage-v1',
+          language: 'diff',
+          type: 'artifact',
+          scaffoldId: detail.scaffoldId,
+          isModified: true,
+          content: '',
+        },
+        {
           id: 'tab-wireframe-p2',
           name: 'Page 2.canvas',
           path: 'wireframe/page-2',
@@ -1582,6 +1620,41 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     setPane1Tabs((prev) => [canvasTab, ...prev]);
     setPane1ActiveId(canvasTabId);
   }, [scaffoldId, pane1Tabs]);
+
+  // [컨셉 B] 멀티 Pane 에디터의 전용 탭: tab-artifact-stage (Cursor Diff 스타일)
+  const handleOpenArtifactStageTab = useCallback(
+    (version = 1, targetPane: 'pane1' | 'pane2' = 'pane2') => {
+      const artifactTabId = `tab-artifact-v${version}`;
+      const newTab: EditorTabItem = {
+        id: artifactTabId,
+        name: `📦 Artifact: 회의록 데이터 초안 (v${version})`,
+        path: `artifact/stage-v${version}`,
+        language: 'diff',
+        type: 'artifact',
+        scaffoldId,
+        content: '',
+        isModified: true,
+      };
+
+      if (targetPane === 'pane2') {
+        setPane2Tabs((prev) => {
+          const exists = prev.find((t) => t.id === artifactTabId);
+          if (exists) return prev;
+          return [...prev, newTab];
+        });
+        setPane2ActiveId(artifactTabId);
+        setIsSplitEditor(true);
+      } else {
+        setPane1Tabs((prev) => {
+          const exists = prev.find((t) => t.id === artifactTabId);
+          if (exists) return prev;
+          return [...prev, newTab];
+        });
+        setPane1ActiveId(artifactTabId);
+      }
+    },
+    [scaffoldId]
+  );
 
   // 리소스 매니저 아이템을 에디터 탭으로 열기
   const handleOpenResource = useCallback((resource: ResourceItem, targetPane: 'pane1' | 'pane2' = 'pane2') => {
@@ -1981,6 +2054,12 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     handleCloseResourceModal,
     handleMouseDownResourceModalResizer,
 
+    // 좌측 Reasoning 모달 (Prompt + 바인더 아웃라인 + 레시피 규격)
+    isReasoningModalOpen,
+    reasoningFocusedSlotId,
+    handleOpenReasoningModal,
+    handleCloseReasoningModal,
+
     // 좌측 레퍼런스 원본 패널 & 플로팅 레퍼런스 창
     isLeftReferenceOpen,
     leftReferenceWidth,
@@ -1999,6 +2078,8 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     handleSelectActivityTab,
     activeBottomTab,
     setActiveBottomTab,
+    activeSpine,
+    setActiveSpine,
 
     // 파일 트리
     fileTree,
@@ -2006,6 +2087,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     handleOpenFile,
     handleOpenPageTab,
     handleOpenScrivenings,
+    handleOpenArtifactStageTab,
 
     // 멀티 Pane 에디터
     isSplitEditor,

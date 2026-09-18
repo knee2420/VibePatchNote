@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Layers,
+  Package,
 } from 'lucide-react';
 import type { EditorTabItem, DragPayload } from '../model/types';
 
@@ -152,7 +153,9 @@ export function IdeTabBar({
               )}
 
               {/* 탭 아이콘 */}
-              {tab.type === 'wireframe' ? (
+              {tab.type === 'artifact' ? (
+                <Package className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              ) : tab.type === 'wireframe' ? (
                 <Layers className="w-3.5 h-3.5 text-purple-400 shrink-0" />
               ) : tab.language === 'html' ? (
                 <FileCode className="w-3.5 h-3.5 text-orange-400 shrink-0" />
@@ -164,7 +167,12 @@ export function IdeTabBar({
                 <FileCode className="w-3.5 h-3.5 text-blue-400 shrink-0" />
               )}
 
-              {/* 페이지 번호 뱃지 */}
+              {/* 페이지 번호 또는 아티팩트 뱃지 */}
+              {tab.type === 'artifact' && (
+                <span className="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-700/80 font-mono font-bold shrink-0">
+                  DIFF
+                </span>
+              )}
               {tab.pageNumber && (
                 <span className="text-[10px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-800/80 font-mono font-bold shrink-0">
                   P.{tab.pageNumber}

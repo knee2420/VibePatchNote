@@ -5,8 +5,11 @@ import {
   Maximize2,
   X,
   Terminal,
+  Layers,
 } from 'lucide-react';
-import type { BottomPanelTab, TerminalSessionItem } from '../model/types';
+import type { BottomPanelTab, TerminalSessionItem, SlotBindingInfo } from '../model/types';
+import type { BinderSpineMode } from './IdeBinderSidebar';
+import { IdeRecipeBottomView } from './IdeRecipeBottomView';
 
 interface IdeBottomPanelProps {
   activeTab: BottomPanelTab;
@@ -19,6 +22,18 @@ interface IdeBottomPanelProps {
   onChangeCommandInput: (val: string) => void;
   onSubmitCommand: (e?: React.FormEvent) => void;
   onClose: () => void;
+
+  // Recipe 뷰 인터랙션 연동 props
+  activeSpine?: BinderSpineMode;
+  onChangeSpine?: (spine: BinderSpineMode) => void;
+  selectedSlotId?: string | null;
+  selectedSlotNumber?: number | null;
+  onSelectSlot?: (slotId: string, pageNumber: number, slotNumber?: number) => void;
+  slotBindings?: Record<string, SlotBindingInfo>;
+  onBindSlot?: (slotId: string, value: string, resourceName?: string, resourceId?: string) => void;
+  onOpenSoloTab?: (pageNumber: number) => void;
+  scaffoldId?: string;
+  docId?: string;
 }
 
 export function IdeBottomPanel({
@@ -32,10 +47,21 @@ export function IdeBottomPanel({
   onChangeCommandInput,
   onSubmitCommand,
   onClose,
+  activeSpine = 'outline',
+  onChangeSpine,
+  selectedSlotId = null,
+  selectedSlotNumber = null,
+  onSelectSlot,
+  slotBindings,
+  onBindSlot,
+  onOpenSoloTab,
+  scaffoldId,
+  docId,
 }: IdeBottomPanelProps) {
   const [isMaximized, setIsMaximized] = useState(false);
 
-  const tabs: { id: BottomPanelTab; label: string; count?: number }[] = [
+  const tabs: { id: BottomPanelTab; label: string; count?: number; icon?: React.ReactNode }[] = [
+    { id: 'recipe', label: 'Recipe', icon: <Layers className="w-3.5 h-3.5 text-indigo-400" /> },
     { id: 'problems', label: 'Problems', count: 0 },
     { id: 'output', label: 'Output' },
     { id: 'debugConsole', label: 'Debug Console' },
@@ -67,6 +93,7 @@ export function IdeBottomPanel({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
+                {tab.icon}
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span className="px-1 py-0.2 rounded-full bg-slate-800 text-[10px] text-slate-300">
@@ -117,6 +144,22 @@ export function IdeBottomPanel({
 
       {/* 2. 패널 본문 영역 */}
       <div className="flex-1 flex overflow-hidden">
+        {/* [0] Recipe 탭 (문서 저작 규격 실시간 인스펙터) */}
+        {activeTab === 'recipe' && (
+          <IdeRecipeBottomView
+            activeSpine={activeSpine}
+            onChangeSpine={onChangeSpine}
+            selectedSlotId={selectedSlotId}
+            selectedSlotNumber={selectedSlotNumber}
+            onSelectSlot={onSelectSlot}
+            slotBindings={slotBindings}
+            onBindSlot={onBindSlot}
+            onOpenSoloTab={onOpenSoloTab}
+            scaffoldId={scaffoldId}
+            docId={docId}
+          />
+        )}
+
         {/* [A] Terminal 탭 */}
         {activeTab === 'terminal' && (
           <div className="flex-1 flex overflow-hidden">

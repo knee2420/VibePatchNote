@@ -63,6 +63,8 @@ export interface IdeBinderSidebarProps {
   onOpenSlotProvenance?: (binding: SlotBindingInfo) => void;
   onToggleReferenceDoc?: () => void;
   isReferenceDocOpen?: boolean;
+  activeSpine?: BinderSpineMode;
+  onChangeSpine?: (spine: BinderSpineMode) => void;
 }
 
 export function IdeBinderSidebar({
@@ -91,6 +93,8 @@ export function IdeBinderSidebar({
   onOpenSlotProvenance,
   onToggleReferenceDoc,
   isReferenceDocOpen,
+  activeSpine: propActiveSpine,
+  onChangeSpine,
 }: IdeBinderSidebarProps) {
   // 백엔드 실제 세그먼트-아웃라인 결합 구조 및 매핑 데이터 로드
   const { structure, isLoading: isLoadingStructure } = useSegmentStructure(docId, Boolean(docId));
@@ -113,7 +117,12 @@ export function IdeBinderSidebar({
   }, [slotBindings]);
 
   // 1. 활성 척추 모드 (Outline, Segment, Slots, Explorer)
-  const [activeSpine, setActiveSpine] = useState<BinderSpineMode>('outline');
+  const [internalSpine, setInternalSpine] = useState<BinderSpineMode>('outline');
+  const activeSpine = propActiveSpine ?? internalSpine;
+  const handleSpineChange = (mode: BinderSpineMode) => {
+    setInternalSpine(mode);
+    onChangeSpine?.(mode);
+  };
   const [collapsedNodes, setCollapsedNodes] = useState<Record<string, boolean>>({
     'out-root': false,
     'out-p1': false,
@@ -952,7 +961,7 @@ export function IdeBinderSidebar({
         <div className="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
           <button
             type="button"
-            onClick={() => setActiveSpine('outline')}
+            onClick={() => handleSpineChange('outline')}
             className={`py-1 text-[11px] font-medium rounded transition-all cursor-pointer text-center ${
               activeSpine === 'outline'
                 ? 'bg-indigo-600 text-white shadow-sm font-semibold'
@@ -963,7 +972,7 @@ export function IdeBinderSidebar({
           </button>
           <button
             type="button"
-            onClick={() => setActiveSpine('segment')}
+            onClick={() => handleSpineChange('segment')}
             className={`py-1 text-[11px] font-medium rounded transition-all cursor-pointer text-center ${
               activeSpine === 'segment'
                 ? 'bg-indigo-600 text-white shadow-sm font-semibold'
@@ -974,7 +983,7 @@ export function IdeBinderSidebar({
           </button>
           <button
             type="button"
-            onClick={() => setActiveSpine('slots')}
+            onClick={() => handleSpineChange('slots')}
             className={`py-1 text-[11px] font-medium rounded transition-all cursor-pointer text-center ${
               activeSpine === 'slots'
                 ? 'bg-indigo-600 text-white shadow-sm font-semibold'

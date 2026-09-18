@@ -10,6 +10,8 @@ import {
   Zap,
 } from 'lucide-react';
 import { ScaffoldCanvasEditor } from '@vibe/tiptap-scaffold';
+import type { SlotBindingInfo } from '../model/types';
+import { VisualElementOverlay, type CanvasToolMode } from './VisualElementOverlay';
 
 export interface DocumentPageCardProps {
   pageNumber: number;
@@ -30,7 +32,8 @@ export interface DocumentPageCardProps {
   // 2D 문서 AI 에이전트 확장 기능 props
   onJumpToSourceAnchor?: (slotId: string) => void;
   onAcceptSlotSuggestion?: (slotId: string) => void;
-  slotBindings?: Record<string, { status: string; value: string; suggestedValue?: string; resourceName?: string }>;
+  slotBindings?: Record<string, SlotBindingInfo>;
+  onSelectSlotsChange?: (slotIds: string[]) => void;
 }
 
 const BASE_PAGE_WIDTH = 595; // A4 표준 너비 (pt/px)
@@ -79,9 +82,13 @@ export function DocumentPageCard({
   onJumpToSourceAnchor,
   onAcceptSlotSuggestion,
   slotBindings = {},
+  onSelectSlotsChange,
 }: DocumentPageCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const dragTargetSlotRef = useRef<HTMLElement | null>(null);
+
+  // 피그마 / 캔바식 툴 모드 (Select vs Text)
+  const [toolMode, setToolMode] = useState<CanvasToolMode>('select');
 
   // 인라인 플로팅 프롬프트 바 상태 (Cmd+K)
   const [inlinePromptSlotId, setInlinePromptSlotId] = useState<string | null>(null);
@@ -324,8 +331,25 @@ export function DocumentPageCard({
           width: `${BASE_PAGE_WIDTH}px`,
           minHeight: `${BASE_PAGE_HEIGHT}px`,
         }}
-        className="bg-white text-slate-900 shadow-[0_12px_40px_rgba(0,0,0,0.35)] border border-slate-300/80 rounded-[2px] p-6 select-text overflow-hidden hover:border-indigo-400/60 transition-colors relative"
+        className={`bg-white text-slate-900 shadow-[0_12px_40px_rgba(0,0,0,0.35)] border border-slate-300/80 rounded-[2px] p-6 overflow-visible hover:border-indigo-400/60 transition-colors relative ${
+          toolMode === 'select' ? 'select-none cursor-default' : 'select-text cursor-text'
+        }`}
       >
+        {/* 피그마 / Puck 스타일 비주얼 개별 요소 인스펙터 오버레이 */}
+        <VisualElementOverlay
+          cardRef={cardRef}
+          pageNumber={pageNumber}
+          activeSlotId={activeSlotId}
+          onSlotClick={onSlotClick}
+          onBindSlot={onBindSlot}
+          onAcceptSlotSuggestion={onAcceptSlotSuggestion}
+          slotBindings={slotBindings}
+          toolMode={toolMode}
+          onChangeToolMode={setToolMode}
+          scale={scale}
+          onSelectSlotsChange={onSelectSlotsChange}
+        />
+
         <ScaffoldCanvasEditor
           key={`${documentKey}-p${pageNumber}`}
           initialContent={pageHtml}

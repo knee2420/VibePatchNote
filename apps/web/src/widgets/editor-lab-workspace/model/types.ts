@@ -9,8 +9,12 @@ export type ActivityBarTab =
   | 'extensions'
   | 'antigravity';
 
+/** 바인더 척추 모드 (Outline, Segment, Slots, Explorer) */
+export type BinderSpineMode = 'outline' | 'segment' | 'slots' | 'explorer';
+
 /** 하단 패널 활성 탭 */
 export type BottomPanelTab =
+  | 'recipe'
   | 'problems'
   | 'output'
   | 'debugConsole'
@@ -25,7 +29,7 @@ export interface EditorTabItem {
   content: string;
   language: string;
   isModified?: boolean;
-  type?: 'code' | 'wireframe';
+  type?: 'code' | 'wireframe' | 'artifact';
   scaffoldId?: string;
   pageNumber?: number;
 }
@@ -40,7 +44,7 @@ export interface FileTreeNode {
   children?: FileTreeNode[];
   content?: string;
   language?: string;
-  type?: 'code' | 'wireframe';
+  type?: 'code' | 'wireframe' | 'artifact';
   scaffoldId?: string;
   pageNumber?: number;
   gitStatus?: 'M' | 'U' | 'A' | 'D';

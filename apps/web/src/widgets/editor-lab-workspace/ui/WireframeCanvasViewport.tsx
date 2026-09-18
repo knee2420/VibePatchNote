@@ -28,6 +28,7 @@ export interface WireframeCanvasViewportProps {
   onJumpToSourceAnchor?: (slotId: string) => void;
   onAcceptSlotSuggestion?: (slotId: string) => void;
   slotBindings?: Record<string, any>;
+  onSelectSlotsChange?: (slotIds: string[]) => void;
 }
 
 export function WireframeCanvasViewport({
@@ -51,6 +52,7 @@ export function WireframeCanvasViewport({
   onJumpToSourceAnchor,
   onAcceptSlotSuggestion,
   slotBindings,
+  onSelectSlotsChange,
 }: WireframeCanvasViewportProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number>(800);
@@ -148,6 +150,7 @@ export function WireframeCanvasViewport({
             onChangeHtml={handlePageChange}
             onChangeMarkdown={onWireframeChangeMarkdown}
             onOpenSoloTab={onSelectPage}
+            onSelectSlotsChange={onSelectSlotsChange}
           />
 
           {/* 우측 페이지 카드 (양면 스프레드 시) */}
@@ -170,6 +173,7 @@ export function WireframeCanvasViewport({
                 onChangeHtml={handlePageChange}
                 onChangeMarkdown={onWireframeChangeMarkdown}
                 onOpenSoloTab={onSelectPage}
+                onSelectSlotsChange={onSelectSlotsChange}
               />
             ) : (
               <div
@@ -228,6 +232,7 @@ export function WireframeCanvasViewport({
               onChangeHtml={handlePageChange}
               onChangeMarkdown={onWireframeChangeMarkdown}
               onOpenSoloTab={onSelectPage}
+              onSelectSlotsChange={onSelectSlotsChange}
             />
           ))}
         </div>
@@ -258,6 +263,7 @@ export function WireframeCanvasViewport({
           slotBindings={slotBindings}
           onChangeHtml={handlePageChange}
           onChangeMarkdown={onWireframeChangeMarkdown}
+          onSelectSlotsChange={onSelectSlotsChange}
         />
       ) : (
         /* 전체 페이지 탭인 경우: 모든 페이지를 독립 카드로 세로 정렬 (Auto-Fit) */
@@ -280,6 +286,7 @@ export function WireframeCanvasViewport({
               onChangeHtml={handlePageChange}
               onChangeMarkdown={onWireframeChangeMarkdown}
               onOpenSoloTab={onSelectPage}
+              onSelectSlotsChange={onSelectSlotsChange}
             />
           ))}
         </div>

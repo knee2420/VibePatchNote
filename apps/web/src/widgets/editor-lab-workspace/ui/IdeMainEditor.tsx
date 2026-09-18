@@ -8,7 +8,9 @@ import { extractAllPages } from '../lib/scaffoldPageUtils';
 import { IdeTabBar } from './IdeTabBar';
 import { WireframeViewModeBar } from './WireframeViewModeBar';
 import { WireframeCanvasViewport } from './WireframeCanvasViewport';
-import type { EditorTabItem, DragPayload, WireframeViewMode } from '../model/types';
+import { IdeArtifactStageViewport } from './IdeArtifactStageViewport';
+import { SLOT_MODIFICATIONS } from './IdeSecondarySidebar';
+import type { EditorTabItem, DragPayload, WireframeViewMode, SlotBindingInfo } from '../model/types';
 
 interface IdeMainEditorProps {
   pane1Tabs: EditorTabItem[];
@@ -58,6 +60,10 @@ interface IdeMainEditorProps {
   onJumpToSourceAnchor?: (slotId: string) => void;
   onAcceptSlotSuggestion?: (slotId: string) => void;
   slotBindings?: Record<string, any>;
+  onSelectSlotsChange?: (slotIds: string[]) => void;
+  onUnbindSlot?: (slotId: string) => void;
+  onOpenSlotProvenance?: (binding: SlotBindingInfo) => void;
+  onOpenReasoning?: (slotId?: string) => void;
 }
 
 export function IdeMainEditor({
@@ -101,6 +107,10 @@ export function IdeMainEditor({
   onJumpToSourceAnchor,
   onAcceptSlotSuggestion,
   slotBindings,
+  onSelectSlotsChange,
+  onUnbindSlot,
+  onOpenSlotProvenance,
+  onOpenReasoning,
 }: IdeMainEditorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -210,7 +220,13 @@ export function IdeMainEditor({
           <div className="h-6 px-4 bg-slate-950/90 border-b border-slate-900 flex items-center gap-1 text-[11px] text-slate-400 shrink-0 font-sans">
             <span>workspace</span>
             <ChevronRight className="w-3 h-3 text-slate-600" />
-            <span>{activeTab.type === 'wireframe' ? 'wireframes' : 'sources'}</span>
+            <span>
+              {activeTab.type === 'wireframe'
+                ? 'wireframes'
+                : activeTab.type === 'artifact'
+                ? 'artifacts (stage)'
+                : 'sources'}
+            </span>
             <ChevronRight className="w-3 h-3 text-slate-600" />
             <span className="text-slate-200 font-medium">{activeTab.name}</span>
           </div>
@@ -283,6 +299,20 @@ export function IdeMainEditor({
                     <span>저장</span>
                   </button>
                 )}
+
+                {pane === 'pane2' && tabs.some((t) => t.type === 'artifact') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const artTab = tabs.find((t) => t.type === 'artifact');
+                      if (artTab) onSelectTab(artTab.id);
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-indigo-950/90 hover:bg-indigo-900 text-indigo-200 hover:text-white text-[11px] font-bold border border-indigo-500/80 cursor-pointer shadow-md transition-all animate-pulse"
+                    title="우측 창을 에이전트 산출물 Diff 스테이지 뷰로 즉시 전환"
+                  >
+                    <span>📦 Artifact 초안 뷰</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -307,6 +337,7 @@ export function IdeMainEditor({
               horizontalSpread={horizSpread}
               gridCols={gridCols}
               gridScale={gridScale}
+              onSelectSlotsChange={onSelectSlotsChange}
               onSelectPage={(pageNum) => {
                 const targetTabId = `tab-wireframe-p${pageNum}`;
                 const exists = tabs.find((t) => t.id === targetTabId);
@@ -316,6 +347,26 @@ export function IdeMainEditor({
               }}
             />
           </div>
+        ) : activeTab?.type === 'artifact' ? (
+          <IdeArtifactStageViewport
+            tab={activeTab}
+            scaffoldId={scaffoldId}
+            liveHtml={liveHtml}
+            slotBindings={slotBindings}
+            onApplySlotToCanvas={(slotId, value, resourceName) => {
+              onBindSlot?.(slotId, value, resourceName);
+            }}
+            onUnbindSlot={(slotId) => {
+              onUnbindSlot?.(slotId);
+            }}
+            onOpenSlotProvenance={onOpenSlotProvenance}
+            onOpenReasoning={onOpenReasoning}
+            onApplyAllToCanvas={() => {
+              SLOT_MODIFICATIONS.forEach((m) => {
+                onBindSlot?.(m.slotId, m.changeText, m.resourceName);
+              });
+            }}
+          />
         ) : (
           <div className="flex-1 flex overflow-hidden relative select-text font-mono text-[13px] leading-6 bg-slate-950">
             {/* 라인 넘버 거터 */}
