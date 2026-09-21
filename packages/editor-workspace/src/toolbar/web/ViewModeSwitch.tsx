@@ -1,7 +1,7 @@
 import type { ViewModeSwitchProps } from './types';
 
 /**
- * 모던 다크 테마의 알약형(Pill) 세그먼트 뷰 모드 스위처 컴포넌트.
+ * [Document Web Mode] 모던 다크/라이트 알약형(Pill) 세그먼트 뷰 모드 스위처 컴포넌트.
  * 에디터 캔버스 ⇄ 서식 규격 Matrix 등 여러 뷰 화면을 직관적으로 전환합니다.
  */
 export function ViewModeSwitch<T extends string = string>({

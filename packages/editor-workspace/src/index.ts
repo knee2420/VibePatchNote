@@ -59,17 +59,40 @@ export type {
   PanelToolbarProps,
 } from './panels/types';
 
-// Top Menu Bar & Global Toolbar (상단 헤더 툴바, 뷰 모드 스위처, 동기화 배지)
-export { TopMenuBar } from './toolbar/TopMenuBar';
-export { ViewModeSwitch } from './toolbar/ViewModeSwitch';
-export { SyncStatusBadge } from './toolbar/SyncStatusBadge';
+// ============================================================================
+// TopBars & Headers (상단 바: IDE Desktop Mode vs Document Web Mode)
+// ============================================================================
+// 1. [IDE Mode] 데스크톱 IDE 스타일 고밀도 윈도우 헤더 (완제품 및 5대 Primitives)
+export {
+  IdeWindowHeader,
+  IdeBrandLogo,
+  IdeMenuBar,
+  IdeTitleHeader,
+  IdePanelToggleGroup,
+  WindowControlButtons,
+} from './toolbar/ide';
 export type {
+  IdeBrandLogoProps,
+  IdeHeaderMenuItem,
+  IdeMenuBarProps,
+  IdeTitleHeaderProps,
+  IdePanelToggleGroupProps,
+  WindowControlButtonsProps,
+  IdeWindowHeaderProps,
+} from './toolbar/ide';
+
+// 2. [Document Web Mode] 일반 웹 문서형 탑 메뉴바 & 뷰 모드/동기화 배지
+export { DocumentTopBar, TopMenuBar } from './toolbar/web/DocumentTopBar';
+export { ViewModeSwitch } from './toolbar/web/ViewModeSwitch';
+export { SyncStatusBadge } from './toolbar/web/SyncStatusBadge';
+export type {
+  DocumentTopBarProps,
   TopMenuBarProps,
   ViewModeOption,
   ViewModeSwitchProps,
   SyncStatusType,
   SyncStatusBadgeProps,
-} from './toolbar/types';
+} from './toolbar/web/types';
 
 // Navigation & Fast Tab Switching (키보드 단축키 지원 고속 탭 전환기)
 export { QuickTabSwitcher } from './navigation/QuickTabSwitcher';

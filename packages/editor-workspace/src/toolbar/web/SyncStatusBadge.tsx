@@ -9,7 +9,7 @@ const defaultLabels: Record<SyncStatusType, string> = {
 };
 
 /**
- * 실시간 문서 동기화/저장 상태를 나타내는 배지 인디케이터 컴포넌트.
+ * [Document Web Mode] 실시간 문서 동기화/저장 상태를 나타내는 배지 인디케이터 컴포넌트.
  */
 export function SyncStatusBadge({
   status,

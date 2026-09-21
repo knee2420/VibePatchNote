@@ -1,15 +1,16 @@
-import type { TopMenuBarProps } from './types';
+import type { DocumentTopBarProps } from './types';
 
 /**
- * 워크스페이스 상단에 고정되는 범용 글로벌 탑 메뉴바 & 툴바 컴포넌트.
- * 좌측(뒤로가기, 문서제목), 중앙(뷰모드 전환), 우측(상태표시, 사이드바 토글) 3단 슬롯을 제공합니다.
+ * [Document Web Mode] 일반 웹 문서 워크스페이스에 고정되는 상단 탑 메뉴바 & 툴바.
+ * 좌측(뒤로가기/문서제목), 중앙(뷰모드 전환), 우측(상태표시/액션) 3단 슬롯을 제공합니다.
+ * (하위 호환을 위해 `TopMenuBar` 별칭도 함께 제공됩니다.)
  */
-export function TopMenuBar({
+export function DocumentTopBar({
   leftSlot,
   centerSlot,
   rightSlot,
   className = '',
-}: TopMenuBarProps) {
+}: DocumentTopBarProps) {
   return (
     <div
       className={`h-13 border-b border-slate-200 bg-white/95 backdrop-blur-md px-4 flex items-center justify-between shrink-0 select-none z-20 text-slate-800 shadow-xs ${className}`}
@@ -31,3 +32,6 @@ export function TopMenuBar({
     </div>
   );
 }
+
+/** 하위 호환을 위한 이전 명칭 별칭 */
+export const TopMenuBar = DocumentTopBar;
