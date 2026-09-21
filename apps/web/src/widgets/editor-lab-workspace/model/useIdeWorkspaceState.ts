@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useIdeLayoutState } from '@vibe/editor-workspace';
 import { useScaffoldDocumentDetail } from '@/entities/scaffold-document';
+
 import {
   updatePageInFullHtml,
   injectSlotValueInHtml,
@@ -554,19 +556,50 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     reload: reloadScaffold,
   } = useScaffoldDocumentDetail(scaffoldId);
 
-  // 1. 패널 레이아웃 및 크기 상태
-  const [showPrimarySidebar, setShowPrimarySidebar] = useState(true);
-  const [showSecondarySidebar, setShowSecondarySidebar] = useState(true);
-  const [showBottomPanel, setShowBottomPanel] = useState(true);
-  const [showResourceManager, setShowResourceManager] = useState(true);
+  // 1. 패널 레이아웃 및 리사이징 엔진 (@vibe/editor-workspace의 정본 훅에 위임)
+  const layoutState = useIdeLayoutState({
+    defaultPrimarySidebarWidth: 260,
+    defaultSecondarySidebarWidth: 360,
+    defaultResourceManagerWidth: 300,
+    defaultBottomPanelHeight: 200,
+    defaultResourceModalWidth: 620,
+    defaultLeftReferenceWidth: 580,
+    defaultSplitRatio: 55,
+    initialShowPrimarySidebar: true,
+    initialShowSecondarySidebar: true,
+    initialShowBottomPanel: true,
+    initialShowResourceManager: true,
+  });
 
-  const [primarySidebarWidth, setPrimarySidebarWidth] = useState(260);
-  const [secondarySidebarWidth, setSecondarySidebarWidth] = useState(360);
-  const [resourceManagerWidth, setResourceManagerWidth] = useState(300);
-  const [bottomPanelHeight, setBottomPanelHeight] = useState(200);
-  const [splitRatio, setSplitRatio] = useState(55); // 좌우 에디터 분할 비율 (와이어프레임 캔버스 55% : 소스코드 45%)
+  const {
+    showPrimarySidebar,
+    setShowPrimarySidebar,
+    showSecondarySidebar,
+    setShowSecondarySidebar,
+    showBottomPanel,
+    setShowBottomPanel,
+    showResourceManager,
+    setShowResourceManager,
+    isSplitEditor,
+    setIsSplitEditor,
+    primarySidebarWidth,
+    secondarySidebarWidth,
+    resourceManagerWidth,
+    bottomPanelHeight,
+    splitRatio,
+    resourceModalWidth,
+    leftReferenceWidth,
+    isDraggingAnyResizer,
+    handleMouseDownPrimaryResizer,
+    handleMouseDownSecondaryResizer,
+    handleMouseDownBottomResizer,
+    handleMouseDownResourceResizer,
+    handleMouseDownResourceModalResizer,
+    handleMouseDownLeftReferenceResizer,
+    handleMouseDownSplitResizer,
+  } = layoutState;
 
-  const [isDraggingAnyResizer, setIsDraggingAnyResizer] = useState(false);
+
 
   // 리소스 매니저 상태 (다중 디렉토리 묶음 & 통합 리소스 관리)
   const [bundles, setBundles] = useState<DirectoryBundle[]>(initialBundles);
@@ -583,7 +616,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   const [resourceModalResource, setResourceModalResource] = useState<ResourceItem | null>(null);
   const [resourceModalProvenance, setResourceModalProvenance] = useState<ResourceProvenanceInfo | null>(null);
   const [isResourceModalOpen, setIsResourceModalOpen] = useState<boolean>(false);
-  const [resourceModalWidth, setResourceModalWidth] = useState<number>(620);
+
 
   const handleOpenResourceModal = useCallback((resource: ResourceItem, provenance?: ResourceProvenanceInfo) => {
     setResourceModalResource(resource);
@@ -616,8 +649,8 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   // 좌측 레퍼런스 원본 패널 & 프로크리에이트 스타일 플로팅 레퍼런스 창 상태
   // -------------------------------------------------------------------------
   const [isLeftReferenceOpen, setIsLeftReferenceOpen] = useState<boolean>(false);
-  const [leftReferenceWidth, setLeftReferenceWidth] = useState<number>(580);
   const [isFloatingReferenceOpen, setIsFloatingReferenceOpen] = useState<boolean>(false);
+
   // apps/api/data 매핑 원장에 따른 현재 와이어프레임('회의비 사용 내역')의 정본 원본 문서 ID
   const [selectedReferenceDocId, setSelectedReferenceDocId] = useState<string | null>(
     detail?.docId || 'doc-1a0897500d9-989a3b2b'
@@ -996,7 +1029,7 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
   const [fileTree, setFileTree] = useState<FileTreeNode[]>(initialFileTree);
 
   // 4. 멀티 Pane 에디터 상태 (Pane 1: 와이어프레임 캔버스, Pane 2: 소스 코드/규격)
-  const [isSplitEditor, setIsSplitEditor] = useState<boolean>(false);
+
 
   const [pane1Tabs, setPane1Tabs] = useState<EditorTabItem[]>([
     {
@@ -1766,170 +1799,8 @@ export function useIdeWorkspaceState(scaffoldId: string = DEFAULT_SCAFFOLD_ID) {
     }
   }, [pane1ActiveId, pane2ActiveId, setLiveHtml, setLiveMarkdown]);
 
-  // ---------------- 리사이저 드래그 핸들러들 ---------------- //
-  // A. 좌측 사이드바 리사이징 (너비)
-  const handleMouseDownPrimaryResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startWidth = primarySidebarWidth;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = ev.clientX - startX;
-      const newWidth = Math.max(160, Math.min(500, startWidth + delta));
-      setPrimarySidebarWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [primarySidebarWidth]);
-
-  // B. 우측 AI 패널 리사이징 (너비)
-  const handleMouseDownSecondaryResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startWidth = secondarySidebarWidth;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = startX - ev.clientX;
-      const newWidth = Math.max(240, Math.min(650, startWidth + delta));
-      setSecondarySidebarWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [secondarySidebarWidth]);
-
-  // B-2. 리소스 매니저 패널 리사이징 (너비)
-  const handleMouseDownResourceResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startWidth = resourceManagerWidth;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = startX - ev.clientX;
-      const newWidth = Math.max(200, Math.min(550, startWidth + delta));
-      setResourceManagerWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [resourceManagerWidth]);
-
-  // B-3. 헵타베이스 스타일 리소스 모달 리사이징 (너비)
-  const handleMouseDownResourceModalResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startWidth = resourceModalWidth;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = startX - ev.clientX;
-      const newWidth = Math.max(320, Math.min(800, startWidth + delta));
-      setResourceModalWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [resourceModalWidth]);
-
-  // B-4. 좌측 슬라이드 레퍼런스 패널 리사이징 (너비)
-  const handleMouseDownLeftReferenceResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startWidth = leftReferenceWidth;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = ev.clientX - startX;
-      const newWidth = Math.max(340, Math.min(850, startWidth + delta));
-      setLeftReferenceWidth(newWidth);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [leftReferenceWidth]);
-
-  // C. 하단 패널 리사이징 (높이)
-  const handleMouseDownBottomResizer = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startY = e.clientY;
-    const startHeight = bottomPanelHeight;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = startY - ev.clientY;
-      const newHeight = Math.max(100, Math.min(550, startHeight + delta));
-      setBottomPanelHeight(newHeight);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [bottomPanelHeight]);
-
-  // D. 중앙 스플릿 에디터 리사이징 (좌우 비율 %)
-  const handleMouseDownSplitResizer = useCallback((containerWidth: number) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDraggingAnyResizer(true);
-    const startX = e.clientX;
-    const startRatio = splitRatio;
-
-    const handleMouseMove = (ev: MouseEvent) => {
-      const delta = ev.clientX - startX;
-      const deltaRatio = (delta / containerWidth) * 100;
-      const newRatio = Math.max(20, Math.min(80, startRatio + deltaRatio));
-      setSplitRatio(newRatio);
-    };
-
-    const handleMouseUp = () => {
-      setIsDraggingAnyResizer(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  }, [splitRatio]);
-
   // Activity Bar 클릭 핸들러
+
   const handleSelectActivityTab = useCallback((tab: ActivityBarTab) => {
     if (activeActivityTab === tab) {
       setShowPrimarySidebar((prev) => !prev);

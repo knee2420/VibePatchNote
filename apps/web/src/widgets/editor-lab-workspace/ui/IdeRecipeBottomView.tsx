@@ -14,11 +14,41 @@ import {
 } from 'lucide-react';
 import {
   DiagnosticQuickFix,
-  SocketStateBadge,
-  CoverageRing,
 } from '@vibe/editor-workspace';
 import type { BinderSpineMode } from './IdeBinderSidebar';
 import type { SlotBindingInfo } from '../model/types';
+
+/** 규격 충족률 원형 링 게이지 */
+function CoverageRing({ value, size = 22, strokeWidth = 2.5 }: { value: number; size?: number; strokeWidth?: number; showPercent?: boolean }) {
+  const clamped = Math.min(100, Math.max(0, value));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
+  return (
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90 transform" viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={size / 2} cy={size / 2} r={radius} className="text-slate-800" strokeWidth={strokeWidth} stroke="currentColor" fill="transparent" />
+        <circle cx={size / 2} cy={size / 2} r={radius} className="text-emerald-400 transition-all duration-500 ease-out" strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" stroke="currentColor" fill="transparent" />
+      </svg>
+    </div>
+  );
+}
+
+/** 소켓 바인딩 상태 뱃지 */
+function SocketStateBadge({ state, count }: { state: 'filled' | 'empty' | 'partial'; count?: number }) {
+  if (state === 'filled') {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-300 border border-emerald-800/60">
+        <span>연결됨 {count !== undefined ? `(${count})` : ''}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700/60">
+      <span>미할당</span>
+    </span>
+  );
+}
 
 export interface IdeRecipeBottomViewProps {
   activeSpine: BinderSpineMode;

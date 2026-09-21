@@ -18,8 +18,7 @@ import {
   TopMenuBar,
   SyncStatusBadge,
   WorkspacePanel,
-  BinderToolbar,
-  BinderTree,
+  IdeHierarchyTree,
   CorkboardView,
   OutlinerTable,
   SnapshotInspector,
@@ -30,7 +29,7 @@ import {
   PaginationBar,
   PagedCanvasContainer,
   QuickTabSwitcher,
-  type BinderItem,
+  type IdeHierarchyNode,
   type CorkboardCard,
   type OutlinerRow,
   type DocumentSnapshot,
@@ -62,7 +61,7 @@ type InspectorTab = 'mcp' | 'meta' | 'snapshots' | 'matrix';
  *
  * @vibe/editor-workspace 모듈형 엔진으로 구축된 고도화된 문서 편집 상세 워크스페이스.
  * - 상단: TopMenuBar + QuickTabSwitcher (단축키 Ctrl+1~4 지원) + SyncStatusBadge + 컴파일러
- * - 좌측: WorkspacePanel + BinderToolbar + BinderTree (슬롯/섹션 네비게이션)
+ * - 좌측: WorkspacePanel + IdeHierarchyTree (슬롯/섹션 네비게이션)
  * - 중앙: 에디터 캔버스(A4 낱장 / 연속 / 양면 펼침 / 젠 모드) ⇄ 2D 규격 Matrix ⇄ 코르크보드 ⇄ 아웃라이너
  * - 우측: 4단 인스펙터 (MCP 마크다운 / 메타데이터&목표진행도 / 세그먼트 스냅샷 / 저작 규격)
  * - 하단: BreadcrumbBar + PaginationBar (페이지 점프 및 줌) + WordCountBadge 실시간 상태바
@@ -159,30 +158,23 @@ export function DocumentEditorWorkspace({
     },
   ], [recipe]);
 
-  // 바인더 트리 데이터
-  const binderItems: BinderItem[] = useMemo(() => {
+  // 계층 트리 데이터 (IdeHierarchyNode)
+  const hierarchyNodes: IdeHierarchyNode[] = useMemo(() => {
     if (!detail?.slots || detail.slots.length === 0) {
       return [
         {
           id: scaffoldId,
-          name: detail?.title || '기본 본문 섹션',
-          isFolder: false,
+          kind: 'outline',
+          title: detail?.title || '기본 본문 섹션',
         },
       ];
     }
-    return [
-      {
-        id: 'root-document',
-        name: detail.title || '문서 섹션 구조',
-        isFolder: true,
-        children: detail.slots.map((slot) => ({
-          id: slot.id,
-          name: slot.label || `슬롯 #${slot.number}`,
-          isFolder: false,
-          data: { number: slot.number, pageNumber: slot.pageNumber },
-        })),
-      },
-    ];
+    return detail.slots.map((slot) => ({
+      id: slot.id,
+      kind: 'segment',
+      title: slot.label || `슬롯 #${slot.number}`,
+      pageNumber: slot.pageNumber,
+    }));
   }, [detail, scaffoldId]);
 
   // 코르크보드 카드 데이터
@@ -428,20 +420,27 @@ export function DocumentEditorWorkspace({
               </span>
             }
             toolbar={
-              <BinderToolbar
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-              />
+              <div className="px-3 py-1.5 border-b border-slate-200">
+                <input
+                  type="text"
+                  placeholder="섹션 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full text-xs px-2.5 py-1 rounded-md border border-slate-200 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                />
+              </div>
             }
           >
             <div className="p-2 flex flex-col gap-3">
-              <BinderTree
-                data={binderItems}
-                searchTerm={searchTerm}
-                selectedId={selectedSlotId}
-                onSelect={(item) => setSelectedSlotId(item ? item.id : null)}
-                height={280}
-              />
+              <div className="overflow-y-auto max-h-[300px] rounded-lg border border-slate-800 bg-slate-900 text-slate-200 p-1">
+                <IdeHierarchyTree
+                  nodes={hierarchyNodes.filter(
+                    (n) => !searchTerm || n.title.toLowerCase().includes(searchTerm.toLowerCase())
+                  )}
+                  selectedId={selectedSlotId || undefined}
+                  onSelectNode={(node) => setSelectedSlotId(node.id)}
+                />
+              </div>
 
               {/* 서식 골격 요약 카드 */}
               <div className="mt-2 p-3 rounded-xl bg-indigo-50/60 border border-indigo-100 flex flex-col gap-1.5 text-xs">
