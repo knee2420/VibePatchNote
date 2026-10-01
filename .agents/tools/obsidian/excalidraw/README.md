@@ -13,6 +13,7 @@
 | **`01_extract_text_elements.py`** | **[텍스트 슬라이서]**<br/>하단의 무거운 드로잉을 일체 건너뛰고, 상단의 `## Text Elements`와 `## Embedded Files`만 즉시 추출 | **200 ~ 300 토큰**<br/>(제로 오버헤드) | 캔버스에 적힌 아이디어, 질문, 대립쌍(VS), 키워드를 바탕으로 **빠르게 브레인스토밍**할 때 |
 | **`02_extract_semantic_graph.py`** | **[시맨틱 그래프 변환기]**<br/>드로잉 JSON을 해독하여 좌표/스타일 등 수만 토큰의 렌더링 노이즈를 100% 제거하고, 노드와 화살표(Arrow) 연결선만 추출해 **Mermaid 다이어그램**으로 압축 | **800 ~ 1,200 토큰**<br/>(96% 이상 절감) | "무엇이 어디로 연결되는지", 인과 관계, 아키텍처 흐름, **논리적 구조를 깊이 있게 파악**할 때 |
 | **`03_resolve_visual_images.py`** | **[비전 자산 로케이터]**<br/>캔버스에 연동된 내보내기 이미지(`.png`/`.svg`) 및 캔버스 내부에 붙여넣은 스크린샷(`[[Pasted Image ...]]`)의 로컬 절대 경로를 해결 | **0 토큰**<br/>(경로 안내 후 view_file로 비전 입력) | 사용자가 표시한 빨간 마커나 **UI 시안, 실제 화면 배치를 비전(Vision)으로 직접 확인**할 때 |
+| **`04_grid_tile_canvas.py`** | **[단순 그리드 타일러 & 캐시]**<br/>캔버스 면적(종횡비)에 따라 2분할/4분할로 단순 슬라이싱하여 손글씨·디테일을 100% 보존하고 `scratch/excalidraw_cache/YYYY-MM-DD/`에 SHA-256 해시로 캐싱 | **0 토큰**<br/>(캐시 적중 시 0초 재사용) | 수작업 캡처 없이 **캔버스 전체를 고해상도 분할 타일로 무인 자동 동기화**할 때 |
 
 ---
 
@@ -37,6 +38,15 @@ python .agents/tools/obsidian/excalidraw/02_extract_semantic_graph.py "<파일�
 ### 3. 연동된 시각 이미지 절대 경로 찾기
 ```bash
 python .agents/tools/obsidian/excalidraw/03_resolve_visual_images.py "<파일경로>"
+```
+
+### 4. 캔버스 단순 그리드 분할 및 날짜별 scratch 캐싱
+```bash
+python .agents/tools/obsidian/excalidraw/04_grid_tile_canvas.py "<파일경로>"
+# 특정 소스 이미지 강제 지정:
+python .agents/tools/obsidian/excalidraw/04_grid_tile_canvas.py "<파일경로>" --image "<이미지경로>"
+# 캐시 무시 강제 재생성:
+python .agents/tools/obsidian/excalidraw/04_grid_tile_canvas.py "<파일경로>" --force
 ```
 
 ---

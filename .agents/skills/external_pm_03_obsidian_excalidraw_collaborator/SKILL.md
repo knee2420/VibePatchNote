@@ -26,11 +26,12 @@ description: "사용자가 옵시디언의 Excalidraw 다이어그램/도면(.md
 | :--- | :--- | :--- | :--- |
 | **`01_extract_text_elements.py`** | 마크다운 상단의 `## Text Elements`와 `## Embedded Files`만 즉시 슬라이싱 | **200~300 토큰** | 화두, 의문점, 대립쌍(VS), 키워드 중심 빠른 아이데이션 |
 | **`02_extract_semantic_graph.py`** | 드로잉 JSON 해독 및 노이즈 100% 제거 후 **Mermaid 다이어그램** 생성 | **800~1,200 토큰** (96% 절감) | "무엇이 어디로 연결되는가?", 인과 관계, 아키텍처 구조 분석 |
-| **`03_resolve_visual_images.py`** | 캔버스 내보내기 PNG 및 삽입된 스크린샷(`Pasted Image...`)의 로컬 절대 경로 탐색 | **0 토큰** (경로 안내) | 사용자가 짚은 UI 지점이나 캔버스 전체 화면을 `view_file`로 비전 관찰 |
+| **`03_resolve_visual_images.py`** | 캔버스 내보내기 PNG 및 삽입된 스크린샷(`Pasted Image...`)의 로컬 절대 경로 탐색 | **0 토큰** (경로 안내) | 특정 삽입 스크린샷이나 개별 이미지 경로를 `view_file`로 확인할 때 |
+| **`04_grid_tile_canvas.py`** | 캔버스 면적 비율(W/H)에 따라 2분할/4분할 고해상도 슬라이싱 및 `scratch/` 날짜별 해시 캐싱 | **0 토큰** (0초 캐시 적중) | 사람이 매번 수작업 캡처할 필요 없이 **캔버스 전체를 고해상도 분할 타일로 무인 자동 동기화**할 때 |
 
 ---
 
-## 📋 3. 3단계 페어 싱킹 프로토콜 (The 3-Tier Protocol)
+## 📋 3. 4단계 페어 싱킹 프로토콜 (The 4-Tier Protocol)
 
 에이전트는 사용자의 질문 깊이와 맥락에 따라 다음 단계를 유연하게 밟습니다:
 
@@ -39,10 +40,12 @@ flowchart TD
     A["사용자의 Excalidraw 파일 제시"] --> B{"논의 성격 판별"}
     B -- "1단계: 가설/키워드/질의응답" --> C["01_extract_text_elements.py 실행\n(최소 토큰으로 화두 파악)"]
     B -- "2단계: 화살표/인과/구조 분석" --> D["02_extract_semantic_graph.py 실행\n(Mermaid 그래프로 관계 추적)"]
-    B -- "3단계: UI 시안/스크린샷 배치" --> E["03_resolve_visual_images.py 실행\n(절대 경로 획득 후 view_file 비전 관찰)"]
-    C --> F["생각 교환 및 피드백 제공 (Pair Thinking)"]
+    B -- "3단계: 캔버스 자동 분할·비전 싱크" --> E["04_grid_tile_canvas.py 실행\n(scratch/ 날짜별 캐시에서 고해상도 타일 로드)"]
+    B -- "4단계: 단일 스크린샷 핀포인트" --> G["03_resolve_visual_images.py 실행\n(임베드 스크린샷 직접 조회)"]
+    C --> F["밀도 높은 페어 싱킹 (Pair Thinking)"]
     D --> F
     E --> F
+    G --> F
 ```
 
 ### [Step 1] 화두 및 핵심 의문 파악 (Fast Ideation)
@@ -59,12 +62,19 @@ python .agents/tools/obsidian/excalidraw/02_extract_semantic_graph.py "<Excalidr
 - "A 작업에서 B로 어떻게 이어지는가?", "포인터 마커가 어느 스크린샷을 가리키는가?" 등 연결 관계가 중요할 때 실행합니다.
 - 원본 10만 바이트의 JSON을 읽지 않고, 산출된 간결한 Mermaid 코드를 바탕으로 인과 관계를 추론합니다.
 
-### [Step 3] 시각적 뷰 싱크 (Visual Multimodal Sync)
+### [Step 3] 캔버스 자동 분할 타일링 & 날짜별 캐싱 (Auto Grid Tiling)
+```bash
+python .agents/tools/obsidian/excalidraw/04_grid_tile_canvas.py "<Excalidraw파일경로>"
+```
+- 사용자가 번거롭게 캔버스를 캡처해서 올릴 필요가 없도록, 도면의 전체 면적(가로/세로 비율)을 측정하여 **가로 2분할(Tile 1 좌측, Tile 2 우측) 또는 4분할**로 무손실 고해상도 슬라이싱합니다.
+- 슬라이싱된 이미지는 **`scratch/excalidraw_cache/YYYY-MM-DD/도면명/`**에 SHA-256 해시로 캐싱되며, 변경 사항이 없으면 0초 만에 기존 캐시 이미지를 재사용합니다.
+- 에이전트는 출력된 타일 중 논의 중인 영역의 타일을 `view_file`로 열어 인간과 똑같은 고해상도 시각으로 대화합니다.
+
+### [Step 4] 임베드 스크린샷 핀포인트 관찰 (Snapshot Resolver)
 ```bash
 python .agents/tools/obsidian/excalidraw/03_resolve_visual_images.py "<Excalidraw파일경로>"
 ```
-- 도구의 출력에서 발견된 실제 스크린샷 이미지 경로를 `view_file` 도구로 호출합니다.
-- Gemini 멀티모달 비전을 통해 사용자가 스크린샷 위에 표시한 위치, UI 구성 요소, 레이아웃을 인간과 동일한 시각으로 직관 확인합니다.
+- 캔버스 내부에 붙여넣어진 특정 스크린샷 파일 원본을 직접 열어보아야 할 때 실행합니다.
 
 ---
 
