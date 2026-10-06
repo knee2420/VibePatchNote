@@ -1,0 +1,557 @@
+{
+  "documentTitle": "11월 디딤돌 회의록.pdf",
+  "totalPages": 2,
+  "outlines": [
+    {
+      "id": "node-p1-title",
+      "level": 1,
+      "title": "회의비 사용 내역",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        87,
+        386,
+        107,
+        614
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
+        {
+          "id": "node-p1-table",
+          "level": 2,
+          "title": "회의비 사용 내역 (1차)",
+          "type": "header",
+          "page": 1,
+          "box_2d": [
+            121,
+            121,
+            854,
+            879
+          ],
+          "purpose": null,
+          "elements": [],
+          "children": [
+            {
+              "id": "node-p1-1",
+              "level": 3,
+              "title": "일    시",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                137,
+                160,
+                150,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-1",
+                  "outline_id": "node-p1-1",
+                  "type": "key_value",
+                  "label": "일 시",
+                  "value": "2018.11.08",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    137,
+                    160,
+                    150,
+                    350
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-2",
+              "level": 3,
+              "title": "장    소",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                180,
+                160,
+                193,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-2",
+                  "outline_id": "node-p1-2",
+                  "type": "key_value",
+                  "label": "장 소",
+                  "value": "6공학관 6108-1호",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    180,
+                    160,
+                    193,
+                    401
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-3",
+              "level": 3,
+              "title": "참 석 자",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                230,
+                160,
+                243,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-3",
+                  "outline_id": "node-p1-3",
+                  "type": "key_value",
+                  "label": "참 석 자",
+                  "value": "4명",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    230,
+                    160,
+                    243,
+                    294
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-4",
+              "level": 3,
+              "title": "안    건",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                283,
+                160,
+                296,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-4",
+                  "outline_id": "node-p1-4",
+                  "type": "key_value",
+                  "label": "안 건",
+                  "value": "GPS + 동영상 촬영 및 프로그램 테스트 최종 확인",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    283,
+                    160,
+                    296,
+                    625
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-5",
+              "level": 3,
+              "title": "회의내용",
+              "type": "list",
+              "page": 1,
+              "box_2d": [
+                313,
+                121,
+                479,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-5",
+                  "outline_id": "node-p1-5",
+                  "type": "list",
+                  "label": "회의내용",
+                  "value": null,
+                  "items": [
+                    "1. 드론 비행 후 GPS 센서가 정상적으로 수집이 되는지 확인",
+                    "2. 프로그램 최종 테스트 진행",
+                    "3. 결과보고서 작성 회의"
+                  ],
+                  "page": 1,
+                  "box_2d": [
+                    330,
+                    160,
+                    450,
+                    850
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-6",
+              "level": 3,
+              "title": "지출금액",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                479,
+                121,
+                520,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-6",
+                  "outline_id": "node-p1-6",
+                  "type": "key_value",
+                  "label": "지출금액",
+                  "value": "₩40,000",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    470,
+                    160,
+                    490,
+                    400
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p1-7",
+              "level": 3,
+              "title": "증빙자료",
+              "type": "media",
+              "page": 1,
+              "box_2d": [
+                520,
+                121,
+                854,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-7",
+                  "outline_id": "node-p1-7",
+                  "type": "media",
+                  "label": "증빙자료",
+                  "value": "(신용카드 영수증, 현금영수증 등)",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    520,
+                    121,
+                    854,
+                    879
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "node-p2-title",
+      "level": 1,
+      "title": "회의비 사용 내역",
+      "type": "header",
+      "page": 2,
+      "box_2d": [
+        87,
+        386,
+        107,
+        614
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
+        {
+          "id": "node-p2-table",
+          "level": 2,
+          "title": "회의비 사용 내역 (2차)",
+          "type": "header",
+          "page": 2,
+          "box_2d": [
+            121,
+            121,
+            854,
+            879
+          ],
+          "purpose": null,
+          "elements": [],
+          "children": [
+            {
+              "id": "node-p2-1",
+              "level": 3,
+              "title": "일    시",
+              "type": "key_value",
+              "page": 2,
+              "box_2d": [
+                137,
+                160,
+                150,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-1",
+                  "outline_id": "node-p2-1",
+                  "type": "key_value",
+                  "label": "일 시",
+                  "value": "2018.11.16",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    137,
+                    160,
+                    150,
+                    350
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-2",
+              "level": 3,
+              "title": "장    소",
+              "type": "key_value",
+              "page": 2,
+              "box_2d": [
+                180,
+                160,
+                193,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-2",
+                  "outline_id": "node-p2-2",
+                  "type": "key_value",
+                  "label": "장 소",
+                  "value": "6공학관 6108-1호",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    180,
+                    160,
+                    193,
+                    401
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-3",
+              "level": 3,
+              "title": "참 석 자",
+              "type": "key_value",
+              "page": 2,
+              "box_2d": [
+                230,
+                160,
+                243,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-3",
+                  "outline_id": "node-p2-3",
+                  "type": "key_value",
+                  "label": "참 석 자",
+                  "value": "3명",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    230,
+                    160,
+                    243,
+                    294
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-4",
+              "level": 3,
+              "title": "안    건",
+              "type": "key_value",
+              "page": 2,
+              "box_2d": [
+                283,
+                160,
+                296,
+                220
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-4",
+                  "outline_id": "node-p2-4",
+                  "type": "key_value",
+                  "label": "안 건",
+                  "value": "최종 점검, 결과보고서 작성",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    283,
+                    160,
+                    296,
+                    461
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-5",
+              "level": 3,
+              "title": "회의내용",
+              "type": "list",
+              "page": 2,
+              "box_2d": [
+                313,
+                121,
+                479,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-5",
+                  "outline_id": "node-p2-5",
+                  "type": "list",
+                  "label": "회의내용",
+                  "value": null,
+                  "items": [
+                    "1. 제출 필요서류 최종 점검",
+                    "2. 결과보고서 작성"
+                  ],
+                  "page": 2,
+                  "box_2d": [
+                    330,
+                    160,
+                    450,
+                    850
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-6",
+              "level": 3,
+              "title": "지출금액",
+              "type": "key_value",
+              "page": 2,
+              "box_2d": [
+                479,
+                121,
+                520,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-6",
+                  "outline_id": "node-p2-6",
+                  "type": "key_value",
+                  "label": "지출금액",
+                  "value": "₩29,000",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    470,
+                    160,
+                    490,
+                    400
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-7",
+              "level": 3,
+              "title": "증빙자료",
+              "type": "media",
+              "page": 2,
+              "box_2d": [
+                520,
+                121,
+                854,
+                266
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-7",
+                  "outline_id": "node-p2-7",
+                  "type": "media",
+                  "label": "증빙자료",
+                  "value": "(신용카드 영수증, 현금영수증 등)",
+                  "items": null,
+                  "page": 2,
+                  "box_2d": [
+                    520,
+                    121,
+                    854,
+                    879
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

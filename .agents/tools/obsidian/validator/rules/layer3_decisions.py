@@ -102,8 +102,8 @@ class DecisionProvenanceRule(BaseLintRule):
             # 원본 정리본 파일이 아직 생성되지 않았거나 경로가 완전히 다른 경우 경고
             return violations
 
-        # 가장 적합한 첫 번째 원본 파일 이름 (확장자 제외)
-        expected_stem = os.path.splitext(matched_output_files[0][0])[0]
+        # 후보 원본 파일 이름 목록 (확장자 제외)
+        candidate_stems = [os.path.splitext(f[0])[0] for f in matched_output_files]
 
         # 4. 프론트매터 링크 확인
         links = []
@@ -114,9 +114,9 @@ class DecisionProvenanceRule(BaseLintRule):
             elif raw_links:
                 links = [str(raw_links)]
 
-        # 위키링크 내부에 expected_stem이 들어있는지 확인
+        # 위키링크 내부에 후보 stem 중 하나라도 들어있는지 확인
         # e.g., '[[D1_인스파이어드_...]]' or '[["D1_..."]]'
-        found = any(expected_stem in l for l in links)
+        found = any(stem in l for stem in candidate_stems for l in links)
 
         if not found:
             violations.append(
@@ -124,7 +124,7 @@ class DecisionProvenanceRule(BaseLintRule):
                     rule_id=self.rule_id,
                     message=(
                         f"원 정리본 링크 누락: {date_str} 회의/공유회의 A5.outputs 원본인 "
-                        f"'[[{expected_stem}]]' 링크가 프론트매터 '링크:' 에 반드시 포함되어야 합니다."
+                        f"{[f'[[{s}]]' for s in candidate_stems]} 링크 중 하나가 프론트매터 '링크:' 에 반드시 포함되어야 합니다."
                     )
                 )
             )
