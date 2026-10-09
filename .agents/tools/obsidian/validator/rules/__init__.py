@@ -12,7 +12,11 @@ from .layer1_syntax import (
     WikilinkQuoteRule,
     UnquotedNumberListRule,
 )
-from .layer2_classification import ClassificationSinglePolicyRule
+from .layer2_classification import (
+    ClassificationSinglePolicyRule,
+    StatusLeakToClassificationRule,
+    ResourceClassificationRule,
+)
 from .layer3_system_ground_rules import BugReportAuthorGroundRule
 from .layer3_decisions import DecisionStatusRule, DecisionProvenanceRule
 
@@ -26,6 +30,8 @@ ALL_RULES: list[BaseLintRule] = [
     UnquotedNumberListRule(),
     # Layer 2: 구역/분류 거버넌스 (Classification Governance Rules)
     ClassificationSinglePolicyRule(),
+    StatusLeakToClassificationRule(),
+    ResourceClassificationRule(),
     # Layer 3: 볼트 시스템 공식 그라운드 룰 (Vault System Ground Rules)
     BugReportAuthorGroundRule(),
     # Layer 3: 아티팩트 전용 계약 (Artifact-Specific Contracts)
