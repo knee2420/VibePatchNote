@@ -1,0 +1,68 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "oxc", "import"],
+  "rules": {
+    "import/no-cycle": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "react",
+            "message": "outliner-core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+          },
+          {
+            "name": "react-dom",
+            "message": "outliner-core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+          },
+          {
+            "name": "zustand",
+            "message": "outliner-core 는 호스트 비의존 엔진입니다. 상태 보관은 호스트 앱이 합니다."
+          }
+        ],
+        "patterns": [
+          {
+            "regex": "^(\\.\\./)+(apps|packages)/",
+            "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/index.ts", "src/model/**", "src/queries/index.ts", "src/transforms/index.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "message": "outliner-core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "react-dom",
+                "message": "outliner-core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "zustand",
+                "message": "outliner-core 는 호스트 비의존 엔진입니다. 상태 보관은 호스트 앱이 합니다."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(apps|packages)/",
+                "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+              },
+              {
+                "regex": "(^|/)internal(/|$)",
+                "message": "internal/ 은 패키지 내부 전용입니다. Public API(index.ts)나 model 에서 다시 내보내지 마세요."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
