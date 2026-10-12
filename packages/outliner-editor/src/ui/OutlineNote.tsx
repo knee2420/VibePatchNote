@@ -170,7 +170,7 @@ export const OutlineNote: React.FC<OutlineNoteProps> = ({ nodeId, note, flattene
         onBlur={handleBlur}
         data-note-for={nodeId}
         data-placeholder="노트를 입력하세요..."
-        className={`w-full px-1.5 pb-1 -mt-0.5 min-h-[18px] font-[var(--font-text-theme)] text-[13px] text-(--text-muted) font-normal leading-[1.7] tracking-[-0.005em] rounded hover:text-(--text-normal) hover:bg-(--background-modifier-hover)/40 focus:text-(--text-normal) focus:bg-(--background-modifier-hover)/60 outline-none transition-all break-words cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-(--text-faint) empty:before:italic ${
+        className={`w-full px-1.5 pb-0.5 min-h-[18px] font-[var(--font-text-theme)] text-[13px] text-(--text-muted) font-normal leading-[1.7] tracking-[-0.005em] rounded hover:text-(--text-normal) hover:bg-(--background-modifier-hover)/40 focus:text-(--text-normal) focus:bg-(--background-modifier-hover)/60 outline-none transition-all break-words cursor-text empty:before:content-[attr(data-placeholder)] empty:before:text-(--text-faint) empty:before:italic ${
           isExpanded ? 'whitespace-pre-wrap' : 'line-clamp-1 overflow-hidden'
         }`}
       />

@@ -15,7 +15,7 @@ export {
   type OutlineEditorStore,
   createOutlineEditorStore,
 } from './session/editorStore';
-export type { OutlineHost } from './session/host';
+export type { OutlineFileHost, OutlineHost } from './session/host';
 export { OutlineEditorProvider } from './session/context';
 
 export { OutlineTree } from './ui/OutlineTree';
@@ -24,4 +24,5 @@ export { OutlineBoard } from './ui/OutlineBoard';
 export { OutlineHeader, type OutlineHeaderProps } from './ui/OutlineHeader';
 export { useZoom } from './model/useZoom';
 export { useOutlineView } from './model/useOutlineView';
+export { FILE_KINDS } from './attachments/registry';
 

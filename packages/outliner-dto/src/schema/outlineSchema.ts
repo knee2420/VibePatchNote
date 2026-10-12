@@ -8,8 +8,10 @@
 
 import { z } from 'zod';
 import {
+  type FileDisplay,
   type OutlineDocument,
   type OutlineNode,
+  type OutlineNodeFile,
   type OutlineNodeType,
   type ViewMode,
   OUTLINE_FORMAT_VERSION,
@@ -29,6 +31,17 @@ export const outlineNodeTypeSchema: z.ZodType<OutlineNodeType> = z.enum([
   'divider',
 ]);
 
+export const fileDisplaySchema: z.ZodType<FileDisplay> = z.enum(['title', 'small', 'large']);
+
+/** 불릿에 딸린 파일. 종류별 옵션(options)의 속 모양은 종류가 정하므로 여기서는 열어 둔다. */
+export const outlineNodeFileSchema: z.ZodType<OutlineNodeFile> = z
+  .object({
+    target: z.string().min(1),
+    display: fileDisplaySchema.optional(),
+    options: z.record(z.unknown()).optional(),
+  })
+  .passthrough();
+
 export const outlineNodeSchema: z.ZodType<OutlineNode> = z.lazy(() =>
   z
     .object({
@@ -40,6 +53,7 @@ export const outlineNodeSchema: z.ZodType<OutlineNode> = z.lazy(() =>
       isCompleted: z.boolean().optional(),
       completedAt: z.number().optional(),
       note: z.string().optional(),
+      file: outlineNodeFileSchema.optional(),
       viewMode: viewModeSchema.optional(),
       createdAt: z.number().optional(),
       updatedAt: z.number().optional(),

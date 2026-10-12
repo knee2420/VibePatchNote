@@ -22,6 +22,22 @@ export type OutlineNodeType =
   | 'paragraph'
   | 'divider';
 
+/** 불릿에 딸린 파일을 얼마나 크게 보일지: 제목만 / 작게 / 크게 */
+export type FileDisplay = 'title' | 'small' | 'large';
+
+/**
+ * 불릿에 딸린 파일 하나. 파일 내용은 담지 않고 주소만 갖는다.
+ * 어떤 종류(이미지·PDF 등)인지는 저장하지 않는다. 주소의 확장자를 보고 그때그때 정한다.
+ */
+export interface OutlineNodeFile {
+  /** 파일의 주소. 옵시디언 링크 주소 꼴(`자료/설계.pdf`, `그림.png`)이거나 웹 주소 */
+  target: string;
+  /** 보이는 크기. 없으면 호스트가 정한 종류별 기본값을 따른다. */
+  display?: FileDisplay;
+  /** 그 종류만의 옵션 (예: PDF 의 시작 쪽). 모양은 종류가 정한다. */
+  options?: Record<string, unknown>;
+}
+
 export interface OutlineNode {
   id: NodeId;
   text: string;
@@ -37,6 +53,9 @@ export interface OutlineNode {
 
   /** 하위 노드가 아닌 자체 부연 설명문 (Shift+Enter 노트) */
   note?: string;
+
+  /** 이 불릿에 딸린 파일 (불릿 하나에 파일 하나) */
+  file?: OutlineNodeFile;
 
   /** 해당 노드에 줌인했을 때 적용할 로컬 뷰 모드 (선택적) */
   viewMode?: ViewMode;

@@ -48,6 +48,6 @@
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "oxlint",
-    "test": "tsx --test test/workspace.test.ts"
+    "test": "tsx --test test/workspace.test.ts test/file.test.ts"
   }
 }

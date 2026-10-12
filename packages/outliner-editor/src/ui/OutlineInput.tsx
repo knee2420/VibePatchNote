@@ -5,32 +5,57 @@
  * - 링크/태그 클릭 시 host.openLink, 마우스 호버 시 host.hoverLink(Page Preview) 트리거
  * - 포커스 상태에서 host.attachSuggest 자동완성 드롭다운 연동
  * - 포커스 진입 시 100% 순수 plaintext contenteditable 모드로 안전하게 토글
+ * - 붙여 넣기: 파일은 이 불릿에 붙이고, 글자를 고른 채 붙인 웹 주소는 그 글자를 링크로 만든다
  */
 
 import React, { useEffect, useRef } from 'react';
-import type { OutlineNodeType } from '@vibe/outliner-core';
+import { type OutlineNodeType, isWebTarget } from '@vibe/outliner-core';
 import { useEditorStore, useOutlineHost } from '../session/context';
 import { winOf } from '../session/host';
+import { useFileAttach } from '../attachments/useFileAttach';
 
-/** 불릿 종류별 글자 모양 */
-const TYPE_STYLES: Record<OutlineNodeType, string> = {
-  bullet: 'text-sm font-normal',
-  todo: 'text-sm font-normal',
-  paragraph: 'text-sm font-normal',
-  h1: 'text-2xl font-bold tracking-tight',
-  h2: 'text-xl font-semibold',
-  h3: 'text-lg font-semibold',
-  quote: 'text-sm italic border-l-2 border-(--background-modifier-border-hover) pl-3',
-  code: 'text-xs font-mono bg-(--background-secondary) border border-(--background-modifier-border)',
-  divider: 'text-sm font-normal',
+/**
+ * 불릿 종류별 글자 크기. 한 줄의 높이는 이 크기에 줄 높이(1.7배)를 곱한 값이다.
+ * 줄(OutlineRow)에도 같은 크기를 걸어 두어, 불릿 점이 글자 첫 줄의 높이를 물려받아 그 가운데에 놓이게 한다.
+ */
+export const NODE_TEXT_SIZE: Record<OutlineNodeType, string> = {
+  bullet: 'text-sm',
+  todo: 'text-sm',
+  paragraph: 'text-sm',
+  h1: 'text-2xl',
+  h2: 'text-xl',
+  h3: 'text-lg',
+  quote: 'text-sm',
+  code: 'text-xs',
+  divider: 'text-sm',
 };
 
-/** 호스트 렌더러에 맡길 글자인지 가린다. 닫힌 [[링크]] 나 #태그 가 있을 때만이다. */
+/** 불릿 종류별 글자 모양 (크기는 NODE_TEXT_SIZE) */
+const TYPE_STYLES: Record<OutlineNodeType, string> = {
+  bullet: 'font-normal',
+  todo: 'font-normal',
+  paragraph: 'font-normal',
+  h1: 'font-bold tracking-tight',
+  h2: 'font-semibold',
+  h3: 'font-semibold',
+  quote: 'italic border-l-2 border-(--background-modifier-border-hover) pl-3',
+  code: 'font-mono bg-(--background-secondary) border border-(--background-modifier-border)',
+  divider: 'font-normal',
+};
+
+/** 호스트 렌더러에 맡길 글자인지 가린다. 닫힌 [[링크]], #태그, [이름](주소), 웹 주소가 있을 때만이다. */
 const WIKILINK_PATTERN = /\[\[[^[\]\n]+\]\]/;
 const TAG_PATTERN = /(?:^|\s)#[\p{L}\p{N}_/-]*[\p{L}_/-]/u;
+const MARKDOWN_LINK_PATTERN = /\[[^\]\n]+\]\([^)\s]+\)/;
+const WEB_URL_PATTERN = /https?:\/\/\S+/i;
 
 function hasLinkOrTag(text: string): boolean {
-  return WIKILINK_PATTERN.test(text) || TAG_PATTERN.test(text);
+  return (
+    WIKILINK_PATTERN.test(text) ||
+    TAG_PATTERN.test(text) ||
+    MARKDOWN_LINK_PATTERN.test(text) ||
+    WEB_URL_PATTERN.test(text)
+  );
 }
 
 /** 입력칸의 글자 기준 위치에 캐럿을 둔다. */
@@ -164,6 +189,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   const targetCaretOffset = useEditorStore((s) => s.targetCaretOffset);
   const updateText = useEditorStore((s) => s.updateText);
   const setFocus = useEditorStore((s) => s.setFocus);
+  const { canAttach, importAndAttach } = useFileAttach();
 
   const isFocused = focusedNodeId === nodeId;
   const hasFormatting = hasLinkOrTag(initialText);
@@ -224,6 +250,27 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
     updateText(nodeId, text);
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    // 파일(그림 등)을 붙여 넣으면 이 불릿에 붙인다.
+    const pastedFiles = Array.from(e.clipboardData.files);
+    if (canAttach && pastedFiles.length > 0) {
+      e.preventDefault();
+      void importAndAttach(nodeId, pastedFiles);
+      return;
+    }
+
+    // 글자를 고른 채 웹 주소를 붙여 넣으면 그 글자를 링크로 만든다. (Workflowy 방식)
+    const pastedText = e.clipboardData.getData('text/plain').trim();
+    const sel = winOf(e.currentTarget).getSelection();
+    const selected =
+      sel && !sel.isCollapsed && e.currentTarget.contains(sel.anchorNode) ? sel.toString() : '';
+    if (selected && isWebTarget(pastedText) && !/\s/.test(pastedText)) {
+      e.preventDefault();
+      // 고른 글자를 바꿔 넣는다. 입력 이벤트가 따라 나와 편집 상태에도 반영된다.
+      e.currentTarget.ownerDocument.execCommand('insertText', false, `[${selected}](${pastedText})`);
+    }
+  };
+
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent || '';
     updateText(nodeId, text);
@@ -247,9 +294,11 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
     cancelBlurCheck.current = () => win.clearTimeout(timer);
   };
 
-  const commonClassName = `flex-1 py-0.5 px-1.5 min-h-[26px] font-[var(--font-text-theme)] leading-[1.7] tracking-[-0.005em] rounded hover:bg-(--background-modifier-hover) focus:bg-(--background-modifier-hover)/60 focus:ring-1 focus:ring-(--interactive-accent)/50 transition-colors break-words whitespace-pre-wrap ${
-    TYPE_STYLES[nodeType]
-  } ${
+  // 위아래 여백은 줄 사이 간격(--outline-line-gap, OutlineTree 가 정한다)뿐이다.
+  // 빈 불릿도 글자 한 줄만큼의 높이(1lh)는 갖는다.
+  const commonClassName = `flex-1 py-(--outline-line-gap) px-1.5 min-h-[calc(1lh+2*var(--outline-line-gap))] font-[var(--font-text-theme)] leading-[1.7] tracking-[-0.005em] rounded hover:bg-(--background-modifier-hover) focus:bg-(--background-modifier-hover)/60 focus:ring-1 focus:ring-(--interactive-accent)/50 transition-colors break-words whitespace-pre-wrap ${
+    NODE_TEXT_SIZE[nodeType]
+  } ${TYPE_STYLES[nodeType]} ${
     isCompleted
       ? 'text-(--text-muted) opacity-60 line-through decoration-(--background-modifier-border-hover)'
       : nodeType === 'quote'
@@ -279,6 +328,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
       suppressContentEditableWarning
       onFocus={handleFocus}
       onInput={handleInput}
+      onPaste={handlePaste}
       onBlur={handleBlur}
       onKeyDown={onKeyDown}
       data-node-id={nodeId}

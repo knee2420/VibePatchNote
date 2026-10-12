@@ -161,3 +161,24 @@ test('내보낸 파일을 그대로 가져오면 새 워크스페이스의 프�
   assert.ok(result.workspace);
   assert.deepEqual(Object.keys(result.workspace.projects), [MAIN_ID]);
 });
+
+test('프로젝트 파일: 불릿에 딸린 파일은 그대로 남고, 주소가 없는 파일은 받지 않는다', () => {
+  const ws = sampleWorkspace();
+  const project = structuredClone(ws.projects[MAIN_ID]);
+  project.rootNodes[0].file = {
+    target: '자료/설계.pdf',
+    display: 'small',
+    options: { page: 3 },
+  };
+
+  const parsed = parseProjectFile(serializeProjectFile(project));
+  assert.ok(parsed.success);
+  assert.deepEqual(parsed.project.rootNodes[0].file, project.rootNodes[0].file);
+
+  const broken = JSON.parse(serializeProjectFile(project));
+  broken.rootNodes[0].file = { display: 'small' };
+  assert.deepEqual(parseProjectFile(JSON.stringify(broken)), {
+    success: false,
+    reason: 'not-a-project',
+  });
+});

@@ -10,15 +10,17 @@
 
 import './styles.css';
 import { type TAbstractFile, Plugin, TFile } from 'obsidian';
+import { OutlineSettingTab } from './commands/OutlineSettingTab';
 import { registerNodeLinkProtocol } from './commands/nodeLinkProtocol';
 import { registerOutlineCommands } from './commands/outlineCommands';
 import { OUTLINE_EXTENSION, VIEW_TYPE_OUTLINE } from './document/outlineFiles';
+import { loadPluginSettings } from './host/pluginSettings';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
 import { LivePreviewEmbedWatcher } from './surfaces/entries/LivePreviewEmbedWatcher';
 import { registerOutlineCodeBlockProcessor } from './surfaces/entries/codeBlock';
 import { registerOutlineMarkdownEmbedProcessor } from './surfaces/entries/readingEmbed';
 import { OutlineFileView } from './surfaces/tab/OutlineFileView';
-import { OutlineSubpathEditorSuggest } from './vault/OutlineSubpathEditorSuggest';
+import { retargetOutlineFiles } from './vault/fileTargetTracker';
 import { clearOutlineMetadata, syncOutlineMetadata } from './vault/outlineMetadataIndexer';
 
 export default class VibeOutlinerPlugin extends Plugin {
@@ -26,6 +28,10 @@ export default class VibeOutlinerPlugin extends Plugin {
   private livePreviewWatcher: LivePreviewEmbedWatcher | null = null;
 
   async onload(): Promise<void> {
+    // 0. 설정을 먼저 불러 둔다. (화면이 뜨자마자 딸린 파일의 기본 크기를 묻는다)
+    await loadPluginSettings(this);
+    this.addSettingTab(new OutlineSettingTab(this.app, this));
+
     // 1. .outline 확장자를 단독 탭 뷰에 등록
     this.registerView(VIEW_TYPE_OUTLINE, (leaf) => new OutlineFileView(leaf));
     this.registerExtensions([OUTLINE_EXTENSION], VIEW_TYPE_OUTLINE);
@@ -54,10 +60,7 @@ export default class VibeOutlinerPlugin extends Plugin {
       defaultMod: true,
     });
 
-    // 6. 마크다운 에디터 내 [[아웃라인# 불릿 텍스트 검색 및 자동완성 제안기 등록
-    this.registerEditorSuggest(new OutlineSubpathEditorSuggest(this.app));
-
-    // 7. 명령·리본·폴더 메뉴, 그리고 "내부 링크 복사" 주소
+    // 6. 명령·리본·폴더 메뉴, 그리고 "내부 링크 복사" 주소
     registerOutlineCommands(this);
     registerNodeLinkProtocol(this);
 
@@ -75,6 +78,8 @@ export default class VibeOutlinerPlugin extends Plugin {
       this.app.vault.on('rename', (file, oldPath) => {
         if (isOutlinePath(oldPath)) clearOutlineMetadata(this.app, oldPath);
         syncIfOutline(file);
+        // 이 파일을 딸린 파일로 가리키던 아웃라인들의 주소를 새 이름으로 고친다.
+        if (file instanceof TFile) void retargetOutlineFiles(this.app, file, oldPath);
       })
     );
     this.registerEvent(

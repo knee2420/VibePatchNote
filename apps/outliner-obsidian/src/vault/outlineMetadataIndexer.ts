@@ -1,22 +1,24 @@
 /**
  * @file outlineMetadataIndexer.ts
- * @description .outline 파일 내부의 [[위키링크]]와 #태그를 추출하여 옵시디언 MetadataCache 및 resolvedLinks에 공식 등록
+ * @description .outline 파일 내부의 [[위키링크]]·#태그와 불릿에 딸린 파일을 추출하여 옵시디언 MetadataCache 및 resolvedLinks에 공식 등록
  * - 옵시디언 그래프 뷰(Graph View), 백링크 패널(Backlinks)과 공식 연결선 형성
  */
 
 import { type App, type CachedMetadata, type ReferenceCache, type TagCache, TFile } from 'obsidian';
-import type { OutlineNode } from '@vibe/outliner-core';
+import { type OutlineNode, getTargetName, isWebTarget } from '@vibe/outliner-core';
 import { parseProjectFile } from '@vibe/outliner-dto';
 
 const WIKI_LINK_REGEX = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
 const TAG_REGEX = /(?:^|\s)(#[a-zA-Z0-9_\uAC00-\uD7A3/-]+)/g;
 
-function collectNodeTexts(nodes: OutlineNode[], out: string[]) {
+/** 불릿의 글자·노트와, 불릿에 딸린 파일의 주소(웹 주소는 빼고)를 모은다. */
+function collectNodeTexts(nodes: OutlineNode[], out: string[], fileTargets: string[]) {
   for (const node of nodes) {
     if (node.text) out.push(node.text);
     if (node.note) out.push(node.note);
+    if (node.file && !isWebTarget(node.file.target)) fileTargets.push(node.file.target);
     if (node.children && node.children.length > 0) {
-      collectNodeTexts(node.children, out);
+      collectNodeTexts(node.children, out, fileTargets);
     }
   }
 }
@@ -28,10 +30,20 @@ export function extractOutlineMetadata(text: string): CachedMetadata {
   }
 
   const texts: string[] = [];
-  collectNodeTexts(parsed.project.rootNodes, texts);
+  const fileTargets: string[] = [];
+  collectNodeTexts(parsed.project.rootNodes, texts, fileTargets);
   const combined = texts.join('\n');
 
-  const links: ReferenceCache[] = [];
+  // 딸린 파일도 링크다. 그래프와 백링크에 글자 속 링크와 똑같이 잡힌다.
+  const links: ReferenceCache[] = fileTargets.map((target) => ({
+    link: target,
+    original: target,
+    displayText: getTargetName(target),
+    position: {
+      start: { line: 0, col: 0, offset: 0 },
+      end: { line: 0, col: 0, offset: 0 },
+    },
+  }));
   let match: RegExpExecArray | null;
 
   WIKI_LINK_REGEX.lastIndex = 0;

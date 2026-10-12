@@ -17,14 +17,14 @@ import {
   ChevronsUpDown,
   ChevronsDownUp,
   Link2,
-  FileCode2,
-  ExternalLink,
+  Paperclip,
   Download,
   Trash2,
   ChevronRight,
 } from 'lucide-react';
 import { TURN_INTO_OPTIONS, useNodeActions } from '../model/useNodeActions';
-import { useEditorWindow, useOutlineHost } from '../session/context';
+import { useEditorStore, useEditorWindow, useOutlineHost } from '../session/context';
+import { useFileAttach } from '../attachments/useFileAttach';
 
 interface OutlineContextMenuProps {
   item: FlattenedNode;
@@ -95,6 +95,8 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
   onMouseLeave,
 }) => {
   const actions = useNodeActions();
+  const { canAttach, pickAndAttach } = useFileAttach();
+  const detachFile = useEditorStore((s) => s.detachFile);
   const host = useOutlineHost();
   const win = useEditorWindow();
   const [isTypeListOpen, setIsTypeListOpen] = useState(false);
@@ -147,6 +149,20 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
           label={item.node.note ? '노트 편집' : '노트 추가'}
           hint="Shift+Enter"
           onSelect={run(() => actions.startNoteEdit(item.id))}
+        />
+      )}
+      {isSingle && canAttach && (
+        <MenuItem
+          icon={<Paperclip className="w-3.5 h-3.5 text-amber-400" />}
+          label="파일 붙이기..."
+          onSelect={run(() => void pickAndAttach(item.id))}
+        />
+      )}
+      {isSingle && item.node.file && (
+        <MenuItem
+          icon={<Paperclip className="w-3.5 h-3.5 text-(--text-muted)" />}
+          label="파일 떼기"
+          onSelect={run(() => detachFile(item.id))}
         />
       )}
 
@@ -210,23 +226,9 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
       {isSingle && (
         <>
           <Separator />
-          {host.copyWikilink && (
-            <>
-              <MenuItem
-                icon={<Link2 className="w-3.5 h-3.5 text-(--text-accent)" />}
-                label="위키링크 복사 ([[...#불릿]])"
-                onSelect={run(() => void actions.copyWikilink(item.id, false))}
-              />
-              <MenuItem
-                icon={<FileCode2 className="w-3.5 h-3.5 text-(--text-accent)" />}
-                label="임베드 복사 (![[...#불릿]])"
-                onSelect={run(() => void actions.copyWikilink(item.id, true))}
-              />
-            </>
-          )}
           <MenuItem
-            icon={<ExternalLink className="w-3.5 h-3.5 text-(--text-muted)" />}
-            label="URL 주소 복사 (obsidian://)"
+            icon={<Link2 className="w-3.5 h-3.5 text-(--text-muted)" />}
+            label="내부 링크 복사"
             onSelect={run(() => void actions.copyNodeLink(item.id))}
           />
         </>

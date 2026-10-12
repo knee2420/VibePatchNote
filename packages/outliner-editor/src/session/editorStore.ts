@@ -14,6 +14,7 @@ import {
   type DropPosition,
   type NodeId,
   type OutlineNode,
+  type OutlineNodeFile,
   type OutlineNodeType,
   type ViewMode,
   insertAfter,
@@ -25,6 +26,8 @@ import {
   toggleFold,
   toggleNodesCompleted,
   setNodeNote,
+  setNodeFile,
+  updateNodeFile,
   deleteNodes,
   moveNodes,
   duplicateNodes,
@@ -83,6 +86,10 @@ export interface OutlineEditorState extends EditorViewState {
   clearSelection: () => void;
   toggleCompleted: (targetId: NodeId) => void;
   setNote: (targetId: NodeId, note: string) => void;
+  /** 파일들을 붙인다. 붙인 불릿들의 id 를 돌려준다. */
+  attachFiles: (targetId: NodeId, targets: string[]) => NodeId[];
+  detachFile: (targetId: NodeId) => void;
+  updateFile: (targetId: NodeId, patch: Partial<OutlineNodeFile>) => void;
   startNoteEdit: (nodeId: NodeId) => void;
   endNoteEdit: () => void;
   setZoom: (nodeId: NodeId | null) => void;
@@ -248,6 +255,57 @@ export function createOutlineEditorStore(document: OutlineDocumentPort): Outline
 
       setNote: (targetId, note) => {
         const res = setNodeNote(roots(), targetId, note);
+        if (!res.success) return;
+        commit(res.newNodes);
+      },
+
+      // 파일 하나가 불릿 하나다. (Workflowy 방식)
+      // 빈 불릿에 붙이면 그 불릿이 파일 불릿이 되고, 남은 파일은 그 뒤에 줄줄이 놓인다.
+      // 글자나 파일이 이미 있는 불릿에 붙이면 모두 그 아래 새 불릿으로 들어간다.
+      attachFiles: (targetId, targets) => {
+        let current = roots();
+        const target = findNode(current, targetId);
+        if (!target || targets.length === 0) return [];
+
+        const attached: NodeId[] = [];
+        const attach = (nodeId: NodeId, fileTarget: string) => {
+          const res = setNodeFile(current, nodeId, { target: fileTarget });
+          if (!res.success) return;
+          current = res.newNodes;
+          attached.push(nodeId);
+        };
+
+        if (target.text === '' && !target.file) {
+          attach(targetId, targets[0]);
+          let previousId = targetId;
+          for (const fileTarget of targets.slice(1)) {
+            const { newNodes, createdNode } = insertAfter(current, previousId, '');
+            current = newNodes;
+            attach(createdNode.id, fileTarget);
+            previousId = createdNode.id;
+          }
+        } else {
+          for (const fileTarget of targets) {
+            const { newNodes, createdNode } = appendChild(current, targetId, '');
+            current = newNodes;
+            attach(createdNode.id, fileTarget);
+          }
+          // 접혀 있으면 방금 붙인 파일이 보이지 않으므로 펼친다.
+          if (target.isFolded) current = toggleFold(current, targetId, false).newNodes;
+        }
+
+        if (attached.length > 0) commit(current);
+        return attached;
+      },
+
+      detachFile: (targetId) => {
+        const res = setNodeFile(roots(), targetId, null);
+        if (!res.success) return;
+        commit(res.newNodes);
+      },
+
+      updateFile: (targetId, patch) => {
+        const res = updateNodeFile(roots(), targetId, patch);
         if (!res.success) return;
         commit(res.newNodes);
       },

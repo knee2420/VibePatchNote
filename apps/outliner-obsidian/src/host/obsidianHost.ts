@@ -12,11 +12,11 @@ import {
   type HoverParent,
   type TFile,
   MarkdownRenderer,
-  Notice,
 } from 'obsidian';
 import type { OutlineHost } from '@vibe/outliner-editor';
 import { ConfirmModal } from './dialogs/ConfirmModal';
 import { VIEW_TYPE_OUTLINE, buildNodeLink, createSiblingFile } from '../document/outlineFiles';
+import { createObsidianFiles } from './files/obsidianFiles';
 import { OutlineWikilinkSuggest } from './links/OutlineWikilinkSuggest';
 
 /** 옵시디언의 검색 코어 플러그인. 공개 타입에는 없다. */
@@ -61,14 +61,6 @@ export function createObsidianHost({
     confirm: (message) => new ConfirmModal(app, message).ask(),
     copyNodeLink: (nodeId) =>
       navigator.clipboard.writeText(buildNodeLink(app, sourcePath(), nodeId)),
-    copyWikilink: async (nodeId, embed = false) => {
-      const file = getFile();
-      const baseName = file?.basename ?? '아웃라인';
-      const linkText = `${baseName}#${nodeId}`;
-      const text = embed ? `![[${linkText}]]` : `[[${linkText}]]`;
-      await navigator.clipboard.writeText(text);
-      new Notice(`${embed ? '임베드' : '위키링크'} 복사됨: ${text}`);
-    },
     exportText: (fileName, text) => void createSiblingFile(app, getFile(), fileName, text),
     getPortalRoot,
     openLink: (link) => {
@@ -101,5 +93,6 @@ export function createObsidianHost({
       }
       return () => suggest.close();
     },
+    files: createObsidianFiles({ app, getFile }),
   };
 }

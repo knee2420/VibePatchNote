@@ -1,7 +1,8 @@
 /**
  * @file OutlineRow.tsx
- * @description 들여쓰기 패딩 + 조작부(손잡이·화살표·불릿 점) + 텍스트 인풋 + 참조 뱃지 + 노트를 결합한 아웃라인 한 줄 뷰
+ * @description 들여쓰기 패딩 + 조작부(손잡이·화살표·불릿 점) + 텍스트 인풋 + 참조 뱃지 + 딸린 파일 + 노트를 결합한 아웃라인 한 줄 뷰
  * - 끌어 놓기의 대상이기도 하다: 위에 끌어오면 놓을 자리(파란 선)를 보여준다.
+ * - 운영체제에서 파일을 끌어다 놓으면 그 파일을 이 불릿에 붙인다.
  */
 
 import React from 'react';
@@ -14,11 +15,13 @@ import {
 import { LayoutGrid } from 'lucide-react';
 import { OutlineBullet } from './OutlineBullet';
 import { OutlineDropIndicator } from './OutlineDropIndicator';
-import { OutlineInput } from './OutlineInput';
+import { NODE_TEXT_SIZE, OutlineInput } from './OutlineInput';
 import { OutlineNote } from './OutlineNote';
 import { useKeyOrchestrator } from '../model/useKeyOrchestrator';
 import { useZoom } from '../model/useZoom';
 import { useEditorStore } from '../session/context';
+import { FileBlock } from '../attachments/FileBlock';
+import { isFileDrag, useFileAttach } from '../attachments/useFileAttach';
 
 /** 트리가 모든 행에 똑같이 내려주는 조작 함수 묶음 */
 export interface OutlineRowHandlers {
@@ -55,6 +58,27 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
   const isNoteEditing = useEditorStore((s) => s.noteEditingNodeId === item.id);
   const { zoomIn } = useZoom();
   const { handleKeyDown } = useKeyOrchestrator(item.id, navigableNodes);
+  const { canAttach, importAndAttach } = useFileAttach();
+
+  // 운영체제에서 파일을 끌어다 놓으면 이 불릿에 붙인다. 불릿을 끄는 것은 원래대로 순서 바꾸기다.
+  const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
+    if (canAttach && isFileDrag(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'copy';
+      return;
+    }
+    handlers.dragOverRow(e, item);
+  };
+  const handleDrop = (e: React.DragEvent<HTMLElement>) => {
+    if (canAttach && isFileDrag(e)) {
+      e.preventDefault();
+      e.stopPropagation();
+      void importAndAttach(item.id, Array.from(e.dataTransfer.files));
+      return;
+    }
+    handlers.dropOnRow(e);
+  };
 
   const { node } = item;
   const nodeType = node.nodeType ?? 'bullet';
@@ -64,14 +88,17 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
 
   return (
     <div
-      className={`group/row flex items-start py-0.5 relative rounded transition-colors ${
+      // 글자 크기와 줄 높이를 줄 전체에 걸어 둔다. 불릿 점이 이 값을 물려받아 글자 첫 줄에 맞춰진다.
+      className={`group/row flex items-start relative rounded transition-colors leading-[1.7] ${
+        NODE_TEXT_SIZE[nodeType]
+      } ${
         isSelected ? 'bg-(--interactive-accent)/15' : 'hover:bg-(--background-modifier-hover)'
       } ${isDragging ? 'opacity-40 bg-(--background-modifier-hover)' : ''}`}
       style={{ paddingLeft: `${item.depth * 24}px` }}
       data-node-id={item.id}
       data-row-id={item.id}
-      onDragOver={(e) => handlers.dragOverRow(e, item)}
-      onDrop={handlers.dropOnRow}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       {/* 0. 끌어 놓을 자리 표시 */}
       {dropPosition && <OutlineDropIndicator position={dropPosition} depth={item.depth} />}
@@ -84,8 +111,8 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
         />
       )}
 
-      {/* 2. 손잡이 · 화살표 · 불릿 점 */}
-      <div className="pt-1.5">
+      {/* 2. 손잡이 · 화살표 · 불릿 점: 글자 첫 줄과 같은 높이의 칸(1lh) 안에서 가운데에 놓는다 */}
+      <div className="h-[1lh] mt-(--outline-line-gap) flex items-center">
         <OutlineBullet
           hasChildren={item.hasChildren}
           isFolded={item.isFolded}
@@ -107,7 +134,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
       {/* 3. 텍스트 입력 에디터 & 참조 뱃지, 그 아래 부연설명 노트 */}
       <div className="flex-1 min-w-0" data-row-text>
         {isDivider ? (
-          <div className="h-[26px] flex items-center px-1.5">
+          <div className="h-[calc(1lh+2*var(--outline-line-gap))] flex items-center px-1.5">
             <hr className="w-full border-0 border-t border-(--background-modifier-border-hover)" />
           </div>
         ) : (
@@ -133,6 +160,9 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
 
           </div>
         )}
+
+        {/* 이 불릿에 딸린 파일 */}
+        {!isDivider && node.file && <FileBlock nodeId={item.id} file={node.file} />}
 
         {hasNote && (
           <OutlineNote nodeId={item.id} note={node.note ?? ''} flattenedNodes={navigableNodes} />

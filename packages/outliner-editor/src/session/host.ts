@@ -6,15 +6,36 @@
  * 확인 창, 주소 복사, 글자 내보내기처럼 환경마다 방법이 다른 일은 직접 하지 않고 여기에 부탁한다.
  */
 
-import type { NodeId } from '@vibe/outliner-core';
+import type { FileDisplay, NodeId } from '@vibe/outliner-core';
+
+/**
+ * 불릿에 딸린 파일을 다루는 능력. 실제 파일이 어디에 있고 어떻게 여는지는 호스트만 안다.
+ * 종류 모듈(이미지·PDF 등)은 옵시디언을 직접 부르지 않고 여기에만 부탁한다.
+ */
+export interface OutlineFileHost {
+  /** 화면에 그릴 수 있는 주소(`<img src>` 등). 파일을 찾지 못하면 null */
+  resolveUrl: (target: string) => string | null;
+  /** 파일을 연다. 어디에 여는지(옆 패널·기본 프로그램·브라우저)는 호스트가 정한다. */
+  open: (target: string, options?: Record<string, unknown>) => void;
+  /** (선택) 마우스를 올렸을 때의 미리보기. 띄울지 말지(Ctrl 등)는 호스트가 정한다. */
+  hoverPreview?: (event: MouseEvent, targetEl: HTMLElement, target: string) => void;
+  /** 붙일 파일을 사용자가 고르게 한다. 고르지 않으면 null */
+  pick: () => Promise<string | null>;
+  /** 끌어다 놓거나 붙여 넣은 파일을 받아 들이고, 그 주소들을 돌려준다. */
+  importFiles: (files: File[]) => Promise<string[]>;
+  /** 종류별 기본 표시 크기 (파일에 크기가 적혀 있지 않을 때 쓴다) */
+  defaultDisplay: (kindId: string) => FileDisplay;
+  /** (선택) 기본 표시 크기가 바뀔 때 알림을 받는다. 돌려주는 함수로 그만 받는다. */
+  subscribeDefaults?: (listener: () => void) => () => void;
+  /** (선택) 표지 그림의 주소 (PDF 첫 쪽 등). 만들 수 없으면 null */
+  thumbnail?: (target: string, width: number) => Promise<string | null>;
+}
 
 export interface OutlineHost {
   /** 되돌릴 수 없는 일을 하기 전에 사용자에게 확인을 받는다. */
   confirm: (message: string) => Promise<boolean>;
   /** 이 불릿으로 곧장 들어오는 주소를 클립보드에 복사한다. */
   copyNodeLink: (nodeId: NodeId) => Promise<void>;
-  /** (선택) 이 불릿의 마크다운 위키링크([[파일#불릿]] 또는 ![[...]])를 클립보드에 복사 */
-  copyWikilink?: (nodeId: NodeId, embed?: boolean) => Promise<void>;
   /** 글자를 파일 하나로 내보낸다. (고른 불릿의 Markdown 목록 등) */
   exportText: (fileName: string, text: string) => void;
   /** 메뉴·대화상자를 붙일 자리. 편집 화면이 지금 떠 있는 창의 것이어야 한다. */
@@ -30,6 +51,8 @@ export interface OutlineHost {
     inputEl: HTMLDivElement,
     onSelect: (insertedText: string, newCaretOffset: number) => void
   ) => () => void;
+  /** (선택) 불릿에 파일을 붙이고 여는 능력. 없으면 붙어 있는 파일은 이름만 보인다. */
+  files?: OutlineFileHost;
 }
 
 /** 요소가 속한 창. 탭이 다른 창으로 옮겨질 수 있어서 전역 `window` 를 직접 쓰지 않는다. */

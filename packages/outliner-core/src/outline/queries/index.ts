@@ -5,3 +5,4 @@
 
 export * from './find';
 export * from './path';
+export * from './fileTarget';
