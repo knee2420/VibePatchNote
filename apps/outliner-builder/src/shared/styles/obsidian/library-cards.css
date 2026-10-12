@@ -1,0 +1,30 @@
+/**
+ * @file library-cards.css
+ * @description 노션 갤러리 카드 및 1px 소프트 섀도우 (What-s-in-my-head 스니펫 이식)
+ */
+
+.obsidian-card,
+.bases-cards-item {
+  border-radius: 8px;
+  background: var(--background-secondary);
+  box-shadow: var(--bases-cards-shadow);
+  transition: box-shadow 120ms ease, transform 120ms ease;
+  border: 1px solid var(--background-modifier-border);
+}
+
+.obsidian-card:hover,
+.bases-cards-item:hover {
+  box-shadow: var(--bases-cards-shadow-hover);
+}
+
+.obsidian-card-title {
+  font-size: var(--font-ui-medium);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-normal);
+}
+
+.obsidian-card-muted {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}

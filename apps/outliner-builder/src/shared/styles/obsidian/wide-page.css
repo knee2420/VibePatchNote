@@ -1,0 +1,52 @@
+/**
+ * @file wide-page.css
+ * @description 와이드 페이지 레이아웃 및 48px 가독성 여백 (What-s-in-my-head 스니펫 이식)
+ */
+
+.wide-page {
+  --file-line-width: 100% !important;
+  --line-width: 100% !important;
+  --max-width: 100% !important;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ── 2. 가독성 여백 (48px) ───────────────────────────────────── */
+.wide-page-content,
+.wide-page .outline-viewport-content {
+  padding-inline-start: 48px !important;
+  padding-inline-end: 48px !important;
+  padding-top: 12px !important;
+  padding-bottom: 96px !important;
+}
+
+@media (max-width: 640px) {
+  .wide-page-content,
+  .wide-page .outline-viewport-content {
+    padding-inline-start: 16px !important;
+    padding-inline-end: 16px !important;
+  }
+}
+
+/* ── 3. 미니멀 스크롤바 ───────────────────────────────────────── */
+.wide-page::-webkit-scrollbar,
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.wide-page::-webkit-scrollbar-track,
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wide-page::-webkit-scrollbar-thumb,
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.wide-page::-webkit-scrollbar-thumb:hover,
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}

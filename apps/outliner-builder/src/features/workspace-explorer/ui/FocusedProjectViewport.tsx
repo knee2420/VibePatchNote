@@ -85,9 +85,9 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
   };
 
   return (
-    <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-6 flex flex-col min-w-0">
+    <main className="wide-page flex-1 max-w-5xl w-full mx-auto px-6 py-6 flex flex-col min-w-0">
       {/* 1. 상단 프로젝트 컨트롤 헤더 */}
-      <div className="mb-4 pb-3 border-b border-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mb-4 pb-3 border-b border-(--background-modifier-border) flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           {/* 사이드바 토글 버튼 */}
           {onToggleSidebar && (
@@ -95,26 +95,26 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
               type="button"
               onClick={onToggleSidebar}
               title={isSidebarOpen ? '사이드바 닫기' : '사이드바 열기'}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs transition-colors cursor-pointer shrink-0"
+              className="p-1.5 rounded-lg bg-(--background-secondary) border border-(--background-modifier-border) hover:border-(--background-modifier-border-hover) hover:bg-(--background-modifier-hover) text-(--text-muted) hover:text-(--text-normal) text-xs transition-colors cursor-pointer shrink-0"
             >
               {isSidebarOpen ? (
                 <PanelLeftClose className="w-4 h-4" />
               ) : (
-                <PanelLeft className="w-4 h-4 text-indigo-400" />
+                <PanelLeft className="w-4 h-4 text-(--interactive-accent)" />
               )}
             </button>
           )}
 
           {/* 상위 조상 프로젝트 네비게이션 빵가루 (하위 프로젝트일 경우) */}
           {ancestorProjects.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0 select-none">
+            <div className="flex items-center gap-1.5 text-xs text-(--text-muted) shrink-0 select-none">
               {ancestorProjects.map((anc) => (
                 <React.Fragment key={anc.id}>
                   <button
                     type="button"
                     onClick={() => focusProject(anc.id)}
                     title={`상위 프로젝트 '${anc.title}'로 이동`}
-                    className="hover:text-cyan-400 flex items-center gap-1 text-slate-400 hover:underline transition-colors cursor-pointer"
+                    className="hover:text-cyan-400 flex items-center gap-1 text-(--text-muted) hover:underline transition-colors cursor-pointer"
                   >
                     <FolderTree className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="truncate max-w-[120px] font-medium">{anc.title}</span>
@@ -125,13 +125,13 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
             </div>
           )}
 
-          {/* 프로젝트 제목 인라인 편집 */}
+          {/* 프로젝트 제목 인라인 편집 (MaruBuri 볼드 헤딩) */}
           <input
             type="text"
             value={title}
             onChange={(e) => onUpdateTitle(e.target.value)}
             placeholder="프로젝트 제목"
-            className="text-base sm:text-lg font-bold bg-transparent text-slate-100 hover:bg-slate-900/60 focus:bg-slate-900 px-2.5 py-1 rounded-md border border-transparent focus:border-indigo-500 focus:outline-hidden transition-all truncate min-w-0"
+            className="text-base sm:text-lg font-bold font-[var(--font-text-theme)] tracking-tight bg-transparent text-(--text-normal) hover:bg-(--background-modifier-hover) focus:bg-(--background-secondary) px-2.5 py-1 rounded-md border border-transparent focus:border-(--interactive-accent) focus:outline-hidden transition-all truncate min-w-0"
           />
         </div>
 
@@ -143,16 +143,16 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
               type="button"
               onClick={onToggleViewMode}
               title={`현재: ${defaultView === 'board' ? '칸반 보드 뷰' : '불릿 아웃라인 뷰'}`}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800 text-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--background-secondary) border border-(--background-modifier-border) hover:border-(--background-modifier-border-hover) text-(--text-muted) hover:text-(--text-normal) text-xs transition-colors cursor-pointer"
             >
               {defaultView === 'board' ? (
                 <>
-                  <LayoutGrid className="w-3.5 h-3.5 text-indigo-400" />
+                  <LayoutGrid className="w-3.5 h-3.5 text-(--interactive-accent)" />
                   <span className="hidden sm:inline">보드 뷰</span>
                 </>
               ) : (
                 <>
-                  <List className="w-3.5 h-3.5 text-indigo-400" />
+                  <List className="w-3.5 h-3.5 text-(--interactive-accent)" />
                   <span className="hidden sm:inline">불릿 뷰</span>
                 </>
               )}
@@ -168,9 +168,9 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
                 ? `직전 스냅샷 대비 ${changeCount}개 항목 변경됨 (클릭하여 이력 관리)`
                 : '스냅샷과 완전히 일치함 (클릭하여 이력 관리)'
             }
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-slate-100 hover:bg-slate-800 text-xs font-medium transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--background-secondary) border border-(--background-modifier-border) hover:border-(--background-modifier-border-hover) text-(--text-normal) text-xs font-medium transition-colors cursor-pointer"
           >
-            <History className="w-3.5 h-3.5 text-indigo-400" />
+            <History className="w-3.5 h-3.5 text-(--interactive-accent)" />
             <span>{latestLabel}</span>
             {changeCount > 0 ? (
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -192,7 +192,7 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
             type="button"
             onClick={handleQuickSnapshot}
             title="현재 시점 즉시 스냅샷 저장"
-            className="p-1.5 rounded-lg bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
+            className="p-1.5 rounded-lg bg-(--background-secondary) text-(--text-muted) border border-(--background-modifier-border) hover:border-(--interactive-accent) hover:text-(--text-normal) transition-all cursor-pointer"
           >
             <Camera className="w-3.5 h-3.5" />
           </button>

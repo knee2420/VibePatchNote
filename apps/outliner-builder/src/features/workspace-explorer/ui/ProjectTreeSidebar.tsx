@@ -66,8 +66,8 @@ const ProjectTreeItem: React.FC<ProjectTreeItemProps> = ({
         onClick={() => onFocus(project.id)}
         className={`group flex items-center justify-between px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer select-none ${
           isActive
-            ? 'bg-indigo-950/60 text-indigo-200 font-medium border-l-2 border-indigo-500'
-            : 'text-slate-400 hover:bg-slate-900/60 hover:text-slate-200'
+            ? 'bg-(--interactive-accent)/15 text-(--text-normal) font-medium border-l-2 border-(--interactive-accent)'
+            : 'text-(--text-muted) hover:bg-(--background-modifier-hover) hover:text-(--text-normal)'
         }`}
         style={{ paddingLeft: `${depth * 14 + (hasChildren ? 4 : 16)}px` }}
       >
@@ -114,7 +114,7 @@ const ProjectTreeItem: React.FC<ProjectTreeItemProps> = ({
           {backlinkCount > 0 && (
             <span
               title={`${backlinkCount}개 인용됨`}
-              className="px-1 py-0.2 rounded text-[10px] font-medium bg-cyan-500/10 text-cyan-400 flex items-center gap-0.5"
+              className="px-1.5 py-0.2 rounded-full text-[10px] font-medium bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 flex items-center gap-0.5"
             >
               <Link2 className="w-2.5 h-2.5" />
               <span>{backlinkCount}</span>
@@ -125,7 +125,7 @@ const ProjectTreeItem: React.FC<ProjectTreeItemProps> = ({
           {snapCount > 0 && (
             <span
               title={`${snapCount}개 스냅샷`}
-              className="px-1 py-0.2 rounded text-[10px] font-medium bg-slate-800 text-slate-400 flex items-center gap-0.5"
+              className="px-1.5 py-0.2 rounded-full text-[10px] font-medium bg-(--background-modifier-hover) text-(--text-muted) border border-(--background-modifier-border) flex items-center gap-0.5"
             >
               <Camera className="w-2.5 h-2.5" />
               <span>{snapCount}</span>
@@ -332,14 +332,14 @@ export const ProjectTreeSidebar: React.FC<ProjectTreeSidebarProps> = ({
   return (
     <aside
       style={{ width: `${sidebarWidth}px` }}
-      className={`h-full border-r border-slate-800/80 bg-slate-950 flex flex-col select-none shrink-0 relative ${
+      className={`h-full border-r border-(--background-modifier-border) bg-(--background-secondary) flex flex-col select-none shrink-0 relative ${
         isResizing ? 'transition-none select-none' : 'transition-[width] duration-150'
       }`}
     >
       {/* 1. 사이드바 상단 워크스페이스 헤더 */}
-      <div className="h-10 px-3.5 border-b border-slate-900 flex items-center justify-between text-xs font-semibold text-slate-300">
+      <div className="h-10 px-3.5 border-b border-(--background-modifier-border) flex items-center justify-between text-xs font-semibold text-(--text-normal)">
         <div className="flex items-center gap-2 truncate">
-          <FolderTree className="w-4 h-4 text-indigo-400 shrink-0" />
+          <FolderTree className="w-4 h-4 text-(--interactive-accent) shrink-0" />
           <span className="truncate">{workspace.title || 'EXPLORER'}</span>
         </div>
         <button
@@ -349,7 +349,7 @@ export const ProjectTreeSidebar: React.FC<ProjectTreeSidebarProps> = ({
             setIsCreating(true);
           }}
           title="새 최상위 프로젝트 추가"
-          className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-100 transition-colors cursor-pointer"
+          className="p-1 rounded hover:bg-(--background-modifier-hover) text-(--text-muted) hover:text-(--text-normal) transition-colors cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
@@ -424,9 +424,9 @@ export const ProjectTreeSidebar: React.FC<ProjectTreeSidebarProps> = ({
       </div>
 
       {/* 3. 사이드바 하단 정보 */}
-      <div className="p-2.5 border-t border-slate-900 text-[11px] text-slate-500 flex items-center justify-between">
+      <div className="p-2.5 border-t border-(--background-modifier-border) text-[11px] text-(--text-muted) flex items-center justify-between">
         <span>프로젝트 {projectList.length}개</span>
-        <span className="text-[10px] text-slate-600">Local-First Tree</span>
+        <span className="text-[10px] text-(--text-faint)">Local-First Tree</span>
       </div>
 
       {/* 4. 마우스 드래그 리사이저 핸들 (스플리터) */}

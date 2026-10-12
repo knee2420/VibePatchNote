@@ -65,8 +65,8 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
   return (
     <div
       className={`group/row flex items-start py-0.5 relative rounded transition-colors ${
-        isSelected ? 'bg-indigo-500/20' : 'hover:bg-slate-900/30'
-      } ${isDragging ? 'opacity-40 bg-slate-900/50' : ''}`}
+        isSelected ? 'bg-(--interactive-accent)/15' : 'hover:bg-(--background-modifier-hover)'
+      } ${isDragging ? 'opacity-40 bg-(--background-modifier-hover)' : ''}`}
       style={{ paddingLeft: `${item.depth * 24}px` }}
       data-node-id={item.id}
       data-row-id={item.id}
@@ -79,7 +79,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
       {/* 1. 들여쓰기 세로 가이드선 (depth > 0) */}
       {item.depth > 0 && (
         <div
-          className="absolute top-0 bottom-0 w-[1px] bg-slate-800/60 pointer-events-none group-hover/row:bg-slate-700/60"
+          className="absolute top-0 bottom-0 w-[1px] bg-(--background-modifier-border) pointer-events-none group-hover/row:bg-(--background-modifier-border-hover)"
           style={{ left: `${(item.depth - 1) * 24 + 46}px` }}
         />
       )}

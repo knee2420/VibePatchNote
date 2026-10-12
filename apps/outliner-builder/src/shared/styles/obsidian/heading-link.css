@@ -1,0 +1,35 @@
+/**
+ * @file heading-link.css
+ * @description 제목 링크 — 노션처럼 평소엔 텍스트와 같고, 호버 시에만 부드러운 둥근 배경 (What-s-in-my-head 스니펫 이식)
+ */
+
+:is(h1, h2, h3, h4, h5, h6),
+.outline-title,
+.outline-heading {
+  --link-color: inherit;
+  --link-color-hover: inherit;
+  --link-decoration: none;
+  --link-decoration-hover: none;
+  --link-weight: inherit;
+}
+
+:is(h1, h2, h3, h4, h5, h6) a.internal-link,
+:is(h1, h2, h3, h4, h5, h6) .heading-link,
+.outline-heading a,
+.outline-heading .heading-link {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none !important;
+  border-radius: 4px;
+  transition: background-color 100ms ease, box-shadow 100ms ease;
+}
+
+/* 배경이 글자에 딱 붙지 않도록 box-shadow 로 바깥까지 확장 (padding 쓰면 줄 밀림 방지) */
+:is(h1, h2, h3, h4, h5, h6) a.internal-link:hover,
+:is(h1, h2, h3, h4, h5, h6) .heading-link:hover,
+.outline-heading a:hover,
+.outline-heading .heading-link:hover {
+  background-color: var(--heading-link-hover);
+  box-shadow: 0 0 0 5px var(--heading-link-hover);
+  cursor: pointer;
+}

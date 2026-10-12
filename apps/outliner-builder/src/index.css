@@ -1,22 +1,21 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --bg-main: #090d16;
-    --bg-surface: #0f172a;
-    --bg-subtle: #1e293b;
-    --border-subtle: #334155;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --accent: #6366f1;
-    --accent-hover: #4f46e5;
-  }
+/* 1. Obsidian Design Tokens & Standard Variables */
+@import "./shared/styles/tokens.css";
 
+/* 2. What-s-in-my-head Obsidian Vault Snippets */
+@import "./shared/styles/obsidian/maruburi.css";
+@import "./shared/styles/obsidian/author-chips.css";
+@import "./shared/styles/obsidian/status-chips.css";
+@import "./shared/styles/obsidian/heading-link.css";
+@import "./shared/styles/obsidian/wide-page.css";
+@import "./shared/styles/obsidian/library-cards.css";
+
+@layer base {
   body {
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-interface-theme);
     margin: 0;
     padding: 0;
     overflow-x: hidden;

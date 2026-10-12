@@ -100,14 +100,14 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
       onBlur={handleBlur}
       onKeyDown={onKeyDown}
       data-node-id={nodeId}
-      className={`flex-1 py-1 px-1.5 min-h-[26px] leading-relaxed rounded hover:bg-slate-900/60 focus:bg-slate-900/90 focus:ring-1 focus:ring-indigo-500/50 transition-colors break-words whitespace-pre-wrap cursor-text ${
+      className={`flex-1 py-0.5 px-1.5 min-h-[26px] font-[var(--font-text-theme)] leading-[1.7] tracking-[-0.005em] rounded hover:bg-(--background-modifier-hover) focus:bg-(--background-modifier-hover)/60 focus:ring-1 focus:ring-(--interactive-accent)/50 transition-colors break-words whitespace-pre-wrap cursor-text ${
         TYPE_STYLES[nodeType]
       } ${
         isCompleted
-          ? 'text-slate-500/70 line-through decoration-slate-600'
+          ? 'text-(--text-muted) opacity-60 line-through decoration-slate-600'
           : nodeType === 'quote'
-            ? 'text-slate-300'
-            : 'text-slate-100'
+            ? 'text-(--text-muted) italic'
+            : 'text-(--text-normal)'
       }`}
       data-placeholder="내용을 입력하세요..."
     />

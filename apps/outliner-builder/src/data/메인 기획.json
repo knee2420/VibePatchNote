@@ -27,9 +27,9 @@
               "updatedAt": 1791772172694
             }
           ],
+          "isFolded": true,
           "createdAt": 1791720102898,
-          "updatedAt": 1791772167772,
-          "isFolded": false
+          "updatedAt": 1791772167772
         },
         {
           "id": "E7h7neLhg6XQ",
@@ -65,9 +65,9 @@
           "text": "호옹이 ",
           "children": [],
           "isFolded": false,
+          "note": "입력해봅니다\n다음 줄도",
           "createdAt": 1791721561954,
-          "updatedAt": 1791772121524,
-          "note": "입력해봅니다\n다음 줄도"
+          "updatedAt": 1791772121524
         },
         {
           "id": "qnumESfSiuwt",
@@ -99,17 +99,17 @@
       "id": "S3UtR8jzn4hH",
       "text": "하위 추가해봄",
       "children": [],
+      "createdAt": 1791772006045,
+      "updatedAt": 1791772006045,
       "ref": {
         "type": "project",
         "targetProjectId": "Rw7zi6nQyx41",
         "displayText": "하위 추가해봄",
         "relation": "child"
-      },
-      "createdAt": 1791772006045,
-      "updatedAt": 1791772006045
+      }
     }
   ],
   "defaultView": "bullets",
   "createdAt": 1791720096143,
-  "updatedAt": 1791772172694
+  "updatedAt": 1791773206198
 }

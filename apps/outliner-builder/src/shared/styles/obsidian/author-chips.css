@@ -1,0 +1,93 @@
+/**
+ * @file author-chips.css
+ * @description 작성자 · 담당자 · AI · 이슈 색상 칩 시스템 (What-s-in-my-head 스니펫 이식)
+ */
+
+/* ── 칩 공통 외형 ───────────────────────────────────────────── */
+.internal-link,
+.author-chip,
+[data-property="note.담당"] .internal-link,
+[data-property="note.작성자"] .internal-link,
+[data-property="담당"] .internal-link,
+[data-property="작성자"] .internal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none !important;
+  opacity: 1;
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.internal-link::before,
+.author-chip::before,
+[data-property="note.담당"] .internal-link::before,
+[data-property="note.작성자"] .internal-link::before {
+  content: "●";
+  font-size: 8px;
+}
+
+/* ── 사람 ─────────────────────────────────────────────────── */
+.internal-link[data-href="민규 서"],
+.author-chip[data-author="민규 서"] {
+  background: color-mix(in srgb, var(--color-blue) 14%, transparent) !important;
+  color: var(--color-blue) !important;
+}
+
+.internal-link[data-href="Rin"],
+.author-chip[data-author="Rin"] {
+  background: color-mix(in srgb, var(--color-purple) 14%, transparent) !important;
+  color: var(--color-purple) !important;
+}
+
+/* ── 사람이 아닌 것 — 버그 표시 ──────────────────────────── */
+.internal-link[data-href="bug"],
+.author-chip[data-author="bug"] {
+  background: color-mix(in srgb, var(--color-red) 16%, transparent) !important;
+  color: var(--color-red) !important;
+  font-weight: 600 !important;
+}
+.internal-link[data-href="bug"]::before,
+.author-chip[data-author="bug"]::before {
+  content: "🐛" !important;
+  font-size: 9px !important;
+}
+
+/* ── 사람이 아닌 것 — 챙길 일 표시 ──────────────────────── */
+.internal-link[data-href="챙길 일"],
+.author-chip[data-author="챙길 일"] {
+  background: color-mix(in srgb, var(--color-yellow) 22%, transparent) !important;
+  color: color-mix(in srgb, var(--color-yellow) 60%, var(--text-normal)) !important;
+  font-weight: 600 !important;
+}
+.internal-link[data-href="챙길 일"]::before,
+.author-chip[data-author="챙길 일"]::before {
+  content: "🧺" !important;
+  font-size: 9px !important;
+}
+
+/* ── AI — 사람과 색 계열을 나눠서 한눈에 구분 ──────────── */
+.internal-link[data-href="Claude"],
+.author-chip[data-author="Claude"] {
+  background: color-mix(in srgb, var(--color-orange) 16%, transparent) !important;
+  color: var(--color-orange) !important;
+}
+
+.internal-link[data-href="Gemini"],
+.author-chip[data-author="Gemini"] {
+  background: color-mix(in srgb, var(--color-cyan) 16%, transparent) !important;
+  color: var(--color-cyan) !important;
+}
+
+.internal-link[data-href="ChatGPT"],
+.author-chip[data-author="ChatGPT"] {
+  background: color-mix(in srgb, var(--color-green) 16%, transparent) !important;
+  color: var(--color-green) !important;
+}

@@ -75,7 +75,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500/30 overflow-hidden">
+    <div className="h-screen flex flex-col bg-(--background-primary) text-(--text-normal) font-[var(--font-interface-theme)] selection:bg-(--interactive-accent)/30 overflow-hidden theme-dark">
       {/* 1. 상단 보관함 툴바 */}
       <FileStorageToolbar
         status={status}
@@ -94,7 +94,7 @@ export const App: React.FC = () => {
         />
 
         {/* [우측] 현재 활성 프로젝트의 아웃라인 캔버스 (In-place Switching) */}
-        <div className="flex-1 flex flex-col overflow-y-auto min-w-0">
+        <div className="flex-1 flex flex-col overflow-y-auto min-w-0 custom-scroll">
           <FocusedProjectViewport
             title={activeProject.title}
             onUpdateTitle={updateTitle}
@@ -104,10 +104,10 @@ export const App: React.FC = () => {
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           >
             {/* 상단 빵가루 네비게이션 */}
-            <div className="mb-4 pb-2 border-b border-slate-900/60 flex items-center justify-between">
+            <div className="mb-4 pb-2 border-b border-(--background-modifier-border) flex items-center justify-between">
               <OutlineBreadcrumb />
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-(--text-muted) font-medium">
+                <Sparkles className="w-3.5 h-3.5 text-(--interactive-accent)" />
                 <span>Spine Canvas</span>
               </div>
             </div>
