@@ -17,6 +17,8 @@ export interface OutlineHost {
   exportText: (fileName: string, text: string) => void;
   /** 메뉴·대화상자를 붙일 자리. 편집 화면이 지금 떠 있는 창의 것이어야 한다. */
   getPortalRoot: () => HTMLElement;
+  /** (선택) 불릿 텍스트 내 위키링크([[...]]) 클릭 시 대상 문서 열기 */
+  openLink?: (link: string) => void;
 }
 
 /** 요소가 속한 창. 탭이 다른 창으로 옮겨질 수 있어서 전역 `window` 를 직접 쓰지 않는다. */

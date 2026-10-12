@@ -7,7 +7,13 @@ import React from 'react';
 import { Home, ChevronRight } from 'lucide-react';
 import { useZoom } from '../model/useZoom';
 
-export const OutlineBreadcrumb: React.FC = () => {
+export interface OutlineBreadcrumbProps {
+  className?: string;
+}
+
+export const OutlineBreadcrumb: React.FC<OutlineBreadcrumbProps> = ({
+  className = 'mb-3',
+}) => {
   const { isZoomed, breadcrumb, zoomIn, zoomToRoot } = useZoom();
 
   // 최상위 전체 보기 상태에서는 불필요한 Root 안내 배너를 숨겨 Workflowy처럼 깔끔하게 유지
@@ -16,7 +22,7 @@ export const OutlineBreadcrumb: React.FC = () => {
   }
 
   return (
-    <nav className="flex items-center gap-1.5 py-1 text-xs text-(--text-muted) overflow-x-auto select-none mb-3">
+    <nav className={`flex items-center gap-1.5 py-1 text-xs text-(--text-muted) overflow-x-auto select-none ${className}`}>
       <button
         type="button"
         onClick={zoomToRoot}

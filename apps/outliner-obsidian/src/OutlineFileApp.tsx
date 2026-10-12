@@ -3,12 +3,12 @@
  * @description .outline 파일 하나의 화면 구성: 제목(파일 이름) + 경로 + 불릿 또는 보드
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useStore } from 'zustand';
 import {
   OutlineBoard,
-  OutlineBreadcrumb,
   OutlineEditorProvider,
+  OutlineHeader,
   OutlineTree,
   useOutlineView,
 } from '@vibe/outliner-editor';
@@ -31,36 +31,6 @@ function describeProblem(problem: OutlineProblem): string {
       return `이 플러그인이 읽을 수 없는 규격 버전입니다 (${problem.version}).`;
   }
 }
-
-/** 제목 칸. 고치는 도중에는 파일을 건드리지 않고, 마쳤을 때(Enter·포커스 이동) 파일 이름을 바꾼다. */
-const TitleField: React.FC<{ title: string; onRename: (title: string) => void }> = ({
-  title,
-  onRename,
-}) => {
-  // 파일 이름이 밖에서 바뀌면 부모가 key 를 바꿔 이 칸을 새로 만든다.
-  const [draft, setDraft] = useState(title);
-
-  return (
-    <input
-      type="text"
-      value={draft}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={() => {
-        if (draft.trim() === '') setDraft(title);
-        else if (draft !== title) onRename(draft);
-      }}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') e.currentTarget.blur();
-        if (e.key === 'Escape') {
-          setDraft(title);
-          e.currentTarget.blur();
-        }
-      }}
-      placeholder="제목"
-      className="w-full text-2xl font-bold tracking-tight bg-transparent text-(--text-normal) px-2 py-1 rounded-md border border-transparent hover:bg-(--background-modifier-hover) focus:border-(--interactive-accent) focus:outline-hidden truncate"
-    />
-  );
-};
 
 /** 불릿으로 볼지 보드로 볼지는 편집 상태에 달려 있어서, 편집 공급자 안에서 정한다. */
 const OutlineBody: React.FC = () => {
@@ -89,10 +59,12 @@ export const OutlineFileApp: React.FC<OutlineFileAppProps> = ({ view, title }) =
       defaultView={project.defaultView}
     >
       <div className="max-w-5xl w-full mx-auto px-6 pt-4 pb-20 flex flex-col">
-        <div className="mb-3 pb-2 border-b border-(--background-modifier-border)">
-          <TitleField key={title} title={title} onRename={(next) => void view.renameTo(next)} />
-        </div>
-        <OutlineBreadcrumb />
+        <OutlineHeader
+          rootTitle={title}
+          onUpdateRootTitle={(next) => void view.renameTo(next)}
+          rootPlaceholder="아웃라인 제목"
+          zoomPlaceholder="불릿 제목"
+        />
         <OutlineBody />
       </div>
     </OutlineEditorProvider>

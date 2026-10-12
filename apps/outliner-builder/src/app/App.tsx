@@ -26,7 +26,6 @@ import {
 import { ProjectTreeSidebar, FocusedProjectViewport } from '@/features/workspace-explorer';
 import {
   OutlineBoard,
-  OutlineBreadcrumb,
   OutlineEditorProvider,
   OutlineTree,
   useOutlineView,
@@ -48,20 +47,15 @@ const ScaffoldPane: React.FC<ScaffoldPaneProps> = ({
   onToggleSidebar,
 }) => {
   // 불릿으로 볼지 보드로 볼지: 줌인한 불릿에 지정된 방식이 있으면 그것을, 없으면 스캐폴드 기본값을 따른다.
-  const { view, toggleView } = useOutlineView();
+  const { view } = useOutlineView();
 
   return (
     <FocusedProjectViewport
       title={title}
       onUpdateTitle={onUpdateTitle}
-      defaultView={view}
-      onToggleViewMode={toggleView}
       isSidebarOpen={isSidebarOpen}
       onToggleSidebar={onToggleSidebar}
     >
-      {/* 줌인 시에만 나타나는 미니멀 조상 경로 (Root일 땐 null 반환) */}
-      <OutlineBreadcrumb />
-
       {/* 아웃라인 캔버스 에디터: 뷰 모드(불릿 vs 보드) 분기 */}
       {view === 'board' ? <OutlineBoard /> : <OutlineTree />}
     </FocusedProjectViewport>

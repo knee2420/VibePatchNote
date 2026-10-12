@@ -21,5 +21,7 @@ export { OutlineEditorProvider } from './session/context';
 export { OutlineTree } from './ui/OutlineTree';
 export { OutlineBreadcrumb } from './ui/OutlineBreadcrumb';
 export { OutlineBoard } from './ui/OutlineBoard';
+export { OutlineHeader, type OutlineHeaderProps } from './ui/OutlineHeader';
 export { useZoom } from './model/useZoom';
 export { useOutlineView } from './model/useOutlineView';
+

@@ -63,6 +63,9 @@ export class OutlineFileView extends TextFileView {
       copyNodeLink: (nodeId) => navigator.clipboard.writeText(this.buildNodeLink(nodeId)),
       exportText: (fileName, text) => void this.createSiblingFile(fileName, text),
       getPortalRoot: () => this.getPortalRoot(),
+      openLink: (link) => {
+        void this.app.workspace.openLinkText(link, this.file?.path ?? '', false);
+      },
     };
 
     // 줌 위치가 바뀌면 옵시디언이 탭 상태를 다시 저장하게 한다. (다시 열 때 그 자리로 돌아온다)
@@ -131,11 +134,19 @@ export class OutlineFileView extends TextFileView {
     this.applyPendingZoom();
   }
 
-  /** 주소로 들어왔을 때: 그 불릿으로 줌인한다. */
+  /** 주소 또는 내부 링크(#nodeId)로 들어왔을 때: 그 불릿으로 줌인/포커스한다. */
   setEphemeralState(state: unknown): void {
     super.setEphemeralState(state);
-    const nodeId = (state as { nodeId?: unknown } | null)?.nodeId;
-    if (typeof nodeId === 'string') this.revealNode(nodeId);
+    const typed = state as { nodeId?: unknown; subpath?: unknown } | null;
+    let targetNodeId: string | null = null;
+    if (typeof typed?.nodeId === 'string') {
+      targetNodeId = typed.nodeId;
+    } else if (typeof typed?.subpath === 'string') {
+      targetNodeId = typed.subpath.replace(/^#/, '').trim();
+    }
+    if (targetNodeId) {
+      this.revealNode(targetNodeId);
+    }
   }
 
   revealNode(nodeId: string): void {
