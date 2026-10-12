@@ -1,0 +1,25 @@
+/**
+ * @file editor.css
+ * @description 편집 화면이 어느 호스트에서든 필요로 하는 Tailwind 밖의 스타일
+ * 색은 옵시디언 표준 변수 이름을 쓴다. 옵시디언에서는 테마의 실제 값이, 독립 앱에서는 흉내 낸 값이 들어온다.
+ */
+
+/* 불릿 인풋 (plaintext-only contenteditable) 포커스 아웃라인 제거 */
+[contenteditable]:focus {
+  outline: none;
+}
+
+/* 메뉴·대화상자·선택 막대가 뜰 때의 가벼운 페이드인 + 확대 */
+@keyframes outline-menu-pop {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.outline-menu-pop {
+  animation: outline-menu-pop 110ms ease-out;
+}

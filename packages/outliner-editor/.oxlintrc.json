@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "import"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "import/no-cycle": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "regex": "^(\\.\\./)+(apps|packages)/",
+            "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+          },
+          {
+            "regex": "^@/",
+            "message": "outliner-editor 는 호스트 비의존 편집 화면입니다. 앱의 코드를 import 하지 마세요."
+          }
+        ]
+      }
+    ]
+  }
+}

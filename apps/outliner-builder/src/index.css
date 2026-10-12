@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* 편집 화면(@vibe/outliner-editor)의 Tailwind 클래스도 함께 찾는다. */
+@source "../../../packages/outliner-editor/src";
+@import "@vibe/outliner-editor/styles.css";
+
 /* 1. Obsidian Design Tokens & Standard Variables */
 @import "./shared/styles/tokens.css";
 
@@ -22,11 +26,6 @@
   }
 }
 
-/* 불릿 인풋 (plaintext-only contenteditable) 포커스 아웃라인 제거 */
-[contenteditable]:focus {
-  outline: none;
-}
-
 /* 스크롤바 미니멀 커스텀 */
 ::-webkit-scrollbar {
   width: 6px;
@@ -41,19 +40,4 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
-}
-
-/* 메뉴·대화상자·선택 막대가 뜰 때의 가벼운 페이드인 + 확대 */
-@keyframes outline-menu-pop {
-  from {
-    opacity: 0;
-    scale: 0.95;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
-}
-.outline-menu-pop {
-  animation: outline-menu-pop 110ms ease-out;
 }

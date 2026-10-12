@@ -86,6 +86,9 @@ importers:
       '@vibe/outliner-dto':
         specifier: workspace:*
         version: link:../../packages/outliner-dto
+      '@vibe/outliner-editor':
+        specifier: workspace:*
+        version: link:../../packages/outliner-editor
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -123,6 +126,61 @@ importers:
       oxlint:
         specifier: ^1.79.0
         version: 1.81.0
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+      vite:
+        specifier: ^8.2.2
+        version: 8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)
+
+  apps/outliner-obsidian:
+    dependencies:
+      '@vibe/outliner-core':
+        specifier: workspace:*
+        version: link:../../packages/outliner-core
+      '@vibe/outliner-dto':
+        specifier: workspace:*
+        version: link:../../packages/outliner-dto
+      '@vibe/outliner-editor':
+        specifier: workspace:*
+        version: link:../../packages/outliner-editor
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.2.18)(immer@11.1.21)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+    devDependencies:
+      '@tailwindcss/vite':
+        specifier: ^4.3.3
+        version: 4.3.3(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.5(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^6.1.0
+        version: 6.1.1(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+      obsidian:
+        specifier: latest
+        version: 1.14.4(@codemirror/state@6.7.4)(@codemirror/view@6.43.11)
+      oxlint:
+        specifier: ^1.79.0
+        version: 1.81.0
+      postcss:
+        specifier: ^8.5.26
+        version: 8.5.26
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -334,6 +392,37 @@ importers:
       tsx:
         specifier: ^4.23.15
         version: 4.23.15
+      typescript:
+        specifier: ~6.0.2
+        version: 6.0.3
+
+  packages/outliner-editor:
+    dependencies:
+      '@vibe/outliner-core':
+        specifier: workspace:*
+        version: link:../outliner-core
+      lucide-react:
+        specifier: ^1.38.0
+        version: 1.39.0(react@19.2.8)
+      zustand:
+        specifier: ^5.0.15
+        version: 5.0.15(@types/react@19.2.18)(immer@11.1.21)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.5(@types/react@19.2.18)
+      oxlint:
+        specifier: ^1.79.0
+        version: 1.81.0
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
       typescript:
         specifier: ~6.0.2
         version: 6.0.3
@@ -2099,6 +2188,9 @@ packages:
     cpu: [arm64]
     os: [win32]
 
+  '@types/codemirror@5.60.8':
+    resolution: {integrity: sha512-VjFgDF/eB+Aklcy15TtOTLQeMjTo07k7KAjql8OK5Dirr7a6sJY4T1uVBDuTVG9VEmn1uUsohOpYnVfgC6/jyw==}
+
   '@types/d3-color@3.1.3':
     resolution: {integrity: sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A==}
 
@@ -2120,6 +2212,9 @@ packages:
   '@types/diff@8.0.0':
     resolution: {integrity: sha512-o7jqJM04gfaYrdCecCVMbZhNdG6T1MHg/oQoRFdERLV+4d+V7FijhiEAbFu0Usww84Yijk9yH58U4Jk4HbtzZw==}
     deprecated: This is a stub types definition. diff provides its own type definitions, so you do not need this installed.
+
+  '@types/estree@1.0.9':
+    resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
   '@types/linkify-it@3.0.5':
     resolution: {integrity: sha512-yg6E+u0/+Zjva+buc3EIb+29XEg4wltq7cSmd4Uc2EE/1nUVmxyzpX6gUXD0V8jIrG0r7YeOGVIbYRkxeooCtw==}
@@ -2152,6 +2247,9 @@ packages:
 
   '@types/react@19.2.18':
     resolution: {integrity: sha512-AnzbBERsrLKtk2XSfTbYRLjQPdy116Sty4q+T+Bp3IC4l6jNBvreVPAHmpq9qhXQM7CXZPjLVmGMw9sy+hxQ3w==}
+
+  '@types/tern@0.23.9':
+    resolution: {integrity: sha512-ypzHFE/wBzh+BlH6rrBgS5I/Z7RD21pGhZ2rltb/+ZrVM1awdZwjx7hE5XfuYgHWk9uvV5HLZN3SloevCAp3Bw==}
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
@@ -3173,6 +3271,9 @@ packages:
   minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
 
+  moment@2.31.0:
+    resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
+
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -3208,6 +3309,12 @@ packages:
   object-treeify@1.1.33:
     resolution: {integrity: sha512-EFVjAYfzWqWsBMRHPMAXLCDIJnpMhdWAqR7xG6M6a2cs6PMFpl/+Z20w9zDW4vkxOFfddegBKq9Rehd0bxWE7A==}
     engines: {node: '>= 10'}
+
+  obsidian@1.14.4:
+    resolution: {integrity: sha512-Kyo+5t0wFW2On5irLOPrgtwWDnaJsvE9n/P1OVvdPytx+NqeHJXvxVqADNOqLp9bU1+I64B6i+dHb0fxR/ss3w==}
+    peerDependencies:
+      '@codemirror/state': 6.7.6
+      '@codemirror/view': 6.43.13
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
@@ -5647,6 +5754,10 @@ snapshots:
   '@turbo/windows-arm64@2.11.7':
     optional: true
 
+  '@types/codemirror@5.60.8':
+    dependencies:
+      '@types/tern': 0.23.9
+
   '@types/d3-color@3.1.3': {}
 
   '@types/d3-drag@3.0.7':
@@ -5671,6 +5782,8 @@ snapshots:
   '@types/diff@8.0.0':
     dependencies:
       diff: 9.0.0
+
+  '@types/estree@1.0.9': {}
 
   '@types/linkify-it@3.0.5': {}
 
@@ -5705,6 +5818,10 @@ snapshots:
   '@types/react@19.2.18':
     dependencies:
       csstype: 3.2.3
+
+  '@types/tern@0.23.9':
+    dependencies:
+      '@types/estree': 1.0.9
 
   '@types/use-sync-external-store@0.0.6': {}
 
@@ -6609,6 +6726,8 @@ snapshots:
 
   minimist@1.2.8: {}
 
+  moment@2.31.0: {}
+
   ms@2.1.3: {}
 
   nanoid@3.3.18: {}
@@ -6633,6 +6752,13 @@ snapshots:
   object-inspect@1.13.4: {}
 
   object-treeify@1.1.33: {}
+
+  obsidian@1.14.4(@codemirror/state@6.7.4)(@codemirror/view@6.43.11):
+    dependencies:
+      '@codemirror/state': 6.7.4
+      '@codemirror/view': 6.43.11
+      '@types/codemirror': 5.60.8
+      moment: 2.31.0
 
   on-finished@2.4.1:
     dependencies:

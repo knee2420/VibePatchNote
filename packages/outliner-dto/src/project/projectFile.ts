@@ -10,7 +10,10 @@
 import { type Project, OUTLINE_FORMAT_VERSION } from '@vibe/outliner-core';
 import { projectSchema } from '../schema/workspaceSchema';
 
+/** 독립 앱이 쓰는 확장자 */
 export const PROJECT_FILE_EXTENSION = '.json';
+/** 옵시디언 플러그인이 쓰는 확장자. 내용은 같은 JSON 이고 확장자만 다르다. */
+export const OUTLINE_FILE_EXTENSION = '.outline';
 
 export function serializeProjectFile(project: Project): string {
   return JSON.stringify({ version: OUTLINE_FORMAT_VERSION, ...project }, null, 2);

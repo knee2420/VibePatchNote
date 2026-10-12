@@ -9,7 +9,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { findNode } from '@vibe/outliner-core';
 import { type ExportFile, type ExportScope, buildExportFile } from '@vibe/outliner-dto';
-import { useWorkspaceStore } from '@/entities/workspace';
+import { useOutlineEditorState, useWorkspaceStore } from '@/entities/workspace';
 import { downloadTextFile } from '../lib/downloadTextFile';
 import { saveTextFileAs } from '../lib/vaultFs';
 
@@ -23,8 +23,9 @@ function isAbort(err: unknown): boolean {
 
 export function useExport() {
   const workspace = useWorkspaceStore((s) => s.workspace);
-  const activeRootId = useWorkspaceStore((s) => s.activeRootId);
-  const selectedNodeIds = useWorkspaceStore((s) => s.selectedNodeIds);
+  // 줌인한 불릿과 고른 불릿은 편집 화면의 상태다.
+  const activeRootId = useOutlineEditorState((s) => s.activeRootId);
+  const selectedNodeIds = useOutlineEditorState((s) => s.selectedNodeIds);
 
   const project = workspace.projects[workspace.activeProjectId];
   const zoomNode = activeRootId ? findNode(project.rootNodes, activeRootId) : null;

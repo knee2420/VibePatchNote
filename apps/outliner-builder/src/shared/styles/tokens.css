@@ -51,6 +51,9 @@
   --text-muted: #94a3b8;
   --text-faint: #64748b;
   --interactive-accent: #6366f1;
+  --interactive-accent-hover: #818cf8;
+  --text-accent: #a5b4fc;
+  --text-on-accent: #ffffff;
   --heading-link-hover: rgba(255, 255, 255, 0.055);
 
   /* 노션/옵시디언 카드 섀도우 */
@@ -69,6 +72,9 @@
   --text-muted: #6c7680;
   --text-faint: #9aa0a6;
   --interactive-accent: #4f46e5;
+  --interactive-accent-hover: #4338ca;
+  --text-accent: #4f46e5;
+  --text-on-accent: #ffffff;
   --heading-link-hover: rgba(15, 15, 15, 0.045);
 
   /* 노션/옵시디언 카드 섀도우 */

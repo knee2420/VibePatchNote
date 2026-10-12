@@ -93,10 +93,14 @@ export const FileStorageToolbar: React.FC<FileStorageToolbarProps> = ({
           type="button"
           onClick={onOpenVault}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-(--text-normal) hover:bg-(--background-modifier-hover) bg-(--background-secondary) border border-(--background-modifier-border) transition-colors cursor-pointer"
-          title="다른 폴더를 보관함으로 열기"
+          title={
+            vaultName
+              ? '다른 폴더를 보관함으로 열기'
+              : '빈 폴더를 고르면 지금 내용이 그 폴더에 저장되고, 이후로는 자동 저장됩니다'
+          }
         >
           <FolderOpen className="w-3.5 h-3.5 text-sky-400" />
-          <span className="hidden sm:inline">보관함 열기</span>
+          <span className="hidden sm:inline">{vaultName ? '보관함 열기' : '폴더에 저장'}</span>
         </button>
 
         <div className="w-[1px] h-4 bg-(--background-modifier-border) mx-1" />

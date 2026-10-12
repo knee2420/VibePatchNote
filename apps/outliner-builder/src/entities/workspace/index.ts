@@ -9,3 +9,5 @@ export {
   selectActiveProject,
 } from './model/useWorkspaceStore';
 export type { WorkspaceViewMode } from './model/useWorkspaceStore';
+export { outlineEditorStore, outlineHost, useOutlineEditorState } from './model/outlineSession';
+export { useNodeLinkNavigation } from './model/useNodeLinkNavigation';

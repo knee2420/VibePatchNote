@@ -60,11 +60,23 @@ export function useFileIO() {
         }
 
         const { vaultHandle, isDirty } = useWorkspaceStore.getState();
+        const hasUnsavedWork = !vaultHandle && isDirty;
         if (result.workspace) {
+          // 폴더 없이 작업하던 내용은 이 보관함을 여는 순간 사라진다. 지금 내용을 저장하려면 빈 폴더를 골라야 한다.
+          if (
+            hasUnsavedWork &&
+            !window.confirm(
+              `'${handle.name}' 폴더에는 이미 스캐폴드가 있습니다.\n` +
+                '이 폴더를 열면 지금 저장하지 않은 내용은 사라집니다. (지금 내용을 저장하려면 빈 폴더를 고르세요)\n' +
+                '계속하시겠습니까?'
+            )
+          ) {
+            return false;
+          }
           loadWorkspace(result.workspace, handle, {
             dirty: needsVaultSync(handle, result.workspace),
           });
-        } else if (!vaultHandle && isDirty) {
+        } else if (hasUnsavedWork) {
           // 빈 폴더를 골랐고 보관함 없이 작업하던 내용이 있으면, 그 내용을 이 보관함에 담는다.
           bindVault(handle);
         } else {

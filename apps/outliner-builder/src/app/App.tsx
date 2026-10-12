@@ -16,16 +16,57 @@ import {
   useAutoSave,
   useFileIO,
 } from '@/features/file-storage';
-import { useActiveProject, useWorkspaceStore } from '@/entities/workspace';
+import {
+  outlineEditorStore,
+  outlineHost,
+  useActiveProject,
+  useNodeLinkNavigation,
+  useWorkspaceStore,
+} from '@/entities/workspace';
 import { ProjectTreeSidebar, FocusedProjectViewport } from '@/features/workspace-explorer';
 import {
-  OutlineTree,
-  OutlineBreadcrumb,
   OutlineBoard,
+  OutlineBreadcrumb,
+  OutlineEditorProvider,
+  OutlineTree,
   useOutlineView,
-  useNodeLinkNavigation,
-} from '@/features/outline-editor';
+} from '@vibe/outliner-editor';
 import { Command } from 'lucide-react';
+
+interface ScaffoldPaneProps {
+  title: string;
+  onUpdateTitle: (title: string) => void;
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
+}
+
+/** 지금 보는 스캐폴드의 편집 화면. 편집 상태를 읽으므로 편집 공급자 안에서 그린다. */
+const ScaffoldPane: React.FC<ScaffoldPaneProps> = ({
+  title,
+  onUpdateTitle,
+  isSidebarOpen,
+  onToggleSidebar,
+}) => {
+  // 불릿으로 볼지 보드로 볼지: 줌인한 불릿에 지정된 방식이 있으면 그것을, 없으면 스캐폴드 기본값을 따른다.
+  const { view, toggleView } = useOutlineView();
+
+  return (
+    <FocusedProjectViewport
+      title={title}
+      onUpdateTitle={onUpdateTitle}
+      defaultView={view}
+      onToggleViewMode={toggleView}
+      isSidebarOpen={isSidebarOpen}
+      onToggleSidebar={onToggleSidebar}
+    >
+      {/* 줌인 시에만 나타나는 미니멀 조상 경로 (Root일 땐 null 반환) */}
+      <OutlineBreadcrumb />
+
+      {/* 아웃라인 캔버스 에디터: 뷰 모드(불릿 vs 보드) 분기 */}
+      {view === 'board' ? <OutlineBoard /> : <OutlineTree />}
+    </FocusedProjectViewport>
+  );
+};
 
 export const App: React.FC = () => {
   // 보관함 연결 및 자동 저장 훅 바인딩
@@ -52,8 +93,6 @@ export const App: React.FC = () => {
   const hasVault = useWorkspaceStore((s) => s.vaultHandle !== null);
   const activeProject = useActiveProject();
   const updateTitle = useWorkspaceStore((s) => s.updateActiveProjectTitle);
-  // 불릿으로 볼지 보드로 볼지: 줌인한 불릿에 지정된 방식이 있으면 그것을, 없으면 프로젝트 기본값을 따른다.
-  const { view: defaultView, toggleView: toggleViewMode } = useOutlineView();
   // "내부 링크 복사"로 만든 주소로 들어오면 그 불릿으로 이동한다.
   useNodeLinkNavigation(hasVault || isTemporary);
 
@@ -95,25 +134,23 @@ export const App: React.FC = () => {
 
         {/* [우측] 현재 활성 프로젝트의 아웃라인 캔버스 (In-place Switching) */}
         <div className="flex-1 flex flex-col overflow-y-auto min-w-0 custom-scroll">
-          <FocusedProjectViewport
-            title={activeProject.title}
-            onUpdateTitle={updateTitle}
-            defaultView={defaultView}
-            onToggleViewMode={toggleViewMode}
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          <OutlineEditorProvider
+            store={outlineEditorStore}
+            host={outlineHost}
+            rootNodes={activeProject.rootNodes}
+            defaultView={activeProject.defaultView}
           >
-            {/* 줌인 시에만 나타나는 미니멀 조상 경로 (Root일 땐 null 반환) */}
-            <OutlineBreadcrumb />
-
-            {/* 아웃라인 캔버스 에디터: 뷰 모드(불릿 vs 보드) 분기 */}
-            {defaultView === 'board' ? <OutlineBoard /> : <OutlineTree />}
-          </FocusedProjectViewport>
+            <ScaffoldPane
+              title={activeProject.title}
+              onUpdateTitle={updateTitle}
+              isSidebarOpen={isSidebarOpen}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          </OutlineEditorProvider>
         </div>
       </div>
 
       {/* 3. 내보내기·가져오기 대화상자 */}
-      {/* 내보내기·가져오기 대화상자 */}
       {exchangeDialog === 'export' && <ExportDialog onClose={() => setExchangeDialog(null)} />}
       {exchangeDialog === 'import' && (
         <ImportDialog
