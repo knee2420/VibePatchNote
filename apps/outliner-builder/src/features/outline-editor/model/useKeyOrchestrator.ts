@@ -106,8 +106,7 @@ export function useKeyOrchestrator(
         const prevItem = flattenedNodes.find((n) => n.id === prevId);
         const prevText = prevItem?.node.text || '';
 
-        // 삭제가 취소될 수 있다(연결 불릿이면 하위 프로젝트까지 지울지 확인한다).
-        // 그래서 먼저 지우고, 실제로 지워졌을 때에만 글자를 합치고 포커스를 옮긴다.
+        // 먼저 지우고, 실제로 지워졌을 때에만 글자를 합치고 포커스를 옮긴다.
         if (currentText.length === 0) {
           if (store.deleteNode(nodeId)) {
             store.setFocus(prevId, prevText.length);

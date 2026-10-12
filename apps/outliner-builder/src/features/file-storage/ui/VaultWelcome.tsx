@@ -39,7 +39,7 @@ export const VaultWelcome: React.FC<VaultWelcomeProps> = ({
         </div>
         <h1 className="text-lg font-semibold text-slate-100 mb-2">보관함을 열어 시작하세요</h1>
         <p className="text-xs text-slate-400 leading-relaxed mb-6">
-          폴더 하나를 보관함으로 고르면 프로젝트가 파일 하나씩 그 안에 놓입니다.
+          폴더 하나를 보관함으로 고르면 스캐폴드가 파일 하나씩 그 안에 놓입니다.
           <br />
           이후의 모든 변경은 따로 저장하지 않아도 자동으로 기록됩니다.
         </p>

@@ -178,7 +178,7 @@ export function deleteNodes(
 }
 
 /**
- * 노드 텍스트 갱신 (프로젝트 참조가 있을 경우 ref.displayText 도 일관성 동기화)
+ * 노드 텍스트 갱신
  */
 export function updateNodeText(
   rootNodes: OutlineNode[],
@@ -196,9 +196,6 @@ export function updateNodeText(
 
     const node = lookup.siblings[lookup.index];
     node.text = newText;
-    if (node.ref && node.ref.type === 'project') {
-      node.ref.displayText = newText.trim() || '제목 없는 프로젝트';
-    }
     node.updatedAt = Date.now();
     updatedNode = node;
     success = true;
@@ -277,7 +274,6 @@ export function toggleNodesCompleted(
 
 /**
  * 노드 부연 설명(노트) 갱신. 빈 문자열이면 노트를 없앤다.
- * (빈 노트를 남기면 노트가 없던 스냅샷과 비교할 때 "변경됨"으로 잡힌다)
  */
 export function setNodeNote(
   rootNodes: OutlineNode[],

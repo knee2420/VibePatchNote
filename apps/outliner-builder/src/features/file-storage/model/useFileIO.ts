@@ -1,15 +1,15 @@
 /**
  * @file useFileIO.ts
- * @description 보관함 열기 / 다시 열기 / 가져오기 / 내보내기 처리 훅
+ * @description 보관함 열기 / 다시 열기 / 가져온 워크스페이스 열기 처리 훅
  *
  * 저장 버튼은 없다. 폴더 하나를 보관함으로 고르면 이후 변경은 `useAutoSave` 가 알아서 기록한다.
- * 이 훅은 "어느 폴더에 묶을지"와 "단일 파일로 주고받기"만 다룬다.
+ * 이 훅은 "지금 어느 워크스페이스를 열고, 어느 폴더에 묶을지"만 다룬다.
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { createEmptyWorkspace, serializeWorkspace } from '@vibe/outliner-core';
+import { type Workspace, createEmptyWorkspace } from '@vibe/outliner-core';
 import { useWorkspaceStore } from '@/entities/workspace';
-import { type FileIOFailure, parseWorkspaceText } from '../lib/outlineFile';
+import type { FileIOFailure } from '../lib/fileIOFailure';
 import {
   hasVaultPermission,
   isVaultSupported,
@@ -17,16 +17,26 @@ import {
   requestVaultPermission,
 } from '../lib/vaultFs';
 import { recallVault, rememberVault } from '../lib/vaultRegistry';
-import { needsVaultSync, readVault } from '../lib/vaultSession';
+import { needsVaultSync, readVault, syncVault } from '../lib/vaultSession';
+
+/** 가져온 워크스페이스를 열려던 시도의 결과 */
+export type OpenImportedResult = 'opened' | 'cancelled' | 'folder-not-empty' | 'failed';
 
 function isAbort(err: unknown): boolean {
   return err instanceof Error && err.name === 'AbortError';
 }
 
+/** 다른 워크스페이스로 바꾸기 전에, 지금 워크스페이스의 아직 기록되지 않은 변경을 마저 기록한다. */
+async function flushPendingSave(): Promise<void> {
+  const { workspace, vaultHandle, isDirty, markClean } = useWorkspaceStore.getState();
+  if (!vaultHandle || !isDirty) return;
+  await syncVault(vaultHandle, workspace);
+  markClean(workspace);
+}
+
 export function useFileIO() {
   const loadWorkspace = useWorkspaceStore((s) => s.loadWorkspace);
   const bindVault = useWorkspaceStore((s) => s.bindVault);
-  const importWorkspace = useWorkspaceStore((s) => s.importWorkspace);
 
   const [failure, setFailure] = useState<FileIOFailure | null>(null);
   // 지난번에 쓰던 보관함을 확인하는 동안은 첫 화면을 아직 정하지 않는다.
@@ -125,42 +135,46 @@ export function useFileIO() {
     }
   }, [enterVault, recentVault]);
 
-  // 3. 단일 .json 파일의 프로젝트들을 지금 워크스페이스에 더하기 (가져오기)
-  const importJson = useCallback(() => {
-    const input = window.document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,application/json';
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file) return;
+  // 3. 가져온 워크스페이스를, 사용자가 고른 빈 폴더에 묶어 새로 연다.
+  //    프로젝트가 이미 있는 폴더에는 열지 않는다. (남의 데이터를 기존 보관함과 섞지 않는다)
+  const openImportedInVault = useCallback(
+    async (workspace: Workspace): Promise<OpenImportedResult> => {
       try {
-        const parsed = parseWorkspaceText(await file.text());
-        if (!parsed.success) {
-          setFailure(parsed.failure);
-          return;
-        }
-        const importedCount = importWorkspace(parsed.data);
-        setFailure(importedCount === 0 ? { kind: 'nothing-to-import' } : null);
-      } catch (err: unknown) {
-        console.error('파일 가져오기 오류:', err);
-        setFailure({ kind: 'open-failed' });
-      }
-    };
-    input.click();
-  }, [importWorkspace]);
+        const handle = await pickVaultDirectory();
+        const existing = await readVault(handle);
+        if (!existing.success || existing.workspace) return 'folder-not-empty';
 
-  // 4. 워크스페이스 전체를 단일 .json 파일로 내려받기 (내보내기)
-  const exportJson = useCallback(() => {
-    const { workspace } = useWorkspaceStore.getState();
-    const dataStr =
-      'data:text/json;charset=utf-8,' + encodeURIComponent(serializeWorkspace(workspace));
-    const downloadAnchor = window.document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `${workspace.title || 'workspace'}.json`);
-    window.document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  }, []);
+        await flushPendingSave();
+        loadWorkspace(workspace, handle, { dirty: true });
+        void rememberVault(handle);
+        setRecentVault(null);
+        setFailure(null);
+        return 'opened';
+      } catch (err: unknown) {
+        if (isAbort(err)) return 'cancelled';
+        console.error('가져온 워크스페이스 열기 오류:', err);
+        return 'failed';
+      }
+    },
+    [loadWorkspace]
+  );
+
+  // 4. 가져온 워크스페이스를 폴더 없이 새로 연다. 저장할 폴더는 나중에 "보관함 열기"로 정한다.
+  const openImportedTemporary = useCallback(
+    async (workspace: Workspace): Promise<OpenImportedResult> => {
+      try {
+        await flushPendingSave();
+      } catch (err: unknown) {
+        console.error('가져오기 전 저장 오류:', err);
+        return 'failed';
+      }
+      loadWorkspace(workspace, null, { dirty: true });
+      setIsTemporary(true);
+      setFailure(null);
+      return 'opened';
+    },
+    [loadWorkspace]
+  );
 
   return {
     isRestoring,
@@ -170,8 +184,8 @@ export function useFileIO() {
     openVault,
     reopenRecentVault,
     startTemporary,
-    importJson,
-    exportJson,
+    openImportedInVault,
+    openImportedTemporary,
     failure,
     dismissFailure,
   };

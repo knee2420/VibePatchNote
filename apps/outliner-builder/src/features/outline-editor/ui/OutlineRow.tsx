@@ -18,7 +18,7 @@ import { OutlineInput } from './OutlineInput';
 import { OutlineNote } from './OutlineNote';
 import { useKeyOrchestrator } from '../model/useKeyOrchestrator';
 import { useZoom } from '../model/useZoom';
-import { ProjectRefBadge, useWorkspaceStore } from '@/entities/workspace';
+import { useWorkspaceStore } from '@/entities/workspace';
 
 /** 트리가 모든 행에 똑같이 내려주는 조작 함수 묶음 */
 export interface OutlineRowHandlers {
@@ -117,7 +117,6 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
               initialText={node.text}
               nodeType={nodeType}
               isCompleted={isCompleted}
-              isProjectRef={node.ref?.type === 'project'}
               onKeyDown={handleKeyDown}
             />
 
@@ -132,14 +131,6 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
               </span>
             )}
 
-            {/* 프로젝트 참조 뱃지 */}
-            {node.ref && node.ref.type === 'project' && (
-              <ProjectRefBadge
-                targetProjectId={node.ref.targetProjectId}
-                displayText={node.ref.displayText}
-                relation={node.ref.relation}
-              />
-            )}
           </div>
         )}
 

@@ -1,9 +1,10 @@
 /**
  * @file vaultFs.ts
- * @description 보관함 폴더 핸들 <-> "경로 -> 텍스트" 묶음 (브라우저 File System Access API 어댑터)
+ * @description 폴더 핸들 <-> "경로 -> 텍스트" 묶음 (브라우저 File System Access API 어댑터)
  *
+ * 보관함과 가져올 폴더를 여기서 읽고, 보관함과 내보낼 파일을 여기서 쓴다.
  * 폴더 안의 무엇이 프로젝트이고 무엇이 메타인지는 여기서 판단하지 않는다.
- * 그 규칙은 `@vibe/outliner-core` 의 DTO 엔진이 갖고 있고, 여기는 읽고 쓰는 손발일 뿐이다.
+ * 그 규칙은 `@vibe/outliner-dto` 가 갖고 있고, 여기는 읽고 쓰는 손발일 뿐이다.
  */
 
 import {
@@ -11,8 +12,7 @@ import {
   type VaultSyncPlan,
   VAULT_FILE_EXTENSION,
   VAULT_MANIFEST_PATH,
-  VAULT_SNAPSHOTS_DIR,
-} from '@vibe/outliner-core';
+} from '@vibe/outliner-dto';
 
 type PermissionQuery = (descriptor: { mode: 'readwrite' }) => Promise<PermissionState>;
 
@@ -30,15 +30,33 @@ type DirectoryPickerWindow = Window & {
   }) => Promise<FileSystemDirectoryHandle>;
 };
 
+type SaveFilePickerWindow = Window & {
+  showSaveFilePicker?: (options?: {
+    id?: string;
+    suggestedName?: string;
+    types?: Array<{ description?: string; accept: Record<string, string[]> }>;
+  }) => Promise<FileSystemFileHandle>;
+};
+
 export function isVaultSupported(): boolean {
   return typeof (window as DirectoryPickerWindow).showDirectoryPicker === 'function';
 }
 
-/** 사용자에게 보관함으로 쓸 폴더를 고르게 한다. (취소하면 AbortError 를 던진다) */
-export function pickVaultDirectory(): Promise<FileSystemDirectoryHandle> {
+// 용도마다 id 를 달리해, 브라우저가 마지막으로 연 위치를 따로 기억하게 한다.
+function pickDirectory(id: string, mode: 'read' | 'readwrite'): Promise<FileSystemDirectoryHandle> {
   const picker = (window as DirectoryPickerWindow).showDirectoryPicker;
   if (!picker) throw new Error('showDirectoryPicker 를 지원하지 않는 브라우저');
-  return picker.call(window, { id: 'outliner-vault', mode: 'readwrite' });
+  return picker.call(window, { id, mode });
+}
+
+/** 사용자에게 보관함으로 쓸 폴더를 고르게 한다. (취소하면 AbortError 를 던진다) */
+export function pickVaultDirectory(): Promise<FileSystemDirectoryHandle> {
+  return pickDirectory('outliner-vault', 'readwrite');
+}
+
+/** 사용자에게 가져올 폴더를 고르게 한다. (취소하면 AbortError 를 던진다) */
+export function pickImportDirectory(): Promise<FileSystemDirectoryHandle> {
+  return pickDirectory('outliner-import', 'read');
 }
 
 /** 지금 이 폴더를 읽고 쓸 수 있는지 (사용자에게 묻지 않는다) */
@@ -78,7 +96,7 @@ async function getDirectoryIfExists(
   return current;
 }
 
-/** 보관함에서 DTO 엔진이 볼 파일들을 읽는다: 최상위 .json, 메타 파일, 스냅샷 파일 */
+/** 보관함에서 파일 규격 엔진이 볼 파일들을 읽는다: 최상위 .json, 메타 파일 */
 export async function readVaultFiles(root: FileSystemDirectoryHandle): Promise<VaultFiles> {
   const files: VaultFiles = {};
 
@@ -93,19 +111,28 @@ export async function readVaultFiles(root: FileSystemDirectoryHandle): Promise<V
     try {
       files[VAULT_MANIFEST_PATH] = await readText(await metaDir.getFileHandle(manifestName));
     } catch {
-      // 메타 파일이 없으면 DTO 엔진이 새로 만든다.
+      // 메타 파일이 없으면 파일 규격 엔진이 새로 만든다.
     }
   }
 
-  const snapshotsDir = await getDirectoryIfExists(root, VAULT_SNAPSHOTS_DIR);
-  if (snapshotsDir) {
-    for await (const [name, handle] of (snapshotsDir as VaultDirectoryHandle).entries()) {
+  return files;
+}
+
+/** 폴더와 그 아래 모든 폴더의 .json 파일을 읽는다. 점으로 시작하는 폴더는 들어가지 않는다. */
+export async function readJsonFilesDeep(root: FileSystemDirectoryHandle): Promise<VaultFiles> {
+  const files: VaultFiles = {};
+
+  async function walk(dir: FileSystemDirectoryHandle, prefix: string): Promise<void> {
+    for await (const [name, handle] of (dir as VaultDirectoryHandle).entries()) {
       if (isJsonFile(name, handle)) {
-        files[`${VAULT_SNAPSHOTS_DIR}/${name}`] = await readText(handle);
+        files[`${prefix}${name}`] = await readText(handle);
+      } else if (handle.kind === 'directory' && !name.startsWith('.')) {
+        await walk(handle as FileSystemDirectoryHandle, `${prefix}${name}/`);
       }
     }
   }
 
+  await walk(root, '');
   return files;
 }
 
@@ -127,18 +154,45 @@ function isNotFound(err: unknown): boolean {
   return err instanceof DOMException && err.name === 'NotFoundError';
 }
 
-/** 계획대로 쓴다: 쓰기를 순서대로 모두 끝낸 뒤 지우기를 한다. */
-export async function applyVaultPlan(
+/** 파일들을 순서대로 쓴다. 중간 폴더가 없으면 만든다. */
+async function writeTextFiles(
   root: FileSystemDirectoryHandle,
-  plan: VaultSyncPlan
+  files: ReadonlyArray<{ path: string; text: string }>
 ): Promise<void> {
-  for (const { path, text } of plan.writes) {
+  for (const { path, text } of files) {
     const { dir, name } = await resolveParent(root, path, true);
     const file = await dir.getFileHandle(name, { create: true });
     const writable = await file.createWritable();
     await writable.write(text);
     await writable.close();
   }
+}
+
+/**
+ * 파일 하나를 사용자가 고른 자리에 저장한다. (취소하면 AbortError 를 던진다)
+ * 저장 위치를 고르게 할 수 없는 브라우저면 false 를 돌려준다.
+ */
+export async function saveTextFileAs(suggestedName: string, text: string): Promise<boolean> {
+  const picker = (window as SaveFilePickerWindow).showSaveFilePicker;
+  if (!picker) return false;
+
+  const file = await picker.call(window, {
+    id: 'outliner-export',
+    suggestedName,
+    types: [{ description: 'JSON', accept: { 'application/json': [VAULT_FILE_EXTENSION] } }],
+  });
+  const writable = await file.createWritable();
+  await writable.write(text);
+  await writable.close();
+  return true;
+}
+
+/** 계획대로 쓴다: 쓰기를 순서대로 모두 끝낸 뒤 지우기를 한다. */
+export async function applyVaultPlan(
+  root: FileSystemDirectoryHandle,
+  plan: VaultSyncPlan
+): Promise<void> {
+  await writeTextFiles(root, plan.writes);
 
   for (const path of plan.deletes) {
     try {

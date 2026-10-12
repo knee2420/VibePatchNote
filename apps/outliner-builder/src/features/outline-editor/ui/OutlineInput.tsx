@@ -25,8 +25,6 @@ interface OutlineInputProps {
   initialText: string;
   nodeType?: OutlineNodeType;
   isCompleted?: boolean;
-  /** 하위·독립 프로젝트를 가리키는 연결 불릿인지 */
-  isProjectRef?: boolean;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
@@ -35,13 +33,9 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   initialText,
   nodeType = 'bullet',
   isCompleted = false,
-  isProjectRef = false,
   onKeyDown,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  // 이번에 포커스를 얻은 뒤로 글자를 실제로 고쳤는지 (연결 불릿의 제목 확정 여부 판단용)
-  const editedSinceFocus = useRef(false);
-  const finishRefEdit = useWorkspaceStore((s) => s.finishRefEdit);
   const focusedNodeId = useWorkspaceStore((s) => s.focusedNodeId);
   const targetCaretOffset = useWorkspaceStore((s) => s.targetCaretOffset);
   const updateText = useWorkspaceStore((s) => s.updateText);
@@ -81,14 +75,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent || '';
-    editedSinceFocus.current = true;
     updateText(nodeId, text);
-  };
-
-  // 연결 불릿은 글자를 고치는 도중이 아니라, 편집을 마치고 떠날 때 프로젝트 제목에 반영한다.
-  const handleBlur = () => {
-    if (isProjectRef && editedSinceFocus.current) finishRefEdit(nodeId);
-    editedSinceFocus.current = false;
   };
 
   return (
@@ -97,7 +84,6 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
       contentEditable="plaintext-only"
       suppressContentEditableWarning
       onInput={handleInput}
-      onBlur={handleBlur}
       onKeyDown={onKeyDown}
       data-node-id={nodeId}
       className={`flex-1 py-0.5 px-1.5 min-h-[26px] font-[var(--font-text-theme)] leading-[1.7] tracking-[-0.005em] rounded hover:bg-(--background-modifier-hover) focus:bg-(--background-modifier-hover)/60 focus:ring-1 focus:ring-(--interactive-accent)/50 transition-colors break-words whitespace-pre-wrap cursor-text ${

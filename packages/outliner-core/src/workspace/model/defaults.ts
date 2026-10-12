@@ -6,14 +6,13 @@
 import { generateNodeId } from '../../outline/model/id';
 import { OUTLINE_FORMAT_VERSION } from '../../outline/model/version';
 import type { OutlineNode } from '../../outline/model/types';
-import { createSnapshot } from '../history/snapshot';
 import type { Project, Workspace } from './types';
 
 /**
  * 기본 프로젝트 생성
  */
 export function createDefaultProject(
-  title: string = '새 프로젝트',
+  title: string = '새 스캐폴드',
   initialNodes?: OutlineNode[]
 ): Project {
   const now = Date.now();
@@ -48,7 +47,7 @@ export function createDefaultProject(
 }
 
 /**
- * 기본 워크스페이스 생성 (1개의 기본 프로젝트 + 그 초기 스냅샷 포함)
+ * 기본 워크스페이스 생성 (1개의 기본 프로젝트 포함)
  */
 export function createEmptyWorkspace(title: string = '내 워크스페이스'): Workspace {
   const now = Date.now();
@@ -62,14 +61,6 @@ export function createEmptyWorkspace(title: string = '내 워크스페이스'): 
       [initialProject.id]: initialProject,
     },
     activeProjectId: initialProject.id,
-    snapshots: {
-      [initialProject.id]: [
-        createSnapshot(initialProject, {
-          milestoneName: 'v0.1 초안',
-          summary: '프로젝트 생성 초기 스냅샷',
-        }),
-      ],
-    },
     createdAt: now,
     updatedAt: now,
   };

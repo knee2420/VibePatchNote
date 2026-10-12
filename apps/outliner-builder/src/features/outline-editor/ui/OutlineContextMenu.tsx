@@ -16,18 +16,12 @@ import {
   Shapes,
   ChevronsUpDown,
   ChevronsDownUp,
-  CornerDownRight,
-  FolderTree,
   Link2,
   Download,
   Trash2,
   ChevronRight,
 } from 'lucide-react';
-import {
-  TURN_INTO_OPTIONS,
-  canExtractToProject,
-  useNodeActions,
-} from '../model/useNodeActions';
+import { TURN_INTO_OPTIONS, useNodeActions } from '../model/useNodeActions';
 
 interface OutlineContextMenuProps {
   item: FlattenedNode;
@@ -101,7 +95,6 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
   const [isTypeListOpen, setIsTypeListOpen] = useState(false);
 
   const isSingle = targetIds.length === 1;
-  const canExtract = isSingle && canExtractToProject(item);
   const currentType = item.node.viewMode === 'board' ? 'board' : (item.node.nodeType ?? 'bullet');
 
   // 실제 크기를 잰 뒤 화면 밖으로 나가지 않도록 위치를 당긴다. (종류 목록을 펼쳐 길어져도 다시 맞춘다)
@@ -212,18 +205,6 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
       {isSingle && (
         <>
           <Separator />
-          <MenuItem
-            icon={<CornerDownRight className={`w-3.5 h-3.5 ${canExtract ? 'text-cyan-400' : ''}`} />}
-            label="하위 프로젝트로 추출"
-            disabled={!canExtract}
-            onSelect={run(() => actions.extractToProject(item, 'child'))}
-          />
-          <MenuItem
-            icon={<FolderTree className={`w-3.5 h-3.5 ${canExtract ? 'text-indigo-400' : ''}`} />}
-            label="독립 프로젝트로 추출"
-            disabled={!canExtract}
-            onSelect={run(() => actions.extractToProject(item, 'standalone'))}
-          />
           <MenuItem
             icon={<Link2 className="w-3.5 h-3.5 text-slate-400" />}
             label="내부 링크 복사"

@@ -6,14 +6,14 @@
  * 맞출 때는 그 기준선과 워크스페이스의 차이만 폴더에 반영한다.
  */
 
+import type { Workspace } from '@vibe/outliner-core';
 import {
   type VaultDiskState,
-  type Workspace,
   deserializeVault,
   isVaultInSync,
   planVaultSync,
-} from '@vibe/outliner-core';
-import type { FileIOFailure } from './outlineFile';
+} from '@vibe/outliner-dto';
+import type { FileIOFailure } from './fileIOFailure';
 import { applyVaultPlan, readVaultFiles } from './vaultFs';
 
 // 기준선은 폴더 핸들에 딸린 정보다. 핸들이 사라지면 함께 사라진다.
@@ -31,7 +31,7 @@ export async function readVault(handle: FileSystemDirectoryHandle): Promise<Read
   }
 
   if (result.skipped.length > 0) {
-    console.warn('보관함에서 프로젝트로 읽지 않은 파일:', result.skipped);
+    console.warn('보관함에서 스캐폴드로 읽지 않은 파일:', result.skipped);
   }
   diskStates.set(handle, result.disk);
   return { success: true, workspace: result.workspace };

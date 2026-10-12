@@ -35,11 +35,6 @@ export const TURN_INTO_OPTIONS: Array<{ value: TurnIntoOption; label: string }> 
   { value: 'board', label: '보드' },
 ];
 
-/** 프로젝트로 추출할 수 있는 불릿인지 (하위 항목이 있고, 이미 프로젝트 참조가 아닌 것) */
-export function canExtractToProject(item: FlattenedNode): boolean {
-  return item.hasChildren && !item.node.ref;
-}
-
 function downloadTextFile(fileName: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown;charset=utf-8' }));
   const anchor = window.document.createElement('a');
@@ -60,18 +55,6 @@ export function useNodeActions() {
   const setNodesType = useWorkspaceStore((s) => s.setNodesType);
   const setNodesViewMode = useWorkspaceStore((s) => s.setNodesViewMode);
   const setFoldDeep = useWorkspaceStore((s) => s.setFoldDeep);
-  const extractSubtreeToNewProject = useWorkspaceStore((s) => s.extractSubtreeToNewProject);
-
-  const extractToProject = useCallback(
-    (item: FlattenedNode, mode: 'child' | 'standalone') => {
-      if (!canExtractToProject(item)) return;
-      const { activeProjectId } = useWorkspaceStore.getState().workspace;
-      const title = item.node.text.trim() || '추출된 프로젝트';
-      extractSubtreeToNewProject(activeProjectId, item.id, title, mode);
-    },
-    [extractSubtreeToNewProject]
-  );
-
   // 되돌리기가 없으므로, 하위 항목까지 사라지거나 여러 개를 한꺼번에 지울 때는 한 번 확인한다.
   const removeNodes = useCallback(
     (nodeIds: NodeId[]) => {
@@ -137,7 +120,6 @@ export function useNodeActions() {
     duplicateNodes,
     turnInto,
     setFoldAll,
-    extractToProject,
     exportNodes,
     copyNodeLink,
     removeNode,

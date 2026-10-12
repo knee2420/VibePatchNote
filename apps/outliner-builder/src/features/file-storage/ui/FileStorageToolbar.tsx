@@ -75,7 +75,7 @@ export const FileStorageToolbar: React.FC<FileStorageToolbarProps> = ({
         {vaultName && (
           <div
             className="flex items-center gap-1.5 text-xs text-(--text-normal) bg-(--background-modifier-hover) border border-(--background-modifier-border) px-3 py-1 rounded-md shrink-0 shadow-xs min-w-0"
-            title={`연동된 보관함 폴더: ${vaultName} | 프로젝트 파일: ${title || '무제'}.json`}
+            title={`연동된 보관함 폴더: ${vaultName} | 스캐폴드 파일: ${title || '무제'}.json`}
           >
             <FolderOpen className="w-3.5 h-3.5 text-sky-400 shrink-0" />
             <span className="font-mono text-[11px] font-medium text-(--text-normal) whitespace-nowrap flex items-center">
@@ -105,7 +105,7 @@ export const FileStorageToolbar: React.FC<FileStorageToolbarProps> = ({
           type="button"
           onClick={onExport}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-(--text-muted) hover:text-(--text-normal) hover:bg-(--background-modifier-hover) transition-colors cursor-pointer"
-          title="워크스페이스 전체를 JSON 파일 하나로 내려받기"
+          title="지금 스캐폴드를 JSON 파일로 내보내기"
         >
           <Download className="w-3.5 h-3.5" />
           <span className="hidden md:inline">내보내기</span>
@@ -115,7 +115,7 @@ export const FileStorageToolbar: React.FC<FileStorageToolbarProps> = ({
           type="button"
           onClick={onImport}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-(--text-muted) hover:text-(--text-normal) hover:bg-(--background-modifier-hover) transition-colors cursor-pointer"
-          title="JSON 파일의 프로젝트들을 이 보관함에 더하기"
+          title="JSON 파일이나 폴더를 새 워크스페이스로 열기"
         >
           <Upload className="w-3.5 h-3.5" />
           <span className="hidden md:inline">가져오기</span>

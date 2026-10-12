@@ -8,18 +8,16 @@
 
 import React, { useState } from 'react';
 import {
+  ExportDialog,
   FileStorageNotice,
   FileStorageToolbar,
+  ImportDialog,
   VaultWelcome,
   useAutoSave,
   useFileIO,
 } from '@/features/file-storage';
 import { useActiveProject, useWorkspaceStore } from '@/entities/workspace';
-import {
-  ProjectTreeSidebar,
-  FocusedProjectViewport,
-  VersionHistoryDrawer,
-} from '@/features/workspace-explorer';
+import { ProjectTreeSidebar, FocusedProjectViewport } from '@/features/workspace-explorer';
 import {
   OutlineTree,
   OutlineBreadcrumb,
@@ -27,7 +25,7 @@ import {
   useOutlineView,
   useNodeLinkNavigation,
 } from '@/features/outline-editor';
-import { Command, Sparkles } from 'lucide-react';
+import { Command } from 'lucide-react';
 
 export const App: React.FC = () => {
   // 보관함 연결 및 자동 저장 훅 바인딩
@@ -40,13 +38,15 @@ export const App: React.FC = () => {
     openVault,
     reopenRecentVault,
     startTemporary,
-    importJson,
-    exportJson,
+    openImportedInVault,
+    openImportedTemporary,
     failure,
     dismissFailure,
   } = useFileIO();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  // 내보내기·가져오기 대화상자 (한 번에 하나만 뜬다)
+  const [exchangeDialog, setExchangeDialog] = useState<'export' | 'import' | null>(null);
 
   // 에디터는 독립 문서를 갖지 않는다. 워크스페이스의 활성 프로젝트를 그대로 들여다본다.
   const hasVault = useWorkspaceStore((s) => s.vaultHandle !== null);
@@ -80,8 +80,8 @@ export const App: React.FC = () => {
       <FileStorageToolbar
         status={status}
         onOpenVault={openVault}
-        onExport={exportJson}
-        onImport={importJson}
+        onExport={() => setExchangeDialog('export')}
+        onImport={() => setExchangeDialog('import')}
       />
       <FileStorageNotice failure={failure} onDismiss={dismissFailure} />
 
@@ -103,14 +103,8 @@ export const App: React.FC = () => {
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           >
-            {/* 상단 빵가루 네비게이션 */}
-            <div className="mb-4 pb-2 border-b border-(--background-modifier-border) flex items-center justify-between">
-              <OutlineBreadcrumb />
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-(--text-muted) font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-(--interactive-accent)" />
-                <span>Spine Canvas</span>
-              </div>
-            </div>
+            {/* 줌인 시에만 나타나는 미니멀 조상 경로 (Root일 땐 null 반환) */}
+            <OutlineBreadcrumb />
 
             {/* 아웃라인 캔버스 에디터: 뷰 모드(불릿 vs 보드) 분기 */}
             {defaultView === 'board' ? <OutlineBoard /> : <OutlineTree />}
@@ -118,8 +112,16 @@ export const App: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. 온디맨드 버전 타임머신 서랍 (오버레이) */}
-      <VersionHistoryDrawer />
+      {/* 3. 내보내기·가져오기 대화상자 */}
+      {/* 내보내기·가져오기 대화상자 */}
+      {exchangeDialog === 'export' && <ExportDialog onClose={() => setExchangeDialog(null)} />}
+      {exchangeDialog === 'import' && (
+        <ImportDialog
+          onOpenInVault={openImportedInVault}
+          onOpenTemporary={openImportedTemporary}
+          onClose={() => setExchangeDialog(null)}
+        />
+      )}
 
       {/* 4. 하단 상태 및 단축키 안내 풋터 */}
       <footer className="h-9 border-t border-slate-900 bg-slate-950 px-6 flex items-center justify-between text-[11px] text-slate-500 select-none shrink-0">

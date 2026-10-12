@@ -30,7 +30,6 @@ import {
   toBoardViewModel,
 } from '@vibe/outliner-core';
 import { useActiveProject, useWorkspaceStore } from '@/entities/workspace';
-import { ProjectRefBadge } from '@/entities/workspace';
 import { type BoardDnd, useBoardDragAndDrop } from '../model/useBoardDragAndDrop';
 
 const DEFAULT_COLUMN_WIDTH = 288;
@@ -98,14 +97,6 @@ const SubBulletRow: React.FC<SubBulletRowProps> = ({
           placeholder="하위 항목..."
           className="flex-1 min-w-0 bg-transparent text-[11px] text-slate-300 hover:text-slate-100 focus:text-slate-100 hover:bg-slate-900/60 focus:bg-slate-950 px-1 py-0.5 rounded border border-transparent focus:border-indigo-500/60 focus:outline-hidden transition-all truncate"
         />
-
-        {/* 프로젝트 참조 뱃지 */}
-        {node.ref && node.ref.type === 'project' && (
-          <ProjectRefBadge
-            targetProjectId={node.ref.targetProjectId}
-            displayText={node.ref.displayText}
-          />
-        )}
 
         {/* 호버 액션: 자식 추가 & 삭제 */}
         <div className="opacity-0 group-hover/sub:opacity-100 flex items-center gap-0.5 shrink-0 transition-opacity">
@@ -241,16 +232,6 @@ const BoardCardView: React.FC<BoardCardViewProps> = ({
           </button>
         </div>
       </div>
-
-      {/* 프로젝트 참조 뱃지 (존재 시) */}
-      {card.ref && card.ref.type === 'project' && (
-        <div className="pl-5">
-          <ProjectRefBadge
-            targetProjectId={card.ref.targetProjectId}
-            displayText={card.ref.displayText}
-          />
-        </div>
-      )}
 
       {/* 카드 하위 종속 불릿 트리 (Level 3+) */}
       {hasSubBullets && (

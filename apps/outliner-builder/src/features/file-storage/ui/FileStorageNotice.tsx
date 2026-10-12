@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AlertCircle, X } from 'lucide-react';
-import type { FileIOFailure } from '../lib/outlineFile';
+import type { FileIOFailure } from '../lib/fileIOFailure';
 
 interface FileStorageNoticeProps {
   failure: FileIOFailure | null;
@@ -14,10 +14,6 @@ interface FileStorageNoticeProps {
 
 function describeFailure(failure: FileIOFailure): string {
   switch (failure.kind) {
-    case 'parse-error':
-      return 'JSON 파싱에 실패했습니다.';
-    case 'invalid-format':
-      return '올바른 아웃라인 JSON 문서 형식이 아닙니다.';
     case 'unsupported-version':
       return `지원하지 않는 문서 버전입니다 (${failure.version}).`;
     case 'open-failed':
@@ -26,8 +22,6 @@ function describeFailure(failure: FileIOFailure): string {
       return '이 브라우저는 폴더 접근을 지원하지 않습니다. Chrome 또는 Edge에서 열어주세요.';
     case 'permission-denied':
       return '보관함 폴더 접근이 허용되지 않았습니다.';
-    case 'nothing-to-import':
-      return '가져올 새 프로젝트가 없습니다. (이미 모두 들어 있습니다)';
   }
 }
 

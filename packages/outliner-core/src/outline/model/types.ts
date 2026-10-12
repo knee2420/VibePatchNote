@@ -41,22 +41,6 @@ export interface OutlineNode {
   /** 해당 노드에 줌인했을 때 적용할 로컬 뷰 모드 (선택적) */
   viewMode?: ViewMode;
 
-  /** 타 프로젝트 또는 외부 블록 참조 링크 */
-  ref?: {
-    type: 'project' | 'block';
-    targetProjectId: string;
-    targetBlockId?: string;
-    displayText?: string;
-    relation?: 'child' | 'standalone';
-  };
-
-  /** 타 프로젝트 블록 인라인 미러링/임베드 */
-  embed?: {
-    type: 'embed';
-    targetProjectId: string;
-    targetBlockId?: string;
-  };
-
   createdAt?: number;
   updatedAt?: number;
 }

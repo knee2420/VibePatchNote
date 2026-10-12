@@ -20,26 +20,14 @@ import {
   type OutlineNodeType,
   type Project,
   type ProjectId,
-  type Snapshot,
-  type SnapshotId,
   type ViewMode,
   type Workspace,
-  type RelationsGraph,
   createEmptyWorkspace,
-  createSnapshot,
-  restoreSnapshot,
-  forkProject,
-  extractToProject,
-  buildRelationsGraph,
-  addChildProjectToWorkspace,
+  addProjectToWorkspace,
   removeProjectFromWorkspace,
   renameProjectInWorkspace,
   setProjectTitleInWorkspace,
   syncProjectRootsInWorkspace,
-  importProjectsIntoWorkspace,
-  linkChildProjectInParent,
-  findChildProjectsLosingRef,
-  commitProjectRefText,
   insertAfter,
   appendChild,
   indentNode,
@@ -56,8 +44,6 @@ import {
   setFoldDeep,
   setNodesType,
   setNodesViewMode,
-  getTopmostNodeIds,
-  getPath,
   findNode,
   generateNodeId,
 } from '@vibe/outliner-core';
@@ -81,8 +67,6 @@ interface WorkspaceStoreState extends EditorViewState {
 
   // ── 화면 상태 ──
   viewMode: WorkspaceViewMode;
-  isHistoryDrawerOpen: boolean;
-  selectedSnapshotId: SnapshotId | null;
 
   // 보관함 결합
   loadWorkspace: (
@@ -91,7 +75,6 @@ interface WorkspaceStoreState extends EditorViewState {
     options?: { dirty?: boolean }
   ) => void;
   bindVault: (vaultHandle: FileSystemDirectoryHandle) => void;
-  importWorkspace: (source: Workspace) => number;
   markClean: (savedWorkspace?: Workspace) => void;
   setDirty: () => void;
 
@@ -126,7 +109,6 @@ interface WorkspaceStoreState extends EditorViewState {
   setNodesCompleted: (targetIds: NodeId[]) => void;
   selectNodes: (nodeIds: NodeId[]) => void;
   clearSelection: () => void;
-  finishRefEdit: (targetId: NodeId) => void;
   toggleCompleted: (targetId: NodeId) => void;
   setNote: (targetId: NodeId, note: string) => void;
   startNoteEdit: (nodeId: NodeId) => void;
@@ -135,27 +117,9 @@ interface WorkspaceStoreState extends EditorViewState {
   setFocus: (nodeId: NodeId | null, caretOffset?: number) => void;
 
   // 프로젝트 수명주기
-  createProject: (title?: string, parentProjectId?: ProjectId | null) => ProjectId;
+  createProject: (title?: string) => ProjectId;
   deleteProject: (projectId: ProjectId) => boolean;
-  forkCurrentProject: (projectId: ProjectId, title?: string, parentProjectId?: ProjectId | null) => ProjectId;
-  extractSubtreeToNewProject: (
-    sourceProjectId: ProjectId,
-    targetNodeId: string,
-    newProjectTitle?: string,
-    mode?: 'child' | 'standalone',
-    parentProjectId?: ProjectId | null
-  ) => ProjectId | null;
   updateProjectTitle: (projectId: ProjectId, title: string) => void;
-
-  // 버전 히스토리 & 스냅샷
-  openHistoryDrawer: () => void;
-  closeHistoryDrawer: () => void;
-  selectSnapshot: (snapshotId: SnapshotId | null) => void;
-  takeSnapshot: (projectId: ProjectId, milestoneName?: string, summary?: string) => Snapshot | null;
-  rollbackToSnapshot: (projectId: ProjectId, snapshotId: SnapshotId) => boolean;
-
-  // 관계망 그래프 셀렉터
-  getRelationsGraph: () => RelationsGraph;
 }
 
 const RESET_EDITOR_VIEW: EditorViewState = {
@@ -166,22 +130,6 @@ const RESET_EDITOR_VIEW: EditorViewState = {
   selectedNodeIds: [],
 };
 
-/**
- * 연결 불릿이 사라져 하위 프로젝트까지 지워지게 될 때 사용자에게 확인을 받는다.
- * 되돌리기가 없으므로, 어느 경로로 지워지든 반드시 이 확인을 거친다.
- */
-function confirmCascadeDelete(workspace: Workspace, lostProjectIds: ProjectId[]): boolean {
-  const titles = lostProjectIds.map((id) => `'${workspace.projects[id].title}'`).join(', ');
-  const hasDescendants = Object.values(workspace.projects).some(
-    (p) => p.parentProjectId && lostProjectIds.includes(p.parentProjectId)
-  );
-  return window.confirm(
-    `연결 불릿이 사라지면 하위 프로젝트 ${titles}도 함께 삭제됩니다.\n` +
-      (hasDescendants ? '그 아래에 있던 프로젝트는 한 단계 위로 올라갑니다.\n' : '') +
-      '되돌릴 수 없습니다. 계속하시겠습니까?'
-  );
-}
-
 /** 현재 에디터가 들여다보는 프로젝트 */
 export const selectActiveProject = (s: WorkspaceStoreState): Project =>
   s.workspace.projects[s.workspace.activeProjectId];
@@ -191,36 +139,15 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
   const commit = (workspace: Workspace, view: Partial<WorkspaceStoreState> = {}) =>
     set({ ...view, workspace, isDirty: true });
 
-  /**
-   * 한 프로젝트의 불릿 트리를 바꾸는 유일한 길.
-   * 바뀐 트리에서 하위 프로젝트의 연결 불릿이 사라지면, 확인을 받은 뒤 그 하위 프로젝트도 함께 지운다.
-   * 백스페이스·메뉴 삭제·상위 불릿 삭제·스냅샷 복원 어느 경로든 여기서 똑같이 처리된다.
-   * 사용자가 취소하면 아무것도 바꾸지 않고 false 를 돌려준다.
-   */
-  const replaceProjectRoots = (
-    projectId: ProjectId,
+  /** 활성 프로젝트의 불릿 트리를 바꾸는 유일한 길. */
+  const commitActiveRoots = (
     roots: OutlineNode[],
     view: Partial<EditorViewState> = {}
   ): boolean => {
     const { workspace } = get();
-    const lostProjectIds = findChildProjectsLosingRef(workspace, projectId, roots);
-    if (lostProjectIds.length > 0 && !confirmCascadeDelete(workspace, lostProjectIds)) {
-      return false;
-    }
-
-    let next = syncProjectRootsInWorkspace(workspace, projectId, roots);
-    for (const lostId of lostProjectIds) {
-      next = removeProjectFromWorkspace(next, lostId).updatedWorkspace;
-    }
-
-    const switchedProject = next.activeProjectId !== workspace.activeProjectId;
-    commit(next, switchedProject ? { ...RESET_EDITOR_VIEW, ...view } : view);
+    commit(syncProjectRootsInWorkspace(workspace, workspace.activeProjectId, roots), view);
     return true;
   };
-
-  /** 활성 프로젝트의 불릿 트리를 교체한다. */
-  const commitActiveRoots = (roots: OutlineNode[], view: Partial<EditorViewState> = {}) =>
-    replaceProjectRoots(get().workspace.activeProjectId, roots, view);
 
   const activeRoots = () => selectActiveProject(get()).rootNodes;
 
@@ -229,8 +156,6 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
     vaultHandle: null,
     isDirty: false,
     viewMode: 'focus',
-    isHistoryDrawerOpen: false,
-    selectedSnapshotId: null,
     ...RESET_EDITOR_VIEW,
 
     // "현재 워크스페이스"와 "그것이 묶인 보관함"은 항상 함께 바뀐다.
@@ -248,27 +173,11 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
         vaultHandle,
         isDirty: options?.dirty ?? false,
         viewMode: 'focus',
-        isHistoryDrawerOpen: false,
-        selectedSnapshotId: null,
       });
     },
 
     // 지금 메모리에 있는 워크스페이스를 그대로 둔 채 보관함에 묶는다. (전체가 저장 대기가 된다)
     bindVault: (vaultHandle) => set({ vaultHandle, isDirty: true }),
-
-    importWorkspace: (source) => {
-      const { updatedWorkspace, importedProjectIds } = importProjectsIntoWorkspace(
-        get().workspace,
-        source
-      );
-      if (importedProjectIds.length === 0) return 0;
-
-      commit(
-        { ...updatedWorkspace, activeProjectId: importedProjectIds[0] },
-        { ...RESET_EDITOR_VIEW, viewMode: 'focus', selectedSnapshotId: null }
-      );
-      return importedProjectIds.length;
-    },
 
     // 방금 디스크에 쓴 워크스페이스를 넘기면, 쓰는 동안 들어온 편집은 저장 대기로 남는다.
     markClean: (savedWorkspace) =>
@@ -284,7 +193,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       const { workspace } = get();
       if (!workspace.projects[projectId]) return;
 
-      const view = { ...RESET_EDITOR_VIEW, viewMode: 'focus' as const, selectedSnapshotId: null };
+      const view = { ...RESET_EDITOR_VIEW, viewMode: 'focus' as const };
       if (workspace.activeProjectId === projectId) {
         set(view);
         return;
@@ -293,12 +202,11 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
     },
 
     returnToOverview: () => {
-      set({ viewMode: 'overview', isHistoryDrawerOpen: false });
+      set({ viewMode: 'overview' });
     },
 
     updateActiveProjectNodes: (roots) => commitActiveRoots(roots),
 
-    // 제목을 바꾸면 다른 프로젝트 안의 연결 불릿 글자도 곧바로 따라온다.
     updateActiveProjectTitle: (title) => {
       const { workspace } = get();
       commit(setProjectTitleInWorkspace(workspace, workspace.activeProjectId, title));
@@ -390,27 +298,7 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
     },
 
     moveNodes: (sourceIds, targetId, position) => {
-      const { workspace } = get();
-      const roots = activeRoots();
-
-      // 하위 프로젝트의 연결 불릿은 맨 위 단계에만 둔다. (프로젝트 탐색기의 단계와 맞추기 위해)
-      const landsAtTopLevel =
-        targetId === null ||
-        ((position === 'before' || position === 'after') &&
-          getPath(roots, targetId).length === 1);
-      if (!landsAtTopLevel) {
-        const carriesChildLink = getTopmostNodeIds(roots, sourceIds).some((id) => {
-          const ref = findNode(roots, id)?.ref;
-          return (
-            ref?.type === 'project' &&
-            workspace.projects[ref.targetProjectId]?.parentProjectId ===
-              workspace.activeProjectId
-          );
-        });
-        if (carriesChildLink) return false;
-      }
-
-      const res = moveNodes(roots, sourceIds, targetId, position);
+      const res = moveNodes(activeRoots(), sourceIds, targetId, position);
       if (!res.success) return false;
       return commitActiveRoots(res.newNodes);
     },
@@ -462,13 +350,6 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       if (get().selectedNodeIds.length > 0) set({ selectedNodeIds: [] });
     },
 
-    // 연결 불릿의 글자 편집을 마쳤을 때에만, 그 글자를 하위 프로젝트 제목으로 확정한다.
-    finishRefEdit: (targetId) => {
-      const { workspace } = get();
-      const next = commitProjectRefText(workspace, workspace.activeProjectId, targetId);
-      if (next !== workspace) commit(next);
-    },
-
     toggleCompleted: (targetId) => {
       const res = toggleNodesCompleted(activeRoots(), [targetId]);
       if (res.count === 0) return;
@@ -496,22 +377,13 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
         targetCaretOffset: caretOffset,
       }),
 
-    createProject: (title = '새 프로젝트', parentProjectId?: ProjectId | null) => {
-      const { updatedWorkspace, newProject } = addChildProjectToWorkspace(get().workspace, {
-        title,
-        parentProjectId,
-      });
-
-      // 최상위 프로젝트는 만들자마자 그 프로젝트로 전환한다.
-      if (parentProjectId) {
-        commit(updatedWorkspace);
-      } else {
-        commit(
-          { ...updatedWorkspace, activeProjectId: newProject.id },
-          { ...RESET_EDITOR_VIEW, viewMode: 'focus', selectedSnapshotId: null }
-        );
-      }
-
+    // 새 프로젝트는 만들자마자 그 프로젝트로 전환한다.
+    createProject: (title = '새 스캐폴드') => {
+      const { updatedWorkspace, newProject } = addProjectToWorkspace(get().workspace, title);
+      commit(
+        { ...updatedWorkspace, activeProjectId: newProject.id },
+        { ...RESET_EDITOR_VIEW, viewMode: 'focus' }
+      );
       return newProject.id;
     },
 
@@ -525,106 +397,10 @@ export const useWorkspaceStore = create<WorkspaceStoreState>((set, get) => {
       return true;
     },
 
-    forkCurrentProject: (projectId, title, parentProjectId) => {
-      const { workspace } = get();
-      const source = workspace.projects[projectId];
-      if (!source) return projectId;
-
-      const forked = forkProject(source, title, parentProjectId);
-      const withFork: Workspace = {
-        ...workspace,
-        projects: { ...workspace.projects, [forked.id]: forked },
-        activeProjectId: forked.id,
-        updatedAt: Date.now(),
-      };
-      // 분기도 하위 프로젝트이므로, 부모의 아웃라인 맨 위 단계에 연결 불릿을 둔다.
-      commit(linkChildProjectInParent(withFork, forked.id), {
-        ...RESET_EDITOR_VIEW,
-        viewMode: 'focus',
-        selectedSnapshotId: null,
-      });
-      return forked.id;
-    },
-
-    extractSubtreeToNewProject: (
-      sourceProjectId,
-      targetNodeId,
-      newProjectTitle,
-      mode = 'child',
-      parentProjectId?: ProjectId | null
-    ) => {
-      const { workspace } = get();
-      const source = workspace.projects[sourceProjectId];
-      if (!source) return null;
-
-      const result = extractToProject(source, targetNodeId, {
-        title: newProjectTitle,
-        mode,
-        parentProjectId,
-      });
-      if (!result) return null;
-
-      const { updatedSourceProject, newProject } = result;
-      commit(
-        {
-          ...workspace,
-          projects: {
-            ...workspace.projects,
-            [sourceProjectId]: updatedSourceProject,
-            [newProject.id]: newProject,
-          },
-          updatedAt: Date.now(),
-        },
-        // 추출로 사라진 노드를 줌·포커스가 가리키지 않도록 초기화
-        sourceProjectId === workspace.activeProjectId ? RESET_EDITOR_VIEW : {}
-      );
-
-      return newProject.id;
-    },
-
     updateProjectTitle: (projectId, title) => {
       commit(renameProjectInWorkspace(get().workspace, projectId, title));
     },
 
-    openHistoryDrawer: () => set({ isHistoryDrawerOpen: true }),
-    closeHistoryDrawer: () => set({ isHistoryDrawerOpen: false, selectedSnapshotId: null }),
-
-    selectSnapshot: (snapshotId) => set({ selectedSnapshotId: snapshotId }),
-
-    takeSnapshot: (projectId, milestoneName, summary) => {
-      const { workspace } = get();
-      const project = workspace.projects[projectId];
-      if (!project) return null;
-
-      const snap = createSnapshot(project, { milestoneName, summary });
-      commit({
-        ...workspace,
-        snapshots: {
-          ...workspace.snapshots,
-          [projectId]: [snap, ...(workspace.snapshots[projectId] ?? [])],
-        },
-        updatedAt: Date.now(),
-      });
-
-      return snap;
-    },
-
-    rollbackToSnapshot: (projectId, snapshotId) => {
-      const { workspace } = get();
-      const project = workspace.projects[projectId];
-      const targetSnap = (workspace.snapshots[projectId] ?? []).find((s) => s.id === snapshotId);
-      if (!project || !targetSnap) return false;
-
-      return replaceProjectRoots(
-        projectId,
-        restoreSnapshot(project, targetSnap).rootNodes,
-        projectId === workspace.activeProjectId ? RESET_EDITOR_VIEW : {}
-      );
-    },
-
-    getRelationsGraph: () => {
-      return buildRelationsGraph(get().workspace.projects);
-    },
   };
 });
 

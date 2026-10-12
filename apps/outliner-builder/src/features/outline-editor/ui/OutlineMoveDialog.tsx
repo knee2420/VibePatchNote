@@ -76,7 +76,7 @@ export const OutlineMoveDialog: React.FC<OutlineMoveDialogProps> = ({ sourceIds,
 
         {isRejected && (
           <div className="px-4 py-2 text-[11px] text-amber-300 bg-amber-950/30 border-b border-amber-800/40">
-            그곳으로는 옮길 수 없습니다. 하위 프로젝트의 연결 불릿은 맨 위 단계에만 둘 수 있습니다.
+            그곳으로는 옮길 수 없습니다.
           </div>
         )}
 

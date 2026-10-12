@@ -5,4 +5,3 @@
 
 export { ProjectTreeSidebar } from './ui/ProjectTreeSidebar';
 export { FocusedProjectViewport } from './ui/FocusedProjectViewport';
-export { VersionHistoryDrawer } from './ui/VersionHistoryDrawer';

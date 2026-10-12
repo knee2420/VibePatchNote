@@ -52,13 +52,7 @@
           "children": [],
           "isFolded": false,
           "createdAt": 1791720111159,
-          "updatedAt": 1791772019859,
-          "ref": {
-            "type": "project",
-            "targetProjectId": "VJu3C6Lnpi7V",
-            "displayText": "여기는 급을 올립니다",
-            "relation": "standalone"
-          }
+          "updatedAt": 1791778029772
         },
         {
           "id": "U9qN6unttoBZ",
@@ -96,20 +90,36 @@
       "updatedAt": 1791771992677
     },
     {
-      "id": "S3UtR8jzn4hH",
-      "text": "하위 추가해봄",
-      "children": [],
-      "createdAt": 1791772006045,
-      "updatedAt": 1791772006045,
+      "id": "dnD9gva8EuR8",
+      "text": "하위를 추가해봅니다",
+      "children": [
+        {
+          "id": "xABgApOnIpuT",
+          "text": "하위에 하위 입니다",
+          "children": [],
+          "createdAt": 1791778043665,
+          "updatedAt": 1791778050749
+        },
+        {
+          "id": "mDUOa5PyRROd",
+          "text": "딘하위선",
+          "children": [],
+          "createdAt": 1791778050749,
+          "updatedAt": 1791778052557
+        }
+      ],
       "ref": {
         "type": "project",
-        "targetProjectId": "Rw7zi6nQyx41",
-        "displayText": "하위 추가해봄",
+        "targetProjectId": "oczFo1KKbI5T",
+        "displayText": "하위를 추가해봅니다",
         "relation": "child"
-      }
+      },
+      "createdAt": 1791778039213,
+      "updatedAt": 1791778043664,
+      "isFolded": false
     }
   ],
   "defaultView": "bullets",
   "createdAt": 1791720096143,
-  "updatedAt": 1791773206198
+  "updatedAt": 1791778052557
 }

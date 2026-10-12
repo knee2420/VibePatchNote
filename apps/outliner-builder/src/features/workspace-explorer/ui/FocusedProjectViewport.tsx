@@ -5,17 +5,7 @@
  */
 
 import React from 'react';
-import {
-  Camera,
-  History,
-  LayoutGrid,
-  List,
-  PanelLeftClose,
-  PanelLeft,
-  FolderTree,
-} from 'lucide-react';
-import { diffSnapshots } from '@vibe/outliner-core';
-import { useWorkspaceStore } from '@/entities/workspace';
+import { LayoutGrid, List, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 interface FocusedProjectViewportProps {
   children?: React.ReactNode;
@@ -27,8 +17,6 @@ interface FocusedProjectViewportProps {
   onToggleSidebar?: () => void;
 }
 
-const EMPTY_SNAPSHOTS: any[] = [];
-
 export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
   children,
   title,
@@ -38,56 +26,10 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
   isSidebarOpen = true,
   onToggleSidebar,
 }) => {
-  const workspace = useWorkspaceStore((s) => s.workspace);
-  const activeProjectId = workspace.activeProjectId;
-  const focusProject = useWorkspaceStore((s) => s.focusProject);
-  const snapshots = workspace.snapshots[activeProjectId] ?? EMPTY_SNAPSHOTS;
-  const openHistoryDrawer = useWorkspaceStore((s) => s.openHistoryDrawer);
-  const takeSnapshot = useWorkspaceStore((s) => s.takeSnapshot);
-
-  const currentProject = workspace.projects[activeProjectId];
-  const ancestorProjects = React.useMemo(() => {
-    const chain: (typeof currentProject)[] = [];
-    let curr = currentProject?.parentProjectId
-      ? workspace.projects[currentProject.parentProjectId]
-      : null;
-    const visited = new Set<string>();
-
-    while (curr && !visited.has(curr.id)) {
-      visited.add(curr.id);
-      chain.unshift(curr);
-      curr = curr.parentProjectId ? workspace.projects[curr.parentProjectId] : null;
-    }
-    return chain.filter(Boolean);
-  }, [currentProject, workspace.projects]);
-
-  const currentRoots = currentProject.rootNodes;
-  const latestSnapshot = snapshots[0];
-  const latestLabel =
-    latestSnapshot?.milestoneName ??
-    (latestSnapshot ? `스냅샷 #${snapshots.length}` : '초기 버전');
-
-  // 직전 스냅샷 대비 실시간 변경사항 계산
-  const diffFromLatest = React.useMemo(() => {
-    if (!latestSnapshot) return null;
-    return diffSnapshots(latestSnapshot.rootNodes, currentRoots);
-  }, [latestSnapshot, currentRoots]);
-
-  const changeCount = diffFromLatest
-    ? diffFromLatest.addedCount +
-      diffFromLatest.modifiedCount +
-      diffFromLatest.removedCount
-    : 0;
-
-  const handleQuickSnapshot = () => {
-    const summary = window.prompt('스냅샷 요약을 입력하세요 (선택):');
-    takeSnapshot(activeProjectId, undefined, summary ?? undefined);
-  };
-
   return (
-    <main className="wide-page flex-1 max-w-5xl w-full mx-auto px-6 py-6 flex flex-col min-w-0">
+    <main className="wide-page flex-1 max-w-5xl w-full mx-auto px-6 sm:px-10 pt-6 pb-20 flex flex-col min-w-0">
       {/* 1. 상단 프로젝트 컨트롤 헤더 */}
-      <div className="mb-4 pb-3 border-b border-(--background-modifier-border) flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="mb-3 pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-(--background-modifier-border)/50">
         <div className="flex items-center gap-2 min-w-0">
           {/* 사이드바 토글 버튼 */}
           {onToggleSidebar && (
@@ -105,37 +47,17 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
             </button>
           )}
 
-          {/* 상위 조상 프로젝트 네비게이션 빵가루 (하위 프로젝트일 경우) */}
-          {ancestorProjects.length > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-(--text-muted) shrink-0 select-none">
-              {ancestorProjects.map((anc) => (
-                <React.Fragment key={anc.id}>
-                  <button
-                    type="button"
-                    onClick={() => focusProject(anc.id)}
-                    title={`상위 프로젝트 '${anc.title}'로 이동`}
-                    className="hover:text-cyan-400 flex items-center gap-1 text-(--text-muted) hover:underline transition-colors cursor-pointer"
-                  >
-                    <FolderTree className="w-3.5 h-3.5 text-cyan-400" />
-                    <span className="truncate max-w-[120px] font-medium">{anc.title}</span>
-                  </button>
-                  <span className="text-slate-600">/</span>
-                </React.Fragment>
-              ))}
-            </div>
-          )}
-
-          {/* 프로젝트 제목 인라인 편집 (MaruBuri 볼드 헤딩) */}
+          {/* 프로젝트 제목 인라인 편집 (Workflowy 풍 볼드 헤딩) */}
           <input
             type="text"
             value={title}
             onChange={(e) => onUpdateTitle(e.target.value)}
-            placeholder="프로젝트 제목"
-            className="text-base sm:text-lg font-bold font-[var(--font-text-theme)] tracking-tight bg-transparent text-(--text-normal) hover:bg-(--background-modifier-hover) focus:bg-(--background-secondary) px-2.5 py-1 rounded-md border border-transparent focus:border-(--interactive-accent) focus:outline-hidden transition-all truncate min-w-0"
+            placeholder="스캐폴드 제목"
+            className="text-xl sm:text-2xl font-bold font-[var(--font-text-theme)] tracking-tight bg-transparent text-(--text-normal) hover:bg-(--background-modifier-hover) focus:bg-(--background-secondary) px-2 py-0.5 rounded-md border border-transparent focus:border-(--interactive-accent) focus:outline-hidden transition-all truncate min-w-0"
           />
         </div>
 
-        {/* 우측 버전 알약 & 뷰 모드 토글 */}
+        {/* 우측 뷰 모드 토글 */}
         <div className="flex items-center gap-2 shrink-0">
           {/* 뷰 모드 토글 버튼 (불릿 vs 보드) */}
           {onToggleViewMode && (
@@ -158,49 +80,11 @@ export const FocusedProjectViewport: React.FC<FocusedProjectViewportProps> = ({
               )}
             </button>
           )}
-
-          {/* 버전 히스토리 알약 버튼 */}
-          <button
-            type="button"
-            onClick={openHistoryDrawer}
-            title={
-              changeCount > 0
-                ? `직전 스냅샷 대비 ${changeCount}개 항목 변경됨 (클릭하여 이력 관리)`
-                : '스냅샷과 완전히 일치함 (클릭하여 이력 관리)'
-            }
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--background-secondary) border border-(--background-modifier-border) hover:border-(--background-modifier-border-hover) text-(--text-normal) text-xs font-medium transition-colors cursor-pointer"
-          >
-            <History className="w-3.5 h-3.5 text-(--interactive-accent)" />
-            <span>{latestLabel}</span>
-            {changeCount > 0 ? (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                <span>
-                  +{diffFromLatest?.addedCount} ~{diffFromLatest?.modifiedCount}
-                  {diffFromLatest?.removedCount ? ` -${diffFromLatest.removedCount}` : ''}
-                </span>
-              </span>
-            ) : (
-              <span
-                className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"
-                title="스냅샷과 일치 (Clean)"
-              />
-            )}
-          </button>
-
-          {/* 빠른 스냅샷 저장 */}
-          <button
-            type="button"
-            onClick={handleQuickSnapshot}
-            title="현재 시점 즉시 스냅샷 저장"
-            className="p-1.5 rounded-lg bg-(--background-secondary) text-(--text-muted) border border-(--background-modifier-border) hover:border-(--interactive-accent) hover:text-(--text-normal) transition-all cursor-pointer"
-          >
-            <Camera className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
 
-      {/* 2. 아웃라인 트리 작업대 (Slot 합성 영역) */}
-      <div className="flex-1 bg-slate-900/20 rounded-xl border border-slate-800/60 p-6 shadow-2xl backdrop-blur-sm flex flex-col min-h-0">
+      {/* 2. 아웃라인 트리 작업대 (불필요한 카드 테두리 없이 플랫하게 전개) */}
+      <div className="flex-1 flex flex-col min-h-0 pt-1">
         {children}
       </div>
     </main>

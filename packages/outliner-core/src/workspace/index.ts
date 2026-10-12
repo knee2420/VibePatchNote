@@ -1,10 +1,7 @@
 /**
  * @file index.ts
- * @description [Macro 층위] 다중 프로젝트 컬렉션 & 버전 그래프 코어
+ * @description [Macro 층위] 워크스페이스와 그 안에 나란히 놓인 프로젝트들
  */
 
 export * from './model';
 export * from './operations';
-export * from './reference';
-export * from './history';
-export * from './graph';
