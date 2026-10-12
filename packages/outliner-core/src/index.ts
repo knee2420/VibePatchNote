@@ -1,10 +1,11 @@
 /**
  * @file index.ts
  * @description @vibe/outliner-core Public API
- * model (데이터 규격) + transforms (변형 행위) + queries (조회 행위) + views (뷰 프로젝션)
+ * - [Micro] outline : 단일 아웃라인 트리 코어 (Block, transforms, queries, views)
+ * - [Macro] workspace : 다중 프로젝트 컬렉션, 추출, 버전 스냅샷 및 그래프 (Workspace, Project, Snapshot, relations)
+ * - [DTO] dto : 워크스페이스 파일 직렬화/역직렬화 및 구버전 승격 (serializeWorkspace, deserializeWorkspace)
  */
 
-export * from './model';
-export * from './transforms';
-export * from './queries';
-export * from './views';
+export * from './outline';
+export * from './workspace';
+export * from './dto';

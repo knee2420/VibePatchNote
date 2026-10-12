@@ -4,23 +4,47 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { useTreeStore } from '@/entities/outline-document';
+import type { OutlineNodeType } from '@vibe/outliner-core';
+import { useWorkspaceStore } from '@/entities/workspace';
+
+/** 불릿 종류별 글자 모양 */
+const TYPE_STYLES: Record<OutlineNodeType, string> = {
+  bullet: 'text-sm font-normal',
+  todo: 'text-sm font-normal',
+  paragraph: 'text-sm font-normal',
+  h1: 'text-2xl font-bold tracking-tight',
+  h2: 'text-xl font-semibold',
+  h3: 'text-lg font-semibold',
+  quote: 'text-sm italic border-l-2 border-slate-600 pl-3',
+  code: 'text-xs font-mono bg-slate-900 border border-slate-800',
+  divider: 'text-sm font-normal',
+};
 
 interface OutlineInputProps {
   nodeId: string;
   initialText: string;
+  nodeType?: OutlineNodeType;
+  isCompleted?: boolean;
+  /** 하위·독립 프로젝트를 가리키는 연결 불릿인지 */
+  isProjectRef?: boolean;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
 export const OutlineInput: React.FC<OutlineInputProps> = ({
   nodeId,
   initialText,
+  nodeType = 'bullet',
+  isCompleted = false,
+  isProjectRef = false,
   onKeyDown,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const focusedNodeId = useTreeStore((s) => s.focusedNodeId);
-  const targetCaretOffset = useTreeStore((s) => s.targetCaretOffset);
-  const updateText = useTreeStore((s) => s.updateText);
+  // 이번에 포커스를 얻은 뒤로 글자를 실제로 고쳤는지 (연결 불릿의 제목 확정 여부 판단용)
+  const editedSinceFocus = useRef(false);
+  const finishRefEdit = useWorkspaceStore((s) => s.finishRefEdit);
+  const focusedNodeId = useWorkspaceStore((s) => s.focusedNodeId);
+  const targetCaretOffset = useWorkspaceStore((s) => s.targetCaretOffset);
+  const updateText = useWorkspaceStore((s) => s.updateText);
 
   // 1. 초기 텍스트 반영
   useEffect(() => {
@@ -57,7 +81,14 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent || '';
+    editedSinceFocus.current = true;
     updateText(nodeId, text);
+  };
+
+  // 연결 불릿은 글자를 고치는 도중이 아니라, 편집을 마치고 떠날 때 프로젝트 제목에 반영한다.
+  const handleBlur = () => {
+    if (isProjectRef && editedSinceFocus.current) finishRefEdit(nodeId);
+    editedSinceFocus.current = false;
   };
 
   return (
@@ -66,9 +97,18 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
       contentEditable="plaintext-only"
       suppressContentEditableWarning
       onInput={handleInput}
+      onBlur={handleBlur}
       onKeyDown={onKeyDown}
       data-node-id={nodeId}
-      className="flex-1 py-1 px-1.5 min-h-[26px] text-sm text-slate-100 font-normal leading-relaxed rounded hover:bg-slate-900/60 focus:bg-slate-900/90 focus:ring-1 focus:ring-indigo-500/50 transition-colors break-words whitespace-pre-wrap cursor-text"
+      className={`flex-1 py-1 px-1.5 min-h-[26px] leading-relaxed rounded hover:bg-slate-900/60 focus:bg-slate-900/90 focus:ring-1 focus:ring-indigo-500/50 transition-colors break-words whitespace-pre-wrap cursor-text ${
+        TYPE_STYLES[nodeType]
+      } ${
+        isCompleted
+          ? 'text-slate-500/70 line-through decoration-slate-600'
+          : nodeType === 'quote'
+            ? 'text-slate-300'
+            : 'text-slate-100'
+      }`}
       data-placeholder="내용을 입력하세요..."
     />
   );

@@ -10,21 +10,33 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts"
     },
+    "./outline": {
+      "import": "./src/outline/index.ts",
+      "types": "./src/outline/index.ts"
+    },
+    "./workspace": {
+      "import": "./src/workspace/index.ts",
+      "types": "./src/workspace/index.ts"
+    },
+    "./dto": {
+      "import": "./src/dto/index.ts",
+      "types": "./src/dto/index.ts"
+    },
     "./model": {
-      "import": "./src/model/index.ts",
-      "types": "./src/model/index.ts"
+      "import": "./src/outline/model/index.ts",
+      "types": "./src/outline/model/index.ts"
     },
     "./transforms": {
-      "import": "./src/transforms/index.ts",
-      "types": "./src/transforms/index.ts"
+      "import": "./src/outline/transforms/index.ts",
+      "types": "./src/outline/transforms/index.ts"
     },
     "./queries": {
-      "import": "./src/queries/index.ts",
-      "types": "./src/queries/index.ts"
+      "import": "./src/outline/queries/index.ts",
+      "types": "./src/outline/queries/index.ts"
     },
     "./views": {
-      "import": "./src/views/index.ts",
-      "types": "./src/views/index.ts"
+      "import": "./src/outline/views/index.ts",
+      "types": "./src/outline/views/index.ts"
     }
   },
   "dependencies": {

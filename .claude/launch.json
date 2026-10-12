@@ -30,6 +30,16 @@
         "dev"
       ],
       "port": 5174
+    },
+    {
+      "name": "outliner",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@vibe/outliner-builder",
+        "dev"
+      ],
+      "port": 5175
     }
   ]
 }

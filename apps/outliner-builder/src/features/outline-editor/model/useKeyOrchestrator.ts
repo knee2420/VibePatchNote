@@ -1,10 +1,11 @@
 /**
  * @file useKeyOrchestrator.ts
- * @description 아웃라인 키보드 인터랙션(Enter, Tab, Backspace, 방향키) 오케스트레이션 훅
+ * @description 아웃라인 키보드 인터랙션(Enter, Tab, Backspace, 방향키, 빠른 조작 단축키) 오케스트레이션 훅
  */
 
 import { type KeyboardEvent, useCallback } from 'react';
-import { useTreeStore } from '@/entities/outline-document';
+import { useWorkspaceStore } from '@/entities/workspace';
+import { useNodeActions } from './useNodeActions';
 import {
   type FlattenedNode,
   type NodeId,
@@ -31,13 +32,44 @@ export function useKeyOrchestrator(
   nodeId: NodeId,
   flattenedNodes: FlattenedNode[]
 ) {
-  const store = useTreeStore();
+  const store = useWorkspaceStore();
+  const { toggleCompleted, startNoteEdit, removeNode } = useNodeActions();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
       const targetElement = e.currentTarget;
       const caretPos = getCaretCharacterOffsetWithin(targetElement);
       const currentText = targetElement.textContent || '';
+      const isModifier = e.ctrlKey || e.metaKey;
+
+      // 0. 빠른 조작 단축키 (우클릭 메뉴와 같은 동작)
+      // Ctrl+Enter: 완료 토글
+      if (e.key === 'Enter' && isModifier && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        toggleCompleted(nodeId);
+        return;
+      }
+
+      // Shift+Enter: 부연설명 노트 열기
+      if (e.key === 'Enter' && e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        startNoteEdit(nodeId);
+        return;
+      }
+
+      // Ctrl+Shift+Backspace: 이 불릿 삭제
+      // (Ctrl+Backspace 는 "앞 단어 지우기"라서 불릿 삭제에 쓰지 않는다)
+      if (e.key === 'Backspace' && isModifier && e.shiftKey) {
+        e.preventDefault();
+        const current = flattenedNodes.find((n) => n.id === nodeId);
+        if (!current) return;
+        const prevId = getNextFocusId(flattenedNodes, nodeId, 'up');
+        const prevTextLength = flattenedNodes.find((n) => n.id === prevId)?.node.text.length ?? 0;
+        if (removeNode(current) && prevId) {
+          store.setFocus(prevId, prevTextLength);
+        }
+        return;
+      }
 
       // 1. Enter: 새 노드 생성 및 텍스트 분할
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -74,14 +106,18 @@ export function useKeyOrchestrator(
         const prevItem = flattenedNodes.find((n) => n.id === prevId);
         const prevText = prevItem?.node.text || '';
 
+        // 삭제가 취소될 수 있다(연결 불릿이면 하위 프로젝트까지 지울지 확인한다).
+        // 그래서 먼저 지우고, 실제로 지워졌을 때에만 글자를 합치고 포커스를 옮긴다.
         if (currentText.length === 0) {
-          store.deleteNode(nodeId);
-          store.setFocus(prevId, prevText.length);
+          if (store.deleteNode(nodeId)) {
+            store.setFocus(prevId, prevText.length);
+          }
         } else {
           const { mergedText, caretOffset } = mergeTextAtCaret(prevText, currentText);
-          store.updateText(prevId, mergedText);
-          store.deleteNode(nodeId);
-          store.setFocus(prevId, caretOffset);
+          if (store.deleteNode(nodeId)) {
+            store.updateText(prevId, mergedText);
+            store.setFocus(prevId, caretOffset);
+          }
         }
         return;
       }
@@ -97,6 +133,14 @@ export function useKeyOrchestrator(
       }
 
       if (e.key === 'ArrowDown' && !e.shiftKey) {
+        // 현재 노드에 부연설명 노트가 있다면 다음 노드로 건너뛰지 않고 노트로 먼저 진입!
+        const currentItem = flattenedNodes.find((n) => n.id === nodeId);
+        if (currentItem?.node.note) {
+          e.preventDefault();
+          startNoteEdit(nodeId);
+          return;
+        }
+
         const nextId = getNextFocusId(flattenedNodes, nodeId, 'down');
         if (nextId) {
           e.preventDefault();
@@ -105,7 +149,7 @@ export function useKeyOrchestrator(
         return;
       }
     },
-    [nodeId, flattenedNodes, store]
+    [nodeId, flattenedNodes, store, toggleCompleted, startNoteEdit, removeNode]
   );
 
   return { handleKeyDown };

@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "projectId": "XHdQQ8UGiY3a",
+  "snapshots": [
+    {
+      "id": "IO3h8gmuTAm9",
+      "projectId": "XHdQQ8UGiY3a",
+      "timestamp": 1791720096143,
+      "milestoneName": "v0.1 초안",
+      "summary": "프로젝트 생성 초기 스냅샷",
+      "rootNodes": [
+        {
+          "id": "VyX1CKUyYuj9",
+          "text": "메인 기획 개요",
+          "children": [
+            {
+              "id": "H8lGiEBQKQpy",
+              "text": "핵심 아이디어와 생각의 흐름을 여기에 작성하세요",
+              "children": [],
+              "isFolded": false,
+              "createdAt": 1791720096143,
+              "updatedAt": 1791720096143
+            }
+          ],
+          "isFolded": false,
+          "createdAt": 1791720096143,
+          "updatedAt": 1791720096143
+        }
+      ]
+    }
+  ]
+}

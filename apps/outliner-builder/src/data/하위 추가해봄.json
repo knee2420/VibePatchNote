@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "id": "Rw7zi6nQyx41",
+  "title": "하위 추가해봄",
+  "rootNodes": [
+    {
+      "id": "CHcyagBZCRZY",
+      "text": "하위 추가해봄 개요",
+      "children": [
+        {
+          "id": "I9WB5NJvoYjh",
+          "text": "핵심 아이디어와 생각의 흐름을 여기에 작성하세요",
+          "children": [],
+          "isFolded": false,
+          "createdAt": 1791772006045,
+          "updatedAt": 1791772006045
+        }
+      ],
+      "isFolded": false,
+      "createdAt": 1791772006045,
+      "updatedAt": 1791772006045
+    }
+  ],
+  "defaultView": "bullets",
+  "createdAt": 1791772006045,
+  "updatedAt": 1791772006045,
+  "parentProjectId": "XHdQQ8UGiY3a"
+}
