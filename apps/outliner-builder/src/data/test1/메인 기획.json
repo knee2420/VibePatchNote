@@ -46,21 +46,21 @@
           "text": "티토리티토리로리리",
           "children": [],
           "createdAt": 1791720107209,
-          "updatedAt": 1791785678058
+          "updatedAt": 1791803194375
         },
         {
           "id": "qeYrOhHsw74U",
           "text": "그리고 여기도 씁니다",
           "children": [],
           "createdAt": 1791720107364,
-          "updatedAt": 1791785678058
+          "updatedAt": 1791799737246
         },
         {
           "id": "E7h7neLhg6XQ",
           "text": "하위에 씁니다",
           "children": [],
           "createdAt": 1791720117758,
-          "updatedAt": 1791723126337
+          "updatedAt": 1791799818763
         },
         {
           "id": "e3glwFsez8me",
@@ -68,7 +68,7 @@
           "children": [],
           "isFolded": false,
           "createdAt": 1791720121643,
-          "updatedAt": 1791723126337
+          "updatedAt": 1791799815653
         },
         {
           "id": "BL9i5aVM6NmS",
@@ -76,7 +76,7 @@
           "children": [],
           "isFolded": false,
           "createdAt": 1791720111159,
-          "updatedAt": 1791778029772
+          "updatedAt": 1791799585810
         }
       ],
       "isFolded": false,
@@ -129,5 +129,5 @@
   ],
   "defaultView": "bullets",
   "createdAt": 1791720096143,
-  "updatedAt": 1791786440991
+  "updatedAt": 1791803194375
 }

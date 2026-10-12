@@ -38,3 +38,25 @@ input {
   line-height: inherit;
   border-radius: 0;
 }
+
+/* 위키링크(.internal-link) 칩 배지 스타일 강화 */
+.vibe-outliner a.internal-link {
+  color: var(--link-color, var(--text-accent, #7057ff)) !important;
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 14%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--text-accent, #7057ff) 28%, transparent) !important;
+  padding: 0.05em 0.4em !important;
+  margin: 0 0.15em !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+  display: inline !important;
+}
+
+.vibe-outliner a.internal-link:hover {
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 24%, transparent) !important;
+  border-color: var(--text-accent, #7057ff) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-accent, #7057ff) 20%, transparent) !important;
+}
+

@@ -13,7 +13,7 @@ import {
   useOutlineView,
 } from '@vibe/outliner-editor';
 import type { OutlineFileView } from './OutlineFileView';
-import type { OutlineProblem } from './outlineDocument';
+import type { OutlineProblem } from '../../document/outlineDocument';
 
 interface OutlineFileAppProps {
   view: OutlineFileView;

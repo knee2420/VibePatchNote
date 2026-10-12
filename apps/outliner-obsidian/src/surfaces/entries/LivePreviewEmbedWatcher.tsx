@@ -1,20 +1,23 @@
 /**
- * @file livePreviewEmbed.tsx
+ * @file LivePreviewEmbedWatcher.tsx
  * @description 옵시디언 Live Preview 및 호버 팝오버(.popover.hover-popover) 마크다운 임베드 인터셉터
  * - CodeMirror 6 기반 에디터 내에서 ![[...]] 로 생성된 .file-embed / .internal-embed 회색 박스를 가로채 아웃라인 에디터로 렌더링
  * - Ctrl+Hover 시 나타나는 호버 팝오버 내부의 회색 파일 카드도 감지하여 살아있는 아웃라인 프리뷰로 전환
  */
 
 import { createRoot, type Root } from 'react-dom/client';
-import { type App, TFile } from 'obsidian';
-import { OutlineMarkdownEmbed } from './OutlineMarkdownEmbed';
+import { type App, type EventRef, TFile } from 'obsidian';
+import { OutlineInline } from '../inline/OutlineInline';
 
-const MOUNTED_FLAG = 'vibeLiveEmbedMounted';
+/** 아웃라인 화면을 이미 올린 임베드 자리의 표시. 읽기 모드 등록기와 함께 쓴다. (같은 자리를 두 번 그리지 않도록) */
+export const EMBED_MOUNTED_FLAG = 'vibeLiveEmbedMounted';
+const MOUNTED_FLAG = EMBED_MOUNTED_FLAG;
 
 export class LivePreviewEmbedWatcher {
   private app: App;
   private roots = new Map<HTMLElement, Root>();
   private observer: MutationObserver | null = null;
+  private eventRefs: EventRef[] = [];
   private scheduled = false;
 
   constructor(app: App) {
@@ -46,19 +49,25 @@ export class LivePreviewEmbedWatcher {
     });
 
     // 2. 옵시디언 작업공간 이벤트 구독
-    this.app.workspace.on('layout-change', () => this.requestScan());
-    this.app.workspace.on('active-leaf-change', () => this.requestScan());
+    this.eventRefs.push(
+      this.app.workspace.on('layout-change', () => this.requestScan()),
+      this.app.workspace.on('active-leaf-change', () => this.requestScan())
+    );
   }
 
   public destroy() {
     this.observer?.disconnect();
     this.observer = null;
-    this.roots.forEach((root) => {
+    this.eventRefs.forEach((ref) => this.app.workspace.offref(ref));
+    this.eventRefs = [];
+    this.roots.forEach((root, embedEl) => {
       try {
         root.unmount();
       } catch {
         // 이미 unmount된 경우 무시
       }
+      // 플러그인을 다시 켰을 때 이 자리를 새로 그릴 수 있게 표시를 지운다.
+      delete embedEl.dataset[MOUNTED_FLAG];
     });
     this.roots.clear();
   }
@@ -68,7 +77,8 @@ export class LivePreviewEmbedWatcher {
     this.scheduled = true;
     requestAnimationFrame(() => {
       this.scheduled = false;
-      this.scan();
+      // 기다리는 사이에 플러그인이 꺼졌으면 그리지 않는다.
+      if (this.observer) this.scan();
     });
   }
 
@@ -83,21 +93,23 @@ export class LivePreviewEmbedWatcher {
   }
 
   private cleanupNode(node: HTMLElement) {
-    if (this.roots.has(node)) {
-      try {
-        this.roots.get(node)?.unmount();
-      } catch {}
-      this.roots.delete(node);
+    this.unmountEmbed(node);
+    node
+      .querySelectorAll<HTMLElement>('[data-vibe-live-embed-mounted="true"]')
+      .forEach((child) => this.unmountEmbed(child));
+  }
+
+  private unmountEmbed(embedEl: HTMLElement) {
+    const root = this.roots.get(embedEl);
+    if (!root) return;
+    try {
+      root.unmount();
+    } catch {
+      // 이미 unmount된 경우 무시
     }
-    const children = node.querySelectorAll<HTMLElement>('[data-vibe-live-embed-mounted="true"]');
-    children.forEach((child) => {
-      if (this.roots.has(child)) {
-        try {
-          this.roots.get(child)?.unmount();
-        } catch {}
-        this.roots.delete(child);
-      }
-    });
+    this.roots.delete(embedEl);
+    // 옮겨져서 다시 붙은 자리라면 새로 그릴 수 있게 표시를 지운다.
+    delete embedEl.dataset[MOUNTED_FLAG];
   }
 
   private resolveTarget(embedEl: HTMLElement): { file: TFile; anchor?: string } | null {
@@ -193,7 +205,7 @@ export class LivePreviewEmbedWatcher {
     this.roots.set(embedEl, root);
 
     root.render(
-      <OutlineMarkdownEmbed
+      <OutlineInline
         app={this.app}
         file={file}
         zoomNodeId={anchor}

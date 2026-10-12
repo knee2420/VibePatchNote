@@ -1,10 +1,10 @@
 /**
- * @file OutlineMarkdownEmbed.tsx
+ * @file OutlineInline.tsx
  * @description 마크다운 문서 및 캔버스 텍스트 카드 내에 삽입되는 아웃라인 임베드 뷰어/에디터 컴포넌트
  */
 
-import React, { useMemo } from 'react';
-import type { App, TFile } from 'obsidian';
+import React, { useEffect, useMemo } from 'react';
+import { type App, Component, type TFile } from 'obsidian';
 import {
   OutlineBoard,
   OutlineEditorProvider,
@@ -12,13 +12,13 @@ import {
   OutlineTree,
   createOutlineEditorStore,
   useOutlineView,
-  type OutlineHost,
 } from '@vibe/outliner-editor';
 import type { ViewMode } from '@vibe/outliner-core';
-import { ConfirmModal } from '../ConfirmModal';
+import { createObsidianHost } from '../../host/obsidianHost';
+import { renameOutlineFile } from '../../document/outlineFiles';
 import { useEmbedFileSync } from './useEmbedFileSync';
 
-export interface OutlineMarkdownEmbedProps {
+export interface OutlineInlineProps {
   app: App;
   file: TFile;
   /** 특정 불릿 하위만 줌인하여 렌더링할 경우 노드 ID */
@@ -35,53 +35,44 @@ const EmbedBody: React.FC<{ forcedView?: ViewMode }> = ({ forcedView }) => {
   return effectiveView === 'board' ? <OutlineBoard /> : <OutlineTree />;
 };
 
-export const OutlineMarkdownEmbed: React.FC<OutlineMarkdownEmbedProps> = ({
+export const OutlineInline: React.FC<OutlineInlineProps> = ({
   app,
   file,
   zoomNodeId,
   viewMode,
   maxHeight = '500px',
 }) => {
-  const { project, problem, isLoading, commitRoots, setDefaultView } = useEmbedFileSync({
+  const { project, problem, isLoading, getRoots, commitRoots, setDefaultView } = useEmbedFileSync({
     app,
     file,
   });
 
+  // 편집 상태(줌·포커스·선택)는 이 임베드가 떠 있는 동안 하나다. 내용이 바뀔 때마다 새로 만들면
+  // 글자를 한 번 칠 때마다 포커스가 날아간다. 불릿 트리는 그때그때 getRoots 로 물어 간다.
   const editorStore = useMemo(() => {
-    const store = createOutlineEditorStore({
-      getRoots: () => project?.rootNodes ?? [],
-      commitRoots,
-      setDefaultView,
-    });
+    const store = createOutlineEditorStore({ getRoots, commitRoots, setDefaultView });
     if (zoomNodeId) {
       store.getState().setZoom(zoomNodeId);
     }
     return store;
-  }, [commitRoots, setDefaultView, project?.rootNodes, zoomNodeId]);
+  }, [getRoots, commitRoots, setDefaultView, zoomNodeId]);
 
-  const host = useMemo<OutlineHost>(
-    () => ({
-      confirm: (message) => new ConfirmModal(app, message).ask(),
-      copyNodeLink: async (nodeId) => {
-        const query = [
-          ['vault', app.vault.getName()],
-          ['file', file.path],
-          ['node', nodeId],
-        ]
-          .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-          .join('&');
-        await navigator.clipboard.writeText(`obsidian://vibe-outline?${query}`);
-      },
-      exportText: (fileName, text) => {
-        const folder = file.parent ?? app.vault.getRoot();
-        void app.vault.create(`${folder.path}/${fileName}`, text);
-      },
-      getPortalRoot: () => window.document.body,
-      openLink: (link) => {
-        void app.workspace.openLinkText(link, file.path, false);
-      },
-    }),
-    [app, file]
+  // 불릿 글자를 옵시디언 렌더러로 그린 조각들의 수명. 임베드가 사라질 때 함께 정리한다.
+  const renderScope = useMemo(() => new Component(), []);
+  useEffect(() => {
+    renderScope.load();
+    return () => renderScope.unload();
+  }, [renderScope]);
+
+  const host = useMemo(
+    () =>
+      createObsidianHost({
+        app,
+        getFile: () => file,
+        getPortalRoot: () => window.document.body,
+        component: renderScope,
+      }),
+    [app, file, renderScope]
   );
 
   if (isLoading) {
@@ -115,12 +106,7 @@ export const OutlineMarkdownEmbed: React.FC<OutlineMarkdownEmbedProps> = ({
         <div className="flex flex-col min-w-0">
           <OutlineHeader
             rootTitle={file.basename}
-            onUpdateRootTitle={(title) => {
-              void app.fileManager.renameFile(
-                file,
-                file.parent?.path ? `${file.parent.path}/${title}.${file.extension}` : `${title}.${file.extension}`
-              );
-            }}
+            onUpdateRootTitle={(title) => void renameOutlineFile(app, file, title)}
             rootPlaceholder="아웃라인 제목"
             zoomPlaceholder="불릿 제목"
           />

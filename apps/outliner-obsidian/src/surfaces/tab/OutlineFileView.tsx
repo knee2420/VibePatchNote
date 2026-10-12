@@ -13,7 +13,6 @@ import {
   type TFile,
   type ViewStateResult,
   type WorkspaceLeaf,
-  Notice,
   TextFileView,
 } from 'obsidian';
 import { type OutlineNode, type ViewMode, findNode, toOutlineText } from '@vibe/outliner-core';
@@ -22,19 +21,16 @@ import {
   type OutlineHost,
   createOutlineEditorStore,
 } from '@vibe/outliner-editor';
-import { ConfirmModal } from './ConfirmModal';
 import { OutlineFileApp } from './OutlineFileApp';
+import { syncOutlineMetadata } from '../../vault/outlineMetadataIndexer';
+import { createObsidianHost } from '../../host/obsidianHost';
 import {
   type OutlineDocumentStore,
   createOutlineDocumentStore,
   readOutlineText,
   writeOutlineText,
-} from './outlineDocument';
-import { findFreePath, toOutlineBaseName } from './outlineFiles';
-
-export const VIEW_TYPE_OUTLINE = 'vibe-outline';
-/** `obsidian://vibe-outline?file=...&node=...` 주소의 동작 이름 */
-export const OUTLINE_PROTOCOL_ACTION = 'vibe-outline';
+} from '../../document/outlineDocument';
+import { VIEW_TYPE_OUTLINE, createSiblingFile, renameOutlineFile } from '../../document/outlineFiles';
 
 /** 우리 화면의 뿌리와 메뉴·대화상자 자리에 붙는 클래스. 스타일이 이 안으로 가둬져 있다. */
 const SCOPE_CLASS = 'vibe-outliner';
@@ -58,15 +54,12 @@ export class OutlineFileView extends TextFileView {
       setDefaultView: (defaultView) => this.updateProject({ defaultView }),
     });
 
-    this.host = {
-      confirm: (message) => new ConfirmModal(this.app, message).ask(),
-      copyNodeLink: (nodeId) => navigator.clipboard.writeText(this.buildNodeLink(nodeId)),
-      exportText: (fileName, text) => void this.createSiblingFile(fileName, text),
+    this.host = createObsidianHost({
+      app: this.app,
+      getFile: () => this.file,
       getPortalRoot: () => this.getPortalRoot(),
-      openLink: (link) => {
-        void this.app.workspace.openLinkText(link, this.file?.path ?? '', false);
-      },
-    };
+      component: this,
+    });
 
     // 줌 위치가 바뀌면 옵시디언이 탭 상태를 다시 저장하게 한다. (다시 열 때 그 자리로 돌아온다)
     this.register(
@@ -100,6 +93,9 @@ export class OutlineFileView extends TextFileView {
     this.applyPendingZoom();
     // 파일이 정해진 뒤에야 제목(파일 이름)을 알 수 있다.
     this.render();
+    if (this.file) {
+      void syncOutlineMetadata(this.app, this.file);
+    }
   }
 
   getViewData(): string {
@@ -214,24 +210,20 @@ export class OutlineFileView extends TextFileView {
 
   /** 파일 이름을 바꾼다. (헤더의 제목 칸에서 부른다) */
   async renameTo(title: string): Promise<void> {
-    const file = this.file;
-    const base = toOutlineBaseName(title);
-    if (!file || !base || base === file.basename) return;
-
-    const folder = file.parent?.path ?? '';
-    const path = folder && folder !== '/' ? `${folder}/${base}.${file.extension}` : `${base}.${file.extension}`;
-    if (this.app.vault.getAbstractFileByPath(path)) {
-      new Notice(`같은 이름의 파일이 이미 있습니다: ${base}`);
-      this.render();
-      return;
-    }
-    await this.app.fileManager.renameFile(file, path);
+    if (!this.file) return;
+    // 바꾸지 못했으면 제목 칸을 원래 파일 이름으로 되돌린다.
+    if ((await renameOutlineFile(this.app, this.file, title)) === 'conflict') this.render();
   }
 
   exportAsMarkdown(): void {
     const project = this.outline.getState().project;
     if (!project || !this.file) return;
-    void this.createSiblingFile(`${this.file.basename}.md`, toOutlineText(project.rootNodes));
+    void createSiblingFile(
+      this.app,
+      this.file,
+      `${this.file.basename}.md`,
+      toOutlineText(project.rootNodes)
+    );
   }
 
   // ── 내부 ──
@@ -266,36 +258,5 @@ export class OutlineFileView extends TextFileView {
       this.portalEl = doc.body.createDiv({ cls: SCOPE_CLASS });
     }
     return this.portalEl;
-  }
-
-  private buildNodeLink(nodeId: string): string {
-    // 옵시디언은 주소의 값을 %XX 로만 푼다. 빈칸이 + 로 바뀌지 않도록 하나씩 인코딩한다.
-    const query = [
-      ['vault', this.app.vault.getName()],
-      ['file', this.file?.path ?? ''],
-      ['node', nodeId],
-    ]
-      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-      .join('&');
-    return `obsidian://${OUTLINE_PROTOCOL_ACTION}?${query}`;
-  }
-
-  /** 이 파일 옆에 새 파일을 만든다. 같은 이름이 있으면 번호를 붙이고, 있는 파일은 덮어쓰지 않는다. */
-  private async createSiblingFile(fileName: string, text: string): Promise<void> {
-    const folder = this.file?.parent ?? this.app.vault.getRoot();
-    const dot = fileName.lastIndexOf('.');
-    const base = toOutlineBaseName(dot > 0 ? fileName.slice(0, dot) : fileName) ?? '내보낸 파일';
-    const extension = dot > 0 ? fileName.slice(dot + 1) : 'md';
-
-    try {
-      const created = await this.app.vault.create(
-        findFreePath(this.app, folder, base, extension),
-        text
-      );
-      new Notice(`만들었습니다: ${created.path}`);
-    } catch (err) {
-      console.error('파일 만들기 실패:', err);
-      new Notice('파일을 만들지 못했습니다.');
-    }
   }
 }

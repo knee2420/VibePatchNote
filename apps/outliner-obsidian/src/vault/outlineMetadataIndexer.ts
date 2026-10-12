@@ -167,3 +167,26 @@ export async function syncOutlineMetadata(app: App, file: TFile) {
     console.error('[VibeOutliner Indexer] 메타데이터 색인 실패:', err);
   }
 }
+
+/**
+ * 지워지거나 이름이 바뀐 .outline 파일의 옛 색인을 걷어낸다.
+ * 남겨 두면 그래프와 백링크에 없는 파일이 계속 보인다.
+ */
+export function clearOutlineMetadata(app: App, path: string) {
+  const cacheManager = app.metadataCache as unknown as MetadataCacheInternal;
+  const formerTargets = Object.keys(cacheManager.resolvedLinks?.[path] ?? {});
+
+  delete cacheManager.resolvedLinks?.[path];
+  delete cacheManager.unresolvedLinks?.[path];
+  delete cacheManager.fileCache?.[path];
+
+  // 이 파일이 가리키던 문서들의 백링크 패널을 새로 고친다.
+  if (typeof cacheManager.trigger === 'function') {
+    for (const targetPath of formerTargets) {
+      const dest = app.vault.getAbstractFileByPath(targetPath);
+      if (dest instanceof TFile) {
+        cacheManager.trigger('resolve', dest);
+      }
+    }
+  }
+}

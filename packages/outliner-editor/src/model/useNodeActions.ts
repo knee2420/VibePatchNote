@@ -108,6 +108,20 @@ export function useNodeActions() {
     [host]
   );
 
+  // 이 불릿의 마크다운 위키링크([[...#id]] 또는 ![[...#id]])를 클립보드에 복사한다.
+  const copyWikilink = useCallback(
+    async (nodeId: NodeId, embed = false) => {
+      try {
+        if (host.copyWikilink) {
+          await host.copyWikilink(nodeId, embed);
+        }
+      } catch (err) {
+        console.error('위키링크 복사 실패:', err);
+      }
+    },
+    [host]
+  );
+
   return {
     toggleCompleted,
     setNodesCompleted,
@@ -117,6 +131,7 @@ export function useNodeActions() {
     setFoldAll,
     exportNodes,
     copyNodeLink,
+    copyWikilink,
     removeNode,
     removeNodes,
   };

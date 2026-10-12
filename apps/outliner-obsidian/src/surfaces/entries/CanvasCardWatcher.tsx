@@ -1,14 +1,16 @@
 /**
- * @file OutlineCanvasNode.ts
+ * @file CanvasCardWatcher.tsx
  * @description 옵시디언 캔버스(Canvas) 파일 노드 인터셉터
  * - 캔버스에 .outline 파일을 직접 드롭했을 때, 회색 링크 대신 살아있는 아웃라인 캔버스로 렌더링
  */
 
 import { createRoot, type Root } from 'react-dom/client';
-import type { App, View, WorkspaceLeaf } from 'obsidian';
-import { OutlineMarkdownEmbed } from '../embed/OutlineMarkdownEmbed';
+import type { App, EventRef, View, WorkspaceLeaf } from 'obsidian';
+import { OutlineInline } from '../inline/OutlineInline';
 
 const MOUNTED_FLAG = 'vibeOutlineMounted';
+const OBSERVED_FLAG = 'vibeCanvasObserved';
+const EVENTS_FLAG = 'vibeOutlineEvents';
 
 interface CanvasNode {
   id: string;
@@ -25,10 +27,13 @@ interface CanvasView extends View {
   canvas?: CanvasInstance;
 }
 
-export class OutlineCanvasInterceptor {
+export class CanvasCardWatcher {
   private app: App;
-  private mountedRoots = new Map<string, Root>();
-  private observer: MutationObserver | null = null;
+  /** 아웃라인을 올린 카드 요소 -> 그 화면 */
+  private mountedRoots = new Map<HTMLElement, Root>();
+  /** 감시 중인 캔버스 화면 -> 그 감시자 */
+  private observers = new Map<HTMLElement, MutationObserver>();
+  private eventRefs: EventRef[] = [];
 
   constructor(app: App) {
     this.app = app;
@@ -38,22 +43,25 @@ export class OutlineCanvasInterceptor {
     // 1. 활성 탭 전환 및 레이아웃 변경 시 캔버스 스캔
     this.scanCurrentCanvas();
 
-    this.app.workspace.on('layout-change', () => {
-      this.scanCurrentCanvas();
-    });
-
-    this.app.workspace.on('active-leaf-change', () => {
-      this.scanCurrentCanvas();
-    });
+    this.eventRefs.push(
+      this.app.workspace.on('layout-change', () => this.scanCurrentCanvas()),
+      this.app.workspace.on('active-leaf-change', () => this.scanCurrentCanvas())
+    );
   }
 
   public destroy() {
-    this.observer?.disconnect();
-    this.observer = null;
+    this.eventRefs.forEach((ref) => this.app.workspace.offref(ref));
+    this.eventRefs = [];
+    this.observers.forEach((observer, container) => {
+      observer.disconnect();
+      delete container.dataset[OBSERVED_FLAG];
+    });
+    this.observers.clear();
     this.unmountAll();
   }
 
   private scanCurrentCanvas() {
+    this.unmountDetached();
     const leaves = this.app.workspace.getLeavesOfType('canvas');
     for (const leaf of leaves) {
       this.hookCanvasLeaf(leaf);
@@ -72,14 +80,16 @@ export class OutlineCanvasInterceptor {
 
     // 캔버스 컨테이너에 DOM MutationObserver 연결 (동적으로 추가되거나 스크롤 인 될 때 감지)
     const container = view.containerEl;
-    if (container && !container.dataset.vibeCanvasObserved) {
-      container.dataset.vibeCanvasObserved = 'true';
+    if (container && !container.dataset[OBSERVED_FLAG]) {
+      container.dataset[OBSERVED_FLAG] = 'true';
       const observer = new MutationObserver(() => {
+        this.unmountDetached();
         if (canvas.nodes) {
           canvas.nodes.forEach((n) => this.patchCanvasNode(n));
         }
       });
       observer.observe(container, { childList: true, subtree: true });
+      this.observers.set(container, observer);
     }
   }
 
@@ -103,15 +113,18 @@ export class OutlineCanvasInterceptor {
     contentEl.style.flexDirection = 'column';
     contentEl.style.overflow = 'hidden';
 
-    // 캔버스 판 자체의 줌/패닝과 아웃라인 조작 이벤트 충돌 방지
-    contentEl.addEventListener('pointerdown', (e) => e.stopPropagation());
-    contentEl.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+    // 캔버스 판 자체의 줌/패닝과 아웃라인 조작 이벤트 충돌 방지 (같은 카드를 다시 그려도 한 번만 건다)
+    if (!contentEl.dataset[EVENTS_FLAG]) {
+      contentEl.dataset[EVENTS_FLAG] = 'true';
+      contentEl.addEventListener('pointerdown', (e) => e.stopPropagation());
+      contentEl.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+    }
 
     const root = createRoot(contentEl);
-    this.mountedRoots.set(node.id, root);
+    this.mountedRoots.set(node.nodeEl, root);
 
     root.render(
-      <OutlineMarkdownEmbed
+      <OutlineInline
         app={this.app}
         file={tFile}
         maxHeight="100%"
@@ -119,14 +132,26 @@ export class OutlineCanvasInterceptor {
     );
   }
 
-  private unmountAll() {
-    this.mountedRoots.forEach((root) => {
-      try {
-        root.unmount();
-      } catch {
-        // 이미 언마운트된 경우 무시
-      }
+  /** 캔버스에서 지워졌거나 화면 밖으로 내려간 카드의 아웃라인을 내린다. 다시 나타나면 새로 올린다. */
+  private unmountDetached() {
+    this.mountedRoots.forEach((root, nodeEl) => {
+      if (nodeEl.isConnected) return;
+      this.unmount(nodeEl, root);
+      this.mountedRoots.delete(nodeEl);
     });
+  }
+
+  private unmountAll() {
+    this.mountedRoots.forEach((root, nodeEl) => this.unmount(nodeEl, root));
     this.mountedRoots.clear();
+  }
+
+  private unmount(nodeEl: HTMLElement, root: Root) {
+    try {
+      root.unmount();
+    } catch {
+      // 이미 언마운트된 경우 무시
+    }
+    delete nodeEl.dataset[MOUNTED_FLAG];
   }
 }

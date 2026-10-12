@@ -10,7 +10,7 @@ import {
   type OutlineProblem,
   readOutlineText,
   writeOutlineText,
-} from '../outlineDocument';
+} from '../../document/outlineDocument';
 
 export interface EmbedFileSyncOptions {
   app: App;
@@ -117,7 +117,10 @@ export function useEmbedFileSync({ app, file, debounceMs = 300 }: EmbedFileSyncO
     [debounceMs, flushSave]
   );
 
-  // 5. 트리 노드 변경 콜백
+  // 5. 지금의 불릿 트리. 편집 상태가 그때그때 물어 가므로, 방금 바꾼 내용까지 담긴 것을 준다.
+  const getRoots = useCallback(() => currentProjectRef.current?.rootNodes ?? [], []);
+
+  // 5-1. 트리 노드 변경 콜백
   const commitRoots = useCallback(
     (roots: OutlineNode[]) => {
       const current = currentProjectRef.current;
@@ -158,6 +161,7 @@ export function useEmbedFileSync({ app, file, debounceMs = 300 }: EmbedFileSyncO
     project,
     problem,
     isLoading,
+    getRoots,
     commitRoots,
     setDefaultView,
     flushSave,

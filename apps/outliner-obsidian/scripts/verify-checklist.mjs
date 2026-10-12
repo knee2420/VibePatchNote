@@ -1,13 +1,27 @@
 /**
  * @file verify-checklist.mjs
  * @description 옵시디언 연동 기능 전체 테스트 체크리스트 검증기
+ *
+ * 설치한 묶음이 최신 빌드와 같은지, 묶음에 기능이 실렸는지, 시험용 노트가 갖춰졌는지를 본다.
+ * 화면 동작까지 확인하지는 않는다.
+ * 보관함 위치는 사용자가 정한다: 인자로 주거나 OUTLINER_OBSIDIAN_VAULT 환경 변수로 준다.
+ *   node apps/outliner-obsidian/scripts/verify-checklist.mjs "C:/path/to/vault"
  */
 
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve, join } from 'node:path';
+import { dirname, resolve, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const VAULT_PATH = 'c:/AI_Projects/WebNovelAssistant/Tutorials/obsidian_tuning';
-const APP_PATH = resolve('c:/AI_Projects/WebNovelAssistant/VibePatchNote/apps/outliner-obsidian');
+const APP_PATH = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const VAULT_PATH = process.argv[2] ?? process.env.OUTLINER_OBSIDIAN_VAULT;
+if (!VAULT_PATH) {
+  console.error('보관함 폴더를 인자나 OUTLINER_OBSIDIAN_VAULT 로 지정하세요.');
+  process.exit(1);
+}
+if (!existsSync(join(VAULT_PATH, '.obsidian'))) {
+  console.error(`옵시디언 보관함이 아닙니다 (.obsidian 폴더 없음): ${VAULT_PATH}`);
+  process.exit(1);
+}
 
 let passCount = 0;
 let failCount = 0;

@@ -17,6 +17,8 @@ import {
   ChevronsUpDown,
   ChevronsDownUp,
   Link2,
+  FileCode2,
+  ExternalLink,
   Download,
   Trash2,
   ChevronRight,
@@ -208,9 +210,23 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
       {isSingle && (
         <>
           <Separator />
+          {host.copyWikilink && (
+            <>
+              <MenuItem
+                icon={<Link2 className="w-3.5 h-3.5 text-(--text-accent)" />}
+                label="위키링크 복사 ([[...#불릿]])"
+                onSelect={run(() => void actions.copyWikilink(item.id, false))}
+              />
+              <MenuItem
+                icon={<FileCode2 className="w-3.5 h-3.5 text-(--text-accent)" />}
+                label="임베드 복사 (![[...#불릿]])"
+                onSelect={run(() => void actions.copyWikilink(item.id, true))}
+              />
+            </>
+          )}
           <MenuItem
-            icon={<Link2 className="w-3.5 h-3.5 text-(--text-muted)" />}
-            label="내부 링크 복사"
+            icon={<ExternalLink className="w-3.5 h-3.5 text-(--text-muted)" />}
+            label="URL 주소 복사 (obsidian://)"
             onSelect={run(() => void actions.copyNodeLink(item.id))}
           />
         </>

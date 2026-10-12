@@ -261,10 +261,13 @@ export function createOutlineEditorStore(document: OutlineDocumentPort): Outline
           focusedNodeId: nodeId,
         }),
 
-      setFocus: (nodeId, caretOffset = 0) =>
+      // 불릿 글자를 고치기 시작하면 묶음 선택은 푼다. 포커스를 떼는 것(null)만으로는 풀지 않는다.
+      // (여러 줄을 끌어 고를 때 입력칸의 포커스가 떨어지는데, 그때 방금 고른 선택이 지워지면 안 된다)
+      setFocus: (nodeId, caretOffset) =>
         set({
           focusedNodeId: nodeId,
-          targetCaretOffset: caretOffset,
+          targetCaretOffset: nodeId && caretOffset !== undefined ? caretOffset : null,
+          ...(nodeId ? { selectedNodeIds: [] } : {}),
         }),
     };
   });
