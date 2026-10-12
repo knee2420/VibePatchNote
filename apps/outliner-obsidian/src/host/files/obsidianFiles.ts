@@ -135,8 +135,8 @@ export function createObsidianFiles({ app, getFile }: ObsidianFilesOptions): Out
       return targets;
     },
 
-    defaultDisplay: (kindId) => getPluginSettings().fileDisplay[kindId] ?? FALLBACK_FILE_DISPLAY,
-    subscribeDefaults: subscribePluginSettings,
+    displayOf: (kindId) => getPluginSettings().fileDisplay[kindId] ?? FALLBACK_FILE_DISPLAY,
+    subscribeDisplay: subscribePluginSettings,
 
     thumbnail: async (target, width) => {
       const file = isWebTarget(target) ? null : resolveFile(target);

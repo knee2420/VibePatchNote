@@ -28,8 +28,8 @@ export class OutlineSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName('딸린 파일의 기본 크기')
-      .setDesc('불릿에 붙인 파일이 처음에 어떻게 보일지 종류별로 정합니다. 파일마다 따로 바꾼 것은 그대로 남습니다.')
+      .setName('딸린 파일 표시')
+      .setDesc('불릿에 붙인 파일을 어떤 크기로 보일지 종류별로 정합니다. 모든 아웃라인에 똑같이 적용됩니다.')
       .setHeading();
 
     for (const kind of FILE_KINDS) {

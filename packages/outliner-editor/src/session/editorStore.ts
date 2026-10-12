@@ -14,7 +14,6 @@ import {
   type DropPosition,
   type NodeId,
   type OutlineNode,
-  type OutlineNodeFile,
   type OutlineNodeType,
   type ViewMode,
   insertAfter,
@@ -27,7 +26,6 @@ import {
   toggleNodesCompleted,
   setNodeNote,
   setNodeFile,
-  updateNodeFile,
   deleteNodes,
   moveNodes,
   duplicateNodes,
@@ -89,7 +87,6 @@ export interface OutlineEditorState extends EditorViewState {
   /** 파일들을 붙인다. 붙인 불릿들의 id 를 돌려준다. */
   attachFiles: (targetId: NodeId, targets: string[]) => NodeId[];
   detachFile: (targetId: NodeId) => void;
-  updateFile: (targetId: NodeId, patch: Partial<OutlineNodeFile>) => void;
   startNoteEdit: (nodeId: NodeId) => void;
   endNoteEdit: () => void;
   setZoom: (nodeId: NodeId | null) => void;
@@ -300,12 +297,6 @@ export function createOutlineEditorStore(document: OutlineDocumentPort): Outline
 
       detachFile: (targetId) => {
         const res = setNodeFile(roots(), targetId, null);
-        if (!res.success) return;
-        commit(res.newNodes);
-      },
-
-      updateFile: (targetId, patch) => {
-        const res = updateNodeFile(roots(), targetId, patch);
         if (!res.success) return;
         commit(res.newNodes);
       },

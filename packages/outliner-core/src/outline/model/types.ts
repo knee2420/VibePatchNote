@@ -22,7 +22,10 @@ export type OutlineNodeType =
   | 'paragraph'
   | 'divider';
 
-/** 불릿에 딸린 파일을 얼마나 크게 보일지: 제목만 / 작게 / 크게 */
+/**
+ * 불릿에 딸린 파일을 얼마나 크게 보일지: 제목만 / 작게 / 크게.
+ * 파일마다 정하지 않는다. 호스트의 설정이 종류(이미지·PDF 등)별로 정한다.
+ */
 export type FileDisplay = 'title' | 'small' | 'large';
 
 /**
@@ -32,8 +35,6 @@ export type FileDisplay = 'title' | 'small' | 'large';
 export interface OutlineNodeFile {
   /** 파일의 주소. 옵시디언 링크 주소 꼴(`자료/설계.pdf`, `그림.png`)이거나 웹 주소 */
   target: string;
-  /** 보이는 크기. 없으면 호스트가 정한 종류별 기본값을 따른다. */
-  display?: FileDisplay;
   /** 그 종류만의 옵션 (예: PDF 의 시작 쪽). 모양은 종류가 정한다. */
   options?: Record<string, unknown>;
 }

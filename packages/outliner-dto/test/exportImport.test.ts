@@ -167,7 +167,6 @@ test('프로젝트 파일: 불릿에 딸린 파일은 그대로 남고, 주소�
   const project = structuredClone(ws.projects[MAIN_ID]);
   project.rootNodes[0].file = {
     target: '자료/설계.pdf',
-    display: 'small',
     options: { page: 3 },
   };
 
@@ -176,7 +175,7 @@ test('프로젝트 파일: 불릿에 딸린 파일은 그대로 남고, 주소�
   assert.deepEqual(parsed.project.rootNodes[0].file, project.rootNodes[0].file);
 
   const broken = JSON.parse(serializeProjectFile(project));
-  broken.rootNodes[0].file = { display: 'small' };
+  broken.rootNodes[0].file = { options: { page: 3 } };
   assert.deepEqual(parseProjectFile(JSON.stringify(broken)), {
     success: false,
     reason: 'not-a-project',

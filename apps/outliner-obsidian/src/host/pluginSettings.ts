@@ -10,11 +10,11 @@ import type { Plugin } from 'obsidian';
 import type { FileDisplay } from '@vibe/outliner-core';
 
 export interface PluginSettings {
-  /** 파일 종류(`image`, `pdf`)별 기본 표시 크기. 적혀 있지 않은 종류는 FALLBACK_FILE_DISPLAY */
+  /** 파일 종류(`image`, `pdf`)별 표시 크기. 적혀 있지 않은 종류는 FALLBACK_FILE_DISPLAY */
   fileDisplay: Record<string, FileDisplay>;
 }
 
-/** 설정에 값이 없는 종류의 기본 크기 */
+/** 설정에 값이 없는 종류의 크기 */
 export const FALLBACK_FILE_DISPLAY: FileDisplay = 'small';
 
 const FILE_DISPLAYS: readonly string[] = ['title', 'small', 'large'];

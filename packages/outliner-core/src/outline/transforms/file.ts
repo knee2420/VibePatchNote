@@ -33,8 +33,8 @@ export function setNodeFile(
 }
 
 /**
- * 붙어 있는 파일의 일부(보이는 크기, 종류별 옵션)를 고친다.
- * 값이 undefined 인 칸은 지운다. (예: `display: undefined` 는 "기본값을 따른다"로 되돌린다)
+ * 붙어 있는 파일의 일부(주소, 종류별 옵션)를 고친다.
+ * `options: undefined` 로 넘기면 옵션을 지운다.
  */
 export function updateNodeFile(
   rootNodes: OutlineNode[],
@@ -49,7 +49,6 @@ export function updateNodeFile(
     if (!node?.file) return;
 
     const next: OutlineNodeFile = { ...node.file, ...patch };
-    if (next.display === undefined) delete next.display;
     if (next.options === undefined) delete next.options;
     node.file = next;
     node.updatedAt = Date.now();

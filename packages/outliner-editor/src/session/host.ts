@@ -23,10 +23,10 @@ export interface OutlineFileHost {
   pick: () => Promise<string | null>;
   /** 끌어다 놓거나 붙여 넣은 파일을 받아 들이고, 그 주소들을 돌려준다. */
   importFiles: (files: File[]) => Promise<string[]>;
-  /** 종류별 기본 표시 크기 (파일에 크기가 적혀 있지 않을 때 쓴다) */
-  defaultDisplay: (kindId: string) => FileDisplay;
-  /** (선택) 기본 표시 크기가 바뀔 때 알림을 받는다. 돌려주는 함수로 그만 받는다. */
-  subscribeDefaults?: (listener: () => void) => () => void;
+  /** 종류(`image`, `pdf`)별 표시 크기. 파일마다 정하지 않고 호스트의 설정 하나가 정한다. */
+  displayOf: (kindId: string) => FileDisplay;
+  /** (선택) 표시 크기 설정이 바뀔 때 알림을 받는다. 돌려주는 함수로 그만 받는다. */
+  subscribeDisplay?: (listener: () => void) => () => void;
   /** (선택) 표지 그림의 주소 (PDF 첫 쪽 등). 만들 수 없으면 null */
   thumbnail?: (target: string, width: number) => Promise<string | null>;
 }

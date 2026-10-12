@@ -38,21 +38,17 @@ test('파일을 붙이고 떼어도 다른 불릿은 그대로다', () => {
 
 test('없는 불릿이나 파일이 없는 불릿은 고치지 않는다', () => {
   assert.equal(setNodeFile(tree(), '없음', { target: 'x.png' }).success, false);
-  assert.equal(updateNodeFile(tree(), 'b', { display: 'large' }).success, false);
+  assert.equal(updateNodeFile(tree(), 'b', { options: { page: 3 } }).success, false);
 });
 
-test('보이는 크기와 옵션만 고치고, undefined 로 넘긴 칸은 지운다', () => {
-  const start = setNodeFile(tree(), 'b', { target: 'x.pdf', display: 'small' }).newNodes;
+test('종류별 옵션만 고치고, undefined 로 넘기면 옵션을 지운다', () => {
+  const start = setNodeFile(tree(), 'b', { target: 'x.pdf' }).newNodes;
 
-  const resized = updateNodeFile(start, 'b', { display: 'large', options: { page: 3 } });
-  assert.deepEqual(resized.newNodes[1].file, {
-    target: 'x.pdf',
-    display: 'large',
-    options: { page: 3 },
-  });
+  const paged = updateNodeFile(start, 'b', { options: { page: 3 } });
+  assert.deepEqual(paged.newNodes[1].file, { target: 'x.pdf', options: { page: 3 } });
 
-  const reset = updateNodeFile(resized.newNodes, 'b', { display: undefined });
-  assert.deepEqual(reset.newNodes[1].file, { target: 'x.pdf', options: { page: 3 } });
+  const reset = updateNodeFile(paged.newNodes, 'b', { options: undefined });
+  assert.deepEqual(reset.newNodes[1].file, { target: 'x.pdf' });
 });
 
 test('주소에서 종류를 가릴 확장자와 보일 이름을 읽는다', () => {
