@@ -7,3 +7,5 @@ export * from './types';
 export * from './list/flatten';
 export * from './board/toBoardViewModel';
 export * from './text/toOutlineText';
+export * from './text/parseOutlineToNodes';
+

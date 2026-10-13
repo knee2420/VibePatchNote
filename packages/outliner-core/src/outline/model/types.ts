@@ -91,3 +91,74 @@ export interface FlattenedNode {
   isFolded: boolean;
   path: NodeId[];
 }
+
+/**
+ * 대상 노드 기준으로 놓을 자리 (마우스 조작이 쓰는 말)
+ * - before / after : 대상의 바로 위 / 바로 아래 형제
+ * - inside         : 대상의 자식 맨 끝
+ * - inside-start   : 대상의 자식 맨 앞
+ */
+export type DropPosition = 'before' | 'after' | 'inside' | 'inside-start';
+
+/**
+ * ID 트리의 노드 하나 (Workflowy 방식).
+ * 중첩된 children 대신 부모·자식을 id 로만 가리킨다. 파일의 불릿이 가진 나머지 정보는 그대로 갖는다.
+ * 부모·자식 연결은 패치 엔진(applyPatch) 한 곳에서만 고친다.
+ */
+export type FlatNode = Omit<OutlineNode, 'children'> & {
+  /** 가상 뿌리 노드만 null 이다. 최상위 불릿의 부모는 가상 뿌리(ROOT_ID)다. */
+  parentId: NodeId | null;
+  childIds: NodeId[];
+};
+
+/**
+ * ID 트리. 실행 중 불릿 트리의 원본이다.
+ * 가상 뿌리 노드(ROOT_ID) 하나가 항상 들어 있고, 모든 불릿은 그 아래에 달린다.
+ */
+export interface FlatOutlineTree {
+  nodes: ReadonlyMap<NodeId, FlatNode>;
+}
+
+/** 새로 만들 노드. id 와 만든 시각은 엔진이 정한다. (호출자가 id 를 정할 수 없다) */
+export type FlatNodeInput = Omit<OutlineNode, 'id' | 'children' | 'createdAt' | 'updatedAt'> & {
+  children?: FlatNodeInput[];
+};
+
+/**
+ * 트리를 바꾸는 요청 하나. 위치는 숫자 인덱스가 아니라 "기준 노드의 뒤 / 앞 / 안"으로만 말한다.
+ *
+ * 앞의 일곱 가지는 Workflowy 의 패치 연산과 뜻이 같다.
+ * - insert_after : 기준 노드 바로 뒤 형제로. `inside` 면 기준 노드의 맨 앞 자식으로.
+ * - move         : 기준 노드(under)의 맨 앞 자식으로(기본). `inside: false` 면 기준 노드 바로 뒤 형제로.
+ * - delete       : 하위가 있으면 `recursively` 없이는 거부한다.
+ * 나머지(set_*)는 이 아웃라이너만의 필드(노트·종류·파일·보기 방식·접힘)를 고친다.
+ */
+export type TreePatchRequest =
+  | { op: 'replace'; id: NodeId; text: string }
+  | { op: 'complete'; id: NodeId }
+  | { op: 'uncomplete'; id: NodeId }
+  | { op: 'insert_after'; targetId: NodeId; items: FlatNodeInput[]; inside?: boolean }
+  | { op: 'insert_before'; targetId: NodeId; items: FlatNodeInput[] }
+  | { op: 'move'; ids: NodeId[]; under: NodeId; inside?: boolean }
+  | { op: 'delete'; id: NodeId; recursively?: boolean }
+  | { op: 'set_note'; id: NodeId; note?: string }
+  | { op: 'set_node_type'; id: NodeId; nodeType: OutlineNodeType }
+  | { op: 'set_file'; id: NodeId; file?: OutlineNodeFile }
+  | { op: 'set_view_mode'; id: NodeId; viewMode?: ViewMode }
+  | { op: 'set_fold'; id: NodeId; isFolded: boolean; deep?: boolean };
+
+/** 요청 하나의 결과. 묶음 안의 요청은 서로 독립이라, 하나가 실패해도 나머지는 적용된다. */
+export type TreePatchResult =
+  | {
+      ok: true;
+      /** 삽입 요청이 만든 맨 위 단계 노드들 */
+      createdIds?: NodeId[];
+    }
+  | { ok: false; error: string };
+
+export interface TreePatchOutcome {
+  /** 바뀐 것이 없으면 받은 트리 그대로(같은 객체)다. */
+  tree: FlatOutlineTree;
+  /** 요청과 같은 순서의 결과 */
+  results: TreePatchResult[];
+}

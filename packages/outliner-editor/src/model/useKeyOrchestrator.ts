@@ -7,6 +7,7 @@ import { type KeyboardEvent, useCallback } from 'react';
 import { useEditorStore } from '../session/context';
 import { winOf } from '../session/host';
 import { useNodeActions } from './useNodeActions';
+import { useOutlineClipboard } from './useOutlineClipboard';
 import {
   type FlattenedNode,
   type NodeId,
@@ -35,6 +36,7 @@ export function useKeyOrchestrator(
 ) {
   const store = useEditorStore((s) => s);
   const { toggleCompleted, startNoteEdit, removeNode } = useNodeActions();
+  const { copyNodes, cutNodes } = useOutlineClipboard();
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLDivElement>) => {
@@ -44,6 +46,50 @@ export function useKeyOrchestrator(
       const isModifier = e.ctrlKey || e.metaKey;
 
       // 0. 빠른 조작 단축키 (우클릭 메뉴와 같은 동작)
+      // Ctrl+Z: 실행 취소 (Undo)
+      if (e.key.toLowerCase() === 'z' && isModifier && !e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        store.undo();
+        return;
+      }
+
+      // Ctrl+Y 또는 Ctrl+Shift+Z: 다시 실행 (Redo)
+      if (
+        isModifier &&
+        ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y') &&
+        !e.nativeEvent.isComposing
+      ) {
+        e.preventDefault();
+        store.redo();
+        return;
+      }
+
+      // Ctrl+A: 1회차 전체 글자 선택 후 2회차 누르면 불릿 블록 선택 모드로 전환 (Workflowy 스타일)
+      if (e.key.toLowerCase() === 'a' && isModifier && !e.nativeEvent.isComposing) {
+        const sel = winOf(targetElement).getSelection();
+        const selectedText = sel ? sel.toString() : '';
+        if (selectedText.length === currentText.length) {
+          e.preventDefault();
+          sel?.removeAllRanges();
+          store.selectNodes([nodeId]);
+          return;
+        }
+      }
+
+      // Ctrl+Shift+C: 현재 불릿(서브트리 포함) 전체 복사
+      if (e.key.toLowerCase() === 'c' && isModifier && e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        void copyNodes([nodeId]);
+        return;
+      }
+
+      // Ctrl+Shift+X: 현재 불릿(서브트리 포함) 잘라내기
+      if (e.key.toLowerCase() === 'x' && isModifier && e.shiftKey && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        void cutNodes([nodeId]);
+        return;
+      }
+
       // Ctrl+Enter: 완료 토글
       if (e.key === 'Enter' && isModifier && !e.nativeEvent.isComposing) {
         e.preventDefault();
@@ -61,9 +107,9 @@ export function useKeyOrchestrator(
       // Ctrl+Shift+Backspace: 이 불릿 삭제
       // (Ctrl+Backspace 는 "앞 단어 지우기"라서 불릿 삭제에 쓰지 않는다)
       if (e.key === 'Backspace' && isModifier && e.shiftKey) {
-        e.preventDefault();
         const current = flattenedNodes.find((n) => n.id === nodeId);
         if (!current) return;
+        e.preventDefault();
         const prevId = getNextFocusId(flattenedNodes, nodeId, 'up');
         const prevTextLength = flattenedNodes.find((n) => n.id === prevId)?.node.text.length ?? 0;
         void removeNode(current).then((removed) => {
@@ -76,13 +122,9 @@ export function useKeyOrchestrator(
       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
         e.preventDefault();
 
+        // 글자를 나누고 새 불릿을 만드는 것까지가 한 동작이다. (실행 취소 한 번에 함께 되돌아간다)
         const { before, after } = splitTextAtCaret(currentText, caretPos);
-        store.updateText(nodeId, before);
-
-        const createdId = store.insertAfter(nodeId, after);
-        if (createdId) {
-          store.setFocus(createdId, 0);
-        }
+        store.splitNode(nodeId, before, after);
         return;
       }
 
@@ -107,18 +149,9 @@ export function useKeyOrchestrator(
         const prevItem = flattenedNodes.find((n) => n.id === prevId);
         const prevText = prevItem?.node.text || '';
 
-        // 먼저 지우고, 실제로 지워졌을 때에만 글자를 합치고 포커스를 옮긴다.
-        if (currentText.length === 0) {
-          if (store.deleteNode(nodeId)) {
-            store.setFocus(prevId, prevText.length);
-          }
-        } else {
-          const { mergedText, caretOffset } = mergeTextAtCaret(prevText, currentText);
-          if (store.deleteNode(nodeId)) {
-            store.updateText(prevId, mergedText);
-            store.setFocus(prevId, caretOffset);
-          }
-        }
+        // 이 불릿을 지우고 글자를 윗줄에 합치는 것까지가 한 동작이다. 하위가 있는 불릿은 지워지지 않는다.
+        const { mergedText, caretOffset } = mergeTextAtCaret(prevText, currentText);
+        store.joinWithPrevious(nodeId, prevId, mergedText, caretOffset);
         return;
       }
 
@@ -149,7 +182,7 @@ export function useKeyOrchestrator(
         return;
       }
     },
-    [nodeId, flattenedNodes, store, toggleCompleted, startNoteEdit, removeNode]
+    [nodeId, flattenedNodes, store, toggleCompleted, startNoteEdit, removeNode, copyNodes, cutNodes]
   );
 
   return { handleKeyDown };

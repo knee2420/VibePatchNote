@@ -13,6 +13,7 @@ export {
   type OutlineDocumentPort,
   type OutlineEditorState,
   type OutlineEditorStore,
+  type HistorySnapshot,
   createOutlineEditorStore,
 } from './session/editorStore';
 export type { DroppedItem, OutlineFileHost, OutlineHost } from './session/host';
@@ -24,5 +25,7 @@ export { OutlineBoard } from './ui/OutlineBoard';
 export { OutlineHeader, type OutlineHeaderProps } from './ui/OutlineHeader';
 export { useZoom } from './model/useZoom';
 export { useOutlineView } from './model/useOutlineView';
+export { useOutlineClipboard, OUTLINE_CLIPBOARD_MIME } from './model/useOutlineClipboard';
 export { FILE_KINDS } from './attachments/registry';
+
 

@@ -5,4 +5,5 @@
 
 export * from './find';
 export * from './path';
+export * from './subtree';
 export * from './fileTarget';

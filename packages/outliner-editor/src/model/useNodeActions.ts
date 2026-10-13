@@ -45,7 +45,7 @@ export function useNodeActions() {
   const setNodesType = useEditorStore((s) => s.setNodesType);
   const setNodesViewMode = useEditorStore((s) => s.setNodesViewMode);
   const setFoldDeep = useEditorStore((s) => s.setFoldDeep);
-  // 되돌리기가 없으므로, 하위 항목까지 사라지거나 여러 개를 한꺼번에 지울 때는 한 번 확인한다.
+  // 하위 항목까지 사라지거나 여러 개를 한꺼번에 지울 때는 한 번 확인한다. (지운 뒤에도 실행 취소로 되돌릴 수 있다)
   const removeNodes = useCallback(
     async (nodeIds: NodeId[]): Promise<boolean> => {
       const roots = api.getState().getRoots();
@@ -55,8 +55,8 @@ export function useNodeActions() {
       const hasChildren = topmost.some((id) => (findNode(roots, id)?.children.length ?? 0) > 0);
       const message =
         topmost.length > 1
-          ? `불릿 ${topmost.length}개와 그 하위 항목을 모두 삭제하시겠습니까? 되돌릴 수 없습니다.`
-          : '이 불릿과 하위 항목을 모두 삭제하시겠습니까? 되돌릴 수 없습니다.';
+          ? `불릿 ${topmost.length}개와 그 하위 항목을 모두 삭제하시겠습니까?`
+          : '이 불릿과 하위 항목을 모두 삭제하시겠습니까?';
       if ((topmost.length > 1 || hasChildren) && !(await host.confirm(message))) return false;
 
       return deleteNodes(topmost);

@@ -9,10 +9,16 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { type OutlineNodeType, isWebTarget } from '@vibe/outliner-core';
+import {
+  type OutlineNodeType,
+  getFlatNode,
+  isWebTarget,
+  parseOutlineToNodes,
+} from '@vibe/outliner-core';
 import { useEditorStore, useOutlineHost } from '../session/context';
 import { winOf } from '../session/host';
 import { extractFilesFromClipboard, useFileAttach } from '../attachments/useFileAttach';
+import { OUTLINE_CLIPBOARD_MIME } from '../model/useOutlineClipboard';
 
 /**
  * 불릿 종류별 글자 크기. 한 줄의 높이는 이 크기에 줄 높이(1.7배)를 곱한 값이다.
@@ -185,6 +191,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   /** 포커스 해제 확인을 기다리는 중이면, 그것을 취소하는 함수 */
   const cancelBlurCheck = useRef<(() => void) | null>(null);
   const { renderMarkdown, openLink, hoverLink, attachSuggest } = useOutlineHost();
+  const store = useEditorStore((s) => s);
   const focusedNodeId = useEditorStore((s) => s.focusedNodeId);
   const targetCaretOffset = useEditorStore((s) => s.targetCaretOffset);
   const updateText = useEditorStore((s) => s.updateText);
@@ -199,6 +206,10 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
     ref.current = el;
     if (el && el.textContent !== initialText) {
       el.textContent = initialText;
+      // 글자를 치는 중에 밖에서 글자가 바뀌면(실행 취소 등) 캐럿이 맨 앞으로 튄다. 제자리에 다시 둔다.
+      if (el.ownerDocument.activeElement === el) {
+        placeCaret(el, targetCaretOffset ?? initialText.length);
+      }
     }
   };
 
@@ -270,8 +281,40 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
       e.preventDefault();
       // 고른 글자를 바꿔 넣는다. 입력 이벤트가 따라 나와 편집 상태에도 반영된다.
       e.currentTarget.ownerDocument.execCommand('insertText', false, `[${selected}](${pastedText})`);
+      return;
+    }
+
+    // 3. 계층적 목록 또는 여러 줄 텍스트 붙여넣기 (Workflowy 스타일 트리 자동 분할 삽입)
+    const rawClipboardText = e.clipboardData.getData('text/plain');
+    const jsonClipboardText = e.clipboardData.getData(OUTLINE_CLIPBOARD_MIME);
+    const textToExamine = jsonClipboardText || rawClipboardText;
+
+    if (textToExamine && (textToExamine.includes('\n') || jsonClipboardText)) {
+      const parsedNodes = parseOutlineToNodes(textToExamine);
+      if (parsedNodes.length > 0) {
+        e.preventDefault();
+        const currentText = (e.currentTarget.textContent || '').trim();
+        const current = getFlatNode(store.getTree(), nodeId);
+        // 글자만 비었을 뿐 하위·파일·노트가 달린 불릿은 빈 불릿이 아니다. (바꿔 넣으면 그것들이 함께 사라진다)
+        const isBlank =
+          currentText === '' &&
+          current !== undefined &&
+          current.childIds.length === 0 &&
+          !current.file &&
+          !current.note;
+
+        if (isBlank) {
+          // 3-A. 빈 불릿에서 붙여넣은 경우: 그 불릿을 붙여넣은 불릿들로 바꾼다.
+          store.replaceNodes([nodeId], parsedNodes);
+        } else {
+          // 3-B. 내용이 있는 불릿에서 붙여넣은 경우: 그 불릿 바로 다음 형제로 넣는다.
+          store.insertNodes(nodeId, parsedNodes);
+        }
+        return;
+      }
     }
   };
+
 
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     const text = e.currentTarget.textContent || '';

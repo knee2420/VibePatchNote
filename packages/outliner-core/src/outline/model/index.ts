@@ -7,3 +7,4 @@ export * from './version';
 export * from './types';
 export * from './id';
 export * from './defaults';
+export * from './flatTree';

@@ -26,8 +26,7 @@ export const OutlineTree: React.FC = () => {
   const clearSelection = useEditorStore((s) => s.clearSelection);
 
   const { canAttach, isDraggingFile, dropOnTree } = useFileAttach();
-  const { menu, menuRef, openMenu, closeMenu, hoverOpen, hoverLeave, hoverStay } =
-    useContextMenu();
+  const { menu, menuRef, openMenu, closeMenu } = useContextMenu();
   const { dragIds, dropTarget, startDrag, dragOverRow, dropOnRow, endDrag } = useDragAndDrop();
   const [moveSourceIds, setMoveSourceIds] = useState<NodeId[] | null>(null);
 
@@ -47,14 +46,12 @@ export const OutlineTree: React.FC = () => {
   const handlers = useMemo<OutlineRowHandlers>(
     () => ({
       openMenu,
-      hoverOpenMenu: hoverOpen,
-      hoverLeaveMenu: hoverLeave,
       startDrag,
       dragOverRow,
       dropOnRow,
       endDrag,
     }),
-    [openMenu, hoverOpen, hoverLeave, startDrag, dragOverRow, dropOnRow, endDrag]
+    [openMenu, startDrag, dragOverRow, dropOnRow, endDrag]
   );
 
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
@@ -130,8 +127,6 @@ export const OutlineTree: React.FC = () => {
           menuRef={menuRef}
           onClose={closeMenu}
           onRequestMove={setMoveSourceIds}
-          onMouseEnter={hoverStay}
-          onMouseLeave={hoverLeave}
         />
       )}
 

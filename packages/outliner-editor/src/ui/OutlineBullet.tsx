@@ -20,8 +20,6 @@ interface OutlineBulletProps {
   onToggleFoldDeep: () => void;
   onZoom: () => void;
   onOpenMenu: (x: number, y: number) => void;
-  onHandleEnter: (x: number, y: number) => void;
-  onHandleLeave: () => void;
   onToggleCompleted: () => void;
   onDragStart: (e: React.DragEvent<HTMLElement>) => void;
   onDragEnd: () => void;
@@ -37,8 +35,6 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
   onToggleFoldDeep,
   onZoom,
   onOpenMenu,
-  onHandleEnter,
-  onHandleLeave,
   onToggleCompleted,
   onDragStart,
   onDragEnd,
@@ -50,15 +46,10 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
 
   return (
     <div data-row-control className="flex items-center gap-0.5 shrink-0 select-none">
-      {/* 1. 노드 메뉴 손잡이 */}
+      {/* 1. 노드 메뉴 손잡이 (클릭 시 메뉴 토글) */}
       <button
         type="button"
         tabIndex={-1}
-        onMouseEnter={(e) => {
-          const { x, y } = menuAnchor(e.currentTarget);
-          onHandleEnter(x, y);
-        }}
-        onMouseLeave={onHandleLeave}
         onClick={(e) => {
           e.stopPropagation();
           const { x, y } = menuAnchor(e.currentTarget);

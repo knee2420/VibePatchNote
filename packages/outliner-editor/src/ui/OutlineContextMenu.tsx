@@ -35,8 +35,6 @@ interface OutlineContextMenuProps {
   menuRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onRequestMove: (nodeIds: NodeId[]) => void;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
 }
 
 const MENU_WIDTH = 240;
@@ -91,8 +89,6 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
   menuRef,
   onClose,
   onRequestMove,
-  onMouseEnter,
-  onMouseLeave,
 }) => {
   const actions = useNodeActions();
   const { canAttach, pickAndAttach } = useFileAttach();
@@ -127,8 +123,6 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
       data-row-control
       style={{ left: x, top: y, width: MENU_WIDTH }}
       onContextMenu={(e) => e.preventDefault()}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       className="outline-menu-pop fixed z-[100] py-1 max-h-[calc(100vh-16px)] overflow-y-auto rounded-lg bg-(--background-secondary)/95 border border-(--background-modifier-border) backdrop-blur-md shadow-2xl shadow-black/60 select-none"
     >
       {!isSingle && (

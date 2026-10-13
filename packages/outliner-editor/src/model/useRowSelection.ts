@@ -20,15 +20,11 @@ import { type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef } fr
 import {
   type FlattenedNode,
   type NodeId,
-  type OutlineNode,
-  findNode,
   getNextFocusId,
-  getTopmostNodeIds,
-  toOutlineText,
 } from '@vibe/outliner-core';
+
 import { useEditorApi, useEditorStore, useEditorWindow } from '../session/context';
-import { useNodeActions } from './useNodeActions';
-import { extractFilesFromClipboard, useFileAttach } from '../attachments/useFileAttach';
+import { useOutlineClipboard } from './useOutlineClipboard';
 
 function rowIdOf(element: Element | null): NodeId | null {
   return element?.closest<HTMLElement>('[data-row-id]')?.dataset.rowId ?? null;
@@ -39,8 +35,7 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
   const clearSelection = useEditorStore((s) => s.clearSelection);
   const hasSelection = useEditorStore((s) => s.selectedNodeIds.length > 0);
   const store = useEditorStore((s) => s);
-  const { removeNodes } = useNodeActions();
-  const { pasteClipboardFiles } = useFileAttach();
+  const { copyNodes, cutNodes, pasteFromDataTransfer, pasteFromClipboard } = useOutlineClipboard();
   const api = useEditorApi();
   const win = useEditorWindow();
 
@@ -122,24 +117,19 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
   useEffect(() => {
     if (!hasSelection) return;
 
-    const isInsideTree = (el: EventTarget | null) => {
-      if (el instanceof Element && el.closest('[data-outline-tree]')) return true;
-      const active = win.document.activeElement;
-      if (active instanceof Element && active.closest('[data-outline-tree]')) return true;
-      return false;
-    };
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      // 1. 타겟 영역 검사: 아웃라이너 트리 외부(옵시디언 타이틀, 댓글창, 다른 탭 등)에서 발생한 이벤트면 즉시 무시 및 선택 해제
-      if (!isInsideTree(e.target)) {
+      const active = win.document.activeElement;
+      // 1. 트리 외부의 실제 텍스트 입력창(옵시디언 검색창, 커맨드 팔레트 등)에 포커스가 있는 경우에만 차단하고 선택 해제
+      const isExternalTyping =
+        active instanceof HTMLElement &&
+        active !== win.document.body &&
+        !active.closest('[data-outline-tree]') &&
+        (active.isContentEditable || active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
+
+      if (isExternalTyping) {
         clearSelection();
         return;
       }
-
-      const active = win.document.activeElement;
-      const isTyping =
-        active instanceof HTMLElement &&
-        (active.isContentEditable || active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
 
       const isModifier = e.ctrlKey || e.metaKey;
       const selectedIds = api.getState().selectedNodeIds;
@@ -148,6 +138,7 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
       // 1. Esc: 선택 해제
       if (e.key === 'Escape') {
         e.preventDefault();
+        e.stopPropagation();
         clearSelection();
         return;
       }
@@ -155,6 +146,7 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
       // 2. Tab / Shift+Tab: 선택된 노드들 일괄 들여쓰기 / 내어쓰기
       if (e.key === 'Tab') {
         e.preventDefault();
+        e.stopPropagation();
         if (e.shiftKey) {
           store.outdentNodes(selectedIds);
         } else {
@@ -166,51 +158,75 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
       // 3. Ctrl+Enter: 일괄 완료/미완료 토글
       if (e.key === 'Enter' && isModifier && !e.isComposing) {
         e.preventDefault();
+        e.stopPropagation();
         store.setNodesCompleted(selectedIds);
         return;
       }
 
       // 4. Delete / Backspace: 묶음 삭제
-      if ((e.key === 'Delete' || e.key === 'Backspace') && !isTyping) {
+      if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        void removeNodes(selectedIds);
+        e.stopPropagation();
+        store.deleteNodes(selectedIds);
+        store.clearSelection();
         return;
       }
 
-      // 5. Ctrl+C: 선택된 노드들을 마크다운 들여쓰기 텍스트로 복사
-      if (isModifier && e.key.toLowerCase() === 'c' && !isTyping) {
-        const roots = api.getState().getRoots();
-        const topmost = getTopmostNodeIds(roots, selectedIds);
-        const nodes = topmost
-          .map((id) => findNode(roots, id))
-          .filter((n): n is OutlineNode => n !== null);
-        if (nodes.length > 0) {
-          e.preventDefault();
-          const text = toOutlineText(nodes);
-          void win.navigator.clipboard.writeText(text);
-        }
-        return;
-      }
-
-      // 6. Ctrl+X: 잘라내기 (복사 후 삭제)
-      if (isModifier && e.key.toLowerCase() === 'x' && !isTyping) {
-        const roots = api.getState().getRoots();
-        const topmost = getTopmostNodeIds(roots, selectedIds);
-        const nodes = topmost
-          .map((id) => findNode(roots, id))
-          .filter((n): n is OutlineNode => n !== null);
-        if (nodes.length > 0) {
-          e.preventDefault();
-          const text = toOutlineText(nodes);
-          void win.navigator.clipboard.writeText(text);
-          void removeNodes(selectedIds);
-        }
-        return;
-      }
-
-      // 7. ArrowUp: 선택 해제 후 첫 번째 선택 불릿의 이전 불릿(또는 첫 불릿)으로 포커스
-      if (e.key === 'ArrowUp' && !e.shiftKey && !isTyping) {
+      // 5. Ctrl+C: 선택된 노드들을 클립보드로 복사
+      if (isModifier && e.key.toLowerCase() === 'c') {
         e.preventDefault();
+        e.stopPropagation();
+        void copyNodes(selectedIds);
+        return;
+      }
+
+      // 6. Ctrl+X: 잘라내기 (확인창 없이 복사 후 즉시 삭제 - 이전 불릿 포커스 및 Undo 지원)
+      if (isModifier && e.key.toLowerCase() === 'x') {
+        e.preventDefault();
+        e.stopPropagation();
+        const firstId = selectedIds[0];
+        const prevFocusId = getNextFocusId(rows.current, firstId, 'up');
+        void copyNodes(selectedIds).then(() => {
+          store.deleteNodes(selectedIds);
+          store.clearSelection();
+          if (prevFocusId) {
+            store.setFocus(prevFocusId, 0);
+          }
+        });
+        return;
+      }
+
+      // 7. Ctrl+V: 다중 선택 영역 대체 붙여넣기
+      if (isModifier && e.key.toLowerCase() === 'v') {
+        e.preventDefault();
+        e.stopPropagation();
+        void pasteFromClipboard(selectedIds[0], selectedIds);
+        return;
+      }
+
+      // 8. Ctrl+Z: 실행 취소 (Undo)
+      if (isModifier && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.undo();
+        return;
+      }
+
+      // 9. Ctrl+Y 또는 Ctrl+Shift+Z: 다시 실행 (Redo)
+      if (
+        isModifier &&
+        ((e.key.toLowerCase() === 'z' && e.shiftKey) || e.key.toLowerCase() === 'y')
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.redo();
+        return;
+      }
+
+      // 10. ArrowUp: 선택 해제 후 첫 번째 선택 불릿의 이전 불릿(또는 첫 불릿)으로 포커스
+      if (e.key === 'ArrowUp' && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
         const firstId = selectedIds[0];
         const targetId = getNextFocusId(rows.current, firstId, 'up') ?? firstId;
         clearSelection();
@@ -218,9 +234,10 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
         return;
       }
 
-      // 8. ArrowDown: 선택 해제 후 마지막 선택 불릿의 다음 불릿(또는 마지막 불릿)으로 포커스
-      if (e.key === 'ArrowDown' && !e.shiftKey && !isTyping) {
+      // 11. ArrowDown: 선택 해제 후 마지막 선택 불릿의 다음 불릿(또는 마지막 불릿)으로 포커스
+      if (e.key === 'ArrowDown' && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation();
         const lastId = selectedIds[selectedIds.length - 1];
         const targetId = getNextFocusId(rows.current, lastId, 'down') ?? lastId;
         clearSelection();
@@ -228,9 +245,10 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
         return;
       }
 
-      // 9. Ctrl+A: 전체 노드 선택
-      if (isModifier && e.key.toLowerCase() === 'a' && !isTyping) {
+      // 12. Ctrl+A: 전체 노드 선택
+      if (isModifier && e.key.toLowerCase() === 'a') {
         e.preventDefault();
+        e.stopPropagation();
         const allIds = rows.current.map((n) => n.id);
         selectNodes(allIds);
         return;
@@ -238,23 +256,22 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
     };
 
     const handlePaste = (e: ClipboardEvent) => {
-      if (!isInsideTree(e.target)) return;
       const active = win.document.activeElement;
-      const isTyping =
+      const isExternalTyping =
         active instanceof HTMLElement &&
+        active !== win.document.body &&
+        !active.closest('[data-outline-tree]') &&
         (active.isContentEditable || active.tagName === 'INPUT' || active.tagName === 'TEXTAREA');
-      if (isTyping) return;
+      if (isExternalTyping) return;
 
       const selectedIds = api.getState().selectedNodeIds;
       if (selectedIds.length === 0) return;
-      const targetId = selectedIds[selectedIds.length - 1];
+      const targetId = selectedIds[0];
 
       if (e.clipboardData) {
-        const files = extractFilesFromClipboard(e.clipboardData);
-        if (files.length > 0) {
-          e.preventDefault();
-          void pasteClipboardFiles(targetId, e.clipboardData);
-        }
+        e.preventDefault();
+        e.stopPropagation();
+        void pasteFromDataTransfer(targetId, e.clipboardData, selectedIds);
       }
     };
 
@@ -270,17 +287,19 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
       clearSelection();
     };
 
-    win.addEventListener('keydown', handleKeyDown);
-    win.addEventListener('paste', handlePaste);
+    // 옵시디언 전역 핫키 가로채기보다 먼저 발동하도록 capture 모드 사용
+    win.addEventListener('keydown', handleKeyDown, true);
+    win.addEventListener('paste', handlePaste, true);
     win.addEventListener('mousedown', handleOutsidePointerDown);
     win.addEventListener('blur', handleBlur);
     return () => {
-      win.removeEventListener('keydown', handleKeyDown);
-      win.removeEventListener('paste', handlePaste);
+      win.removeEventListener('keydown', handleKeyDown, true);
+      win.removeEventListener('paste', handlePaste, true);
       win.removeEventListener('mousedown', handleOutsidePointerDown);
       win.removeEventListener('blur', handleBlur);
     };
-  }, [hasSelection, clearSelection, removeNodes, selectNodes, store, api, win, pasteClipboardFiles]);
+  }, [hasSelection, clearSelection, copyNodes, cutNodes, pasteFromClipboard, pasteFromDataTransfer, selectNodes, store, api, win]);
+
 
   return { handleMouseDown };
 }

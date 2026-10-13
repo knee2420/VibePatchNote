@@ -26,8 +26,6 @@ import { useFileAttach } from '../attachments/useFileAttach';
 /** 트리가 모든 행에 똑같이 내려주는 조작 함수 묶음 */
 export interface OutlineRowHandlers {
   openMenu: (nodeId: NodeId, x: number, y: number) => void;
-  hoverOpenMenu: (nodeId: NodeId, x: number, y: number) => void;
-  hoverLeaveMenu: () => void;
   startDrag: (e: React.DragEvent<HTMLElement>, item: FlattenedNode) => void;
   dragOverRow: (e: React.DragEvent<HTMLElement>, item: FlattenedNode) => void;
   dropOnRow: (e: React.DragEvent<HTMLElement>) => void;
@@ -123,8 +121,6 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
           onToggleFoldDeep={() => setFoldDeep(item.id, isFullyExpanded(node))}
           onZoom={() => zoomIn(item.id)}
           onOpenMenu={(x, y) => handlers.openMenu(item.id, x, y)}
-          onHandleEnter={(x, y) => handlers.hoverOpenMenu(item.id, x, y)}
-          onHandleLeave={handlers.hoverLeaveMenu}
           onToggleCompleted={() => toggleCompleted(item.id)}
           onDragStart={(e) => handlers.startDrag(e, item)}
           onDragEnd={handlers.endDrag}

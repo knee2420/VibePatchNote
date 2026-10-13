@@ -60,6 +60,7 @@ export function useFileAttach() {
   const insertAfter = useEditorStore((s) => s.insertAfter);
   const appendChild = useEditorStore((s) => s.appendChild);
   const addBulletAtEnd = useEditorStore((s) => s.addBulletAtEnd);
+  const batch = useEditorStore((s) => s.batch);
 
   // 호스트의 파일 고르기 창에서 하나를 골라 붙인다.
   const pickAndAttach = useCallback(
@@ -131,37 +132,18 @@ export function useFileAttach() {
 
       const isTargetEmpty = targetNode.text.trim() === '' && !targetNode.file;
 
-      if (isTargetEmpty) {
-        const first = items[0];
-        let lastCreatedId = targetId;
-        if (first.fileTarget) {
-          attachFiles(targetId, [first.fileTarget]);
-        } else if (first.text) {
-          updateText(targetId, first.text);
-        }
-
-        for (const item of items.slice(1)) {
-          const newId = insertAfter(lastCreatedId, item.text ?? '');
-          if (newId) {
-            lastCreatedId = newId;
-            if (item.fileTarget) {
-              attachFiles(newId, [item.fileTarget]);
-            }
+      // 여러 개를 놓아도 한 동작이다. (실행 취소 한 번에 함께 되돌아간다)
+      batch(() => {
+        if (isTargetEmpty) {
+          const first = items[0];
+          let lastCreatedId = targetId;
+          if (first.fileTarget) {
+            attachFiles(targetId, [first.fileTarget]);
+          } else if (first.text) {
+            updateText(targetId, first.text);
           }
-        }
-      } else {
-        // 대상 불릿에 이미 내용이 있는 경우 하위 불릿으로 추가
-        let lastCreatedId: NodeId | null = null;
-        for (const item of items) {
-          if (!lastCreatedId) {
-            const newId = appendChild(targetId, item.text ?? '');
-            if (newId) {
-              lastCreatedId = newId;
-              if (item.fileTarget) {
-                attachFiles(newId, [item.fileTarget]);
-              }
-            }
-          } else {
+
+          for (const item of items.slice(1)) {
             const newId = insertAfter(lastCreatedId, item.text ?? '');
             if (newId) {
               lastCreatedId = newId;
@@ -170,12 +152,34 @@ export function useFileAttach() {
               }
             }
           }
+        } else {
+          // 대상 불릿에 이미 내용이 있는 경우 하위 불릿으로 추가
+          let lastCreatedId: NodeId | null = null;
+          for (const item of items) {
+            if (!lastCreatedId) {
+              const newId = appendChild(targetId, item.text ?? '');
+              if (newId) {
+                lastCreatedId = newId;
+                if (item.fileTarget) {
+                  attachFiles(newId, [item.fileTarget]);
+                }
+              }
+            } else {
+              const newId = insertAfter(lastCreatedId, item.text ?? '');
+              if (newId) {
+                lastCreatedId = newId;
+                if (item.fileTarget) {
+                  attachFiles(newId, [item.fileTarget]);
+                }
+              }
+            }
+          }
         }
-      }
+      });
 
       return true;
     },
-    [files, getRoots, attachFiles, updateText, insertAfter, appendChild]
+    [files, getRoots, attachFiles, updateText, insertAfter, appendChild, batch]
   );
 
   // 트리 빈 영역에 드롭했을 때 맨 아래에 새 불릿을 생성하고 소스/파일 추가
@@ -201,27 +205,29 @@ export function useFileAttach() {
 
       if (items.length === 0) return false;
 
-      let lastCreatedId: NodeId | null = null;
-      for (const item of items) {
-        if (!lastCreatedId) {
-          const newId = addBulletAtEnd();
-          if (newId) {
-            lastCreatedId = newId;
-            if (item.text) updateText(newId, item.text);
-            if (item.fileTarget) attachFiles(newId, [item.fileTarget]);
-          }
-        } else {
-          const newId = insertAfter(lastCreatedId, item.text ?? '');
-          if (newId) {
-            lastCreatedId = newId;
-            if (item.fileTarget) attachFiles(newId, [item.fileTarget]);
+      batch(() => {
+        let lastCreatedId: NodeId | null = null;
+        for (const item of items) {
+          if (!lastCreatedId) {
+            const newId = addBulletAtEnd();
+            if (newId) {
+              lastCreatedId = newId;
+              if (item.text) updateText(newId, item.text);
+              if (item.fileTarget) attachFiles(newId, [item.fileTarget]);
+            }
+          } else {
+            const newId = insertAfter(lastCreatedId, item.text ?? '');
+            if (newId) {
+              lastCreatedId = newId;
+              if (item.fileTarget) attachFiles(newId, [item.fileTarget]);
+            }
           }
         }
-      }
+      });
 
       return true;
     },
-    [files, addBulletAtEnd, updateText, insertAfter, attachFiles]
+    [files, addBulletAtEnd, updateText, insertAfter, attachFiles, batch]
   );
 
   return {
