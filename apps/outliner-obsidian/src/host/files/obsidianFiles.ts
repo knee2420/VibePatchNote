@@ -18,7 +18,7 @@ import {
   parseLinktext,
 } from 'obsidian';
 import { isWebTarget } from '@vibe/outliner-core';
-import type { OutlineFileHost } from '@vibe/outliner-editor';
+import type { DroppedItem, OutlineFileHost } from '@vibe/outliner-editor';
 import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
 import {
   FALLBACK_FILE_DISPLAY,
@@ -27,6 +27,25 @@ import {
 } from '../pluginSettings';
 import { FilePickerModal } from './FilePickerModal';
 import { renderPdfCover } from './pdfCover';
+
+/** 클립보드 캡처 이미지 붙여넣기 시 옵시디언 표준 타임스탬프 파일명 생성 */
+function formatPastedImageName(mimeType?: string): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const MM = pad(now.getMonth() + 1);
+  const dd = pad(now.getDate());
+  const HH = pad(now.getHours());
+  const mm = pad(now.getMinutes());
+  const ss = pad(now.getSeconds());
+  let ext = 'png';
+  if (mimeType) {
+    const sub = mimeType.split('/')[1]?.toLowerCase();
+    if (sub === 'jpeg') ext = 'jpg';
+    else if (sub && ['png', 'webp', 'gif', 'svg'].includes(sub)) ext = sub;
+  }
+  return `Pasted image ${yyyy}${MM}${dd}${HH}${mm}${ss}.${ext}`;
+}
 
 /** 옵시디언이 직접 열어 볼 수 있는 확장자. 그 밖의 파일은 기본 프로그램으로 넘긴다. */
 const VIEWABLE_EXTENSIONS: ReadonlySet<string> = new Set([
@@ -128,11 +147,87 @@ export function createObsidianFiles({ app, getFile }: ObsidianFilesOptions): Out
     importFiles: async (incoming) => {
       const targets: string[] = [];
       for (const item of incoming) {
-        const path = await app.fileManager.getAvailablePathForAttachment(item.name, sourcePath());
+        let name = item.name;
+        if (!name || name === 'image.png' || name === 'blob') {
+          name = formatPastedImageName(item.type);
+        }
+        const path = await app.fileManager.getAvailablePathForAttachment(name, sourcePath());
         const created = await app.vault.createBinary(path, await item.arrayBuffer());
         targets.push(toTarget(created));
       }
       return targets;
+    },
+
+    isDraggingFile: (event) => {
+      // 1. 운영체제 외부 파일 드래그
+      const dt = 'dataTransfer' in event ? event.dataTransfer : null;
+      if (dt && Array.from(dt.types).includes('Files')) {
+        return true;
+      }
+      // 2. 옵시디언 파일 탐색기 트리 소스 드래그
+      const draggable = (app as any).dragManager?.draggable;
+      if (draggable) {
+        if (draggable.type === 'file' || draggable.type === 'files') return true;
+        if (draggable.file || (Array.isArray(draggable.files) && draggable.files.length > 0)) {
+          return true;
+        }
+      }
+      return false;
+    },
+
+    resolveDrop: async (event) => {
+      const items: DroppedItem[] = [];
+      const draggable = (app as any).dragManager?.draggable;
+
+      // 1. 옵시디언 내부 파일 트리 드롭
+      if (draggable) {
+        const files: TFile[] = [];
+        if (draggable.file && typeof draggable.file.path === 'string') {
+          files.push(draggable.file);
+        } else if (Array.isArray(draggable.files)) {
+          files.push(...draggable.files.filter((f: any) => f && typeof f.path === 'string'));
+        }
+
+        if (files.length > 0) {
+          for (const file of files) {
+            const ext = file.extension.toLowerCase();
+            // 문서 계열(.md, .outline, .canvas, .base): 위키링크 텍스트 불릿
+            if (['md', 'outline', 'canvas', 'base'].includes(ext)) {
+              const linktext = app.metadataCache.fileToLinktext(file, sourcePath(), false);
+              items.push({ text: `[[${linktext}]]` });
+            } else {
+              // 미디어/이미지/PDF/기타 바이너리: 기존 볼트 파일이므로 toTarget으로 FileBlock 첨부
+              items.push({ fileTarget: toTarget(file) });
+            }
+          }
+          return items;
+        }
+      }
+
+      // 2. 외부 운영체제 파일 드롭
+      const dt = 'dataTransfer' in event ? event.dataTransfer : null;
+      if (dt && dt.files && dt.files.length > 0) {
+        const osFiles = Array.from(dt.files);
+        for (const osFile of osFiles) {
+          let name = osFile.name;
+          if (!name || name === 'image.png' || name === 'blob') {
+            name = formatPastedImageName(osFile.type);
+          }
+          const ext = name.split('.').pop()?.toLowerCase() ?? '';
+          const path = await app.fileManager.getAvailablePathForAttachment(name, sourcePath());
+          const created = await app.vault.createBinary(path, await osFile.arrayBuffer());
+          const target = toTarget(created);
+
+          if (['md', 'outline', 'canvas', 'base'].includes(ext)) {
+            items.push({ text: `[[${target}]]` });
+          } else {
+            items.push({ fileTarget: target });
+          }
+        }
+        return items;
+      }
+
+      return items;
     },
 
     displayOf: (kindId) => getPluginSettings().fileDisplay[kindId] ?? FALLBACK_FILE_DISPLAY,

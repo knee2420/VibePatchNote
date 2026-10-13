@@ -7,6 +7,7 @@ import { produce } from 'immer';
 import { findParentAndSiblings } from '../internal/locate';
 import { generateNodeId } from '../model/id';
 import type { NodeId, OutlineNode, OutlineNodeType } from '../model/types';
+import { getTopmostNodeIds } from './arrange';
 
 /** 타깃 노드 바로 다음에 새 형제 노드 삽입 */
 export function insertAfter(
@@ -96,6 +97,31 @@ export function indentNode(
 }
 
 /**
+ * 다중 노드 일괄 들여쓰기 (Batch Indent)
+ * - 각 최상위 선택 노드를 순서대로 바로 윗 형제의 자식으로 이동
+ */
+export function indentNodes(
+  rootNodes: OutlineNode[],
+  targetIds: NodeId[]
+): { count: number; newNodes: OutlineNode[] } {
+  const topmost = getTopmostNodeIds(rootNodes, targetIds);
+  if (topmost.length === 0) return { count: 0, newNodes: rootNodes };
+
+  let count = 0;
+  let currentNodes = rootNodes;
+
+  for (const id of topmost) {
+    const res = indentNode(currentNodes, id);
+    if (res.success) {
+      currentNodes = res.newNodes;
+      count++;
+    }
+  }
+
+  return { count, newNodes: currentNodes };
+}
+
+/**
  * 내어쓰기 (Outdent): 현재 노드를 부모의 다음 형제 위치로 승격
  */
 export function outdentNode(
@@ -121,6 +147,32 @@ export function outdentNode(
   });
 
   return { success, newNodes };
+}
+
+/**
+ * 다중 노드 일괄 내어쓰기 (Batch Outdent)
+ * - 선택된 노드들을 부모의 다음 형제 위치로 원래 순서를 유지하며 승격
+ */
+export function outdentNodes(
+  rootNodes: OutlineNode[],
+  targetIds: NodeId[]
+): { count: number; newNodes: OutlineNode[] } {
+  const topmost = getTopmostNodeIds(rootNodes, targetIds);
+  if (topmost.length === 0) return { count: 0, newNodes: rootNodes };
+
+  let count = 0;
+  // 부모 바로 뒤에 순서를 유지하며 끼워넣기 위해 역순으로 처리
+  let currentNodes = rootNodes;
+  for (let i = topmost.length - 1; i >= 0; i--) {
+    const id = topmost[i];
+    const res = outdentNode(currentNodes, id);
+    if (res.success) {
+      currentNodes = res.newNodes;
+      count++;
+    }
+  }
+
+  return { count, newNodes: currentNodes };
 }
 
 /**

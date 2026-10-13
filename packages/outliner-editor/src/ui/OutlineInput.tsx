@@ -12,7 +12,7 @@ import React, { useEffect, useRef } from 'react';
 import { type OutlineNodeType, isWebTarget } from '@vibe/outliner-core';
 import { useEditorStore, useOutlineHost } from '../session/context';
 import { winOf } from '../session/host';
-import { useFileAttach } from '../attachments/useFileAttach';
+import { extractFilesFromClipboard, useFileAttach } from '../attachments/useFileAttach';
 
 /**
  * 불릿 종류별 글자 크기. 한 줄의 높이는 이 크기에 줄 높이(1.7배)를 곱한 값이다.
@@ -189,7 +189,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   const targetCaretOffset = useEditorStore((s) => s.targetCaretOffset);
   const updateText = useEditorStore((s) => s.updateText);
   const setFocus = useEditorStore((s) => s.setFocus);
-  const { canAttach, importAndAttach } = useFileAttach();
+  const { canAttach, pasteClipboardFiles } = useFileAttach();
 
   const isFocused = focusedNodeId === nodeId;
   const hasFormatting = hasLinkOrTag(initialText);
@@ -251,15 +251,17 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
-    // 파일(그림 등)을 붙여 넣으면 이 불릿에 붙인다.
-    const pastedFiles = Array.from(e.clipboardData.files);
-    if (canAttach && pastedFiles.length > 0) {
-      e.preventDefault();
-      void importAndAttach(nodeId, pastedFiles);
-      return;
+    // 1. 파일 및 캡처 이미지(스크린샷) 붙여넣기 대응: 이 불릿에 파일 첨부
+    if (canAttach) {
+      const pastedFiles = extractFilesFromClipboard(e.clipboardData);
+      if (pastedFiles.length > 0) {
+        e.preventDefault();
+        void pasteClipboardFiles(nodeId, e.clipboardData);
+        return;
+      }
     }
 
-    // 글자를 고른 채 웹 주소를 붙여 넣으면 그 글자를 링크로 만든다. (Workflowy 방식)
+    // 2. 글자를 고른 채 웹 주소를 붙여 넣으면 그 글자를 링크로 만든다. (Workflowy 방식)
     const pastedText = e.clipboardData.getData('text/plain').trim();
     const sel = winOf(e.currentTarget).getSelection();
     const selected =

@@ -15,6 +15,7 @@ import { OutlineSelectionBar } from './OutlineSelectionBar';
 import { useContextMenu } from '../model/useContextMenu';
 import { useDragAndDrop } from '../model/useDragAndDrop';
 import { useRowSelection } from '../model/useRowSelection';
+import { useFileAttach } from '../attachments/useFileAttach';
 import { Plus } from 'lucide-react';
 
 export const OutlineTree: React.FC = () => {
@@ -24,6 +25,7 @@ export const OutlineTree: React.FC = () => {
   const addBulletAtEnd = useEditorStore((s) => s.addBulletAtEnd);
   const clearSelection = useEditorStore((s) => s.clearSelection);
 
+  const { canAttach, isDraggingFile, dropOnTree } = useFileAttach();
   const { menu, menuRef, openMenu, closeMenu, hoverOpen, hoverLeave, hoverStay } =
     useContextMenu();
   const { dragIds, dropTarget, startDrag, dragOverRow, dropOnRow, endDrag } = useDragAndDrop();
@@ -67,12 +69,29 @@ export const OutlineTree: React.FC = () => {
       : [menuItem.id]
     : [];
 
+  // 트리 빈 영역에 파일을 끌어다 놓으면 맨 아래 새 불릿으로 생성/첨부한다.
+  const handleContainerDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    if (canAttach && isDraggingFile(e)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+    }
+  };
+
+  const handleContainerDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    if (canAttach && isDraggingFile(e)) {
+      e.preventDefault();
+      void dropOnTree(e);
+    }
+  };
+
   return (
     // 줄 사이 간격은 여기 한 곳에서 정한다. 옵시디언의 목록 간격 변수를 따르고, 없으면(독립 앱) 같은 기본값을 쓴다.
     // 각 줄은 글자 한 줄의 높이에 이 간격을 위아래로 더한 만큼만 차지한다.
     <div
       className="flex flex-col py-2 [--outline-line-gap:var(--list-spacing,0.075em)]"
       onMouseDown={handleMouseDown}
+      onDragOver={handleContainerDragOver}
+      onDrop={handleContainerDrop}
     >
       {flattenedNodes.length === 0 && (
         <p className="py-8 text-center text-(--text-faint) text-sm">아웃라인 항목이 비어있습니다.</p>

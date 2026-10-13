@@ -58,7 +58,7 @@ export const FileBlock: React.FC<FileBlockProps> = ({ nodeId, file }) => {
   const Icon = isMissing ? TriangleAlert : kind.Icon;
 
   return (
-    <div className="group/file flex items-start gap-2 px-1.5 pb-1" data-row-control>
+    <div className="group/file flex items-start gap-2 px-1.5 mt-1 pb-1" data-row-control>
       <button
         type="button"
         onClick={open}

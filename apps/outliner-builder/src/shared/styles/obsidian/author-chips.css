@@ -4,7 +4,6 @@
  */
 
 /* ── 칩 공통 외형 ───────────────────────────────────────────── */
-.internal-link,
 .author-chip,
 [data-property="note.담당"] .internal-link,
 [data-property="note.작성자"] .internal-link,
@@ -26,7 +25,6 @@
   transition: all 0.15s ease;
 }
 
-.internal-link::before,
 .author-chip::before,
 [data-property="note.담당"] .internal-link::before,
 [data-property="note.작성자"] .internal-link::before {

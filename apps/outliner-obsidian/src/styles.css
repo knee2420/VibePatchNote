@@ -39,6 +39,33 @@ input {
   border-radius: 0;
 }
 
+/*
+ * 마크다운 문서 내 코드블록/임베드 내부의 옵시디언 기본 마진/패딩/행간 침투 방어
+ * 옵시디언의 .markdown-rendered p/div/input 스타일이 아웃라인 트리를 벌어지게 하는 현상 차단
+ */
+.vibe-outliner p {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+}
+
+.vibe-outliner input {
+  height: auto !important;
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+}
+
+.vibe-outliner [data-row-text] {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+}
+
 /* 위키링크(.internal-link) 칩 배지 스타일 강화 */
 .vibe-outliner a.internal-link {
   color: var(--link-color, var(--text-accent, #7057ff)) !important;

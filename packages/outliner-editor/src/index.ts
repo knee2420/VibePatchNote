@@ -15,7 +15,7 @@ export {
   type OutlineEditorStore,
   createOutlineEditorStore,
 } from './session/editorStore';
-export type { OutlineFileHost, OutlineHost } from './session/host';
+export type { DroppedItem, OutlineFileHost, OutlineHost } from './session/host';
 export { OutlineEditorProvider } from './session/context';
 
 export { OutlineTree } from './ui/OutlineTree';

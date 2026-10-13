@@ -21,7 +21,7 @@ import { useKeyOrchestrator } from '../model/useKeyOrchestrator';
 import { useZoom } from '../model/useZoom';
 import { useEditorStore } from '../session/context';
 import { FileBlock } from '../attachments/FileBlock';
-import { isFileDrag, useFileAttach } from '../attachments/useFileAttach';
+import { useFileAttach } from '../attachments/useFileAttach';
 
 /** 트리가 모든 행에 똑같이 내려주는 조작 함수 묶음 */
 export interface OutlineRowHandlers {
@@ -58,11 +58,11 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
   const isNoteEditing = useEditorStore((s) => s.noteEditingNodeId === item.id);
   const { zoomIn } = useZoom();
   const { handleKeyDown } = useKeyOrchestrator(item.id, navigableNodes);
-  const { canAttach, importAndAttach } = useFileAttach();
+  const { canAttach, isDraggingFile, dropOnNode } = useFileAttach();
 
-  // 운영체제에서 파일을 끌어다 놓으면 이 불릿에 붙인다. 불릿을 끄는 것은 원래대로 순서 바꾸기다.
+  // 운영체제 외부 파일 또는 옵시디언 파일 탐색기 소스를 끌어다 놓으면 이 불릿에 연결/첨부한다.
   const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
-    if (canAttach && isFileDrag(e)) {
+    if (canAttach && isDraggingFile(e)) {
       e.preventDefault();
       e.stopPropagation();
       e.dataTransfer.dropEffect = 'copy';
@@ -71,10 +71,10 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
     handlers.dragOverRow(e, item);
   };
   const handleDrop = (e: React.DragEvent<HTMLElement>) => {
-    if (canAttach && isFileDrag(e)) {
+    if (canAttach && isDraggingFile(e)) {
       e.preventDefault();
       e.stopPropagation();
-      void importAndAttach(item.id, Array.from(e.dataTransfer.files));
+      void dropOnNode(item.id, e);
       return;
     }
     handlers.dropOnRow(e);

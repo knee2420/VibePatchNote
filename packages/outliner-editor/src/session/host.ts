@@ -6,7 +6,18 @@
  * 확인 창, 주소 복사, 글자 내보내기처럼 환경마다 방법이 다른 일은 직접 하지 않고 여기에 부탁한다.
  */
 
+import type React from 'react';
 import type { FileDisplay, NodeId } from '@vibe/outliner-core';
+
+/**
+ * 드래그 앤 드롭으로 들어온 항목 (텍스트 위키링크 또는 파일 블록)
+ */
+export interface DroppedItem {
+  /** 텍스트 불릿으로 넣을 내용 (예: [[문서명]]) */
+  text?: string;
+  /** 파일 블록으로 첨부할 대상 경로 (예: "attachments/photo.png") */
+  fileTarget?: string;
+}
 
 /**
  * 불릿에 딸린 파일을 다루는 능력. 실제 파일이 어디에 있고 어떻게 여는지는 호스트만 안다.
@@ -23,6 +34,10 @@ export interface OutlineFileHost {
   pick: () => Promise<string | null>;
   /** 끌어다 놓거나 붙여 넣은 파일을 받아 들이고, 그 주소들을 돌려준다. */
   importFiles: (files: File[]) => Promise<string[]>;
+  /** (선택) 드래그 중인 항목이 외부 OS 파일이거나 호스트 내부(옵시디언 파일 탐색기 등) 항목인지 판별 */
+  isDraggingFile?: (event: DragEvent | React.DragEvent) => boolean;
+  /** (선택) 드롭 이벤트를 해석하여 삽입할 항목(위키링크 텍스트 또는 파일 타깃) 목록을 돌려준다. */
+  resolveDrop?: (event: DragEvent | React.DragEvent) => Promise<DroppedItem[]>;
   /** 종류(`image`, `pdf`)별 표시 크기. 파일마다 정하지 않고 호스트의 설정 하나가 정한다. */
   displayOf: (kindId: string) => FileDisplay;
   /** (선택) 표시 크기 설정이 바뀔 때 알림을 받는다. 돌려주는 함수로 그만 받는다. */

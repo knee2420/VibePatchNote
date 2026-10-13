@@ -19,7 +19,9 @@ import {
   insertAfter,
   appendChild,
   indentNode,
+  indentNodes,
   outdentNode,
+  outdentNodes,
   deleteNode,
   updateNodeText,
   toggleFold,
@@ -63,7 +65,9 @@ export interface OutlineEditorState extends EditorViewState {
   insertAfter: (targetId: NodeId, text?: string) => NodeId | null;
   appendChild: (parentId: NodeId, text?: string) => NodeId | null;
   indent: (targetId: NodeId) => boolean;
+  indentNodes: (targetIds: NodeId[]) => boolean;
   outdent: (targetId: NodeId) => boolean;
+  outdentNodes: (targetIds: NodeId[]) => boolean;
   deleteNode: (targetId: NodeId) => boolean;
   updateText: (targetId: NodeId, text: string) => void;
   toggleFold: (targetId: NodeId) => void;
@@ -139,10 +143,22 @@ export function createOutlineEditorStore(document: OutlineDocumentPort): Outline
         return commit(res.newNodes, { focusedNodeId: targetId });
       },
 
+      indentNodes: (targetIds) => {
+        const res = indentNodes(roots(), targetIds);
+        if (res.count === 0) return false;
+        return commit(res.newNodes);
+      },
+
       outdent: (targetId) => {
         const res = outdentNode(roots(), targetId);
         if (!res.success) return false;
         return commit(res.newNodes, { focusedNodeId: targetId });
+      },
+
+      outdentNodes: (targetIds) => {
+        const res = outdentNodes(roots(), targetIds);
+        if (res.count === 0) return false;
+        return commit(res.newNodes);
       },
 
       deleteNode: (targetId) => {
