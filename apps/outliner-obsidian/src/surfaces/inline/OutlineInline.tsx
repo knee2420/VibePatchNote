@@ -27,6 +27,8 @@ export interface OutlineInlineProps {
   viewMode?: ViewMode;
   /** 최대 높이 (예: '500px', '400px', 'auto') */
   maxHeight?: string;
+  /** 캔버스 카드 안에 임베드되었는지 여부 */
+  isCanvasCard?: boolean;
 }
 
 const EmbedBody: React.FC<{ forcedView?: ViewMode }> = ({ forcedView }) => {
@@ -41,6 +43,7 @@ export const OutlineInline: React.FC<OutlineInlineProps> = ({
   zoomNodeId,
   viewMode,
   maxHeight = '500px',
+  isCanvasCard,
 }) => {
   const { project, problem, isLoading, getRoots, commitRoots, setDefaultView } = useEmbedFileSync({
     app,
@@ -91,10 +94,19 @@ export const OutlineInline: React.FC<OutlineInlineProps> = ({
     );
   }
 
+  const containerClasses = isCanvasCard
+    ? "vibe-outliner p-3 flex flex-col min-w-0 w-full h-full text-left bg-transparent"
+    : "vibe-outliner my-2 p-3 rounded-lg border border-(--background-modifier-border) bg-(--background-primary) flex flex-col min-w-0 text-left";
+
   return (
     <div
-      className="vibe-outliner my-2 p-3 rounded-lg border border-(--background-modifier-border) bg-(--background-primary) flex flex-col min-w-0"
-      style={{ maxHeight, overflowY: 'auto' }}
+      className={containerClasses}
+      style={{
+        maxHeight,
+        height: isCanvasCard ? '100%' : undefined,
+        overflowY: 'auto',
+        textAlign: 'left',
+      }}
       onPointerDown={(e) => e.stopPropagation()}
     >
       <OutlineEditorProvider

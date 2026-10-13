@@ -46,21 +46,21 @@
           "text": "티토리티토리로리리",
           "children": [],
           "createdAt": 1791720107209,
-          "updatedAt": 1791817450629
+          "updatedAt": 1791852878604
         },
         {
           "id": "qeYrOhHsw74U",
           "text": "그리고 여기도 씁니다",
           "children": [],
           "createdAt": 1791720107364,
-          "updatedAt": 1791799737246
+          "updatedAt": 1791850405251
         },
         {
           "id": "E7h7neLhg6XQ",
           "text": "하위에 씁니다",
           "children": [],
           "createdAt": 1791720117758,
-          "updatedAt": 1791807744501
+          "updatedAt": 1791852877200
         },
         {
           "id": "e3glwFsez8me",
@@ -99,14 +99,14 @@
           "text": "하위에 하위 입니다",
           "children": [],
           "createdAt": 1791778043665,
-          "updatedAt": 1791778050749
+          "updatedAt": 1791850397573
         },
         {
           "id": "mDUOa5PyRROd",
           "text": "딘하위선",
           "children": [],
           "createdAt": 1791778050749,
-          "updatedAt": 1791780980776
+          "updatedAt": 1791850407925
         },
         {
           "id": "INjY9OkAlChI",
@@ -118,7 +118,7 @@
       ],
       "isFolded": false,
       "createdAt": 1791778039213,
-      "updatedAt": 1791778043664,
+      "updatedAt": 1791852342510,
       "ref": {
         "type": "project",
         "targetProjectId": "oczFo1KKbI5T",
@@ -129,5 +129,5 @@
   ],
   "defaultView": "bullets",
   "createdAt": 1791720096143,
-  "updatedAt": 1791817450629
+  "updatedAt": 1791852878604
 }

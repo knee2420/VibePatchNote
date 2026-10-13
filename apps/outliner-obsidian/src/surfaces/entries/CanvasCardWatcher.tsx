@@ -109,8 +109,12 @@ export class CanvasCardWatcher {
     contentEl.empty();
     contentEl.addClass('vibe-outliner-canvas-node-content');
     contentEl.style.height = '100%';
+    contentEl.style.width = '100%';
     contentEl.style.display = 'flex';
     contentEl.style.flexDirection = 'column';
+    contentEl.style.alignItems = 'stretch';
+    contentEl.style.justifyContent = 'flex-start';
+    contentEl.style.textAlign = 'left';
     contentEl.style.overflow = 'hidden';
 
     // 캔버스 판 자체의 줌/패닝과 아웃라인 조작 이벤트 충돌 방지 (같은 카드를 다시 그려도 한 번만 건다)
@@ -128,6 +132,7 @@ export class CanvasCardWatcher {
         app={this.app}
         file={tFile}
         maxHeight="100%"
+        isCanvasCard
       />
     );
   }
