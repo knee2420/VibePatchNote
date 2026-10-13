@@ -122,7 +122,20 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
   useEffect(() => {
     if (!hasSelection) return;
 
+    const isInsideTree = (el: EventTarget | null) => {
+      if (el instanceof Element && el.closest('[data-outline-tree]')) return true;
+      const active = win.document.activeElement;
+      if (active instanceof Element && active.closest('[data-outline-tree]')) return true;
+      return false;
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      // 1. 타겟 영역 검사: 아웃라이너 트리 외부(옵시디언 타이틀, 댓글창, 다른 탭 등)에서 발생한 이벤트면 즉시 무시 및 선택 해제
+      if (!isInsideTree(e.target)) {
+        clearSelection();
+        return;
+      }
+
       const active = win.document.activeElement;
       const isTyping =
         active instanceof HTMLElement &&
@@ -225,6 +238,7 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
     };
 
     const handlePaste = (e: ClipboardEvent) => {
+      if (!isInsideTree(e.target)) return;
       const active = win.document.activeElement;
       const isTyping =
         active instanceof HTMLElement &&
@@ -244,11 +258,27 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
       }
     };
 
+    // 2. 아웃라이너 외부 클릭 또는 포커스 아웃 시 선택 자동 해제
+    const handleOutsidePointerDown = (e: MouseEvent) => {
+      const target = e.target;
+      if (target instanceof Element && !target.closest('[data-outline-tree]')) {
+        clearSelection();
+      }
+    };
+
+    const handleBlur = () => {
+      clearSelection();
+    };
+
     win.addEventListener('keydown', handleKeyDown);
     win.addEventListener('paste', handlePaste);
+    win.addEventListener('mousedown', handleOutsidePointerDown);
+    win.addEventListener('blur', handleBlur);
     return () => {
       win.removeEventListener('keydown', handleKeyDown);
       win.removeEventListener('paste', handlePaste);
+      win.removeEventListener('mousedown', handleOutsidePointerDown);
+      win.removeEventListener('blur', handleBlur);
     };
   }, [hasSelection, clearSelection, removeNodes, selectNodes, store, api, win, pasteClipboardFiles]);
 
