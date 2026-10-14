@@ -93,6 +93,7 @@ export function useKeyOrchestrator(
       // Ctrl+Enter: 완료 토글
       if (e.key === 'Enter' && isModifier && !e.nativeEvent.isComposing) {
         e.preventDefault();
+        e.stopPropagation();
         toggleCompleted(nodeId);
         return;
       }
@@ -155,8 +156,37 @@ export function useKeyOrchestrator(
         return;
       }
 
-      // 4. 방향키 이동
-      if (e.key === 'ArrowUp' && !e.shiftKey) {
+      // 4. Alt+화살표: 불릿 줄 위/아래 순서 이동
+      if (e.key === 'ArrowUp' && e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.setFocus(nodeId, caretPos);
+        const moved = store.moveNodesStep([nodeId], 'up');
+        if (moved) {
+          winOf(targetElement).requestAnimationFrame(() => {
+            targetElement.focus();
+            store.setFocus(nodeId, caretPos);
+          });
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowDown' && e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.setFocus(nodeId, caretPos);
+        const moved = store.moveNodesStep([nodeId], 'down');
+        if (moved) {
+          winOf(targetElement).requestAnimationFrame(() => {
+            targetElement.focus();
+            store.setFocus(nodeId, caretPos);
+          });
+        }
+        return;
+      }
+
+      // 5. 방향키 이동
+      if (e.key === 'ArrowUp' && !e.shiftKey && !e.altKey) {
         const prevId = getNextFocusId(flattenedNodes, nodeId, 'up');
         if (prevId) {
           e.preventDefault();
@@ -165,7 +195,7 @@ export function useKeyOrchestrator(
         return;
       }
 
-      if (e.key === 'ArrowDown' && !e.shiftKey) {
+      if (e.key === 'ArrowDown' && !e.shiftKey && !e.altKey) {
         // 현재 노드에 부연설명 노트가 있다면 다음 노드로 건너뛰지 않고 노트로 먼저 진입!
         const currentItem = flattenedNodes.find((n) => n.id === nodeId);
         if (currentItem?.node.note) {

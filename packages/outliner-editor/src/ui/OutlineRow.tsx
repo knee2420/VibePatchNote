@@ -115,6 +115,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
           hasChildren={item.hasChildren}
           isFolded={item.isFolded}
           isCompleted={isCompleted}
+          isAncestorCompleted={item.isAncestorCompleted}
           isTodo={nodeType === 'todo'}
           isDotSubtle={nodeType === 'paragraph'}
           onToggleFold={() => toggleFold(item.id)}
@@ -140,6 +141,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
               initialText={node.text}
               nodeType={nodeType}
               isCompleted={isCompleted}
+              isAncestorCompleted={item.isAncestorCompleted}
               onKeyDown={handleKeyDown}
             />
 

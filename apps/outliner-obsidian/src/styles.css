@@ -73,7 +73,48 @@ input {
   text-align: left !important;
 }
 
-/* 위키링크(.internal-link) 칩 배지 스타일 강화 */
+/*
+ * 마크다운 렌더링 샌드박스: 옵시디언 테마의 블록 레벨 요소(p, ol, ul, li, blockquote, h1~h6 등) 침투 차단
+ * 아웃라인 불릿 텍스트 내부에서는 모든 자식 엘리먼트가 단일 인라인 흐름과 일정한 행간을 유지해야 함
+ */
+.vibe-outliner [data-row-text] *,
+.vibe-outliner [data-node-id] * {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  margin-inline: 0 !important;
+  padding-block: 0 !important;
+  list-style: none !important;
+}
+
+.vibe-outliner [data-row-text] p,
+.vibe-outliner [data-row-text] ol,
+.vibe-outliner [data-row-text] ul,
+.vibe-outliner [data-row-text] li,
+.vibe-outliner [data-row-text] blockquote,
+.vibe-outliner [data-row-text] h1,
+.vibe-outliner [data-row-text] h2,
+.vibe-outliner [data-row-text] h3,
+.vibe-outliner [data-row-text] h4,
+.vibe-outliner [data-row-text] h5,
+.vibe-outliner [data-row-text] h6 {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+/* 태그(a.tag) 및 내부 링크(a.internal-link)의 baseline 수평 정렬 보정 */
+.vibe-outliner [data-row-text] a.tag,
+.vibe-outliner [data-row-text] a.internal-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: baseline !important;
+  line-height: 1.2 !important;
+}
+
+/* 위키링크(.internal-link) 칩 배지 스타일 */
 .vibe-outliner a.internal-link {
   color: var(--link-color, var(--text-accent, #7057ff)) !important;
   background-color: color-mix(in srgb, var(--text-accent, #7057ff) 14%, transparent) !important;
@@ -85,12 +126,30 @@ input {
   font-weight: 500 !important;
   transition: all 0.15s ease-in-out !important;
   cursor: pointer !important;
-  display: inline !important;
 }
 
 .vibe-outliner a.internal-link:hover {
   background-color: color-mix(in srgb, var(--text-accent, #7057ff) 24%, transparent) !important;
   border-color: var(--text-accent, #7057ff) !important;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-accent, #7057ff) 20%, transparent) !important;
+}
+
+/* 태그(a.tag) 칩 배지 스타일 강화 */
+.vibe-outliner a.tag {
+  color: var(--tag-color, var(--text-accent, #7057ff)) !important;
+  background-color: var(--tag-background, color-mix(in srgb, var(--text-accent, #7057ff) 12%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--text-accent, #7057ff) 20%, transparent) !important;
+  border-radius: var(--tag-radius, 4px) !important;
+  padding: 0.05em 0.4em !important;
+  margin: 0 0.15em !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.vibe-outliner a.tag:hover {
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 22%, transparent) !important;
+  border-color: var(--text-accent, #7057ff) !important;
 }
 

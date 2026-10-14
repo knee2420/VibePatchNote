@@ -81,9 +81,48 @@ test('끌어 옮기기: 위·아래·안 맨 끝·안 맨 앞, 맨 위 단계, �
   // 골라 둔 순서와 상관없이 문서 순서대로, 부모와 자식을 함께 골랐으면 부모만 옮긴다.
   assert.equal(moved(['C', 'A1a', 'A1'], 'B', 'after'), 'P(A(A2) B A1(A1a) C)');
 
-  assert.equal(moved(['A'], 'A1a', 'inside'), '실패 P(A(A1(A1a) A2) B C)');
-  assert.equal(moved(['A'], 'A', 'after'), '실패 P(A(A1(A1a) A2) B C)');
   assert.equal(moved(['A'], '없음', 'after'), '실패 P(A(A1(A1a) A2) B C)');
+});
+
+test('형제 간 상대 이동 (Alt+ArrowUp/Down): 불릿 순서를 한 줄씩 위/아래로 바꾼다', () => {
+  const step = (ids: string[], direction: 'up' | 'down') => {
+    const editor = createEditor(probe());
+    editor.act().setFocus(ids[0], 2);
+    const ok = editor.act().moveNodesStep(ids, direction);
+    return {
+      shape: `${ok ? '' : '실패 '}${editor.shape()}`,
+      focused: editor.act().focusedNodeId,
+      caret: editor.act().targetCaretOffset,
+    };
+  };
+
+  // B 를 위로 -> A 와 자리 바꿈, 포커스 및 캐럿 유지
+  assert.deepEqual(step(['B'], 'up'), {
+    shape: 'P(B A(A1(A1a) A2) C)',
+    focused: 'B',
+    caret: 2,
+  });
+
+  // B 를 아래로 -> C 와 자리 바꿈, 포커스 및 캐럿 유지
+  assert.deepEqual(step(['B'], 'down'), {
+    shape: 'P(A(A1(A1a) A2) C B)',
+    focused: 'B',
+    caret: 2,
+  });
+
+  // 맨 위 노드 A 를 위로 -> 이동 불가 (실패 및 동일)
+  assert.deepEqual(step(['A'], 'up'), {
+    shape: '실패 P(A(A1(A1a) A2) B C)',
+    focused: 'A',
+    caret: 2,
+  });
+
+  // 맨 아래 노드 C 를 아래로 -> 이동 불가 (실패 및 동일)
+  assert.deepEqual(step(['C'], 'down'), {
+    shape: '실패 P(A(A1(A1a) A2) B C)',
+    focused: 'C',
+    caret: 2,
+  });
 });
 
 test('복제: 원본 바로 아래에 하위째, 새 id 로', () => {
@@ -195,4 +234,18 @@ test('패치 요청을 그대로 적용하면 요청마다 결과가 돌아온�
   );
   assert.equal(editor.shape(), 'P(A(A1(A1a) A2) C(새 B))');
   assert.equal(editor.commits(), 1);
+});
+
+test('toInlineMarkdown: 숫자 목록, 헤딩, 불릿, 인용 등 블록 트리거가 이스케이프된다', async () => {
+  const { toInlineMarkdown } = await import('../src/ui/OutlineInput');
+  assert.equal(toInlineMarkdown('1. [단축키] Ctrl+C'), '1\\. [단축키] Ctrl+C');
+  assert.equal(toInlineMarkdown('20. [항목] 테스트'), '20\\. [항목] 테스트');
+  assert.equal(toInlineMarkdown('- 목록 항목'), '\\- 목록 항목');
+  assert.equal(toInlineMarkdown('* 목록 항목'), '\\* 목록 항목');
+  assert.equal(toInlineMarkdown('# 헤딩 제목'), '\\# 헤딩 제목');
+  assert.equal(toInlineMarkdown('### 소제목'), '\\### 소제목');
+  assert.equal(toInlineMarkdown('> 인용문'), '\\> 인용문');
+  assert.equal(toInlineMarkdown('- [ ] 체크박스'), '\\- [ ] 체크박스');
+  // 일반 텍스트 및 문장 중간의 숫자는 그대로 유지
+  assert.equal(toInlineMarkdown('일반 텍스트 1. 중간 번호'), '일반 텍스트 1. 중간 번호');
 });

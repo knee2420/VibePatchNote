@@ -13,6 +13,7 @@ interface OutlineBulletProps {
   hasChildren: boolean;
   isFolded: boolean;
   isCompleted?: boolean;
+  isAncestorCompleted?: boolean;
   isTodo?: boolean;
   /** 평소에는 불릿 점을 숨기는 종류(문단)인지 */
   isDotSubtle?: boolean;
@@ -29,6 +30,7 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
   hasChildren,
   isFolded,
   isCompleted = false,
+  isAncestorCompleted = false,
   isTodo = false,
   isDotSubtle = false,
   onToggleFold,
@@ -105,7 +107,9 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
         title="클릭: 줌인 · 끌기: 이동 (Alt: 복제) · 우클릭: 메뉴"
       >
         <span
-          className={`rounded-full transition-all duration-150 ${isCompleted ? 'opacity-50' : ''} ${
+          className={`rounded-full transition-all duration-150 ${
+            isCompleted || isAncestorCompleted ? 'opacity-50' : ''
+          } ${
             isDotSubtle && !hasChildren ? 'opacity-0 group-hover/row:opacity-100' : ''
           } ${
             hasChildren && isFolded

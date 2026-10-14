@@ -90,6 +90,8 @@ export interface FlattenedNode {
   hasChildren: boolean;
   isFolded: boolean;
   path: NodeId[];
+  /** 조상 노드 중 완료(isCompleted: true)된 노드가 있는지 여부 (Workflowy 스타일 하위 텍스트 흐림 상속) */
+  isAncestorCompleted?: boolean;
 }
 
 /**

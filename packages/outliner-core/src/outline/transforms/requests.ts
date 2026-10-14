@@ -7,7 +7,7 @@
  * 여기 함수들은 트리를 바꾸지 않고 요청만 만든다. 적용은 `applyPatch` 가 한다.
  */
 
-import { ROOT_ID, getFlatNode } from '../model/flatTree';
+import { ROOT_ID, getFlatNode, getTopmostIds } from '../model/flatTree';
 import type {
   DropPosition,
   FlatNode,
@@ -42,6 +42,22 @@ function previousSiblingExcept(
   const parentId = tree.nodes.get(targetId)?.parentId;
   const siblings = parentId == null ? [] : (tree.nodes.get(parentId)?.childIds ?? []);
   for (let i = siblings.indexOf(targetId) - 1; i >= 0; i--) {
+    if (!skip.has(siblings[i])) return siblings[i];
+  }
+  return null;
+}
+
+/** `targetId` 바로 뒤의 형제 중 `skip` 에 없는 가장 가까운 것 */
+function nextSiblingExcept(
+  tree: FlatOutlineTree,
+  targetId: NodeId,
+  skip: ReadonlySet<NodeId>
+): NodeId | null {
+  const parentId = tree.nodes.get(targetId)?.parentId;
+  const siblings = parentId == null ? [] : (tree.nodes.get(parentId)?.childIds ?? []);
+  const startIndex = siblings.indexOf(targetId);
+  if (startIndex === -1) return null;
+  for (let i = startIndex + 1; i < siblings.length; i++) {
     if (!skip.has(siblings[i])) return siblings[i];
   }
   return null;
@@ -127,6 +143,32 @@ export function outdentRequests(tree: FlatOutlineTree, id: NodeId): TreePatchReq
   return parentId == null || parentId === ROOT_ID
     ? []
     : [{ op: 'move', ids: [id], under: parentId, inside: false }];
+}
+
+/**
+ * 노드(들)를 이전 형제 위('up') 또는 다음 형제 아래('down')로 한 칸 옮기는 요청.
+ * 더 이상 위/아래로 갈 수 없으면 빈 배열이다.
+ */
+export function stepMoveRequests(
+  tree: FlatOutlineTree,
+  ids: NodeId[],
+  direction: 'up' | 'down'
+): TreePatchRequest[] {
+  const topmost = getTopmostIds(tree, ids);
+  if (topmost.length === 0) return [];
+  const moving = new Set(topmost);
+
+  if (direction === 'up') {
+    const firstId = topmost[0];
+    const previous = previousSiblingExcept(tree, firstId, moving);
+    if (!previous) return [];
+    return moveRequests(tree, topmost, previous, 'before');
+  } else {
+    const lastId = topmost[topmost.length - 1];
+    const next = nextSiblingExcept(tree, lastId, moving);
+    if (!next) return [];
+    return moveRequests(tree, topmost, next, 'after');
+  }
 }
 
 /** 중첩 노드들을 새로 만들 노드의 입력으로 바꾼다. id 와 시각은 버린다. (엔진이 새로 정한다) */

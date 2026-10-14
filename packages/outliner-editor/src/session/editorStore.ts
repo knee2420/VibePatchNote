@@ -42,6 +42,7 @@ import {
   moveRequests,
   outdentRequests,
   projectTree,
+  stepMoveRequests,
   subtreeInput,
   toNodeInputs,
   withFoldStateOf,
@@ -114,6 +115,7 @@ export interface OutlineEditorState extends EditorViewState {
   setFoldDeep: (targetId: NodeId, isFolded: boolean) => void;
   addBulletAtEnd: () => NodeId | null;
   moveNodes: (sourceIds: NodeId[], targetId: NodeId | null, position: DropPosition) => boolean;
+  moveNodesStep: (ids: NodeId[], direction: 'up' | 'down') => boolean;
   duplicateNodes: (sourceIds: NodeId[]) => NodeId[];
   duplicateNodesTo: (
     sourceIds: NodeId[],
@@ -492,6 +494,20 @@ export function createOutlineEditorStore(document: OutlineDocumentPort): Outline
             ? moveRequests(tree, topmost, targetId, position)
             : moveRequests(tree, topmost, ROOT_ID, position === 'inside-start' ? position : 'inside');
         apply(requests);
+        return true;
+      },
+
+      // 형제 노드 기준으로 한 칸 위/아래 이동 (Alt+ArrowUp/Down)
+      moveNodesStep: (ids, direction) => {
+        const tree = currentTree();
+        const requests = stepMoveRequests(tree, ids, direction);
+        if (requests.length === 0) return false;
+        const currentFocused = get().focusedNodeId;
+        const currentCaret = get().targetCaretOffset;
+        apply(requests, {
+          focusedNodeId: currentFocused,
+          targetCaretOffset: currentCaret,
+        });
         return true;
       },
 

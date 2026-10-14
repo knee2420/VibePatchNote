@@ -23,6 +23,7 @@ import {
   moveRequests,
   outdentRequests,
   projectTree,
+  stepMoveRequests,
   subtreeInput,
   treeToFlat,
   withFoldStateOf,
@@ -381,6 +382,23 @@ test('새 노드를 놓을 자리 네 가지로 넣고, 하위째 복제할 입�
   const duplicated = patch(start, [{ op: 'insert_after', targetId: 'A', items: [copy] }]).tree;
   assert.equal(shape(duplicated), '(P(A(A1(A1a) A2) A(A1(A1a) A2) B C))');
   assert.equal('id' in copy, false);
+});
+
+test('형제 간 위/아래 상대 이동(stepMoveRequests)으로 한 칸씩 순서를 바꾼다', () => {
+  const start = probe(); // (P(A(A1(A1a) A2) B C))
+  const step = (ids: NodeId[], direction: 'up' | 'down') =>
+    shape(patch(start, stepMoveRequests(start, ids, direction)).tree);
+
+  // B 를 위로 한 칸 -> A 와 순서 바뀜
+  assert.equal(step(['B'], 'up'), '(P(B A(A1(A1a) A2) C))');
+  // B 를 아래로 한 칸 -> C 와 순서 바뀜
+  assert.equal(step(['B'], 'down'), '(P(A(A1(A1a) A2) C B))');
+  // A(맨 위)를 위로 -> 이동 불가 (동일)
+  assert.equal(step(['A'], 'up'), shape(start));
+  // C(맨 아래)를 아래로 -> 이동 불가 (동일)
+  assert.equal(step(['C'], 'down'), shape(start));
+  // 여러 개 [B, C] 를 위로 한 칸 -> A 앞으로 이동
+  assert.equal(step(['B', 'C'], 'up'), '(P(B C A(A1(A1a) A2)))');
 });
 
 // ── 어떤 요청이 와도 트리는 어긋나지 않는다 ──

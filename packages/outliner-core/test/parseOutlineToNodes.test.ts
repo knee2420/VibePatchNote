@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseOutlineToNodes } from '../src/outline/views/text/parseOutlineToNodes';
 import { toOutlineText } from '../src/outline/views/text/toOutlineText';
+import { flattenTree } from '../src/outline/views/list/flatten';
 
 test('단일 라인 텍스트를 기본 bullet 노드로 파싱한다', () => {
   const nodes = parseOutlineToNodes('단일 노드 텍스트');
@@ -139,4 +140,26 @@ test('JSON 노드 배열 문자열을 파싱할 때 새로운 ID를 발급하여
   assert.notEqual(parsed[0].id, 'old-id-1');
   assert.equal(parsed[0].children.length, 1);
   assert.notEqual(parsed[0].children[0].id, 'old-id-2');
+});
+
+test('상위 노드가 완료되면 하위 노드들에 isAncestorCompleted가 전파된다', () => {
+  const rootNodes = parseOutlineToNodes(`- 부모 노드
+  - 자식 노드 1
+    - 손자 노드 1
+  - 자식 노드 2`);
+  rootNodes[0].isCompleted = true;
+
+  const flattened = flattenTree(rootNodes);
+  assert.equal(flattened[0].node.isCompleted, true);
+  assert.equal(flattened[0].isAncestorCompleted, false);
+
+  assert.equal(flattened[1].node.text, '자식 노드 1');
+  assert.equal(flattened[1].node.isCompleted, undefined);
+  assert.equal(flattened[1].isAncestorCompleted, true);
+
+  assert.equal(flattened[2].node.text, '손자 노드 1');
+  assert.equal(flattened[2].isAncestorCompleted, true);
+
+  assert.equal(flattened[3].node.text, '자식 노드 2');
+  assert.equal(flattened[3].isAncestorCompleted, true);
 });

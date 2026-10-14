@@ -20,12 +20,15 @@ export function flattenTree(
 ): FlattenedNode[] {
   let displayNodes = rootNodes;
   let basePath: NodeId[] = [];
+  let baseAncestorCompleted = false;
 
   if (zoomedId) {
     const target = findNode(rootNodes, zoomedId);
     if (target) {
       displayNodes = target.children;
-      basePath = getPath(rootNodes, zoomedId).map((n) => n.id);
+      const pathNodes = getPath(rootNodes, zoomedId);
+      basePath = pathNodes.map((n) => n.id);
+      baseAncestorCompleted = pathNodes.some((n) => n.isCompleted === true);
     }
   }
 
@@ -36,10 +39,12 @@ export function flattenTree(
     nodes: OutlineNode[],
     depth: number,
     parentId: NodeId | null,
-    currentPath: NodeId[]
+    currentPath: NodeId[],
+    ancestorCompleted: boolean
   ) {
     for (const node of nodes) {
-      if (hideCompleted && node.isCompleted) {
+      const isSelfCompleted = node.isCompleted === true;
+      if (hideCompleted && (isSelfCompleted || ancestorCompleted)) {
         continue;
       }
 
@@ -55,15 +60,22 @@ export function flattenTree(
         hasChildren,
         isFolded,
         path: nodePath,
+        isAncestorCompleted: ancestorCompleted,
       });
 
       // 접혀있지 않은 자식 노드만 전개
       if (hasChildren && !isFolded) {
-        traverse(node.children, depth + 1, node.id, nodePath);
+        traverse(
+          node.children,
+          depth + 1,
+          node.id,
+          nodePath,
+          ancestorCompleted || isSelfCompleted
+        );
       }
     }
   }
 
-  traverse(displayNodes, 0, zoomedId || null, basePath);
+  traverse(displayNodes, 0, zoomedId || null, basePath, baseAncestorCompleted);
   return result;
 }

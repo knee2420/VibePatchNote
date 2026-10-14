@@ -5,9 +5,9 @@
  * - 끌어 놓기와 여러 불릿 선택의 상태도 여기서 한 번만 만들어 모든 행에 내려준다.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { type NodeId, flattenTree } from '@vibe/outliner-core';
-import { useEditorStore, useOutlineRoots } from '../session/context';
+import { useEditorStore, useEditorWindow, useOutlineRoots } from '../session/context';
 import { OutlineRow, type OutlineRowHandlers } from './OutlineRow';
 import { OutlineContextMenu } from './OutlineContextMenu';
 import { OutlineMoveDialog } from './OutlineMoveDialog';
@@ -15,6 +15,7 @@ import { OutlineSelectionBar } from './OutlineSelectionBar';
 import { useContextMenu } from '../model/useContextMenu';
 import { useDragAndDrop } from '../model/useDragAndDrop';
 import { useRowSelection } from '../model/useRowSelection';
+import { getCaretCharacterOffsetWithin } from '../model/useKeyOrchestrator';
 import { useFileAttach } from '../attachments/useFileAttach';
 import { Plus } from 'lucide-react';
 
@@ -24,6 +25,8 @@ export const OutlineTree: React.FC = () => {
   const selectedNodeIds = useEditorStore((s) => s.selectedNodeIds);
   const addBulletAtEnd = useEditorStore((s) => s.addBulletAtEnd);
   const clearSelection = useEditorStore((s) => s.clearSelection);
+  const store = useEditorStore((s) => s);
+  const win = useEditorWindow();
 
   const { canAttach, isDraggingFile, dropOnTree } = useFileAttach();
   const { menu, menuRef, openMenu, closeMenu } = useContextMenu();
@@ -42,6 +45,53 @@ export const OutlineTree: React.FC = () => {
   );
 
   const { handleMouseDown } = useRowSelection(flattenedNodes);
+
+  // 단일 불릿 편집 중에도 옵시디언 전역 핫키 가로채기보다 먼저 발동하도록 capture 모드 사용
+  useEffect(() => {
+    const handleCaptureKeyDown = (e: KeyboardEvent) => {
+      // 다중 선택 상태는 useRowSelection 에서 별도로 처리
+      if (store.selectedNodeIds.length > 0) return;
+
+      const active = win.document.activeElement;
+      if (!(active instanceof HTMLElement)) return;
+
+      const rowEl = active.closest<HTMLElement>('[data-node-id]');
+      if (!rowEl) return;
+
+      const nodeId = rowEl.dataset.nodeId;
+      if (!nodeId) return;
+
+      const isModifier = e.ctrlKey || e.metaKey;
+
+      // 1. Ctrl+Enter: 완료/미완료 토글
+      if (e.key === 'Enter' && isModifier && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.toggleCompleted(nodeId);
+        return;
+      }
+
+      // 2. Alt+ArrowUp / Alt+ArrowDown: 불릿 순서 이동
+      if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        const caretPos = getCaretCharacterOffsetWithin(active);
+        const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+        store.setFocus(nodeId, caretPos);
+        const moved = store.moveNodesStep([nodeId], direction);
+        if (moved) {
+          win.requestAnimationFrame(() => {
+            active.focus();
+            store.setFocus(nodeId, caretPos);
+          });
+        }
+        return;
+      }
+    };
+
+    win.addEventListener('keydown', handleCaptureKeyDown, true);
+    return () => win.removeEventListener('keydown', handleCaptureKeyDown, true);
+  }, [win, store]);
 
   const handlers = useMemo<OutlineRowHandlers>(
     () => ({

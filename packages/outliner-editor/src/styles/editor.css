@@ -23,3 +23,29 @@
 .outline-menu-pop {
   animation: outline-menu-pop 110ms ease-out;
 }
+
+/* 불릿 내부 마크다운 렌더링 시 블록 요소 인라인 강제 및 여백 초기화 */
+[data-node-id] p,
+[data-node-id] ol,
+[data-node-id] ul,
+[data-node-id] li,
+[data-node-id] blockquote,
+[data-node-id] h1,
+[data-node-id] h2,
+[data-node-id] h3,
+[data-node-id] h4,
+[data-node-id] h5,
+[data-node-id] h6 {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+}
+
+/* 태그 및 링크 인라인 플렉스 정렬 */
+[data-node-id] a.tag,
+[data-node-id] a.internal-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: baseline !important;
+}

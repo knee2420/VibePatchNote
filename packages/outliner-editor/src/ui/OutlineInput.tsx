@@ -64,6 +64,24 @@ function hasLinkOrTag(text: string): boolean {
   );
 }
 
+/**
+ * 불릿 텍스트가 옵시디언 마크다운 렌더러에 의해 <ol>, <ul>, <h1>, <blockquote> 등의 블록 요소로
+ * 오인 파싱되는 것을 원천 차단하기 위해, 첫머리의 블록 트리거 문자들을 이스케이프한다.
+ */
+export function toInlineMarkdown(text: string): string {
+  // 1. 숫자 목록 (1. , 2. 등) -> 1\. 로 이스케이프하여 <ol> 생성 방지
+  let inline = text.replace(/^(\s*)(\d+)\.(?=\s)/, '$1$2\\.');
+  // 2. 불릿 목록 (- , * , + ) -> \- 로 이스케이프하여 <ul> 생성 방지
+  inline = inline.replace(/^(\s*)([-*+])(?=\s)/, '$1\\$2');
+  // 3. 제목 (# , ## 등) -> \# 로 이스케이프하여 <h1>~<h6> 생성 방지
+  inline = inline.replace(/^(\s*)(#{1,6})(?=\s)/, '$1\\$2');
+  // 4. 인용 (> ) -> \> 로 이스케이프하여 <blockquote> 생성 방지
+  inline = inline.replace(/^(\s*)(>+)(?=\s)/, '$1\\$2');
+  // 5. 체크박스 (- [ ], * [x] 등) -> \- [ ] 로 이스케이프
+  inline = inline.replace(/^(\s*)([-*+]\s*\[[ xX]\])/, '$1\\$2');
+  return inline;
+}
+
 /** 입력칸의 글자 기준 위치에 캐럿을 둔다. */
 function placeCaret(el: HTMLElement, offset: number) {
   try {
@@ -86,6 +104,7 @@ interface OutlineInputProps {
   initialText: string;
   nodeType?: OutlineNodeType;
   isCompleted?: boolean;
+  isAncestorCompleted?: boolean;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
@@ -107,9 +126,11 @@ const MarkdownBulletView: React.FC<{
 
     // 렌더는 비동기라, 글자가 빠르게 바뀌면 앞선 렌더가 늦게 끝나 겹쳐 그려질 수 있다.
     // 따로 그린 뒤 마지막 것만 옮겨 붙인다.
+    // 블록 요소(1., -, #, > 등)로 오인 파싱되어 줄 바꿈/여백이 벌어지지 않도록 인라인 이스케이프 처리
     const staging = container.ownerDocument.createElement('div');
     let isStale = false;
-    void Promise.resolve(renderMarkdown(text, staging)).then(() => {
+    const safeText = toInlineMarkdown(text);
+    void Promise.resolve(renderMarkdown(safeText, staging)).then(() => {
       if (!isStale) container.replaceChildren(...Array.from(staging.childNodes));
     });
     return () => {
@@ -172,7 +193,7 @@ const MarkdownBulletView: React.FC<{
     <div
       ref={containerRef}
       data-node-id={nodeId}
-      className={`${className} cursor-text select-text [&>p]:m-0 [&>p]:inline`}
+      className={`${className} cursor-text select-text [&_*]:inline [&_*]:m-0 [&_*]:p-0 [&_p]:m-0 [&_p]:inline [&_ol]:m-0 [&_ol]:p-0 [&_ol]:list-none [&_ul]:m-0 [&_ul]:p-0 [&_ul]:list-none [&_li]:inline [&_a.tag]:inline-flex [&_a.internal-link]:inline-flex`}
       onClick={handleClick}
       onMouseOver={handleMouseOver}
       onMouseDown={handleMouseDown}
@@ -185,6 +206,7 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   initialText,
   nodeType = 'bullet',
   isCompleted = false,
+  isAncestorCompleted = false,
   onKeyDown,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -339,6 +361,8 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
     cancelBlurCheck.current = () => win.clearTimeout(timer);
   };
 
+  const isInheritedCompleted = !isCompleted && isAncestorCompleted;
+
   // 위아래 여백은 줄 사이 간격(--outline-line-gap, OutlineTree 가 정한다)뿐이다.
   // 빈 불릿도 글자 한 줄만큼의 높이(1lh)는 갖는다.
   const commonClassName = `flex-1 py-(--outline-line-gap) px-1.5 min-h-[calc(1lh+2*var(--outline-line-gap))] font-[var(--font-text-theme)] leading-[1.7] tracking-[-0.005em] rounded hover:bg-(--background-modifier-hover) focus:bg-(--background-modifier-hover)/60 focus:ring-1 focus:ring-(--interactive-accent)/50 transition-colors break-words whitespace-pre-wrap ${
@@ -346,9 +370,11 @@ export const OutlineInput: React.FC<OutlineInputProps> = ({
   } ${TYPE_STYLES[nodeType]} ${
     isCompleted
       ? 'text-(--text-muted) opacity-60 line-through decoration-(--background-modifier-border-hover)'
-      : nodeType === 'quote'
-        ? 'text-(--text-muted) italic'
-        : 'text-(--text-normal)'
+      : isInheritedCompleted
+        ? 'text-(--text-muted) opacity-60'
+        : nodeType === 'quote'
+          ? 'text-(--text-muted) italic'
+          : 'text-(--text-normal)'
   }`;
 
   // 포커스가 없고 서식이 있으며 호스트 마크다운 렌더러가 제공된 경우: 네이티브 뷰 렌더링

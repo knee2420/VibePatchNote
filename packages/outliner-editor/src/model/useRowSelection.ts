@@ -223,8 +223,24 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
         return;
       }
 
-      // 10. ArrowUp: 선택 해제 후 첫 번째 선택 불릿의 이전 불릿(또는 첫 불릿)으로 포커스
-      if (e.key === 'ArrowUp' && !e.shiftKey) {
+      // 10. Alt+ArrowUp: 선택된 불릿들 위로 이동
+      if (e.key === 'ArrowUp' && e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.moveNodesStep(selectedIds, 'up');
+        return;
+      }
+
+      // 11. Alt+ArrowDown: 선택된 불릿들 아래로 이동
+      if (e.key === 'ArrowDown' && e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        store.moveNodesStep(selectedIds, 'down');
+        return;
+      }
+
+      // 12. ArrowUp: 선택 해제 후 첫 번째 선택 불릿의 이전 불릿(또는 첫 불릿)으로 포커스
+      if (e.key === 'ArrowUp' && !e.shiftKey && !e.altKey) {
         e.preventDefault();
         e.stopPropagation();
         const firstId = selectedIds[0];
@@ -234,8 +250,8 @@ export function useRowSelection(flattenedNodes: FlattenedNode[]) {
         return;
       }
 
-      // 11. ArrowDown: 선택 해제 후 마지막 선택 불릿의 다음 불릿(또는 마지막 불릿)으로 포커스
-      if (e.key === 'ArrowDown' && !e.shiftKey) {
+      // 13. ArrowDown: 선택 해제 후 마지막 선택 불릿의 다음 불릿(또는 마지막 불릿)으로 포커스
+      if (e.key === 'ArrowDown' && !e.shiftKey && !e.altKey) {
         e.preventDefault();
         e.stopPropagation();
         const lastId = selectedIds[selectedIds.length - 1];
