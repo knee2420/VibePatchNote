@@ -163,8 +163,9 @@ export async function syncOutlineMetadata(app: App, file: TFile) {
     cacheManager.unresolvedLinks[file.path] = fileUnresolved;
 
     // 3. 옵시디언 내부 캐시 변경 이벤트 트리거
+    // 주의: 'changed' 이벤트는 마크다운 에디터 인스턴스들의 전체 리로드를 유발하여
+    // 사용자의 미저장 버퍼를 파괴할 위험이 있으므로 호출하지 않고, 링크 해결('resolve')만 안전하게 전파합니다.
     if (typeof cacheManager.trigger === 'function') {
-      cacheManager.trigger('changed', file, content, metadata);
       cacheManager.trigger('resolve', file);
 
       // 대상 파일들의 백링크 패널 새로고침을 위해 resolve 이벤트 전파

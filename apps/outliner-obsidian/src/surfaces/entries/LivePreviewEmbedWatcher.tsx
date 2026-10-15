@@ -15,10 +15,10 @@ const MOUNTED_FLAG = EMBED_MOUNTED_FLAG;
 
 export class LivePreviewEmbedWatcher {
   private app: App;
-  private roots = new Map<HTMLElement, Root>();
+  private roots = new Map<HTMLElement, { root: Root; container: HTMLElement }>();
   private observer: MutationObserver | null = null;
   private eventRefs: EventRef[] = [];
-  private scheduled = false;
+  private debounceTimer: number | null = null;
 
   constructor(app: App) {
     this.app = app;
@@ -28,7 +28,7 @@ export class LivePreviewEmbedWatcher {
     this.scan();
 
     // 1. DOM MutationObserver: document.body 전체를 감시하여
-    //    Live Preview 에디터 본문, 호버 팝오버, 캔버스 등 모든 곳의 임베드를 즉시 감지
+    //    Live Preview 에디터 본문, 호버 팝오버, 캔버스 등 모든 곳의 임베드를 감지
     this.observer = new MutationObserver((mutations) => {
       // 제거된 노드에 대한 React Root 언마운트 클린업
       for (const mut of mutations) {
@@ -56,30 +56,37 @@ export class LivePreviewEmbedWatcher {
   }
 
   public destroy() {
+    if (this.debounceTimer !== null) {
+      window.clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
     this.observer?.disconnect();
     this.observer = null;
     this.eventRefs.forEach((ref) => this.app.workspace.offref(ref));
     this.eventRefs = [];
-    this.roots.forEach((root, embedEl) => {
+    this.roots.forEach(({ root, container }, embedEl) => {
       try {
         root.unmount();
       } catch {
         // 이미 unmount된 경우 무시
       }
-      // 플러그인을 다시 켰을 때 이 자리를 새로 그릴 수 있게 표시를 지운다.
+      container.remove();
+      this.restoreNativeChildren(embedEl);
       delete embedEl.dataset[MOUNTED_FLAG];
     });
     this.roots.clear();
   }
 
   private requestScan() {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    requestAnimationFrame(() => {
-      this.scheduled = false;
-      // 기다리는 사이에 플러그인이 꺼졌으면 그리지 않는다.
-      if (this.observer) this.scan();
-    });
+    if (this.debounceTimer !== null) {
+      window.clearTimeout(this.debounceTimer);
+    }
+    this.debounceTimer = window.setTimeout(() => {
+      this.debounceTimer = null;
+      requestAnimationFrame(() => {
+        if (this.observer) this.scan();
+      });
+    }, 100);
   }
 
   private scan() {
@@ -99,16 +106,26 @@ export class LivePreviewEmbedWatcher {
       .forEach((child) => this.unmountEmbed(child));
   }
 
+  private restoreNativeChildren(embedEl: HTMLElement) {
+    Array.from(embedEl.children).forEach((child) => {
+      if (child instanceof HTMLElement && child.classList.contains('vibe-outliner-native-hidden')) {
+        child.classList.remove('vibe-outliner-native-hidden');
+        child.style.display = '';
+      }
+    });
+  }
+
   private unmountEmbed(embedEl: HTMLElement) {
-    const root = this.roots.get(embedEl);
-    if (!root) return;
+    const entry = this.roots.get(embedEl);
+    if (!entry) return;
     try {
-      root.unmount();
+      entry.root.unmount();
     } catch {
       // 이미 unmount된 경우 무시
     }
+    entry.container.remove();
     this.roots.delete(embedEl);
-    // 옮겨져서 다시 붙은 자리라면 새로 그릴 수 있게 표시를 지운다.
+    this.restoreNativeChildren(embedEl);
     delete embedEl.dataset[MOUNTED_FLAG];
   }
 
@@ -192,7 +209,6 @@ export class LivePreviewEmbedWatcher {
 
     // 인터셉트 플래그 설정 및 기존 회색 제네릭 카드 클래스 제거
     embedEl.dataset[MOUNTED_FLAG] = 'true';
-    embedEl.empty();
     embedEl.addClass('vibe-outliner-embed-container');
     embedEl.removeClass('mod-generic');
 
@@ -201,8 +217,23 @@ export class LivePreviewEmbedWatcher {
     embedEl.style.width = '100%';
     embedEl.style.minHeight = '160px';
 
-    const root = createRoot(embedEl);
-    this.roots.set(embedEl, root);
+    // 중요: CodeMirror 6 에디터 DOM 트리 보존을 위해 기존 자식 노드를 지우지 않고 가리기만 합니다.
+    Array.from(embedEl.children).forEach((child) => {
+      if (child instanceof HTMLElement && !child.classList.contains('vibe-outliner-mount-root')) {
+        child.classList.add('vibe-outliner-native-hidden');
+        child.style.display = 'none';
+      }
+    });
+
+    // CodeMirror와 React가 DOM 소유권을 다투지 않도록 독립된 서브 컨테이너 생성
+    const mountContainer = document.createElement('div');
+    mountContainer.className = 'vibe-outliner-mount-root';
+    mountContainer.style.width = '100%';
+    mountContainer.style.height = '100%';
+    embedEl.appendChild(mountContainer);
+
+    const root = createRoot(mountContainer);
+    this.roots.set(embedEl, { root, container: mountContainer });
 
     root.render(
       <OutlineInline

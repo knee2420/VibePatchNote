@@ -66,6 +66,8 @@ export function useEmbedFileSync({ app, file, debounceMs = 300 }: EmbedFileSyncO
         const text = await app.vault.read(file);
         // 내가 방금 쓴 내용이면 무시 (무한 루프 방지)
         if (text === lastWrittenTextRef.current) return;
+        // 사용자가 로컬에서 편집 중(디바운스 대기 중)인 경우 외부 변경으로 덮어쓰지 않음
+        if (saveTimerRef.current !== null) return;
 
         const state = readOutlineText(text, file.basename);
         if (state.project) {

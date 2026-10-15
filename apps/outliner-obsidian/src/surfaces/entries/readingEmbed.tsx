@@ -58,11 +58,25 @@ export function registerOutlineMarkdownEmbedProcessor(app: App, registerProcesso
       // 화면 전체를 살피는 감시자(LivePreviewEmbedWatcher)가 같은 자리를 또 그리지 않도록 표시해 둔다.
       if (embedEl.dataset[EMBED_MOUNTED_FLAG] === 'true') return;
       embedEl.dataset[EMBED_MOUNTED_FLAG] = 'true';
-      embedEl.empty();
       embedEl.addClass('vibe-outliner-embed-container');
       embedEl.removeClass('mod-generic');
+
+      // 네이티브 자식 노드를 파괴하지 않고 가리기만 처리
+      Array.from(embedEl.children).forEach((child) => {
+        if (child instanceof HTMLElement && !child.classList.contains('vibe-outliner-mount-root')) {
+          child.classList.add('vibe-outliner-native-hidden');
+          child.style.display = 'none';
+        }
+      });
+
+      const mountContainer = document.createElement('div');
+      mountContainer.className = 'vibe-outliner-mount-root';
+      mountContainer.style.width = '100%';
+      mountContainer.style.height = '100%';
+      embedEl.appendChild(mountContainer);
+
       mountOutline(
-        embedEl,
+        mountContainer,
         ctx,
         <OutlineInline
           app={app}
