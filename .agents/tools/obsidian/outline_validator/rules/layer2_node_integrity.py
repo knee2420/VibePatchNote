@@ -4,6 +4,7 @@ Layer 2: Outline Node Integrity & Tree Structure Rules
 개별 노드 무결성, ID 고유성, 재귀 트리 구조 검증
 """
 
+import re
 from typing import Any
 from .base import BaseOutlineRule, OutlineLintContext, OutlineViolation
 
@@ -66,6 +67,17 @@ def traverse_nodes(nodes: list[Any], path_ids: set[str], seen_ids: dict[str, int
                 target = file_obj.get("target")
                 if not target or not isinstance(target, str):
                     violations.append(OutlineViolation("OUT-NODE-006", "딸린 파일(file) 객체에 'target' 파일 경로 문자열이 누락되었습니다.", node_id=node_id, node_text=str(node_text)))
+
+        # 6. 인라인 이미지 임베드(![[...]]) 검출 및 'file' 속성 분리 권장 검사
+        if isinstance(node_text, str) and re.search(r"!\[\[.*?\]\]", node_text):
+            violations.append(
+                OutlineViolation(
+                    "OUT-NODE-007",
+                    "노드 'text'에 인라인 마크다운 이미지(![[...]])가 감지되었습니다. '딸린 파일 표시(제목만/작게/크게)' 설정이 적용되도록 'file: { target: ... }' 첨부 속성으로 분리하는 것을 권장합니다 (--fix 지원).",
+                    node_id=node_id,
+                    node_text=str(node_text),
+                )
+            )
 
         # 자식 노드 재귀 탐색
         children = node.get("children")

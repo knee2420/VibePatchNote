@@ -43,6 +43,60 @@ class FrontmatterStructureRule(BaseLintRule):
         return violations
 
 
+class YamlSyntaxRule(BaseLintRule):
+    rule_id = "YML-SYNTAX-001"
+    description = "YAML 구문 문법(들여쓰기, 따옴표 등) 무결성 검증"
+
+    def check(self, ctx: LintContext) -> list[LintViolation]:
+        violations = []
+        if not ctx.fm_raw:
+            return violations
+
+        try:
+            loaded = yaml.safe_load(ctx.fm_raw)
+            if loaded is not None and not isinstance(loaded, dict):
+                violations.append(
+                    LintViolation(
+                        rule_id=self.rule_id,
+                        message="프론트매터가 올바른 딕셔너리(키-값 쌍) 형태가 아닙니다."
+                    )
+                )
+        except yaml.YAMLError as e:
+            violations.append(
+                LintViolation(
+                    rule_id=self.rule_id,
+                    message=f"YAML 구문 문법 오류(들여쓰기/콜론/따옴표 결함): {e}"
+                )
+            )
+        return violations
+
+
+REQUIRED_13_PROPERTIES = [
+    "유형", "구역", "분류", "주제", "상태", "요약",
+    "작성일", "마감", "커버", "상위", "링크", "담당", "작성자"
+]
+
+
+class RequiredPropertiesRule(BaseLintRule):
+    rule_id = "FM-ATTR-13-001"
+    description = "옵시디언 헌법 공통 필수 속성 13종 존재 검증"
+
+    def check(self, ctx: LintContext) -> list[LintViolation]:
+        violations = []
+        if not ctx.has_frontmatter or not ctx.fm_data or not isinstance(ctx.fm_data, dict):
+            return violations
+
+        missing = [attr for attr in REQUIRED_13_PROPERTIES if attr not in ctx.fm_data]
+        if missing:
+            violations.append(
+                LintViolation(
+                    rule_id=self.rule_id,
+                    message=f"옵시디언 필수 속성 13종 중 누락된 속성이 있습니다: {missing}"
+                )
+            )
+        return violations
+
+
 class DangerousColonRule(BaseLintRule):
     rule_id = "YML-COLON-001"
     description = "값 내부 따옴표 없는 ': '(콜론+공백) 매핑 충돌 방지"

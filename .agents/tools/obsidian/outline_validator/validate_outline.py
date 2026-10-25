@@ -13,6 +13,7 @@ import json
 import secrets
 import string
 import time
+import re
 from typing import Optional
 
 # Windows 콘솔 인코딩(cp949) 충돌 방지: stdout/stderr를 UTF-8로 강제 재설정
@@ -154,6 +155,18 @@ def autofix_outline(file_path: str) -> bool:
                 if "updatedAt" not in node:
                     node["updatedAt"] = now
                     changed = True
+
+                # text 내 인라인 이미지(![[...]]) 감지 시 file 속성 분리 자동 수복
+                text_val = node.get("text", "")
+                if isinstance(text_val, str):
+                    img_match = re.search(r"!\[\[(.*?)\]\]", text_val)
+                    if img_match and "file" not in node:
+                        img_target = img_match.group(1).strip()
+                        node["file"] = {"target": img_target}
+                        cleaned = re.sub(r"!\[\[.*?\]\]", "", text_val).strip()
+                        node["text"] = re.sub(r"\s+", " ", cleaned).strip()
+                        changed = True
+
                 fix_nodes(node.get("children", []))
 
     fix_nodes(doc.get("rootNodes", []))

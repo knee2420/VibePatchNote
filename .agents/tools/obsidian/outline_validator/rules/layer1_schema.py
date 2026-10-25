@@ -98,7 +98,7 @@ class RuleDefaultView(BaseOutlineRule):
 
 class RuleTimestamps(BaseOutlineRule):
     rule_id = "OUT-SPEC-006"
-    description = "'createdAt' 및 'updatedAt'은 밀리초 정수 타임스탬프여야 합니다."
+    description = "'createdAt' 및 'updatedAt'은 필수 밀리초 정수 타임스탬프여야 합니다."
 
     def check(self, ctx: OutlineLintContext) -> list[OutlineViolation]:
         if not ctx.json_data:
@@ -106,7 +106,9 @@ class RuleTimestamps(BaseOutlineRule):
         violations = []
         for field in ("createdAt", "updatedAt"):
             val = ctx.json_data.get(field)
-            if val is not None and not isinstance(val, (int, float)):
+            if val is None:
+                violations.append(OutlineViolation(self.rule_id, f"최상위 필수 필드 '{field}'가 누락되었습니다. 옵시디언 플러그인(Zod safeParse) 요구 규격입니다."))
+            elif not isinstance(val, (int, float)):
                 violations.append(OutlineViolation(self.rule_id, f"'{field}'는 숫자(밀리초 타임스탬프)여야 합니다 (현재 타입: {type(val).__name__})."))
         return violations
 

@@ -7,6 +7,8 @@ from .base import BaseLintRule, LintContext, LintViolation
 from .layer1_syntax import (
     EolRule,
     FrontmatterStructureRule,
+    YamlSyntaxRule,
+    RequiredPropertiesRule,
     DangerousColonRule,
     MultitextTypeRule,
     WikilinkQuoteRule,
@@ -24,6 +26,8 @@ ALL_RULES: list[BaseLintRule] = [
     # Layer 1: 기본 구문 & 타입 무결성 (Syntax & Frontmatter Base Rules)
     EolRule(),
     FrontmatterStructureRule(),
+    YamlSyntaxRule(),
+    RequiredPropertiesRule(),
     DangerousColonRule(),
     MultitextTypeRule(),
     WikilinkQuoteRule(),
