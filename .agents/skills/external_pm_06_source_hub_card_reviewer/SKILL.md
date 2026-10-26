@@ -85,17 +85,20 @@ agy -p --output-format json --disable-slash-commands \
 python .agents/tools/obsidian/source_hub/02_verify_hub_card.py "<카드.md>" --json "<임시폴더>/report_NN_rK.json"
 ```
 * **FAIL 이 하나라도 있으면** 사람 리뷰를 하지 않습니다. 카드 제목 줄에 반려 스레드 하나를 열고 FAIL 줄을 그대로 붙여 돌려보냅니다 (`R-GATE`).
-* FAIL 0 이면 WARN 목록을 Step 2 의 확인 대상에 넣습니다.
+  - `H-DUP-001`(이미 등록된 동일 URL 재조사) 발생 시 即時 반려.
+* FAIL 0 이면 WARN 목록(`H-DUP-002` 등)을 Step 2 의 확인 대상에 넣습니다.
 
 ### [Step 2] 표본 대조 — 리뷰어가 직접 다시 연다
-확인 대상: **무작위 링크 3개 + WARN 이 붙은 링크 전부 + `register`(visible-browser) 이미지 전부.**
-허브마다 다음 셋을 봅니다.
+확인 대상: **무작위 링크 3개 + WARN 이 붙은 링크 전부(`H-DUP-002` 동일 도메인 포함) + `register`(visible-browser) 이미지 전부.**
+허브마다 다음 넷을 봅니다.
 
 | 볼 것 | 어떻게 | 어긋나면 |
 | :--- | :--- | :--- |
 | (a) 허브인가 — 서식 목록 · 분류 · 검색이 보이나 | 브라우저로 열어 본다 | `R-SCOPE` |
 | (b) 카드의 숫자 · 이용 조건 문장이 그 페이지에 있나 | 페이지 텍스트에서 그 글자를 찾는다 | `R-FACT` |
 | (c) 캡처가 그 페이지인가 | `01_capture_hub_page.py capture --no-manifest` 로 다시 찍어 **나란히 놓고 본다** | `R-IMG` |
+| (d) 중복 및 계층 구조 — 5번 노드에 이미 동일 도메인이 있는가 | 아웃라인 트리를 조회하여 동일 도메인의 서브카탈로그화 또는 기존 카드 임베드 연동 확인 | `R-DEDUP` |
+| (e) 독립 레퍼런스 카드 — `(web)<허브명>.md` 가 생성되었는가 | `1.collection` 밖 상위 폴더에 카드가 생성되고 본문/커버에 캡처 이미지가 1:1 paste 되었는지 확인 | `R-CARD` |
 
 (c) 는 글자 하나까지 같을 필요는 없습니다 (광고 · 최신 글은 바뀜). **레이아웃 · 제목 · 건수 자리**가 같으면 같은 페이지입니다.
 표본에서 하나라도 위조(`R-IMG` 중 그린 그림 · 다른 페이지)가 나오면 **전 링크로 넓혀** 다 봅니다.
@@ -103,15 +106,15 @@ python .agents/tools/obsidian/source_hub/02_verify_hub_card.py "<카드.md>" --j
 ### [Step 3] 판정
 | 판정 | 조건 | 다음 |
 | :--- | :--- | :--- |
-| **반려** | 기계 FAIL · 위조 캡처 · 짐작 URL · 확인 불가 사실을 사실처럼 씀 | Step 4 — 그리고 `lessons_learned.md` 에 해당 항목이 있으면 코멘트에 링크 |
-| **고침 요청** | 숫자 · 문구 어긋남, 허브 아닌 곳 섞임, 라이선스 누락, 뺀 후보 표 없음 | Step 4 |
+| **반려** | 기계 FAIL(H-DUP-001 등) · 위조 캡처 · 짐작 URL · 확인 불가 사실을 사실처럼 씀 · 독립 레퍼런스 카드 누락(R-CARD) | Step 4 — 그리고 `lessons_learned.md` 에 해당 항목이 있으면 코멘트에 링크 |
+| **고침 요청** | 숫자 · 문구 어긋남, 허브 아닌 곳 섞임, 서브카탈로그 누락(R-DEDUP), 라이선스 누락, 뺀 후보 표 없음 | Step 4 |
 | **통과** | 표본 전부 맞고 WARN 은 까닭이 카드에 적혀 있음 | Step 6 |
 
 ### [Step 4] 💬 코멘트 — 지적 1건 = 스레드 1개
 볼트 코멘트 형식(`What-s-in-my-head/docs/comments.md`)을 그대로 씁니다. 템플릿: [`templates/review_comment_template.md`](./templates/review_comment_template.md)
 1. 틀린 **그 줄 끝**에 앵커 ` [[#^c-xxxxxxxx|💬]]` 를 붙입니다 (`xxxxxxxx` = 소문자 · 숫자 8자, 카드 안에서 겹치지 않게).
 2. 카드 맨 아래 `## 💬 코멘트` (없으면 만듦)에 스레드를 덧붙입니다.
-3. 머리에 **지적 ID** 를 붙입니다: `R-GATE` · `R-LINK` · `R-IMG` · `R-FACT` · `R-SCOPE` · `R-LICENSE` · `R-STYLE`.
+3. 머리에 **지적 ID** 를 붙입니다: `R-GATE` · `R-LINK` · `R-IMG` · `R-FACT` · `R-SCOPE` · `R-LICENSE` · `R-DEDUP` · `R-CARD` · `R-STYLE`.
 4. 본문은 **무엇이 · 어디서 확인했더니 · 어떻게 고치면 되는지** 세 줄. 고친 문장을 대신 써 주지 않습니다 (방향만).
 5. 줄끝 LF 를 지키고, 프론트매터는 건드리지 않습니다.
 

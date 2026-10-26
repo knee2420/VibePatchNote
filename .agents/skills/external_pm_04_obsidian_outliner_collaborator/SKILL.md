@@ -110,3 +110,6 @@ python .agents/tools/obsidian/outline_validator/validate_outline.py "<아웃라�
    - 아웃라인의 내용을 파악할 때 `view_file`로 수천 줄의 JSON을 통째로 읽지 마십시오. 반드시 `01_seek_outline_tree.py --depth 1`로 먼저 전체 지형도를 확인하십시오.
 4. **도메인 정체성 엄격 준수** :
    - 본 프로젝트는 **범용 문서 빌더/스캐폴딩 엔진, 리치 텍스트·캔버스 시각화, 도메인 중립 Agent 런타임 시스템**입니다. 소설, 웹소설 등 창작 용어나 비유는 일체 사용하지 않습니다.
+5. **사전 중복 검색 및 계층화 (Pre-mutation Seek & Hierarchical Deduplication)** :
+   - 노드를 신규 추가(`insert`)하거나 이동하기 전에 반드시 `01_seek_outline_tree.py --query "<키워드 또는 도메인>"`을 통해 트리에 동일하거나 유사한 엔티티가 이미 존재하는지 먼저 조회해야 합니다.
+   - 동일 플랫폼이나 공통 상위 범주에 속하는 파생 항목(예: 동일 도메인의 서로 다른 서식·포맷)은 트리의 최상위에 평면적으로 분산 나열하지 말고, **상위 공통 불릿 아래의 자식 노드(서브트리, `inside` 또는 `move`)로 몰아넣어 계층화**해야 합니다.

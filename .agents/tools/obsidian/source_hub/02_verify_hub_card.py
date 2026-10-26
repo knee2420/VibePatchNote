@@ -50,6 +50,7 @@ SOFT_404_TITLE = re.compile(r"(오류\s*페이지|에러\s*페이지|not\s*found
 BOTBLOCK_TITLE = re.compile(r"(just a moment|attention required|보안 확인|checking your browser)", re.I)
 SELF_CERT = ("전수 검증", "검증 완료", "100%", "완벽", "검증된 공식")
 VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "validator", "validate_obsidian_note.py")
+OUTLINE_VALIDATOR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "outline_validator", "validate_outline.py")
 
 
 class Report:
@@ -223,6 +224,168 @@ def check_vault_lint(note_path: str, rep: Report):
             rep.add("FAIL", "H-OBS-001", line[2:].strip())
 
 
+def check_pipeline_taxonomy(outline_path: str, fm: dict, rep: Report):
+    """
+    [섹터 전용 검증: H-TAX]
+    4번 노드 '서식 템플릿 수급처 분류 기준 (Data Pipeline Source Types)'에 정의된 8대 기준 및 34개 정규 어휘 외에
+    5번 노드 마스터 레지스트리 뱃지에 임의 어휘가 사용되었는지를 엄격히 검사합니다.
+    """
+    try:
+        with open(outline_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception as e:
+        rep.add("WARN", "H-TAX-000", f"아웃라인 JSON 읽기 실패: {e}")
+        return
+
+    root_nodes = data.get("rootNodes", [])
+    node4 = None
+    node5 = None
+    for n in root_nodes:
+        txt = n.get("text", "")
+        if "4." in txt and "분류 기준" in txt:
+            node4 = n
+        elif "5." in txt and "수급처" in txt:
+            node5 = n
+
+    if not node4:
+        rep.add("WARN", "H-TAX-000", "4번 노드(분류 기준)를 찾을 수 없음")
+        return
+
+    # 4번 노드에서 허용 정규 어휘 세트 동적 추출
+    allowed_terms = set()
+    for crit in node4.get("children", []):
+        for item in crit.get("children", []):
+            item_text = item.get("text", "").strip()
+            if item_text:
+                allowed_terms.add(item_text)
+
+    if not node5:
+        return
+
+    # 5번 노드의 모든 뱃지 노드 검증
+    badge_count = 0
+    invalid_terms = []
+    structure_errors = []
+
+    def inspect_hub_children(nodes):
+        nonlocal badge_count
+        for child in nodes:
+            txt = child.get("text", "")
+            if "【" in txt and "】" in txt:
+                badge_count += 1
+                badges = re.findall(r"【(.*?)】", txt)
+                if len(badges) not in (6, 8):
+                    structure_errors.append(f"뱃지 {len(badges)}개 (기준 6개 또는 8개 필요): {txt[:50]}")
+                for b in badges:
+                    terms = [t.strip() for t in b.split(" · ")]
+                    for t in terms:
+                        if t and t not in allowed_terms:
+                            invalid_terms.append((t, txt[:60]))
+            inspect_hub_children(child.get("children", []))
+
+    inspect_hub_children(node5.get("children", []))
+
+    if invalid_terms:
+        unique_invalids = sorted(set(t[0] for t in invalid_terms))
+        rep.add("FAIL", "H-TAX-001", f"4번 노드 분류 기준에 없는 비표준 어휘 감지: {unique_invalids} (4번 노드 {len(allowed_terms)}개 정규 어휘 외 사용 절대 금지)")
+    elif structure_errors:
+        rep.add("FAIL", "H-TAX-002", f"8대 기준 뱃지 구조 위반: {structure_errors[:3]}")
+    else:
+        rep.add("OK", "H-TAX", f"마스터 아웃라인 5번 노드 뱃지 검증 통과 (4번 노드 {len(allowed_terms)}개 정규 어휘 100% 준수, 검사된 뱃지: {badge_count}개)")
+
+
+def check_hub_duplicates(note_path: str, body: str, links: list, outline_path: str, rep: Report):
+    """
+    [L-10 중복 방지 검증: H-DUP]
+    신규 조사 대상 허브가 상위 아웃라인 5번 노드에 이미 등록된 동일 URL이거나,
+    동일 도메인/플랫폼이 이미 존재하여 서브카탈로그화 또는 임베드 연동이 필요한지 검사합니다.
+    """
+    try:
+        with open(outline_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return
+
+    root_nodes = data.get("rootNodes", [])
+    node5 = next((n for n in root_nodes if "5." in n.get("text", "") and "수급처" in n.get("text", "")), None)
+    if not node5:
+        return
+
+    card_name = os.path.splitext(os.path.basename(note_path))[0]
+
+    # 아웃라인 5번 노드의 기존 허브 URL 및 도메인 전수 수집 (자신의 카드는 제외)
+    existing_urls = {}
+    existing_domains = {}
+
+    def collect(nodes, parent_desc=""):
+        for n in nodes:
+            txt = n.get("text", "").strip()
+            if txt.startswith("http://") or txt.startswith("https://"):
+                # URL 노드
+                if card_name not in parent_desc:
+                    clean_u = txt.rstrip("/").lower()
+                    existing_urls[clean_u] = parent_desc
+                    dom = site_of(txt)
+                    if dom:
+                        existing_domains.setdefault(dom, []).append((parent_desc, txt))
+            collect(n.get("children", []), parent_desc=txt if "[[" in txt or "(" in txt else parent_desc)
+
+    collect(node5.get("children", []))
+
+    # 본문에서 '## 2. 순수 신규 조사 대상 허브' 이후의 링크만 신규 후보로 판별
+    new_sec_match = re.search(r"## 2\.\s*순수\s*신규\s*조사\s*대상\s*허브(.*?)(?:##|\Z)", body, re.S)
+    new_links = []
+    if new_sec_match:
+        new_links = re.findall(r"\* \*\*허브 링크\*\*:\s*(https?://[^\s\n\r]+)", new_sec_match.group(1))
+
+    for u in new_links:
+        clean_u = u.strip().rstrip("/").lower()
+        if clean_u in existing_urls:
+            rep.add("FAIL", "H-DUP-001", f"이미 5번 노드에 등록된 동일 URL 허브 (L-10 위반, 신규 조사가 아닌 트랜스클루전 임베드로 연동할 것): {u} (기존: {existing_urls[clean_u]})")
+            continue
+        dom = site_of(u)
+        if dom in existing_domains:
+            matched = existing_domains[dom]
+            # 상위 플랫폼 서브카탈로그 노드로 묶여있지 않은 경우 경고
+            rep.add("WARN", "H-DUP-002", f"동일 플랫폼/도메인({dom})이 이미 5번 노드에 등록되어 있음 (단일 플랫폼 서브카탈로그화 또는 기존 카드 임베드 연동 확인 필요): {u} ← 기존: {matched[0][0]}")
+
+    if not rep.fails():
+        rep.add("OK", "H-DUP", "아웃라인 5번 마스터 레지스트리 대조 중복 검사 통과")
+
+
+def check_outline_lint(note_path: str, body: str, links: list, fm: dict, rep: Report):
+    parent_raw = str(fm.get("상위") or "").strip()
+    m = re.search(r"\[\[(.*?)\]\]", parent_raw)
+    parent_title = m.group(1).strip() if m else parent_raw
+    if not parent_title:
+        return
+
+    # 아웃라인 파일 찾기
+    outline_path = (
+        r"c:\망고독 관련 자료\프로젝트_매니지먼트\What-s-in-my-head\3.📦(Resource) 자료"
+        rf"\📑 문서_서식_수집_파이프라인\{parent_title}.outline"
+    )
+    if not os.path.exists(outline_path):
+        return
+
+    if not os.path.exists(OUTLINE_VALIDATOR):
+        rep.add("WARN", "H-OUT-000", f"아웃라인 린터를 찾지 못함: {OUTLINE_VALIDATOR}")
+    else:
+        r = subprocess.run([sys.executable, OUTLINE_VALIDATOR, outline_path], capture_output=True, text=True, encoding="utf-8")
+        if r.returncode == 0:
+            rep.add("OK", "H-OUT", "마스터 아웃라인 범용 린터 통과")
+        else:
+            for line in (r.stdout + r.stderr).splitlines():
+                line = line.strip()
+                if line.startswith("->"):
+                    rep.add("FAIL", "H-OUT-001", line[2:].strip())
+
+    # 섹터 전용 검증: 4번 노드 Taxonomy 검사
+    check_pipeline_taxonomy(outline_path, fm, rep)
+    # L-10 중복 검증: H-DUP 검사
+    check_hub_duplicates(note_path, body, links, outline_path, rep)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="서식 수급처 허브 카드 기계 검사")
     parser.add_argument("card", help="카드 .md 경로")
@@ -250,6 +413,7 @@ def main() -> int:
         rep.add("WARN", "H-IMG-006", f"링크 {len(links)}개 · 이미지 {len(images)}장 — 허브마다 캡처 한 장인지 볼 것")
     check_body(fm, body, links, rep)
     check_vault_lint(args.card, rep)
+    check_outline_lint(args.card, body, links, fm, rep)
 
     print(f"=== Hub Card Verifier: {os.path.basename(args.card)} ===")
     for item in rep.items:

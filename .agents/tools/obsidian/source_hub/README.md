@@ -16,6 +16,8 @@
 | :--- | :--- | :--- |
 | **`01_capture_hub_page.py`** | 작업자 · 리뷰어 | Edge/Chrome 헤드리스로 주소를 실제로 찍고, 위아래만 크롭해서, 이미지 폴더의 `capture_manifest.json` 에 주소 · 시각 · sha256 을 남김. 봇 차단 페이지는 `register` 로 사람 브라우저 화면을 등록 |
 | **`02_verify_hub_card.py`** | 작업자(자가 검사) · 리뷰어(게이트) | 카드 한 장의 기계 검사. FAIL 이 있으면 종료 코드 1 |
+| **`03_append_hub_to_outline.py`** | 작업자 | 신규 실측 허브를 마스터 아웃라인 5번 노드에 안전하게 누적 등록하고, 도메인 중복 차단 및 38개 정규 어휘 뱃지 규격 강제 |
+| **`04_generate_hub_reference_card.py`** | 작업자 | 검증 완료된 허브를 '1.collection' 밖 상위 디렉터리에 독립 레퍼런스 카드('(web)<허브명>.md')로 자동 생성 및 캡처 이미지 paste |
 
 ## 🔍 `02_verify_hub_card.py` 검사 규칙
 
@@ -58,6 +60,10 @@ python .agents/tools/obsidian/source_hub/01_capture_hub_page.py capture --url "<
 # 4. 카드 검사 (리뷰어는 --json 으로 결과 파일도 남긴다)
 python .agents/tools/obsidian/source_hub/02_verify_hub_card.py "<카드.md>"
 python .agents/tools/obsidian/source_hub/02_verify_hub_card.py "<카드.md>" --json "<임시폴더>/report.json"
+
+# 5. 독립 레퍼런스 카드('(web)<허브명>.md') 자동 생성 (최종 단계)
+python .agents/tools/obsidian/source_hub/04_generate_hub_reference_card.py --card "<카드.md>"
+python .agents/tools/obsidian/source_hub/04_generate_hub_reference_card.py --all-outline
 ```
 
 ## ⚠️ 알려진 한계
