@@ -15,7 +15,9 @@ import { registerNodeLinkProtocol } from './commands/nodeLinkProtocol';
 import { registerOutlineCommands } from './commands/outlineCommands';
 import { OUTLINE_EXTENSION, VIEW_TYPE_OUTLINE } from './document/outlineFiles';
 import { loadPluginSettings } from './host/pluginSettings';
+import { registerCanvasSyncCommands } from './commands/canvasSyncCommands';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
+import { CanvasSelectionSync } from './surfaces/entries/CanvasSelectionSync';
 import { LivePreviewEmbedWatcher } from './surfaces/entries/LivePreviewEmbedWatcher';
 import { registerOutlineCodeBlockProcessor } from './surfaces/entries/codeBlock';
 import { registerOutlineMarkdownEmbedProcessor } from './surfaces/entries/readingEmbed';
@@ -26,6 +28,7 @@ import { clearOutlineMetadata, syncOutlineMetadata } from './vault/outlineMetada
 export default class VibeOutlinerPlugin extends Plugin {
   private canvasCardWatcher: CanvasCardWatcher | null = null;
   private livePreviewWatcher: LivePreviewEmbedWatcher | null = null;
+  private canvasSelectionSync: CanvasSelectionSync | null = null;
 
   async onload(): Promise<void> {
     // 0. 설정을 먼저 불러 둔다. (화면이 뜨자마자 딸린 파일의 기본 크기를 묻는다)
@@ -53,6 +56,11 @@ export default class VibeOutlinerPlugin extends Plugin {
     // 4. 캔버스(Canvas) 파일 카드 직접 연동 인터셉터 초기화
     this.canvasCardWatcher = new CanvasCardWatcher(this.app);
     this.canvasCardWatcher.init();
+
+    // 4-1. 아웃라인 탭 ↔ 캔버스 카드 선택 맞추기 (실험)
+    this.canvasSelectionSync = new CanvasSelectionSync(this.app);
+    this.canvasSelectionSync.init();
+    registerCanvasSyncCommands(this, this.canvasSelectionSync);
 
     // 5. 호버 링크 미리보기 소스 등록 (Page Preview)
     this.registerHoverLinkSource(VIEW_TYPE_OUTLINE, {
@@ -108,6 +116,8 @@ export default class VibeOutlinerPlugin extends Plugin {
   onunload(): void {
     this.canvasCardWatcher?.destroy();
     this.canvasCardWatcher = null;
+    this.canvasSelectionSync?.destroy();
+    this.canvasSelectionSync = null;
     this.livePreviewWatcher?.destroy();
     this.livePreviewWatcher = null;
   }
