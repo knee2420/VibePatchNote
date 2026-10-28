@@ -12,8 +12,8 @@ import {
   OutlineTree,
   createOutlineEditorStore,
   useOutlineView,
-} from '@vibe/outliner-editor';
-import type { ViewMode } from '@vibe/outliner-core';
+} from '@vibe/outliner/editor';
+import type { ViewMode } from '@vibe/outliner/core';
 import { createObsidianHost } from '../../host/obsidianHost';
 import { renameOutlineFile } from '../../document/outlineFiles';
 import { useEmbedFileSync } from './useEmbedFileSync';

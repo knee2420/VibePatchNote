@@ -10,9 +10,7 @@
     "install:vault": "node scripts/install-to-vault.mjs"
   },
   "dependencies": {
-    "@vibe/outliner-core": "workspace:*",
-    "@vibe/outliner-dto": "workspace:*",
-    "@vibe/outliner-editor": "workspace:*",
+    "@vibe/outliner": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "zustand": "^5.0.15"

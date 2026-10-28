@@ -22,8 +22,8 @@ import {
   TFile,
   setIcon,
 } from 'obsidian';
-import type { NodeId } from '@vibe/outliner-core';
-import type { OutlineHost, OutlineHostMenuItem } from '@vibe/outliner-editor';
+import type { NodeId } from '@vibe/outliner/core';
+import type { OutlineHost, OutlineHostMenuItem } from '@vibe/outliner/editor';
 import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
 import { type MirrorPlace, MirrorPanelModal, pathSegments } from '../../mirror/MirrorPanelModal';
 import { type MirrorIndex, toRawCard } from '../../mirror/mirrorIndex';

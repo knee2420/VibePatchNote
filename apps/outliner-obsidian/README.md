@@ -8,9 +8,9 @@
 ## 구성
 
 ```text
-packages/outliner-core      편집 규칙
-packages/outliner-dto       파일 규격 (.outline 의 내용은 독립 앱의 .json 과 같은 JSON)
-packages/outliner-editor    편집 화면 (독립 앱과 함께 씀)
+packages/outliner/src/core      편집 규칙
+packages/outliner/src/dto       파일 규격 (.outline 의 내용은 독립 앱의 .json 과 같은 JSON)
+packages/outliner/src/editor    편집 화면 (독립 앱과 함께 씀)
 apps/outliner-obsidian      이 플러그인: 파일 화면, 명령, 옵시디언 연결
 ```
 

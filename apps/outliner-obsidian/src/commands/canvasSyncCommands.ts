@@ -6,7 +6,7 @@
  */
 
 import { type Plugin, Notice } from 'obsidian';
-import { getFlatNode } from '@vibe/outliner-core';
+import { getFlatNode } from '@vibe/outliner/core';
 import {
   type CanvasSelectionSync,
   type OutlineCardLink,

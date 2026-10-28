@@ -7,7 +7,7 @@
  */
 
 import type { Plugin } from 'obsidian';
-import type { FileDisplay } from '@vibe/outliner-core';
+import type { FileDisplay } from '@vibe/outliner/core';
 
 export interface PluginSettings {
   /** 파일 종류(`image`, `pdf`)별 표시 크기. 적혀 있지 않은 종류는 FALLBACK_FILE_DISPLAY */

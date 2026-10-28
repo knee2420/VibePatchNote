@@ -13,7 +13,7 @@ import {
   type TFile,
   MarkdownRenderer,
 } from 'obsidian';
-import type { OutlineHost } from '@vibe/outliner-editor';
+import type { OutlineHost } from '@vibe/outliner/editor';
 import { ConfirmModal } from './dialogs/ConfirmModal';
 import { VIEW_TYPE_OUTLINE, buildNodeLink, createSiblingFile } from '../document/outlineFiles';
 import { createObsidianFiles } from './files/obsidianFiles';

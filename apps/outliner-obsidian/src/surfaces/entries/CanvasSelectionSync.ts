@@ -9,7 +9,7 @@
  */
 
 import type { App, EventRef } from 'obsidian';
-import { type NodeId, ROOT_ID, getFlatNode, isInSubtree } from '@vibe/outliner-core';
+import { type NodeId, ROOT_ID, getFlatNode, isInSubtree } from '@vibe/outliner/core';
 import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
 import { OutlineFileView } from '../tab/OutlineFileView';
 

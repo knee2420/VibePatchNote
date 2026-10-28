@@ -6,13 +6,13 @@
  * 맞출 때는 그 기준선과 워크스페이스의 차이만 폴더에 반영한다.
  */
 
-import type { Workspace } from '@vibe/outliner-core';
+import type { Workspace } from '@vibe/outliner/core';
 import {
   type VaultDiskState,
   deserializeVault,
   isVaultInSync,
   planVaultSync,
-} from '@vibe/outliner-dto';
+} from '@vibe/outliner/dto';
 import type { FileIOFailure } from './fileIOFailure';
 import { applyVaultPlan, readVaultFiles } from './vaultFs';
 

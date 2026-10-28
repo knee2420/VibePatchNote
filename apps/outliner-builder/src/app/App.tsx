@@ -29,7 +29,7 @@ import {
   OutlineEditorProvider,
   OutlineTree,
   useOutlineView,
-} from '@vibe/outliner-editor';
+} from '@vibe/outliner/editor';
 import { Command } from 'lucide-react';
 
 interface ScaffoldPaneProps {

@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Layers, Plus, Trash2, ChevronRight, ChevronDown, FolderTree } from 'lucide-react';
-import type { Project } from '@vibe/outliner-core';
+import type { Project } from '@vibe/outliner/core';
 import { useWorkspaceStore } from '@/entities/workspace';
 
 // ==========================================

@@ -3,7 +3,7 @@
  * @description .outline 파일 하나를 여는 옵시디언 화면 (탭마다 하나)
  *
  * 파일을 읽고 쓰는 일은 옵시디언이 한다. 이 화면은 옵시디언이 넘겨준 글자를 스캐폴드로 올리고(setViewData),
- * 저장할 때 글자를 돌려준다(getViewData). 편집 화면은 `@vibe/outliner-editor` 를 그대로 쓰며,
+ * 저장할 때 글자를 돌려준다(getViewData). 편집 화면은 `@vibe/outliner/editor` 를 그대로 쓰며,
  * 내용(outlineDocument)과 편집 상태(줌·포커스·선택)를 탭마다 따로 갖는다.
  */
 
@@ -15,12 +15,12 @@ import {
   type WorkspaceLeaf,
   TextFileView,
 } from 'obsidian';
-import { type OutlineNode, type ViewMode, findNode, toOutlineText } from '@vibe/outliner-core';
+import { type OutlineNode, type ViewMode, findNode, toOutlineText } from '@vibe/outliner/core';
 import {
   type OutlineEditorStore,
   type OutlineHost,
   createOutlineEditorStore,
-} from '@vibe/outliner-editor';
+} from '@vibe/outliner/editor';
 import { OutlineFileApp } from './OutlineFileApp';
 import { syncOutlineMetadata } from '../../vault/outlineMetadataIndexer';
 import { createObsidianHost } from '../../host/obsidianHost';

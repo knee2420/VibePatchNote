@@ -4,7 +4,7 @@
  *
  * 보관함과 가져올 폴더를 여기서 읽고, 보관함과 내보낼 파일을 여기서 쓴다.
  * 폴더 안의 무엇이 프로젝트이고 무엇이 메타인지는 여기서 판단하지 않는다.
- * 그 규칙은 `@vibe/outliner-dto` 가 갖고 있고, 여기는 읽고 쓰는 손발일 뿐이다.
+ * 그 규칙은 `@vibe/outliner/dto` 가 갖고 있고, 여기는 읽고 쓰는 손발일 뿐이다.
  */
 
 import {
@@ -12,7 +12,7 @@ import {
   type VaultSyncPlan,
   VAULT_FILE_EXTENSION,
   VAULT_MANIFEST_PATH,
-} from '@vibe/outliner-dto';
+} from '@vibe/outliner/dto';
 
 type PermissionQuery = (descriptor: { mode: 'readwrite' }) => Promise<PermissionState>;
 

@@ -2,13 +2,13 @@
  * @file useExport.ts
  * @description 내보내기 창의 선택 상태와 실행 훅
  *
- * 무엇이 어떤 파일로 나가는지는 `@vibe/outliner-dto` 가 정한다.
+ * 무엇이 어떤 파일로 나가는지는 `@vibe/outliner/dto` 가 정한다.
  * 이 훅은 화면의 선택을 요청으로 옮기고, 그 결과를 미리보기와 실제 저장에 그대로 쓴다.
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { findNode } from '@vibe/outliner-core';
-import { type ExportFile, type ExportScope, buildExportFile } from '@vibe/outliner-dto';
+import { findNode } from '@vibe/outliner/core';
+import { type ExportFile, type ExportScope, buildExportFile } from '@vibe/outliner/dto';
 import { useOutlineEditorState, useWorkspaceStore } from '@/entities/workspace';
 import { downloadTextFile } from '../lib/downloadTextFile';
 import { saveTextFileAs } from '../lib/vaultFs';

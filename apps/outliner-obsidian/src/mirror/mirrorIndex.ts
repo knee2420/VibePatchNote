@@ -12,8 +12,8 @@
  */
 
 import { type App, type TAbstractFile, TFile } from 'obsidian';
-import type { NodeId, OutlineNode } from '@vibe/outliner-core';
-import { parseProjectFile } from '@vibe/outliner-dto';
+import type { NodeId, OutlineNode } from '@vibe/outliner/core';
+import { parseProjectFile } from '@vibe/outliner/dto';
 import { OUTLINE_EXTENSION } from '../document/outlineFiles';
 
 /** 카드 데이터에 심는 미러 정보. 파일 경로는 사람이 알아보라고 적어 두고, 짝은 nodeId 로만 찾는다. */

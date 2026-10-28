@@ -9,8 +9,8 @@
  */
 
 import { type App, type EventRef, type TAbstractFile, TFile } from 'obsidian';
-import type { NodeId, OutlineNode } from '@vibe/outliner-core';
-import { type OutlineEditorStore, createOutlineEditorStore } from '@vibe/outliner-editor';
+import type { NodeId, OutlineNode } from '@vibe/outliner/core';
+import { type OutlineEditorStore, createOutlineEditorStore } from '@vibe/outliner/editor';
 import {
   type OutlineDocumentStore,
   createOutlineDocumentStore,

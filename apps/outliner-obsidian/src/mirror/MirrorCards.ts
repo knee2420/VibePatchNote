@@ -11,7 +11,7 @@
  */
 
 import type { App, EventRef, TFile } from 'obsidian';
-import type { NodeId } from '@vibe/outliner-core';
+import type { NodeId } from '@vibe/outliner/core';
 import type { OutlineDocuments } from '../document/outlineDocuments';
 import type { CanvasInstance, CanvasNode } from '../surfaces/entries/CanvasSelectionSync';
 import { type MirrorIndex, toRawCard } from './mirrorIndex';

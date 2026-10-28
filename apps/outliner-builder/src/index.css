@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-/* 편집 화면(@vibe/outliner-editor)의 Tailwind 클래스도 함께 찾는다. */
-@source "../../../packages/outliner-editor/src";
-@import "@vibe/outliner-editor/styles.css";
+/* 편집 화면(@vibe/outliner/editor)의 Tailwind 클래스도 함께 찾는다. */
+@source "../../../packages/outliner/src/editor";
+@import "@vibe/outliner/styles.css";
 
 /* 1. Obsidian Design Tokens & Standard Variables */
 @import "./shared/styles/tokens.css";

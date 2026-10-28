@@ -2,7 +2,7 @@
  * @file outlineSession.ts
  * @description 독립 앱의 편집 화면 하나 — 편집 상태와 호스트 창구를 워크스페이스 창구에 잇는다.
  *
- * 편집 화면(`@vibe/outliner-editor`)은 스캐폴드 하나만 안다. 여기서 "지금 보는 스캐폴드"를 그 하나로 넘겨주고,
+ * 편집 화면(`@vibe/outliner/editor`)은 스캐폴드 하나만 안다. 여기서 "지금 보는 스캐폴드"를 그 하나로 넘겨주고,
  * 편집 화면이 바꾼 불릿 트리는 워크스페이스 창구(`useWorkspaceStore`)로 돌려보낸다.
  * 독립 앱은 한 번에 스캐폴드 하나만 보므로 편집 상태도 앱 전체에 하나다.
  */
@@ -12,7 +12,7 @@ import {
   type OutlineEditorState,
   type OutlineHost,
   createOutlineEditorStore,
-} from '@vibe/outliner-editor';
+} from '@vibe/outliner/editor';
 import { buildNodeLink } from './nodeLink';
 import { selectActiveProject, useWorkspaceStore } from './useWorkspaceStore';
 

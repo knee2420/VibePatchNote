@@ -80,15 +80,9 @@ importers:
 
   apps/outliner-builder:
     dependencies:
-      '@vibe/outliner-core':
+      '@vibe/outliner':
         specifier: workspace:*
-        version: link:../../packages/outliner-core
-      '@vibe/outliner-dto':
-        specifier: workspace:*
-        version: link:../../packages/outliner-dto
-      '@vibe/outliner-editor':
-        specifier: workspace:*
-        version: link:../../packages/outliner-editor
+        version: link:../../packages/outliner
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -138,15 +132,9 @@ importers:
 
   apps/outliner-obsidian:
     dependencies:
-      '@vibe/outliner-core':
+      '@vibe/outliner':
         specifier: workspace:*
-        version: link:../../packages/outliner-core
-      '@vibe/outliner-dto':
-        specifier: workspace:*
-        version: link:../../packages/outliner-dto
-      '@vibe/outliner-editor':
-        specifier: workspace:*
-        version: link:../../packages/outliner-editor
+        version: link:../../packages/outliner
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -355,51 +343,14 @@ importers:
         specifier: ~6.0.2
         version: 6.0.3
 
-  packages/outliner-core:
-    devDependencies:
-      '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
-      oxlint:
-        specifier: ^1.79.0
-        version: 1.81.0
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
-      typescript:
-        specifier: ~6.0.2
-        version: 6.0.3
-
-  packages/outliner-dto:
+  packages/outliner:
     dependencies:
-      '@vibe/outliner-core':
-        specifier: workspace:*
-        version: link:../outliner-core
-      zod:
-        specifier: ^3.24.2
-        version: 3.25.76
-    devDependencies:
-      '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
-      oxlint:
-        specifier: ^1.79.0
-        version: 1.81.0
-      tsx:
-        specifier: ^4.23.15
-        version: 4.23.15
-      typescript:
-        specifier: ~6.0.2
-        version: 6.0.3
-
-  packages/outliner-editor:
-    dependencies:
-      '@vibe/outliner-core':
-        specifier: workspace:*
-        version: link:../outliner-core
       lucide-react:
         specifier: ^1.38.0
         version: 1.39.0(react@19.2.8)
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(immer@11.1.21)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))

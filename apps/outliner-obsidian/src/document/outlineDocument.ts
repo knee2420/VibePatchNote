@@ -2,13 +2,13 @@
  * @file outlineDocument.ts
  * @description 탭 하나가 열고 있는 .outline 파일의 내용 (탭마다 하나)
  *
- * 옵시디언에서는 파일 그 자체가 관리 단위다. 파일 글자를 `@vibe/outliner-dto` 로 읽어 여기에 올리고,
+ * 옵시디언에서는 파일 그 자체가 관리 단위다. 파일 글자를 `@vibe/outliner/dto` 로 읽어 여기에 올리고,
  * 저장할 때 다시 글자로 만든다. 읽지 못한 파일은 내용을 올리지 않고, 저장할 때도 건드리지 않는다.
  */
 
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import { type Project, generateNodeId } from '@vibe/outliner-core';
-import { parseProjectFile, serializeProjectFile } from '@vibe/outliner-dto';
+import { type Project, generateNodeId } from '@vibe/outliner/core';
+import { parseProjectFile, serializeProjectFile } from '@vibe/outliner/dto';
 
 /** 파일을 스캐폴드로 읽지 못한 이유 */
 export type OutlineProblem =

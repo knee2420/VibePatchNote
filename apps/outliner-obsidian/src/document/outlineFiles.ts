@@ -4,8 +4,8 @@
  */
 
 import { type App, type TFile, type TFolder, Notice, normalizePath } from 'obsidian';
-import { createDefaultProject } from '@vibe/outliner-core';
-import { OUTLINE_FILE_EXTENSION, toVaultFileBase } from '@vibe/outliner-dto';
+import { createDefaultProject } from '@vibe/outliner/core';
+import { OUTLINE_FILE_EXTENSION, toVaultFileBase } from '@vibe/outliner/dto';
 import { writeOutlineText } from './outlineDocument';
 
 /** 옵시디언에 등록하는 확장자 (점 없이) */

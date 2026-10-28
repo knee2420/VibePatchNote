@@ -9,7 +9,7 @@
  * 저장 파이프라인은 `workspace`·`vaultHandle`·`isDirty` 만 보므로, 여기에 새 액션을 추가해도
  * 저장 코드는 고칠 필요가 없다.
  *
- * 불릿 편집 액션과 화면 상태(줌·포커스·선택)는 `@vibe/outliner-editor` 의 편집 상태가 갖는다.
+ * 불릿 편집 액션과 화면 상태(줌·포커스·선택)는 `@vibe/outliner/editor` 의 편집 상태가 갖는다.
  * 편집 화면이 바꾼 불릿 트리는 `updateActiveProjectNodes` 로 이 창구에 돌아온다. (`outlineSession.ts`)
  *
  * FSD 원칙: entities 계층은 다른 entities 슬라이스를 직접 import하지 않는다.
@@ -28,7 +28,7 @@ import {
   renameProjectInWorkspace,
   setProjectTitleInWorkspace,
   syncProjectRootsInWorkspace,
-} from '@vibe/outliner-core';
+} from '@vibe/outliner/core';
 
 export type WorkspaceViewMode = 'focus' | 'overview';
 

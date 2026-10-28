@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { PanelLeftClose, PanelLeft } from 'lucide-react';
-import { OutlineHeader } from '@vibe/outliner-editor';
+import { OutlineHeader } from '@vibe/outliner/editor';
 
 interface FocusedProjectViewportProps {
   children?: React.ReactNode;

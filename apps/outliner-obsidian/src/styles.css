@@ -10,11 +10,11 @@
 @import "tailwindcss/preflight.css";
 @import "tailwindcss/utilities.css";
 
-/* 편집 화면(@vibe/outliner-editor)과 이 플러그인의 Tailwind 클래스를 찾는다. */
-@source "../../../packages/outliner-editor/src";
+/* 편집 화면(@vibe/outliner/editor)과 이 플러그인의 Tailwind 클래스를 찾는다. */
+@source "../../../packages/outliner/src/editor";
 @source "./";
 
-@import "@vibe/outliner-editor/styles.css";
+@import "@vibe/outliner/styles.css";
 
 /* 글꼴과 줄 간격은 옵시디언 테마를 따른다. (Tailwind 초기화 규칙이 정한 값을 되돌린다) */
 :root {

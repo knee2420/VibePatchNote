@@ -5,8 +5,8 @@
  */
 
 import { type App, type CachedMetadata, type ReferenceCache, type TagCache, TFile } from 'obsidian';
-import { type OutlineNode, getTargetName, isWebTarget } from '@vibe/outliner-core';
-import { parseProjectFile } from '@vibe/outliner-dto';
+import { type OutlineNode, getTargetName, isWebTarget } from '@vibe/outliner/core';
+import { parseProjectFile } from '@vibe/outliner/dto';
 
 const WIKI_LINK_REGEX = /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
 const TAG_REGEX = /(?:^|\s)(#[a-zA-Z0-9_\uAC00-\uD7A3/-]+)/g;

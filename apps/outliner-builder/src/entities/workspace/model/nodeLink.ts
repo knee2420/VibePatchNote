@@ -3,7 +3,7 @@
  * @description 불릿 내부 링크의 주소 규칙: #/스캐폴드ID/불릿ID
  */
 
-import type { NodeId, ProjectId } from '@vibe/outliner-core';
+import type { NodeId, ProjectId } from '@vibe/outliner/core';
 
 /** 이 불릿으로 곧장 들어오는 주소를 만든다. */
 export function buildNodeLink(projectId: ProjectId, nodeId: NodeId): string {

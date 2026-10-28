@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { type Workspace, createEmptyWorkspace } from '@vibe/outliner-core';
+import { type Workspace, createEmptyWorkspace } from '@vibe/outliner/core';
 import { useWorkspaceStore } from '@/entities/workspace';
 import type { FileIOFailure } from '../lib/fileIOFailure';
 import {

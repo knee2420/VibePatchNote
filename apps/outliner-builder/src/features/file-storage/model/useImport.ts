@@ -3,12 +3,12 @@
  * @description 가져오기 창의 단계와 실행 훅
  *
  * 가져오는 것은 남의 데이터다. 지금 워크스페이스와 맞춰 보거나 섞지 않고,
- * `@vibe/outliner-dto` 가 구조만 확인해 만든 새 워크스페이스를 통째로 연다.
+ * `@vibe/outliner/dto` 가 구조만 확인해 만든 새 워크스페이스를 통째로 연다.
  */
 
 import { useCallback, useState } from 'react';
-import type { Workspace } from '@vibe/outliner-core';
-import { type ImportFiles, type ImportResult, readImport } from '@vibe/outliner-dto';
+import type { Workspace } from '@vibe/outliner/core';
+import { type ImportFiles, type ImportResult, readImport } from '@vibe/outliner/dto';
 import { useWorkspaceStore } from '@/entities/workspace';
 import { isVaultSupported, pickImportDirectory, readJsonFilesDeep } from '../lib/vaultFs';
 import type { OpenImportedResult } from './useFileIO';

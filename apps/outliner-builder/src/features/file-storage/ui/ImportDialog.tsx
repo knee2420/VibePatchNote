@@ -6,8 +6,8 @@
 
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import type { Workspace } from '@vibe/outliner-core';
-import type { ImportSkippedFile } from '@vibe/outliner-dto';
+import type { Workspace } from '@vibe/outliner/core';
+import type { ImportSkippedFile } from '@vibe/outliner/dto';
 import { AlertCircle, File, FolderOpen, Info, X } from 'lucide-react';
 import type { OpenImportedResult } from '../model/useFileIO';
 import { type ImportProblem, useImport } from '../model/useImport';

@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { App, TFile } from 'obsidian';
-import type { OutlineNode, Project, ViewMode } from '@vibe/outliner-core';
+import type { OutlineNode, Project, ViewMode } from '@vibe/outliner/core';
 import {
   type OutlineProblem,
   readOutlineText,

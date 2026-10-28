@@ -4,8 +4,8 @@
  */
 
 import { type App, type Plugin, PluginSettingTab, Setting } from 'obsidian';
-import type { FileDisplay } from '@vibe/outliner-core';
-import { FILE_KINDS } from '@vibe/outliner-editor';
+import type { FileDisplay } from '@vibe/outliner/core';
+import { FILE_KINDS } from '@vibe/outliner/editor';
 import {
   FALLBACK_FILE_DISPLAY,
   getPluginSettings,

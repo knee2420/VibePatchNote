@@ -4,7 +4,7 @@
  */
 
 import { useEffect } from 'react';
-import { findNode } from '@vibe/outliner-core';
+import { findNode } from '@vibe/outliner/core';
 import { parseNodeLink } from './nodeLink';
 import { outlineEditorStore } from './outlineSession';
 import { useWorkspaceStore } from './useWorkspaceStore';

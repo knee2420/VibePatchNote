@@ -17,8 +17,8 @@ import {
   Notice,
   parseLinktext,
 } from 'obsidian';
-import { isWebTarget } from '@vibe/outliner-core';
-import type { DroppedItem, OutlineFileHost } from '@vibe/outliner-editor';
+import { isWebTarget } from '@vibe/outliner/core';
+import type { DroppedItem, OutlineFileHost } from '@vibe/outliner/editor';
 import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
 import {
   FALLBACK_FILE_DISPLAY,

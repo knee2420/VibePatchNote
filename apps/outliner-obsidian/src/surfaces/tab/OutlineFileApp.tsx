@@ -11,7 +11,7 @@ import {
   OutlineHeader,
   OutlineTree,
   useOutlineView,
-} from '@vibe/outliner-editor';
+} from '@vibe/outliner/editor';
 import type { OutlineFileView } from './OutlineFileView';
 import type { OutlineProblem } from '../../document/outlineDocument';
 

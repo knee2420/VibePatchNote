@@ -17,7 +17,7 @@
  */
 
 import { type App, type EventRef, type WorkspaceLeaf, TFile } from 'obsidian';
-import type { NodeId, OutlineNode } from '@vibe/outliner-core';
+import type { NodeId, OutlineNode } from '@vibe/outliner/core';
 import type { OutlineDocuments } from '../document/outlineDocuments';
 import type { CanvasInstance } from '../surfaces/entries/CanvasSelectionSync';
 import { openCanvasOf } from './mirrorSwitch';

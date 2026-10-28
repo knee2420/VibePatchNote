@@ -7,7 +7,7 @@
  */
 
 import { type App, TFile } from 'obsidian';
-import type { NodeId } from '@vibe/outliner-core';
+import type { NodeId } from '@vibe/outliner/core';
 import type { OutlineDocuments } from '../document/outlineDocuments';
 import type { CanvasInstance } from '../surfaces/entries/CanvasSelectionSync';
 import { type MirrorIndex, type MirrorLink, type RawCard, toRawCard } from './mirrorIndex';

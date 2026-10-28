@@ -1,0 +1,169 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc", "import"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "import/no-cycle": "error",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "regex": "^(\\.\\./)+(apps|packages)/",
+            "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+          },
+          {
+            "regex": "^@/",
+            "message": "outliner 는 호스트 비의존 패키지입니다. 앱의 코드를 import 하지 마세요."
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/core/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "react-dom",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "zustand",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. 상태 보관은 호스트 앱이 합니다."
+              },
+              {
+                "name": "zod",
+                "message": "outliner/core 는 순수 트리·워크스페이스 모델입니다. 파일 규격 검증은 outliner/dto 에 두세요."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(apps|packages)/",
+                "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+              },
+              {
+                "regex": "^(\\.\\./)+(dto|editor)(/|$)",
+                "message": "core 계층은 상위 계층(dto, editor)을 참조할 수 없습니다."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/core/index.ts",
+        "src/core/outline/model/**",
+        "src/core/outline/queries/index.ts",
+        "src/core/outline/transforms/index.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "react-dom",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "zustand",
+                "message": "outliner/core 는 호스트 비의존 엔진입니다. 상태 보관은 호스트 앱이 합니다."
+              },
+              {
+                "name": "zod",
+                "message": "outliner/core 는 순수 트리·워크스페이스 모델입니다. 파일 규격 검증은 outliner/dto 에 두세요."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(apps|packages)/",
+                "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+              },
+              {
+                "regex": "^(\\.\\./)+(dto|editor)(/|$)",
+                "message": "core 계층은 상위 계층(dto, editor)을 참조할 수 없습니다."
+              },
+              {
+                "regex": "(^|/)internal(/|$)",
+                "message": "internal/ 은 패키지 내부 전용입니다. Public API(index.ts)나 model 에서 다시 내보내지 마세요."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/dto/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "message": "outliner/dto 는 호스트 비의존 파일 규격 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "react-dom",
+                "message": "outliner/dto 는 호스트 비의존 파일 규격 엔진입니다. UI 프레임워크를 import 하지 마세요."
+              },
+              {
+                "name": "zustand",
+                "message": "outliner/dto 는 호스트 비의존 파일 규격 엔진입니다. 상태 보관은 호스트 앱이 합니다."
+              }
+            ],
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(apps|packages)/",
+                "message": "패키지 밖을 상대경로로 참조하지 마세요."
+              },
+              {
+                "regex": "^(\\.\\./)+editor(/|$)",
+                "message": "dto 계층은 editor UI 계층을 참조할 수 없습니다."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/editor/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(apps|packages)/",
+                "message": "패키지 밖을 상대경로로 참조하지 마세요. packages/* 는 apps/* 를 import 하지 않습니다."
+              },
+              {
+                "regex": "^@/",
+                "message": "outliner/editor 는 호스트 비의존 편집 화면입니다. 앱의 코드를 import 하지 마세요."
+              },
+              {
+                "regex": "^(\\.\\./)+dto(/|$)",
+                "message": "editor 계층은 파일 규격(dto)을 직접 참조하지 않습니다. 호스트가 문서를 주입합니다."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+

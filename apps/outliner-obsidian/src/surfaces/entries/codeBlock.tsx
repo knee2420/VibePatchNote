@@ -4,7 +4,7 @@
  */
 
 import { type App, type MarkdownPostProcessorContext, TFile } from 'obsidian';
-import type { ViewMode } from '@vibe/outliner-core';
+import type { ViewMode } from '@vibe/outliner/core';
 import { OutlineInline } from '../inline/OutlineInline';
 import { mountOutline } from './mountOutline';
 

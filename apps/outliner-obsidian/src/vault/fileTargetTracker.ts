@@ -8,8 +8,8 @@
  */
 
 import { type App, type TFile, parseLinktext } from 'obsidian';
-import { type OutlineNode, isWebTarget } from '@vibe/outliner-core';
-import { parseProjectFile } from '@vibe/outliner-dto';
+import { type OutlineNode, isWebTarget } from '@vibe/outliner/core';
+import { parseProjectFile } from '@vibe/outliner/dto';
 import { writeOutlineText } from '../document/outlineDocument';
 import { OUTLINE_EXTENSION } from '../document/outlineFiles';
 
