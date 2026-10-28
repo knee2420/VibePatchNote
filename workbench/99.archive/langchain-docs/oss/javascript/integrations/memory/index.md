@@ -1,0 +1,25 @@
+<!-- source: langchain-ai/docs  src/oss/javascript/integrations/memory/index.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: Memory integrations
+sidebarTitle: Memory
+description: Persist short-term and long-term agent memory with LangGraph checkpointers and stores.
+---
+
+Memory integrations provide persistent backends for [short-term memory](/oss/langchain/short-term-memory) (checkpointers) and [long-term memory](/oss/langchain/long-term-memory) (stores).
+
+## Short-term memory (checkpointers)
+
+| Backend | Guide |
+|---------|-------|
+| MongoDB Atlas | [Short-term memory with MongoDB Atlas](/oss/integrations/memory/mongodb-short-term-memory) |
+
+## Long-term memory (stores)
+
+| Backend | Guide |
+|---------|-------|
+| MongoDB Atlas | [Long-term memory with MongoDB Atlas](/oss/integrations/memory/mongodb-long-term-memory) |
+
+See also the full [store integrations](/oss/integrations/long-term-memory) list.

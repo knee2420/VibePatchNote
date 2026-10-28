@@ -1,0 +1,23 @@
+[
+  {
+    "stage_id": "context_build",
+    "stage_name": "문서 컨텍스트 빌드",
+    "timestamp": "2026-09-11T10:17:19.054559Z",
+    "payload": {
+      "filename": "contract_draft.txt",
+      "total_pages": 1,
+      "context_chars": 301,
+      "context_file_path": null
+    }
+  },
+  {
+    "stage_id": "prompt_assembly",
+    "stage_name": "프롬프트 역분해 조립",
+    "timestamp": "2026-09-11T10:17:19.054559Z",
+    "payload": {
+      "constitution_chars": 5402,
+      "dynamic_context_chars": 301,
+      "total_prompt_chars": 6923
+    }
+  }
+]

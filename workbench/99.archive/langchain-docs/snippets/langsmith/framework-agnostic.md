@@ -1,0 +1,5 @@
+<!-- source: langchain-ai/docs  src/snippets/langsmith/framework-agnostic.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+LangSmith Deployment supports deploying a [LangGraph](/oss/python/langgraph/overview) _graph_. However, the implementation of a _node_ of a graph can contain arbitrary code. This means any framework can be implemented within a node and deployed on LangSmith Deployment. This lets you implement your core application logic without using additional LangGraph OSS APIs while still using LangSmith for [deployment](/langsmith/deployment), scaling, and [observability](/langsmith/observability). For more details, refer to [Use any framework with LangSmith Deployment](/langsmith/application-structure#use-any-framework-with-langsmith-deployment).

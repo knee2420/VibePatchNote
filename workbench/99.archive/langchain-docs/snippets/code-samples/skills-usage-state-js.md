@@ -1,0 +1,45 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/skills-usage-state-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```ts
+import { createDeepAgent, StateBackend, type FileData } from "deepagents";
+import { MemorySaver } from "@langchain/langgraph";
+
+const checkpointer = new MemorySaver();
+const backend = new StateBackend();
+
+function createFileData(content: string): FileData {
+  const now = new Date().toISOString();
+  return {
+    content: content.split("\n"),
+    created_at: now,
+    modified_at: now,
+  };
+}
+
+const skillsFiles: Record<string, FileData> = {};
+const skillUrl =
+  "https://raw.githubusercontent.com/langchain-ai/deepagentsjs/refs/heads/main/examples/skills/langgraph-docs/SKILL.md";
+const response = await fetch(skillUrl);
+const skillContent = await response.text();
+
+skillsFiles["/skills/langgraph-docs/SKILL.md"] = createFileData(skillContent);
+
+const agent = await createDeepAgent({
+  model: "anthropic:claude-sonnet-4-6",
+  backend,
+  checkpointer, // Required !
+  // IMPORTANT: deepagents skill source paths are virtual (POSIX) paths relative to the backend root.
+  skills: ["/skills/"],
+});
+
+const config = { configurable: { thread_id: `thread-${Date.now()}` } };
+const result = await agent.invoke(
+  {
+    messages: [{ role: "user", content: "what is langraph?" }],
+    files: skillsFiles,
+  },
+  config,
+);
+```

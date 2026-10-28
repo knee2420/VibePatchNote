@@ -1,0 +1,47 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/long-term-memory-write-tool-postgres-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+from dataclasses import dataclass
+
+from langchain.agents import create_agent
+from langchain.tools import ToolRuntime, tool
+from langchain_core.runnables import Runnable
+from langgraph.store.postgres import PostgresStore  # type: ignore[import-not-found]
+from typing_extensions import TypedDict
+
+
+@dataclass
+class Context:
+    user_id: str
+
+
+class UserInfo(TypedDict):
+    name: str
+
+
+@tool
+def save_user_info(user_info: UserInfo, runtime: ToolRuntime[Context]) -> str:
+    """Save user info."""
+    assert runtime.store is not None
+    runtime.store.put(("users",), runtime.context.user_id, dict(user_info))
+    return "Successfully saved user info."
+
+
+DB_URI = "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+
+with PostgresStore.from_conn_string(DB_URI) as store:
+    store.setup()
+    agent: Runnable = create_agent(
+        "claude-sonnet-4-6",
+        tools=[save_user_info],
+        store=store,
+        context_schema=Context,
+    )
+
+    agent.invoke(
+        {"messages": [{"role": "user", "content": "My name is John Smith"}]},
+        context=Context(user_id="user_123"),
+    )
+```

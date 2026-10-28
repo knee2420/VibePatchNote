@@ -1,0 +1,232 @@
+import { useState, useCallback } from 'react';
+import { useReactFlow, type Edge, MarkerType } from '@xyflow/react';
+
+import { followAgentRun, type AgentRunExecution } from '@/shared/api';
+import { providerExecutionMessage } from '@/shared/ui';
+
+import { referenceDocumentApi } from '../api/referenceDocumentApi';
+
+/** 백엔드 최악 지연(하네스 75초 x 재시도 3회 = 225초)을 덮는 프런트 가드. */
+const SCAFFOLD_TIMEOUT_MS = 240_000;
+
+interface UseDocumentScaffoldOptions {
+  nodeId: string;
+  /** 문서 식별자. 스캐폴드는 이 문서를 참조하는 별개의 애그리거트로 만들어진다. */
+  docId?: string;
+  title: string;
+  onSuccess?: (title: string) => void;
+  onError?: (err: unknown) => void;
+}
+
+/**
+ * useDocumentScaffold (Entity Model Hook)
+ *
+ * 참고 문서 엔티티의 스캐폴딩 생성 헤드리스 훅.
+ * 백엔드 `scaffold-engine`을 호출하고, 완료 시 미로(Miro) 스타일 엣지로 연결된 스캐폴드 노드를 스폰합니다.
+ */
+export function useDocumentScaffold({
+  nodeId,
+  docId,
+  title,
+  onSuccess,
+  onError,
+}: UseDocumentScaffoldOptions) {
+  const [isExtractingScaffold, setIsExtractingScaffold] = useState(false);
+  const { getNode, setNodes, setEdges } = useReactFlow();
+
+  const extractScaffold = useCallback(async (pages?: number[]) => {
+    if (!docId || isExtractingScaffold) return;
+
+    console.info('[useDocumentScaffold] Starting extractScaffold -> docId:', docId, 'title:', title, 'pages:', pages);
+
+    setIsExtractingScaffold(true);
+
+    // 1. 원본 노드 위치 및 동급(=동일) 크기 산정
+    const sourceNode = getNode(nodeId);
+    const measuredWidth =
+      (sourceNode?.measured?.width as number) ||
+      (typeof sourceNode?.style?.width === 'number'
+        ? sourceNode.style.width
+        : typeof sourceNode?.style?.width === 'string'
+          ? parseInt(sourceNode.style.width, 10)
+          : 600);
+    const nodeWidth = Math.max(measuredWidth, 560);
+
+    const nodeHeight =
+      (sourceNode?.measured?.height as number) ||
+      (typeof sourceNode?.style?.height === 'number'
+        ? sourceNode.style.height
+        : typeof sourceNode?.style?.height === 'string'
+          ? parseInt(sourceNode.style.height, 10)
+          : 800);
+
+    const initialTaskSummary =
+      pages && pages.length > 0
+        ? `지정 ${pages.length}개 페이지(p${pages.join(', p')}) 기하 실측 및 서식 슬롯 구조화`
+        : '문서 전체 페이지 기하 실측 및 서식 슬롯 구조화';
+
+    // 넉넉한 180px 오프셋으로 엣지가 찌그러지지 않고 우아하게 이어지도록 배치
+    const posX = (sourceNode?.position?.x ?? 100) + nodeWidth + 180;
+    const posY = sourceNode?.position?.y ?? 100;
+    const newScaffoldId = `scaffold-${Date.now()}`;
+
+    // 2. [즉시 실행] 1단계: 신규 스캐폴드 노드를 'generating' 상태로 즉각 캔버스에 생성
+    const initialScaffoldNode = {
+      id: newScaffoldId,
+      type: 'scaffoldDocument',
+      position: { x: posX, y: posY },
+      style: { width: `${nodeWidth}px`, height: `${nodeHeight}px` },
+      data: {
+        id: newScaffoldId,
+        sourceNodeId: nodeId, // 원본 참고 문서 카드 노드 ID 연결 (격리용 SSOT)
+        title: `${title} 서식 틀`,
+        docId,
+        sourcePdfFileName: title,
+        htmlContent: '',
+        markdownContent: '',
+        status: 'generating' as const,
+        progressStep: 1,
+        progressMessage: '문서 전체 페이지 기하 실측 및 와이어프레임 생성 준비...',
+        taskSummary: initialTaskSummary,
+        execution: null,
+        width: nodeWidth,
+        height: nodeHeight,
+      },
+    };
+
+    // 3. [즉시 실행] 미로 스타일 곡선 보라색 엣지 즉각 연결 (핸들 정확 바인딩 + 화살표)
+    const newEdge: Edge = {
+      id: `edge-${nodeId}-${newScaffoldId}`,
+      source: nodeId,
+      target: newScaffoldId,
+      sourceHandle: 'right',
+      targetHandle: 'target-left',
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: '#9333ea', strokeWidth: 2 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#9333ea',
+        width: 14,
+        height: 14,
+      },
+    };
+
+    setNodes((nds) => [...nds, initialScaffoldNode]);
+    setEdges((eds) => [...eds, newEdge]);
+
+    try {
+      const accepted = await referenceDocumentApi.startScaffold(docId, pages);
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === newScaffoldId
+            ? { ...node, data: { ...node.data, runId: accepted.runId } }
+            : node
+        )
+      );
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('서식 생성 요청 시간 초과 (240초)')), SCAFFOLD_TIMEOUT_MS)
+      );
+
+      const settled = await Promise.race([
+        followAgentRun<Awaited<ReturnType<typeof referenceDocumentApi.extractScaffold>>>(
+          accepted.runId,
+          (current) => {
+            const execution = current.execution as AgentRunExecution | null | undefined;
+            const provMsg = providerExecutionMessage(execution);
+            setNodes((nds) =>
+              nds.map((node) =>
+                node.id === newScaffoldId
+                  ? {
+                      ...node,
+                      data: {
+                        ...node.data,
+                        execution: execution ?? node.data.execution,
+                        progressStep: 2,
+                        progressMessage: provMsg,
+                        taskSummary: node.data.taskSummary || initialTaskSummary,
+                      },
+                    }
+                  : node
+              )
+            );
+          }
+        ),
+        timeoutPromise,
+      ]);
+      if (settled.status !== 'completed' || !settled.result) {
+        throw new Error(settled.errorCode || '서식 생성 작업이 완료되지 않았습니다.');
+      }
+      const res = settled.result;
+      const settledExecution = (settled.execution as AgentRunExecution | null | undefined) ?? null;
+
+      // 5. 완료 시 최종본 노드 데이터 반영 (status: 'completed')
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === newScaffoldId) {
+            const totalP = res.archive?.totalPages ?? 1;
+            const slotsCount = res.slots?.length ?? 0;
+            const finalTaskSummary =
+              res.meta.description ||
+              `원본 실측 기하 기반 와이어프레임 · 전체 ${totalP}페이지 · 슬롯 ${slotsCount}개 구조화 완료`;
+
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                title: res.meta.title || `${title} 서식 틀`,
+                // 본문의 SSOT 는 백엔드 아카이브. 이 포인터가 있으면 세션에는 본문이 저장되지 않는다.
+                scaffoldId: res.archive?.scaffoldId,
+                htmlContent: res.htmlContent,
+                markdownContent: res.markdownContent,
+                // 백엔드가 원본에서 실측한 슬롯 좌표. 이게 있어야 양방향 매핑이 성립한다.
+                slots: res.slots ?? [],
+                archive: res.archive,
+                description: res.meta.description,
+                difficulty: res.meta.difficulty,
+                status: 'completed',
+                progressStep: 4,
+                progressMessage: '서식 생성 완료',
+                taskSummary: finalTaskSummary,
+                execution: settledExecution ?? n.data?.execution ?? null,
+              },
+            };
+          }
+          return n;
+        })
+      );
+
+      onSuccess?.(res.meta.title || title);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+
+      // 실패 시 노드에 실제 에러 상세 메시지 기록
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === newScaffoldId) {
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                status: 'error',
+                errorMessage: `서식 추출 실패: ${errorMsg}`,
+              },
+            };
+          }
+          return n;
+        })
+      );
+
+      onError?.(err);
+    } finally {
+      setIsExtractingScaffold(false);
+    }
+
+  }, [docId, isExtractingScaffold, nodeId, title, getNode, setNodes, setEdges, onSuccess, onError]);
+
+
+  return {
+    isExtractingScaffold,
+    extractScaffold,
+  };
+}

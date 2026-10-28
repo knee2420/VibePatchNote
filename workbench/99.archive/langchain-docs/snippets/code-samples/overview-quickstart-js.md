@@ -1,0 +1,33 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/overview-quickstart-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```ts
+import * as z from "zod";
+// npm install deepagents langchain @langchain/core
+import { createDeepAgent } from "deepagents";
+import { tool } from "langchain";
+
+const getWeather = tool(({ city }) => `It's always sunny in ${city}!`, {
+  name: "get_weather",
+  description: "Get the weather for a given city",
+  schema: z.object({
+    city: z.string(),
+  }),
+});
+
+const agent = await createDeepAgent({
+  tools: [getWeather],
+  systemPrompt: "You are a helpful assistant",
+});
+
+console.log(
+  await agent.invoke({
+    messages: [{ role: "user", content: "What's the weather in Tokyo?" }],
+  }),
+);
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/7837efa6-ba5d-44f4-a88c-7cabaa4d18cb/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BlockClassificationSchema",
+  "type": "object",
+  "properties": {
+    "doc_title": {
+      "type": "string"
+    },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": ["title", "label", "value", "mixed", "decoration"]
+          },
+          "value_text": { "type": "string" },
+          "slot_label": { "type": "string" }
+        },
+        "required": ["id", "role", "value_text", "slot_label"]
+      }
+    }
+  },
+  "required": ["doc_title", "blocks"]
+}

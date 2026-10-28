@@ -1,0 +1,21 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/mcp-graph-factory-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+SERVERS = {
+    "weather": "http://localhost:8001/mcp",
+    "calc": "http://localhost:8002/mcp",
+}
+
+
+async def make_graph():
+    """Build an agent over an MCP fleet. Called once per run by `langgraph dev`."""
+    config = {"mcpServers": {name: {"url": url} for name, url in SERVERS.items()}}
+    # A long-lived deployment discovers per run, but reuses one HTTP connection
+    # pool underneath. `cache_mode="use"` serves a cached tool list within the
+    # server's TTL instead of re-listing on every run.
+    async with MCPAdapter(config) as adapter:
+        tools = await adapter.list_tools(cache_mode="use")
+        return create_agent("claude-sonnet-5", tools)
+```

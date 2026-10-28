@@ -1,0 +1,21 @@
+﻿{
+  "name": "placeholder-node",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "https://ui.reactflow.dev/base-node"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "placeholder-node.tsx",
+      "content": "\"use client\";\n\nimport React, { useCallback, type ReactNode } from \"react\";\nimport {\n  useReactFlow,\n  useNodeId,\n  Handle,\n  Position,\n  type NodeProps,\n} from \"@xyflow/react\";\n\nimport { BaseNode } from \"@/registry/components/base-node\";\n\nexport type PlaceholderNodeProps = Partial<NodeProps> & {\n  children?: ReactNode;\n};\n\nexport function PlaceholderNode({ children }: PlaceholderNodeProps) {\n  const id = useNodeId();\n  const { setNodes, setEdges } = useReactFlow();\n\n  const handleClick = useCallback(() => {\n    if (!id) return;\n\n    setEdges((edges) =>\n      edges.map((edge) =>\n        edge.target === id ? { ...edge, animated: false } : edge,\n      ),\n    );\n\n    setNodes((nodes) => {\n      const updatedNodes = nodes.map((node) => {\n        if (node.id === id) {\n          // Customize this function to update the node's data as needed.\n          // For example, you can change the label or other properties of the node.\n          return {\n            ...node,\n            data: { ...node.data, label: \"Node\" },\n            type: \"default\",\n          };\n        }\n        return node;\n      });\n      return updatedNodes;\n    });\n  }, [id, setEdges, setNodes]);\n\n  return (\n    <BaseNode\n      className=\"bg-card w-[150px] border-dashed border-gray-400 p-2 text-center text-gray-400 shadow-none\"\n      onClick={handleClick}\n    >\n      {children}\n      <Handle\n        type=\"target\"\n        style={{ visibility: \"hidden\" }}\n        position={Position.Top}\n        isConnectable={false}\n      />\n      <Handle\n        type=\"source\"\n        style={{ visibility: \"hidden\" }}\n        position={Position.Bottom}\n        isConnectable={false}\n      />\n    </BaseNode>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

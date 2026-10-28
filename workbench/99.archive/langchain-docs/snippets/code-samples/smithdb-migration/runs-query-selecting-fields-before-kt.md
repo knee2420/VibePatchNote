@@ -1,0 +1,23 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/runs-query-selecting-fields-before-kt.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```kotlin Before
+import com.langchain.smith.client.LangsmithClient
+import com.langchain.smith.client.okhttp.LangsmithOkHttpClient
+import com.langchain.smith.models.runs.RunQueryParams
+import com.langchain.smith.models.sessions.SessionListParams
+
+val client: LangsmithClient = LangsmithOkHttpClient.fromEnv()
+
+val project = client.sessions().list(
+    SessionListParams.builder().name("default").limit(1L).build()
+).items().first()
+// returns a default set of fields; no explicit selection needed
+val runs = client.runs().query(
+    RunQueryParams.builder().addSession(project.id()).build()
+).items()
+for (run in runs) {
+    println("${run.id()} ${run.name()} ${run.runType()} ${run.status()} ${run.startTime()} ${run.inputs()} ${run.error()}")
+}
+```

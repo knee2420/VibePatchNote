@@ -1,0 +1,1107 @@
+{
+  "meta": {
+    "id": "scaffold-v2-디딤돌_참가신청서_딥드론",
+    "title": "디딤돌_참가신청서_딥드론.pdf 와이어프레임 서식 (v2 Vision-Grid)",
+    "targetDoc": "디딤돌_참가신청서_딥드론.pdf",
+    "sourcePdfFileName": "디딤돌_참가신청서_딥드론.pdf",
+    "description": "비전-원자그리드 융합 정밀 와이어프레임 (슬롯 91개)",
+    "difficulty": "normal",
+    "totalPages": 3
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.4\" data-y=\"105.7\" data-w=\"451.9\" data-h=\"616.1\" class=\"scaffold-frame\" style=\"position:absolute;left:66.4px;top:105.7px;width:451.9px;height:616.1px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.4px;top:105.7px;width:451.9px;height:616.1px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"21.4\" style=\"height:21.4px;\">\n<th data-bid=\"t0-r0c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀명</p></th>\n<td data-bid=\"t0-r0c1\" data-wpx=\"368.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"팀명\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<th data-bid=\"t0-r1c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">지원유형</p></th>\n<td data-bid=\"t0-r1c1\" data-wpx=\"368.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"지원유형\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.3\" style=\"height:21.3px;\">\n<th data-bid=\"t0-r2c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">과제명</p></th>\n<td data-bid=\"t0-r2c1\" data-wpx=\"368.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"과제명\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<th data-bid=\"t0-r3c0\" data-wpx=\"83.9\" data-fs=\"10.0\" rowspan=\"4\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀장</p></th>\n<th data-bid=\"t0-r3c1\" data-wpx=\"53.6\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:53.6px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">이름</p></th>\n<td data-bid=\"t0-r3c2\" data-wpx=\"314.4\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"4\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:314.4px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"팀장 성명\"></span></p></td>\n</tr>\n<tr data-hpx=\"28.8\" style=\"height:28.8px;\">\n<th data-bid=\"t0-r4c1\" data-wpx=\"53.6\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:53.6px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">연락처</p></th>\n<td data-bid=\"t0-r4c2\" data-wpx=\"314.4\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"4\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:314.4px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"연락처 및 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<th data-bid=\"t0-r5c1\" data-wpx=\"53.6\" data-fs=\"10.0\" rowspan=\"2\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:53.6px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">소속</p></th>\n<th data-bid=\"t0-r5c2\" data-wpx=\"66.4\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:66.4px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">대학</p></th>\n<th data-bid=\"t0-r5c3\" data-wpx=\"78.1\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:78.1px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학과(부)</p></th>\n<th data-bid=\"t0-r5c4\" data-wpx=\"86.0\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.0px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학년</p></th>\n<th data-bid=\"t0-r5c5\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학번</p></th>\n</tr>\n<tr data-hpx=\"21.4\" style=\"height:21.4px;\">\n<td data-bid=\"t0-r6c2\" data-wpx=\"66.4\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:66.4px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"대학\"></span></p></td>\n<td data-bid=\"t0-r6c3\" data-wpx=\"78.1\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:78.1px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"학과(부)\"></span></p></td>\n<td data-bid=\"t0-r6c4\" data-wpx=\"86.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"학년\"></span></p></td>\n<td data-bid=\"t0-r6c5\" data-wpx=\"83.9\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"학번\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<th data-bid=\"t0-r7c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">과제수행 기간</p></th>\n<td data-bid=\"t0-r7c1\" data-wpx=\"368.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"과제수행 기간\"></span></p></td>\n</tr>\n<tr data-hpx=\"228.6\" style=\"height:228.6px;\">\n<th data-bid=\"t0-r8c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">과제수행 계획 요약</p></th>\n<td data-bid=\"t0-r8c1\" data-wpx=\"368.0\" data-fs=\"11.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:11.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"과제수행 계획 요약\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<th data-bid=\"t0-r9c0\" data-wpx=\"83.9\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:83.9px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">지원요청금액</p></th>\n<td data-bid=\"t0-r9c1\" data-wpx=\"368.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"5\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:368.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"지원요청금액\"></span></p></td>\n</tr>\n<tr data-hpx=\"188.6\" style=\"height:188.6px;\">\n<td data-bid=\"t0-r10c0\" data-wpx=\"451.9\" data-fs=\"15.9\" data-fill=\"true\" colspan=\"6\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:451.9px;font-size:15.9px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"제출일자 및 제출자 서명\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-block\" data-bid=\"L0\" data-x=\"110.5\" data-y=\"73.5\" data-w=\"373.9\" data-h=\"18.0\" data-fs=\"18.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:110.5px;top:73.5px;width:373.9px;height:18.0px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">[ACE⁺] 창의미래설계 디딤돌 사업 지원신청서</div>\n<div data-type=\"scaffold-block\" data-bid=\"L1\" data-x=\"284.5\" data-y=\"783.8\" data-w=\"25.9\" data-h=\"12.0\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:284.5px;top:783.8px;width:25.9px;height:12.0px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">- 1 -</div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"2\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"222.8\" data-w=\"459.0\" data-h=\"209.6\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:222.8px;width:459.0px;height:209.6px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:222.8px;width:459.0px;height:209.6px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"15.6\" style=\"height:15.6px;\">\n<th data-bid=\"t0-r0c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">구분</p></th>\n<th data-bid=\"t0-r0c1\" data-wpx=\"49.3\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">이름</p></th>\n<th data-bid=\"t0-r0c2\" data-wpx=\"86.8\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학과(부)</p></th>\n<th data-bid=\"t0-r0c3\" data-wpx=\"36.0\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학년</p></th>\n<th data-bid=\"t0-r0c4\" data-wpx=\"69.8\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">학번</p></th>\n<td data-bid=\"t0-r0c5\" data-wpx=\"177.6\" data-fs=\"10.0\" colspan=\"2\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:177.6px;font-size:10.0px;padding:3px 6px;color:#334155\"><p style=\"margin:0;line-height:1.2;\">연락처(전화, e-mail)</p></td>\n</tr>\n<tr data-hpx=\"15.7\" style=\"height:15.7px;\">\n<th data-bid=\"t0-r1c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀장</p></th>\n<td data-bid=\"t0-r1c1\" data-wpx=\"49.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s14\" data-mapping-num=\"14\" data-placeholder=\"팀장 성명\"></span></p></td>\n<td data-bid=\"t0-r1c2\" data-wpx=\"86.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s15\" data-mapping-num=\"15\" data-placeholder=\"팀장 학과(부)\"></span></p></td>\n<td data-bid=\"t0-r1c3\" data-wpx=\"36.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s16\" data-mapping-num=\"16\" data-placeholder=\"팀장 학년\"></span></p></td>\n<td data-bid=\"t0-r1c4\" data-wpx=\"69.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s17\" data-mapping-num=\"17\" data-placeholder=\"팀장 학번\"></span></p></td>\n<td data-bid=\"t0-r1c5\" data-wpx=\"80.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:80.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s18\" data-mapping-num=\"18\" data-placeholder=\"팀장 전화번호\"></span></p></td>\n<td data-bid=\"t0-r1c6\" data-wpx=\"97.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:97.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s19\" data-mapping-num=\"19\" data-placeholder=\"팀장 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"15.6\" style=\"height:15.6px;\">\n<th data-bid=\"t0-r2c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th>\n<td data-bid=\"t0-r2c1\" data-wpx=\"49.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s20\" data-mapping-num=\"20\" data-placeholder=\"팀원1 성명\"></span></p></td>\n<td data-bid=\"t0-r2c2\" data-wpx=\"86.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s21\" data-mapping-num=\"21\" data-placeholder=\"팀원1 학과(부)\"></span></p></td>\n<td data-bid=\"t0-r2c3\" data-wpx=\"36.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s22\" data-mapping-num=\"22\" data-placeholder=\"팀원1 학년\"></span></p></td>\n<td data-bid=\"t0-r2c4\" data-wpx=\"69.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s23\" data-mapping-num=\"23\" data-placeholder=\"팀원1 학번\"></span></p></td>\n<td data-bid=\"t0-r2c5\" data-wpx=\"80.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:80.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s24\" data-mapping-num=\"24\" data-placeholder=\"팀원1 전화번호\"></span></p></td>\n<td data-bid=\"t0-r2c6\" data-wpx=\"97.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:97.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s25\" data-mapping-num=\"25\" data-placeholder=\"팀원1 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"15.7\" style=\"height:15.7px;\">\n<th data-bid=\"t0-r3c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th>\n<td data-bid=\"t0-r3c1\" data-wpx=\"49.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s26\" data-mapping-num=\"26\" data-placeholder=\"팀원2 성명\"></span></p></td>\n<td data-bid=\"t0-r3c2\" data-wpx=\"86.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s27\" data-mapping-num=\"27\" data-placeholder=\"팀원2 학과(부)\"></span></p></td>\n<td data-bid=\"t0-r3c3\" data-wpx=\"36.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s28\" data-mapping-num=\"28\" data-placeholder=\"팀원2 학년\"></span></p></td>\n<td data-bid=\"t0-r3c4\" data-wpx=\"69.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s29\" data-mapping-num=\"29\" data-placeholder=\"팀원2 학번\"></span></p></td>\n<td data-bid=\"t0-r3c5\" data-wpx=\"80.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:80.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s30\" data-mapping-num=\"30\" data-placeholder=\"팀원2 전화번호\"></span></p></td>\n<td data-bid=\"t0-r3c6\" data-wpx=\"97.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:97.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s31\" data-mapping-num=\"31\" data-placeholder=\"팀원2 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"15.6\" style=\"height:15.6px;\">\n<th data-bid=\"t0-r4c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th>\n<td data-bid=\"t0-r4c1\" data-wpx=\"49.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s32\" data-mapping-num=\"32\" data-placeholder=\"팀원3 성명\"></span></p></td>\n<td data-bid=\"t0-r4c2\" data-wpx=\"86.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s33\" data-mapping-num=\"33\" data-placeholder=\"팀원3 학과(부)\"></span></p></td>\n<td data-bid=\"t0-r4c3\" data-wpx=\"36.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s34\" data-mapping-num=\"34\" data-placeholder=\"팀원3 학년\"></span></p></td>\n<td data-bid=\"t0-r4c4\" data-wpx=\"69.8\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s35\" data-mapping-num=\"35\" data-placeholder=\"팀원3 학번\"></span></p></td>\n<td data-bid=\"t0-r4c5\" data-wpx=\"80.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:80.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s36\" data-mapping-num=\"36\" data-placeholder=\"팀원3 전화번호\"></span></p></td>\n<td data-bid=\"t0-r4c6\" data-wpx=\"97.3\" data-fs=\"9.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:97.3px;font-size:9.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s37\" data-mapping-num=\"37\" data-placeholder=\"팀원3 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"15.7\" style=\"height:15.7px;\">\n<th data-bid=\"t0-r5c0\" data-wpx=\"39.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:39.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th>\n<td data-bid=\"t0-r5c1\" data-wpx=\"49.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:49.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s38\" data-mapping-num=\"38\" data-placeholder=\"팀원4 성명\"></span></p></td>\n<td data-bid=\"t0-r5c2\" data-wpx=\"86.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:86.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s39\" data-mapping-num=\"39\" data-placeholder=\"팀원4 학과(부)\"></span></p></td>\n<td data-bid=\"t0-r5c3\" data-wpx=\"36.0\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:36.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s40\" data-mapping-num=\"40\" data-placeholder=\"팀원4 학년\"></span></p></td>\n<td data-bid=\"t0-r5c4\" data-wpx=\"69.8\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:69.8px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s41\" data-mapping-num=\"41\" data-placeholder=\"팀원4 학번\"></span></p></td>\n<td data-bid=\"t0-r5c5\" data-wpx=\"80.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:80.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s42\" data-mapping-num=\"42\" data-placeholder=\"팀원4 전화번호\"></span></p></td>\n<td data-bid=\"t0-r5c6\" data-wpx=\"97.3\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:97.3px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s43\" data-mapping-num=\"43\" data-placeholder=\"팀원4 이메일\"></span></p></td>\n</tr>\n<tr data-hpx=\"115.7\" style=\"height:115.7px;\">\n<td data-bid=\"t0-r6c0\" data-wpx=\"459.0\" data-fs=\"10.0\" data-fill=\"true\" colspan=\"7\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:459.0px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s44\" data-mapping-num=\"44\" data-placeholder=\"팀원 구성 이유 및 역할 기술\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"477.9\" data-w=\"451.8\" data-h=\"21.4\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:477.9px;width:451.8px;height:21.4px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:477.9px;width:451.8px;height:21.4px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"21.4\" style=\"height:21.4px;\">\n<th data-bid=\"t1-r0c0\" data-wpx=\"380.6\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">주요과제 및 추진계획</p></th>\n<th data-bid=\"t1-r0c1\" data-wpx=\"71.2\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">추진일정</p></th>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"520.5\" data-w=\"451.8\" data-h=\"42.8\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:520.5px;width:451.8px;height:42.8px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:520.5px;width:451.8px;height:42.8px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"42.8\" style=\"height:42.8px;\">\n<td data-bid=\"t2-r0c0\" data-wpx=\"380.6\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s45\" data-mapping-num=\"45\" data-placeholder=\"추진단계 1 세부계획\"></span></p></td>\n<td data-bid=\"t2-r0c1\" data-wpx=\"71.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s46\" data-mapping-num=\"46\" data-placeholder=\"추진단계 1 추진일정\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"584.6\" data-w=\"451.8\" data-h=\"55.5\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:584.6px;width:451.8px;height:55.5px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:584.6px;width:451.8px;height:55.5px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"34.3\" style=\"height:34.3px;\">\n<td data-bid=\"t3-r0c0\" data-wpx=\"380.6\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s47\" data-mapping-num=\"47\" data-placeholder=\"추진단계 2 세부계획\"></span></p></td>\n<td data-bid=\"t3-r0c1\" data-wpx=\"71.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s48\" data-mapping-num=\"48\" data-placeholder=\"추진단계 2 추진일정\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<td data-bid=\"t3-r1c0\" data-wpx=\"380.6\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s49\" data-mapping-num=\"49\" data-placeholder=\"추진단계 3 제목\"></span></p></td>\n<td data-bid=\"t3-r1c1\" data-wpx=\"71.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s50\" data-mapping-num=\"50\" data-placeholder=\"추진단계 3 추진일정\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"661.4\" data-w=\"451.8\" data-h=\"21.3\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:661.4px;width:451.8px;height:21.3px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:661.4px;width:451.8px;height:21.3px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"21.3\" style=\"height:21.3px;\">\n<td data-bid=\"t4-r0c0\" data-wpx=\"380.6\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s51\" data-mapping-num=\"51\" data-placeholder=\"추진단계 4 제목\"></span></p></td>\n<td data-bid=\"t4-r0c1\" data-wpx=\"71.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s52\" data-mapping-num=\"52\" data-placeholder=\"추진단계 4 추진일정\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"704.0\" data-w=\"451.8\" data-h=\"21.2\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:704.0px;width:451.8px;height:21.2px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:704.0px;width:451.8px;height:21.2px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<td data-bid=\"t5-r0c0\" data-wpx=\"380.6\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:380.6px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s53\" data-mapping-num=\"53\" data-placeholder=\"추진단계 5 제목\"></span></p></td>\n<td data-bid=\"t5-r0c1\" data-wpx=\"71.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:71.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s54\" data-mapping-num=\"54\" data-placeholder=\"추진단계 5 추진일정\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-block\" data-bid=\"L0\" data-x=\"113.9\" data-y=\"73.5\" data-w=\"374.1\" data-h=\"18.0\" data-fs=\"18.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:113.9px;top:73.5px;width:374.1px;height:18.0px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">[ACE⁺] 창의미래설계 디딤돌 사업 활동계획서</div>\n<div data-type=\"scaffold-block\" data-bid=\"L1\" data-x=\"65.1\" data-y=\"111.7\" data-w=\"38.9\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:111.7px;width:38.9px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">1. 목표</div>\n<div data-type=\"scaffold-block\" data-bid=\"L2\" data-x=\"83.1\" data-y=\"130.9\" data-w=\"251.9\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:83.1px;top:130.9px;width:251.9px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s55\" data-mapping-num=\"55\" data-placeholder=\"활동 목표/주요 과제명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L3\" data-x=\"89.1\" data-y=\"150.1\" data-w=\"410.5\" data-h=\"14.3\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:89.1px;top:150.1px;width:410.5px;height:14.3px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s56\" data-mapping-num=\"56\" data-placeholder=\"세부 목표 1\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L4\" data-x=\"65.1\" data-y=\"171.2\" data-w=\"318.7\" data-h=\"12.3\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:171.2px;width:318.7px;height:12.3px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s57\" data-mapping-num=\"57\" data-placeholder=\"세부 목표 2\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L5\" data-x=\"65.1\" data-y=\"200.4\" data-w=\"68.9\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:200.4px;width:68.9px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">2. 팀원 명단</div>\n<div data-type=\"scaffold-block\" data-bid=\"L6\" data-x=\"65.1\" data-y=\"458.4\" data-w=\"92.9\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:458.4px;width:92.9px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">3. 과제수행 계획</div>\n<div data-type=\"scaffold-block\" data-bid=\"L7\" data-x=\"68.0\" data-y=\"504.9\" data-w=\"89.5\" data-h=\"9.9\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:68.0px;top:504.9px;width:89.5px;height:9.9px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s58\" data-mapping-num=\"58\" data-placeholder=\"추진단계 1 제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L8\" data-x=\"68.0\" data-y=\"568.9\" data-w=\"74.5\" data-h=\"9.9\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:68.0px;top:568.9px;width:74.5px;height:9.9px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s59\" data-mapping-num=\"59\" data-placeholder=\"추진단계 2 제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L9\" data-x=\"68.0\" data-y=\"645.3\" data-w=\"368.0\" data-h=\"11.0\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:68.0px;top:645.3px;width:368.0px;height:11.0px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s60\" data-mapping-num=\"60\" data-placeholder=\"추진단계 3 세부계획\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L10\" data-x=\"68.0\" data-y=\"688.3\" data-w=\"242.4\" data-h=\"9.9\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:68.0px;top:688.3px;width:242.4px;height:9.9px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s61\" data-mapping-num=\"61\" data-placeholder=\"추진단계 4 세부계획\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L11\" data-x=\"284.5\" data-y=\"783.8\" data-w=\"25.9\" data-h=\"12.0\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:284.5px;top:783.8px;width:25.9px;height:12.0px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">- 2 -</div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"3\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.3\" data-y=\"95.8\" data-w=\"451.9\" data-h=\"142.6\" class=\"scaffold-frame\" style=\"position:absolute;left:66.3px;top:95.8px;width:451.9px;height:142.6px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.3px;top:95.8px;width:451.9px;height:142.6px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody>\n<tr data-hpx=\"21.3\" style=\"height:21.3px;\">\n<th data-bid=\"t0-r0c0\" data-wpx=\"70.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">지출항목</p></th>\n<th data-bid=\"t0-r0c1\" data-wpx=\"76.2\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">예산액</p></th>\n<th data-bid=\"t0-r0c2\" data-wpx=\"223.1\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">산출근거</p></th>\n<th data-bid=\"t0-r0c3\" data-wpx=\"82.1\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">비 고</p></th>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<td data-bid=\"t0-r1c0\" data-wpx=\"70.5\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s62\" data-mapping-num=\"62\" data-placeholder=\"지출항목명\"></span></p></td>\n<td data-bid=\"t0-r1c1\" data-wpx=\"76.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s63\" data-mapping-num=\"63\" data-placeholder=\"예산액\"></span></p></td>\n<td data-bid=\"t0-r1c2\" data-wpx=\"223.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s64\" data-mapping-num=\"64\" data-placeholder=\"산출근거\"></span></p></td>\n<td data-bid=\"t0-r1c3\" data-wpx=\"82.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s65\" data-mapping-num=\"65\" data-placeholder=\"비고\"></span></p></td>\n</tr>\n<tr data-hpx=\"28.8\" style=\"height:28.8px;\">\n<td data-bid=\"t0-r2c0\" data-wpx=\"70.5\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s66\" data-mapping-num=\"66\" data-placeholder=\"지출항목명\"></span></p></td>\n<td data-bid=\"t0-r2c1\" data-wpx=\"76.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s67\" data-mapping-num=\"67\" data-placeholder=\"예산액\"></span></p></td>\n<td data-bid=\"t0-r2c2\" data-wpx=\"223.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s68\" data-mapping-num=\"68\" data-placeholder=\"산출근거\"></span></p></td>\n<td data-bid=\"t0-r2c3\" data-wpx=\"82.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s69\" data-mapping-num=\"69\" data-placeholder=\"비고\"></span></p></td>\n</tr>\n<tr data-hpx=\"28.8\" style=\"height:28.8px;\">\n<td data-bid=\"t0-r3c0\" data-wpx=\"70.5\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s70\" data-mapping-num=\"70\" data-placeholder=\"지출항목명\"></span></p></td>\n<td data-bid=\"t0-r3c1\" data-wpx=\"76.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s71\" data-mapping-num=\"71\" data-placeholder=\"예산액\"></span></p></td>\n<td data-bid=\"t0-r3c2\" data-wpx=\"223.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s72\" data-mapping-num=\"72\" data-placeholder=\"산출근거\"></span></p></td>\n<td data-bid=\"t0-r3c3\" data-wpx=\"82.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s73\" data-mapping-num=\"73\" data-placeholder=\"비고\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.2\" style=\"height:21.2px;\">\n<td data-bid=\"t0-r4c0\" data-wpx=\"70.5\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s74\" data-mapping-num=\"74\" data-placeholder=\"지출항목명\"></span></p></td>\n<td data-bid=\"t0-r4c1\" data-wpx=\"76.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s75\" data-mapping-num=\"75\" data-placeholder=\"예산액\"></span></p></td>\n<td data-bid=\"t0-r4c2\" data-wpx=\"223.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s76\" data-mapping-num=\"76\" data-placeholder=\"산출근거\"></span></p></td>\n<td data-bid=\"t0-r4c3\" data-wpx=\"82.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s77\" data-mapping-num=\"77\" data-placeholder=\"비고\"></span></p></td>\n</tr>\n<tr data-hpx=\"21.3\" style=\"height:21.3px;\">\n<th data-bid=\"t0-r5c0\" data-wpx=\"70.5\" data-fs=\"10.0\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:70.5px;font-size:10.0px;padding:2px 4px;background:#f8fafc;font-weight:600;text-align:center;color:#1e293b\"><p style=\"margin:0;line-height:1.2;\">합 계</p></th>\n<td data-bid=\"t0-r5c1\" data-wpx=\"76.2\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:76.2px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s78\" data-mapping-num=\"78\" data-placeholder=\"총 예산 합계\"></span></p></td>\n<td data-bid=\"t0-r5c2\" data-wpx=\"223.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:223.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s79\" data-mapping-num=\"79\" data-placeholder=\"합계 산출근거\"></span></p></td>\n<td data-bid=\"t0-r5c3\" data-wpx=\"82.1\" data-fs=\"10.0\" data-fill=\"true\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;width:82.1px;font-size:10.0px;padding:0\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s80\" data-mapping-num=\"80\" data-placeholder=\"합계 비고\"></span></p></td>\n</tr>\n</tbody></table></div>\n<div data-type=\"scaffold-block\" data-bid=\"L0\" data-x=\"65.1\" data-y=\"75.2\" data-w=\"92.9\" data-h=\"14.3\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:75.2px;width:92.9px;height:14.3px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">4. 예상 소요비용</div>\n<div data-type=\"scaffold-block\" data-bid=\"L1\" data-x=\"65.1\" data-y=\"277.0\" data-w=\"122.8\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:277.0px;width:122.8px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">5. 과제수행 점검 계획</div>\n<div data-type=\"scaffold-block\" data-bid=\"L2\" data-x=\"80.1\" data-y=\"295.7\" data-w=\"209.8\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:80.1px;top:295.7px;width:209.8px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s81\" data-mapping-num=\"81\" data-placeholder=\"점검 계획 소제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L3\" data-x=\"95.0\" data-y=\"319.7\" data-w=\"441.8\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:95.0px;top:319.7px;width:441.8px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s82\" data-mapping-num=\"82\" data-placeholder=\"점검 계획 상세내용 1\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L4\" data-x=\"65.1\" data-y=\"345.8\" data-w=\"91.1\" data-h=\"14.7\" data-fs=\"14.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:345.8px;width:91.1px;height:14.7px;font-size:14.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s83\" data-mapping-num=\"83\" data-placeholder=\"점검 계획 상세내용 2\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L5\" data-x=\"65.1\" data-y=\"390.4\" data-w=\"317.4\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:390.4px;width:317.4px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">6. 내․외부 기관 및 전문가와의 협력 계획(필요 시 작성)</div>\n<div data-type=\"scaffold-block\" data-bid=\"L6\" data-x=\"80.1\" data-y=\"409.1\" data-w=\"314.6\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:80.1px;top:409.1px;width:314.6px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s84\" data-mapping-num=\"84\" data-placeholder=\"협력 전문가/기관 소제목\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L7\" data-x=\"95.0\" data-y=\"433.1\" data-w=\"402.1\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:95.0px;top:433.1px;width:402.1px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s85\" data-mapping-num=\"85\" data-placeholder=\"협력 계획 상세내용\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L8\" data-x=\"65.1\" data-y=\"481.5\" data-w=\"116.8\" data-h=\"14.4\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:481.5px;width:116.8px;height:14.4px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">7. 기대효과 및 활용</div>\n<div data-type=\"scaffold-block\" data-bid=\"L11\" data-x=\"102.5\" data-y=\"500.2\" data-w=\"427.3\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:102.5px;top:500.2px;width:427.3px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s86\" data-mapping-num=\"86\" data-placeholder=\"기대효과 및 활용 문제점 서술 1\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L12\" data-x=\"65.1\" data-y=\"524.2\" data-w=\"472.1\" data-h=\"18.0\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:524.2px;width:472.1px;height:18.0px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s87\" data-mapping-num=\"87\" data-placeholder=\"기대효과 및 활용 문제점 서술 2\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L13\" data-x=\"65.1\" data-y=\"548.2\" data-w=\"311.0\" data-h=\"17.9\" data-fs=\"15.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:548.2px;width:311.0px;height:17.9px;font-size:15.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s88\" data-mapping-num=\"88\" data-placeholder=\"기대효과 및 활용 문제점 서술 3\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L14\" data-x=\"65.1\" data-y=\"574.3\" data-w=\"464.7\" data-h=\"12.0\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:574.3px;width:464.7px;height:12.0px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s89\" data-mapping-num=\"89\" data-placeholder=\"기대효과 및 활용 해결방안 서술 1\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L15\" data-x=\"65.1\" data-y=\"593.5\" data-w=\"464.5\" data-h=\"12.0\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:593.5px;width:464.5px;height:12.0px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s90\" data-mapping-num=\"90\" data-placeholder=\"기대효과 및 활용 해결방안 서술 2\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L16\" data-x=\"65.1\" data-y=\"612.7\" data-w=\"84.0\" data-h=\"12.0\" data-fs=\"12.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:65.1px;top:612.7px;width:84.0px;height:12.0px;font-size:12.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s91\" data-mapping-num=\"91\" data-placeholder=\"기대효과 및 활용 해결방안 서술 3\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L17\" data-x=\"284.5\" data-y=\"783.8\" data-w=\"25.9\" data-h=\"12.0\" data-fs=\"10.0\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:284.5px;top:783.8px;width:25.9px;height:12.0px;font-size:10.0px;font-weight:normal;display:flex;align-items:center;line-height:1;overflow:hidden;box-sizing:border-box;\">- 3 -</div>\n</div>",
+  "markdownContent": "# 디딤돌_참가신청서_딥드론.pdf\n\n팀명\n\n[ 팀명 ]\n\n지원유형\n\n[ 지원유형 ]\n\n과제명\n\n[ 과제명 ]\n\n팀장\n\n이름\n\n[ 팀장 성명 ]\n\n연락처\n\n[ 연락처 및 이메일 ]\n\n소속\n\n대학\n\n학과(부)\n\n학년\n\n학번\n\n[ 대학 ]\n\n[ 학과(부) ]\n\n[ 학년 ]\n\n[ 학번 ]\n\n과제수행 기간\n\n[ 과제수행 기간 ]\n\n과제수행 계획 요약\n\n[ 과제수행 계획 요약 ]\n\n지원요청금액\n\n[ 지원요청금액 ]\n\n[ 제출일자 및 제출자 서명 ]\n\n# [ACE⁺] 창의미래설계 디딤돌 사업 지원신청서\n\n- 1 -\n\n---\n\n구분\n\n이름\n\n학과(부)\n\n학년\n\n학번\n\n연락처(전화, e-mail)\n\n팀장\n\n[ 팀장 성명 ]\n\n[ 팀장 학과(부) ]\n\n[ 팀장 학년 ]\n\n[ 팀장 학번 ]\n\n[ 팀장 전화번호 ]\n\n[ 팀장 이메일 ]\n\n팀원\n\n[ 팀원1 성명 ]\n\n[ 팀원1 학과(부) ]\n\n[ 팀원1 학년 ]\n\n[ 팀원1 학번 ]\n\n[ 팀원1 전화번호 ]\n\n[ 팀원1 이메일 ]\n\n팀원\n\n[ 팀원2 성명 ]\n\n[ 팀원2 학과(부) ]\n\n[ 팀원2 학년 ]\n\n[ 팀원2 학번 ]\n\n[ 팀원2 전화번호 ]\n\n[ 팀원2 이메일 ]\n\n팀원\n\n[ 팀원3 성명 ]\n\n[ 팀원3 학과(부) ]\n\n[ 팀원3 학년 ]\n\n[ 팀원3 학번 ]\n\n[ 팀원3 전화번호 ]\n\n[ 팀원3 이메일 ]\n\n팀원\n\n[ 팀원4 성명 ]\n\n[ 팀원4 학과(부) ]\n\n[ 팀원4 학년 ]\n\n[ 팀원4 학번 ]\n\n[ 팀원4 전화번호 ]\n\n[ 팀원4 이메일 ]\n\n[ 팀원 구성 이유 및 역할 기술 ]\n\n주요과제 및 추진계획\n\n추진일정\n\n[ 추진단계 1 세부계획 ]\n\n[ 추진단계 1 추진일정 ]\n\n[ 추진단계 2 세부계획 ]\n\n[ 추진단계 2 추진일정 ]\n\n[ 추진단계 3 제목 ]\n\n[ 추진단계 3 추진일정 ]\n\n[ 추진단계 4 제목 ]\n\n[ 추진단계 4 추진일정 ]\n\n[ 추진단계 5 제목 ]\n\n[ 추진단계 5 추진일정 ]\n\n# [ACE⁺] 창의미래설계 디딤돌 사업 활동계획서\n\n1. 목표\n\n[ 활동 목표/주요 과제명 ]\n\n[ 세부 목표 1 ]\n\n[ 세부 목표 2 ]\n\n2. 팀원 명단\n\n3. 과제수행 계획\n\n[ 추진단계 1 제목 ]\n\n[ 추진단계 2 제목 ]\n\n[ 추진단계 3 세부계획 ]\n\n[ 추진단계 4 세부계획 ]\n\n- 2 -\n\n---\n\n지출항목\n\n예산액\n\n산출근거\n\n비 고\n\n[ 지출항목명 ]\n\n[ 예산액 ]\n\n[ 산출근거 ]\n\n[ 비고 ]\n\n[ 지출항목명 ]\n\n[ 예산액 ]\n\n[ 산출근거 ]\n\n[ 비고 ]\n\n[ 지출항목명 ]\n\n[ 예산액 ]\n\n[ 산출근거 ]\n\n[ 비고 ]\n\n[ 지출항목명 ]\n\n[ 예산액 ]\n\n[ 산출근거 ]\n\n[ 비고 ]\n\n합 계\n\n[ 총 예산 합계 ]\n\n[ 합계 산출근거 ]\n\n[ 합계 비고 ]\n\n4. 예상 소요비용\n\n5. 과제수행 점검 계획\n\n[ 점검 계획 소제목 ]\n\n[ 점검 계획 상세내용 1 ]\n\n[ 점검 계획 상세내용 2 ]\n\n6. 내․외부 기관 및 전문가와의 협력 계획(필요 시 작성)\n\n[ 협력 전문가/기관 소제목 ]\n\n[ 협력 계획 상세내용 ]\n\n7. 기대효과 및 활용\n\n[ 기대효과 및 활용 문제점 서술 1 ]\n\n[ 기대효과 및 활용 문제점 서술 2 ]\n\n[ 기대효과 및 활용 문제점 서술 3 ]\n\n[ 기대효과 및 활용 해결방안 서술 1 ]\n\n[ 기대효과 및 활용 해결방안 서술 2 ]\n\n[ 기대효과 및 활용 해결방안 서술 3 ]\n\n- 3 -",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "팀명",
+      "box_2d": [
+        126,
+        253,
+        151,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "지원유형",
+      "box_2d": [
+        151,
+        253,
+        176,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "과제명",
+      "box_2d": [
+        176,
+        253,
+        202,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "팀장 성명",
+      "box_2d": [
+        202,
+        343,
+        227,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "연락처 및 이메일",
+      "box_2d": [
+        227,
+        343,
+        261,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "대학",
+      "box_2d": [
+        286,
+        343,
+        312,
+        454
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "학과(부)",
+      "box_2d": [
+        286,
+        454,
+        312,
+        586
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "학년",
+      "box_2d": [
+        286,
+        586,
+        312,
+        730
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "학번",
+      "box_2d": [
+        286,
+        730,
+        312,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "과제수행 기간",
+      "box_2d": [
+        312,
+        253,
+        337,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "과제수행 계획 요약",
+      "box_2d": [
+        337,
+        253,
+        609,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "지원요청금액",
+      "box_2d": [
+        609,
+        253,
+        634,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "제출일자 및 제출자 서명",
+      "box_2d": [
+        634,
+        112,
+        858,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s14",
+      "number": 14,
+      "label": "팀장 성명",
+      "box_2d": [
+        283,
+        178,
+        302,
+        261
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s15",
+      "number": 15,
+      "label": "팀장 학과(부)",
+      "box_2d": [
+        283,
+        261,
+        302,
+        407
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s16",
+      "number": 16,
+      "label": "팀장 학년",
+      "box_2d": [
+        283,
+        407,
+        302,
+        467
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s17",
+      "number": 17,
+      "label": "팀장 학번",
+      "box_2d": [
+        283,
+        467,
+        302,
+        585
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s18",
+      "number": 18,
+      "label": "팀장 전화번호",
+      "box_2d": [
+        283,
+        585,
+        302,
+        720
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s19",
+      "number": 19,
+      "label": "팀장 이메일",
+      "box_2d": [
+        283,
+        720,
+        302,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s20",
+      "number": 20,
+      "label": "팀원1 성명",
+      "box_2d": [
+        302,
+        178,
+        321,
+        261
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s21",
+      "number": 21,
+      "label": "팀원1 학과(부)",
+      "box_2d": [
+        302,
+        261,
+        321,
+        407
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s22",
+      "number": 22,
+      "label": "팀원1 학년",
+      "box_2d": [
+        302,
+        407,
+        321,
+        467
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s23",
+      "number": 23,
+      "label": "팀원1 학번",
+      "box_2d": [
+        302,
+        467,
+        321,
+        585
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s24",
+      "number": 24,
+      "label": "팀원1 전화번호",
+      "box_2d": [
+        302,
+        585,
+        321,
+        720
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s25",
+      "number": 25,
+      "label": "팀원1 이메일",
+      "box_2d": [
+        302,
+        720,
+        321,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s26",
+      "number": 26,
+      "label": "팀원2 성명",
+      "box_2d": [
+        321,
+        178,
+        339,
+        261
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s27",
+      "number": 27,
+      "label": "팀원2 학과(부)",
+      "box_2d": [
+        321,
+        261,
+        339,
+        407
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s28",
+      "number": 28,
+      "label": "팀원2 학년",
+      "box_2d": [
+        321,
+        407,
+        339,
+        467
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s29",
+      "number": 29,
+      "label": "팀원2 학번",
+      "box_2d": [
+        321,
+        467,
+        339,
+        585
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s30",
+      "number": 30,
+      "label": "팀원2 전화번호",
+      "box_2d": [
+        321,
+        585,
+        339,
+        720
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s31",
+      "number": 31,
+      "label": "팀원2 이메일",
+      "box_2d": [
+        321,
+        720,
+        339,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s32",
+      "number": 32,
+      "label": "팀원3 성명",
+      "box_2d": [
+        339,
+        178,
+        358,
+        261
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s33",
+      "number": 33,
+      "label": "팀원3 학과(부)",
+      "box_2d": [
+        339,
+        261,
+        358,
+        407
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s34",
+      "number": 34,
+      "label": "팀원3 학년",
+      "box_2d": [
+        339,
+        407,
+        358,
+        467
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s35",
+      "number": 35,
+      "label": "팀원3 학번",
+      "box_2d": [
+        339,
+        467,
+        358,
+        585
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s36",
+      "number": 36,
+      "label": "팀원3 전화번호",
+      "box_2d": [
+        339,
+        585,
+        358,
+        720
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s37",
+      "number": 37,
+      "label": "팀원3 이메일",
+      "box_2d": [
+        339,
+        720,
+        358,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s38",
+      "number": 38,
+      "label": "팀원4 성명",
+      "box_2d": [
+        358,
+        178,
+        377,
+        261
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s39",
+      "number": 39,
+      "label": "팀원4 학과(부)",
+      "box_2d": [
+        358,
+        261,
+        377,
+        407
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s40",
+      "number": 40,
+      "label": "팀원4 학년",
+      "box_2d": [
+        358,
+        407,
+        377,
+        467
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s41",
+      "number": 41,
+      "label": "팀원4 학번",
+      "box_2d": [
+        358,
+        467,
+        377,
+        585
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s42",
+      "number": 42,
+      "label": "팀원4 전화번호",
+      "box_2d": [
+        358,
+        585,
+        377,
+        720
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s43",
+      "number": 43,
+      "label": "팀원4 이메일",
+      "box_2d": [
+        358,
+        720,
+        377,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s44",
+      "number": 44,
+      "label": "팀원 구성 이유 및 역할 기술",
+      "box_2d": [
+        377,
+        112,
+        514,
+        883
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s45",
+      "number": 45,
+      "label": "추진단계 1 세부계획",
+      "box_2d": [
+        619,
+        112,
+        670,
+        751
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s46",
+      "number": 46,
+      "label": "추진단계 1 추진일정",
+      "box_2d": [
+        619,
+        751,
+        670,
+        871
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s47",
+      "number": 47,
+      "label": "추진단계 2 세부계획",
+      "box_2d": [
+        695,
+        112,
+        736,
+        751
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s48",
+      "number": 48,
+      "label": "추진단계 2 추진일정",
+      "box_2d": [
+        695,
+        751,
+        736,
+        871
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s49",
+      "number": 49,
+      "label": "추진단계 3 제목",
+      "box_2d": [
+        736,
+        112,
+        761,
+        751
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s50",
+      "number": 50,
+      "label": "추진단계 3 추진일정",
+      "box_2d": [
+        736,
+        751,
+        761,
+        871
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s51",
+      "number": 51,
+      "label": "추진단계 4 제목",
+      "box_2d": [
+        786,
+        112,
+        812,
+        751
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s52",
+      "number": 52,
+      "label": "추진단계 4 추진일정",
+      "box_2d": [
+        786,
+        751,
+        812,
+        871
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s53",
+      "number": 53,
+      "label": "추진단계 5 제목",
+      "box_2d": [
+        837,
+        112,
+        862,
+        751
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s54",
+      "number": 54,
+      "label": "추진단계 5 추진일정",
+      "box_2d": [
+        837,
+        751,
+        862,
+        871
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s55",
+      "number": 55,
+      "label": "활동 목표/주요 과제명",
+      "box_2d": [
+        156,
+        140,
+        173,
+        563
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s56",
+      "number": 56,
+      "label": "세부 목표 1",
+      "box_2d": [
+        178,
+        150,
+        196,
+        840
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s57",
+      "number": 57,
+      "label": "세부 목표 2",
+      "box_2d": [
+        204,
+        109,
+        218,
+        645
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s58",
+      "number": 58,
+      "label": "추진단계 1 제목",
+      "box_2d": [
+        600,
+        114,
+        612,
+        265
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s59",
+      "number": 59,
+      "label": "추진단계 2 제목",
+      "box_2d": [
+        676,
+        114,
+        688,
+        239
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s60",
+      "number": 60,
+      "label": "추진단계 3 세부계획",
+      "box_2d": [
+        767,
+        114,
+        780,
+        733
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s61",
+      "number": 61,
+      "label": "추진단계 4 세부계획",
+      "box_2d": [
+        818,
+        114,
+        830,
+        522
+      ],
+      "pageNumber": 2
+    },
+    {
+      "id": "s62",
+      "number": 62,
+      "label": "지출항목명",
+      "box_2d": [
+        139,
+        111,
+        164,
+        230
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s63",
+      "number": 63,
+      "label": "예산액",
+      "box_2d": [
+        139,
+        230,
+        164,
+        358
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s64",
+      "number": 64,
+      "label": "산출근거",
+      "box_2d": [
+        139,
+        358,
+        164,
+        733
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s65",
+      "number": 65,
+      "label": "비고",
+      "box_2d": [
+        139,
+        733,
+        164,
+        871
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s66",
+      "number": 66,
+      "label": "지출항목명",
+      "box_2d": [
+        164,
+        111,
+        199,
+        230
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s67",
+      "number": 67,
+      "label": "예산액",
+      "box_2d": [
+        164,
+        230,
+        199,
+        358
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s68",
+      "number": 68,
+      "label": "산출근거",
+      "box_2d": [
+        164,
+        358,
+        199,
+        733
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s69",
+      "number": 69,
+      "label": "비고",
+      "box_2d": [
+        164,
+        733,
+        199,
+        871
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s70",
+      "number": 70,
+      "label": "지출항목명",
+      "box_2d": [
+        199,
+        111,
+        233,
+        230
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s71",
+      "number": 71,
+      "label": "예산액",
+      "box_2d": [
+        199,
+        230,
+        233,
+        358
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s72",
+      "number": 72,
+      "label": "산출근거",
+      "box_2d": [
+        199,
+        358,
+        233,
+        733
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s73",
+      "number": 73,
+      "label": "비고",
+      "box_2d": [
+        199,
+        733,
+        233,
+        871
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s74",
+      "number": 74,
+      "label": "지출항목명",
+      "box_2d": [
+        233,
+        111,
+        258,
+        230
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s75",
+      "number": 75,
+      "label": "예산액",
+      "box_2d": [
+        233,
+        230,
+        258,
+        358
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s76",
+      "number": 76,
+      "label": "산출근거",
+      "box_2d": [
+        233,
+        358,
+        258,
+        733
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s77",
+      "number": 77,
+      "label": "비고",
+      "box_2d": [
+        233,
+        733,
+        258,
+        871
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s78",
+      "number": 78,
+      "label": "총 예산 합계",
+      "box_2d": [
+        258,
+        230,
+        283,
+        358
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s79",
+      "number": 79,
+      "label": "합계 산출근거",
+      "box_2d": [
+        258,
+        358,
+        283,
+        733
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s80",
+      "number": 80,
+      "label": "합계 비고",
+      "box_2d": [
+        258,
+        733,
+        283,
+        871
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s81",
+      "number": 81,
+      "label": "점검 계획 소제목",
+      "box_2d": [
+        352,
+        135,
+        373,
+        487
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s82",
+      "number": 82,
+      "label": "점검 계획 상세내용 1",
+      "box_2d": [
+        380,
+        160,
+        401,
+        902
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s83",
+      "number": 83,
+      "label": "점검 계획 상세내용 2",
+      "box_2d": [
+        411,
+        109,
+        429,
+        262
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s84",
+      "number": 84,
+      "label": "협력 전문가/기관 소제목",
+      "box_2d": [
+        486,
+        135,
+        508,
+        663
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s85",
+      "number": 85,
+      "label": "협력 계획 상세내용",
+      "box_2d": [
+        515,
+        160,
+        536,
+        836
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s86",
+      "number": 86,
+      "label": "기대효과 및 활용 문제점 서술 1",
+      "box_2d": [
+        595,
+        172,
+        616,
+        890
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s87",
+      "number": 87,
+      "label": "기대효과 및 활용 문제점 서술 2",
+      "box_2d": [
+        623,
+        109,
+        645,
+        903
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s88",
+      "number": 88,
+      "label": "기대효과 및 활용 문제점 서술 3",
+      "box_2d": [
+        652,
+        109,
+        673,
+        632
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s89",
+      "number": 89,
+      "label": "기대효과 및 활용 해결방안 서술 1",
+      "box_2d": [
+        683,
+        109,
+        697,
+        890
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s90",
+      "number": 90,
+      "label": "기대효과 및 활용 해결방안 서술 2",
+      "box_2d": [
+        706,
+        109,
+        720,
+        890
+      ],
+      "pageNumber": 3
+    },
+    {
+      "id": "s91",
+      "number": 91,
+      "label": "기대효과 및 활용 해결방안 서술 3",
+      "box_2d": [
+        729,
+        109,
+        743,
+        251
+      ],
+      "pageNumber": 3
+    }
+  ]
+}

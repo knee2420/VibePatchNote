@@ -1,0 +1,21 @@
+﻿{
+  "name": "zoom-select",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "select"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "zoom-select.tsx",
+      "content": "\"use client\";\n\nimport React, { useCallback } from \"react\";\nimport { Panel, useReactFlow, useStore, type PanelProps } from \"@xyflow/react\";\n\nimport {\n  Select,\n  SelectContent,\n  SelectItem,\n  SelectTrigger,\n  SelectValue,\n} from \"@/components/ui/select\";\nimport { cn } from \"@/lib/utils\";\n\nexport function ZoomSelect({\n  className,\n  ...props\n}: Omit<PanelProps, \"children\">) {\n  const { zoomTo, fitView } = useReactFlow();\n\n  const handleZoomChange = useCallback(\n    (value: string) => {\n      if (value === \"best-fit\") {\n        fitView();\n      } else {\n        const zoomValue = parseFloat(value);\n        if (!isNaN(zoomValue)) {\n          zoomTo(zoomValue);\n        }\n      }\n    },\n    [fitView, zoomTo],\n  );\n\n  const zoomLevels = useStore((state) => {\n    const { minZoom, maxZoom } = state;\n    const levels = [];\n    const zoomIncrement = 50;\n\n    for (\n      let i = Math.ceil(minZoom * 100);\n      i <= Math.floor(maxZoom * 100);\n      i += zoomIncrement\n    ) {\n      levels.push((i / 100).toString());\n    }\n\n    return levels;\n  });\n\n  return (\n    <Panel\n      className={cn(\"bg-primary-foreground text-foreground flex\", className)}\n      {...props}\n    >\n      <Select onValueChange={handleZoomChange}>\n        <SelectTrigger className=\"bg-primary-foreground w-[140px]\">\n          <SelectValue placeholder=\"Zoom\" />\n        </SelectTrigger>\n        <SelectContent>\n          <SelectItem value=\"best-fit\">Best Fit</SelectItem>\n          <div className=\"mx-2 my-1 border-t\" />\n          {zoomLevels.map((level) => (\n            <SelectItem key={level} value={level}>\n              {`${(parseFloat(level) * 100).toFixed(0)}%`}\n            </SelectItem>\n          ))}\n        </SelectContent>\n      </Select>\n    </Panel>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

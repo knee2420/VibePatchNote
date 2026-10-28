@@ -1,0 +1,28 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/traces-list-runs-basic-before-kt.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```kotlin Before
+import com.langchain.smith.client.LangsmithClient
+import com.langchain.smith.client.okhttp.LangsmithOkHttpClient
+import com.langchain.smith.models.runs.RunQueryParams
+import com.langchain.smith.models.sessions.SessionListParams
+
+val client: LangsmithClient = LangsmithOkHttpClient.fromEnv()
+
+val project = client.sessions().list(
+    SessionListParams.builder().name("default").limit(1L).build()
+).items().first()
+
+var traceId = "<trace-id>"
+
+val runs = client.runs().query(
+    RunQueryParams.builder()
+        .addSession(project.id())
+        .trace(traceId)
+        .build()
+).runs()
+for (run in runs) {
+    println("${run.name()} ${run.runType()} ${run.status()}")
+}
+```

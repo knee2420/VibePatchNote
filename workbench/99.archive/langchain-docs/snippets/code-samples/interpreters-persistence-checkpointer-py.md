@@ -1,0 +1,89 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/interpreters-persistence-checkpointer-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+<CodeGroup>
+    ```python Google
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="google_genai:gemini-3.6-flash",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python OpenAI
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="openai:gpt-5.5",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python Anthropic
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="anthropic:claude-sonnet-4-6",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python OpenRouter
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="openrouter:z-ai/glm-5.2",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python Fireworks
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="fireworks:accounts/fireworks/models/glm-5p2",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python Baseten
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="baseten:zai-org/GLM-5.2",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+
+    ```python Ollama
+    from deepagents import create_deep_agent
+    from langchain_quickjs import CodeInterpreterMiddleware
+    from langgraph.checkpoint.memory import MemorySaver
+    
+    agent = create_deep_agent(
+        model="ollama:north-mini-code-1.0",
+        checkpointer=MemorySaver(),
+        middleware=[CodeInterpreterMiddleware(mode="thread")],
+    )
+    ```
+</CodeGroup>

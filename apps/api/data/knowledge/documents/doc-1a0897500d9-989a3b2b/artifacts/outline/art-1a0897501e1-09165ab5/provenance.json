@@ -1,0 +1,15 @@
+{
+  "artifactId": "art-1a0897501e1-09165ab5",
+  "kind": "outline",
+  "docId": "doc-1a0897500d9-989a3b2b",
+  "createdAt": "2026-09-08T06:14:53.743491+00:00",
+  "status": "SUCCESS",
+  "model": "gemini-3.8-flash-low",
+  "promptHash": null,
+  "engineVersion": null,
+  "summary": {
+    "totalPages": 2,
+    "totalOutlines": 2,
+    "totalElements": 14
+  }
+}

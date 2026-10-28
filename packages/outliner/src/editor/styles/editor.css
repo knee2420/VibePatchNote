@@ -1,0 +1,51 @@
+/**
+ * @file editor.css
+ * @description 편집 화면이 어느 호스트에서든 필요로 하는 Tailwind 밖의 스타일
+ * 색은 옵시디언 표준 변수 이름을 쓴다. 옵시디언에서는 테마의 실제 값이, 독립 앱에서는 흉내 낸 값이 들어온다.
+ */
+
+/* 불릿 인풋 (plaintext-only contenteditable) 포커스 아웃라인 제거 */
+[contenteditable]:focus {
+  outline: none;
+}
+
+/* 메뉴·대화상자·선택 막대가 뜰 때의 가벼운 페이드인 + 확대 */
+@keyframes outline-menu-pop {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.outline-menu-pop {
+  animation: outline-menu-pop 110ms ease-out;
+}
+
+/* 불릿 내부 마크다운 렌더링 시 블록 요소 인라인 강제 및 여백 초기화 */
+[data-node-id] p,
+[data-node-id] ol,
+[data-node-id] ul,
+[data-node-id] li,
+[data-node-id] blockquote,
+[data-node-id] h1,
+[data-node-id] h2,
+[data-node-id] h3,
+[data-node-id] h4,
+[data-node-id] h5,
+[data-node-id] h6 {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+}
+
+/* 태그 및 링크 인라인 플렉스 정렬 */
+[data-node-id] a.tag,
+[data-node-id] a.internal-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: baseline !important;
+}

@@ -1,0 +1,61 @@
+{
+  "_note": [
+    "각 워크스페이스 package.json 의 scripts 에 병합할 조각.",
+    "2026-09-14 기준 apps/api 에만 test 가 있고, packages/* 는 package.json 자체가 없거나",
+    "test 스크립트가 없어 테스트 14개가 어디서도 실행되지 않는다(감사 4-2).",
+    "정본: workbench/07.test_strategy/spec/04.execution/01.turbo-task.md"
+  ],
+
+  "apps/api/package.json": {
+    "scripts": {
+      "_현재": "venv\\Scripts\\python.exe -m pytest --basetemp .pytest-tmp",
+      "test": "venv\\Scripts\\python.exe -m pytest --basetemp .pytest_tmp/basetemp",
+      "test:all": "venv\\Scripts\\python.exe -m pytest -m \"\" --basetemp .pytest_tmp/basetemp"
+    },
+    "_why": [
+      "test      : pyproject 의 addopts 가 `-m 'not wiring'` 이므로 기본이 L1+L2 다.",
+      "test:all  : `-m \"\"` 로 마커 필터를 비워 L3 까지 포함한다.",
+      "basetemp  : 격리 저장소와 같은 .pytest_tmp 아래로 모은다. 이미 gitignore 대상이다."
+    ]
+  },
+
+  "packages/scaffold-engine/package.json": {
+    "_note": "이 파일은 신설 대상이다. 현재 packages/scaffold-engine 에는 package.json 이 없다.",
+    "name": "@vibe/scaffold-engine",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "test": "../../apps/api/venv/Scripts/python.exe -m pytest"
+    },
+    "_why_interpreter": [
+      "패키지별 venv 를 따로 만들지 않는다. 이 저장소는 apps/api 의 venv 하나로",
+      "모노레포 전체 Python 을 돌린다(main.py 가 sys.path 에 packages 를 넣는 방식과 같다).",
+      "인터프리터를 늘리면 '어느 venv 에서 통과했는가'가 새 변수로 생긴다."
+    ]
+  },
+
+  "packages/agent-core/package.json": {
+    "_note": "신설 대상.",
+    "name": "@vibe/agent-core",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "test": "../../apps/api/venv/Scripts/python.exe -m pytest"
+    }
+  },
+
+  "packages/agent-telemetry/package.json": {
+    "_note": "신설 대상. 현재 tests/ 가 없으므로 스크립트만 두고 테스트는 필요할 때 추가한다.",
+    "name": "@vibe/agent-telemetry",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+      "test": "../../apps/api/venv/Scripts/python.exe -m pytest"
+    }
+  },
+
+  "_pnpm_workspace_확인": [
+    "pnpm-workspace.yaml 에 packages/* 가 포함돼 있어야 turbo 가 이 워크스페이스를 본다.",
+    "포함돼 있지 않으면 스크립트를 만들어도 `turbo run test` 대상에 잡히지 않는다."
+  ]
+}

@@ -1,0 +1,194 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/acp-deep-agents-server-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+<CodeGroup>
+    ```ts Google
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "google-genai:gemini-3.6-flash",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts OpenAI
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "openai:gpt-5.5",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts Anthropic
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "anthropic:claude-sonnet-4-6",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts OpenRouter
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "openrouter:openrouter:z-ai/glm-5.2",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts Fireworks
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "fireworks:accounts/fireworks/models/glm-5p2",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts Baseten
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "baseten:zai-org/GLM-5.2",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+
+    ```ts Ollama
+    import { DeepAgentsServer } from "deepagents-acp";
+    
+    const server = new DeepAgentsServer({
+      agents: [
+        {
+          name: "code-agent",
+          description: "Full-featured coding assistant",
+          model: "ollama:north-mini-code-1.0",
+          skills: ["./skills/"],
+          memory: ["./.deepagents/AGENTS.md"],
+        },
+        {
+          name: "reviewer",
+          description: "Code review specialist",
+          systemPrompt: "You are a code review expert...",
+        },
+      ],
+      serverName: "my-deepagents-acp",
+      serverVersion: "1.0.0",
+      workspaceRoot: process.cwd(),
+      debug: true,
+    });
+    
+    await server.start();
+    ```
+</CodeGroup>

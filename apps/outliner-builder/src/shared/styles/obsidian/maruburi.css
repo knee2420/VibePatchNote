@@ -1,0 +1,38 @@
+/**
+ * @file maruburi.css
+ * @description 마루 부리 (네이버) 본문 명조 글꼴 및 행간 시스템 (What-s-in-my-head 스니펫 이식)
+ */
+
+body,
+.outline-editor,
+.outline-tree,
+.outline-board {
+  --font-text-theme: "MaruBuri", "Nanum Myeongjo", "Malgun Gothic", serif;
+}
+
+/* ── 읽기 편한 가독성 행간 및 자간 ─────────────────────────── */
+.markdown-source-view.mod-cm6 .cm-content,
+.markdown-preview-view,
+.outline-tree,
+.outline-note,
+.outline-content {
+  font-family: var(--font-text-theme);
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+}
+
+/* 제목은 조금 더 굵게 — 마루 부리 Bold 가 잡아줍니다 */
+.markdown-preview-view h1, .markdown-source-view .HyperMD-header-1,
+.markdown-preview-view h2, .markdown-source-view .HyperMD-header-2,
+.markdown-preview-view h3, .markdown-source-view .HyperMD-header-3,
+.outline-title,
+.outline-heading {
+  font-family: var(--font-text-theme);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* 코드·경로는 명조가 어울리지 않으니 고정폭 유지 */
+code, pre, .cm-inline-code, .cm-hmd-codeblock, .font-mono {
+  font-family: var(--font-monospace);
+}

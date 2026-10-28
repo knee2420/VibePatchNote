@@ -1,0 +1,7 @@
+{
+  "name": "@vibe/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "모노레포 공통 TypeScript 설정 패키지",
+  "files": ["tsconfig"]
+}

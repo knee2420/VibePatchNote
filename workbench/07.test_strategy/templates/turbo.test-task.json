@@ -1,0 +1,65 @@
+{
+  "_note": [
+    "turbo.json 의 `tasks` 에 병합할 조각. 이 파일 자체는 실행되지 않는다.",
+    "현재 turbo.json 에는 test 태스크가 없어 `turbo run test` 를 쓸 수 없다(2026-09-14 감사 4-1).",
+    "정본: workbench/07.test_strategy/spec/04.execution/01.turbo-task.md"
+  ],
+
+  "tasks": {
+    "test": {
+      "_why_dependsOn": [
+        "패키지가 먼저 빌드돼야 하는 구조가 아니므로 ^build 를 걸지 않는다.",
+        "Python 워크스페이스는 소스를 직접 임포트한다. 불필요한 의존은 캐시 적중률만 떨어뜨린다."
+      ],
+      "dependsOn": [],
+
+      "_why_inputs": [
+        "inputs 를 지정하지 않으면 turbo 가 워크스페이스 전체를 해시한다.",
+        "그러면 README 한 줄만 고쳐도 테스트가 다시 돈다 — 캐시가 있으나 마나가 된다.",
+        "반대로 너무 좁히면 바뀐 것을 놓쳐 초록 거짓말을 하게 된다.",
+        "아래 목록은 '이것이 바뀌면 결과가 바뀔 수 있는 것' 전부다."
+      ],
+      "inputs": [
+        "app/**/*.py",
+        "tests/**",
+        "migrations/**/*.py",
+        "main.py",
+        "pyproject.toml",
+        "requirements*.txt"
+      ],
+
+      "_why_outputs": [
+        "테스트는 산출물이 없다. 빈 배열이면 turbo 는 종료 코드와 로그만 캐시한다.",
+        ".pytest_tmp 는 출력이 아니라 쓰레기다 — 캐시에 넣으면 안 된다."
+      ],
+      "outputs": [],
+
+      "_why_env": [
+        "등급 루트 환경 변수가 바뀌면 테스트가 다른 저장소를 보게 된다.",
+        "해시에 포함시켜야 '환경이 달라졌는데 캐시가 적중'하는 사고를 막는다."
+      ],
+      "env": ["VIBE_CONFIG_DIR", "VIBE_DATA_DIR", "VIBE_CACHE_DIR", "VIBE_STATE_DIR"]
+    },
+
+    "test:all": {
+      "_why": "L3(wiring) 까지 포함한다. 캐시 규칙은 test 와 같다.",
+      "dependsOn": [],
+      "inputs": [
+        "app/**/*.py",
+        "tests/**",
+        "migrations/**/*.py",
+        "main.py",
+        "pyproject.toml",
+        "requirements*.txt"
+      ],
+      "outputs": [],
+      "env": ["VIBE_CONFIG_DIR", "VIBE_DATA_DIR", "VIBE_CACHE_DIR", "VIBE_STATE_DIR"]
+    }
+  },
+
+  "_root_package_json_scripts": {
+    "_note": "루트 package.json 의 scripts 에도 추가한다. 지금은 test 스크립트 자체가 없다.",
+    "test": "turbo run test",
+    "test:all": "turbo run test:all"
+  }
+}

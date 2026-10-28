@@ -1,0 +1,610 @@
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
+import {
+  FileText,
+  Maximize2,
+  Trash2,
+  Sparkles,
+  Loader2,
+  Layers,
+  AlertCircle,
+  X,
+} from 'lucide-react';
+
+import { ScaffoldCanvasEditor, type SlotMappingItem } from '@vibe/tiptap-scaffold';
+
+import { useActiveElementStore, useSyncMappingStore } from '@/shared/model';
+import { ProviderExecutionBadge, providerExecutionMessage } from '@/shared/ui';
+
+import { useScaffoldArchive, type ScaffoldArchiveSyncState } from '../model/useScaffoldArchive';
+import { useScaffoldFocusStore } from '../model/useScaffoldFocusStore';
+import { SCAFFOLD_DOCUMENT_NODE_TYPE, type ScaffoldDocumentNode, SCAFFOLD_CARD_SIZE } from '../model/types';
+
+/**
+ * ScaffoldDocumentCard (FSD Entity UI)
+ *
+ * 미로(Miro) 레퍼런스 스타일의 스캐폴딩 문서 노드.
+ * 원본 참고 문서와 '= 동급' 크기(600x800)로 배치되며,
+ * 1) 생성 중: 실시간 AI 프로세스(Vision -> 2D Grid -> DSL 추론 -> DOM 검증) 현황 시각화
+ * 2) 완료 시: Tiptap 와이어프레임 캔버스 에디터(인라인 슬롯, 다단 그리드)가 카드에 직접 렌더링됩니다.
+ */
+const SYNC_LABELS: Record<ScaffoldArchiveSyncState, string> = {
+  idle: '',
+  hydrating: '불러오는 중',
+  saving: '저장 중',
+  saved: '보관함 저장됨',
+  error: '동기화 실패',
+};
+
+export const ScaffoldDocumentCard = memo(function ScaffoldDocumentCard({
+  id,
+  data,
+  selected = false,
+}: NodeProps<ScaffoldDocumentNode>) {
+  const { setNodes, setEdges } = useReactFlow();
+  const navigate = useNavigate();
+  const openFocus = useScaffoldFocusStore((s) => s.openFocus);
+
+  const [showTaskBanner, setShowTaskBanner] = useState(true);
+
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+
+  // 본문(HTML/마크다운/슬롯)의 출처이자 저장처는 백엔드 아카이브다.
+  const { syncState } = useScaffoldArchive(id, data, editorContainerRef);
+
+  const setActiveMapping = useSyncMappingStore((s) => s.setActiveMapping);
+  const activeMapping = useSyncMappingStore((s) => s.activeMapping);
+  const setSelection = useActiveElementStore((s) => s.setSelection);
+
+  const totalPages = useMemo(() => {
+    if (typeof data.archive?.totalPages === 'number' && data.archive.totalPages > 0) {
+      return data.archive.totalPages;
+    }
+    const maxPageInSlots = (data.slots as SlotMappingItem[] | undefined)?.reduce(
+      (max, s) => Math.max(max, s.pageNumber ?? 1),
+      1
+    );
+    if (maxPageInSlots && maxPageInSlots > 1) return maxPageInSlots;
+    const match = data.description?.match(/(\d+)\s*페이지/);
+    if (match) return parseInt(match[1], 10);
+    return 1;
+  }, [data.archive?.totalPages, data.slots, data.description]);
+
+  const slotsCount = useMemo(() => {
+    if (Array.isArray(data.slots) && data.slots.length > 0) {
+      return data.slots.length;
+    }
+    if (typeof data.archive?.slotsCount === 'number' && data.archive.slotsCount > 0) {
+      return data.archive.slotsCount;
+    }
+    const match = data.description?.match(/슬롯\s*(\d+)개/);
+    if (match) return parseInt(match[1], 10);
+    return 0;
+  }, [data.slots, data.archive?.slotsCount, data.description]);
+
+  // 노드가 선택될 때 전역 활성 선택 스토어와 동기화 (WinForm 스타일 속성창 연동)
+  useEffect(() => {
+    if (selected) {
+      setSelection({
+        nodeId: id,
+        nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+        docId: data.docId || (data.archive?.docId as string) || undefined,
+        docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+        scaffoldId: data.scaffoldId,
+        selectedElement: {
+          id: data.scaffoldId || id,
+          label: data.title || '와이어프레임 서식',
+          type: 'scaffold_card',
+          totalPages,
+          slotsCount,
+          difficulty: data.difficulty || 'medium',
+          sourceFile: data.sourcePdfFileName,
+          content_summary: data.description || data.taskSummary,
+        },
+      });
+    }
+  }, [
+    selected,
+    id,
+    data.docId,
+    data.archive?.docId,
+    data.title,
+    data.sourcePdfFileName,
+    data.scaffoldId,
+    data.slots,
+    data.difficulty,
+    data.description,
+    data.taskSummary,
+    totalPages,
+    slotsCount,
+    setSelection,
+  ]);
+
+  const handleHoverSlot = useCallback(
+    (slot: SlotMappingItem | null) => {
+      if (!slot) {
+        setActiveMapping(null);
+        return;
+      }
+      setActiveMapping({
+        id: slot.id,
+        number: slot.number,
+        label: slot.label,
+        box_2d: slot.box_2d,
+        page: slot.pageNumber ?? 1,
+        targetNodeId: (data.sourceNodeId as string) || undefined,
+        sourcePdfFileName: data.sourcePdfFileName,
+        source: 'slot',
+      });
+    },
+    [setActiveMapping, data.sourceNodeId, data.sourcePdfFileName]
+  );
+
+  // 활성 매핑이 이 스캐폴드 카드의 원본 문서와 일치하는 경우에만 하이라이트 번호를 전달한다
+  const isMappingForThisCard = useMemo(() => {
+    if (!activeMapping) return false;
+    if (activeMapping.targetNodeId && data.sourceNodeId) {
+      return activeMapping.targetNodeId === data.sourceNodeId;
+    }
+    if (activeMapping.sourcePdfFileName && data.sourcePdfFileName) {
+      return activeMapping.sourcePdfFileName === data.sourcePdfFileName;
+    }
+    return false;
+  }, [activeMapping, data.sourceNodeId, data.sourcePdfFileName]);
+
+  const activeNumberForEditor = isMappingForThisCard ? activeMapping?.number : null;
+
+  // 카드 클릭 시 (슬롯 개별 클릭 또는 카드 본체 클릭) 속성 인스펙터 동기화
+  // 방안 B: e.stopPropagation()을 호출하지 않아 에디터 커서(Caret) 포커스와 속성창 동기화가 동시에 자연스럽게 동작함!
+  const handleCardClick = useCallback(
+    (e: React.MouseEvent) => {
+      // 슬롯 클릭 여부 확인 (Tiptap 슬롯 요소: span[data-type="scaffold-slot"])
+      const slotEl = (e.target as HTMLElement).closest('span[data-type="scaffold-slot"]');
+      if (slotEl) {
+        const rawNum = slotEl.getAttribute('data-mapping-num');
+        const num = rawNum ? Number.parseInt(rawNum, 10) : null;
+        const rawId = slotEl.getAttribute('data-slot-id');
+
+        const slots = (data.slots as SlotMappingItem[] | undefined) || [];
+        const matched = slots.find(
+          (s) => (num !== null && s.number === num) || (rawId && s.id === rawId)
+        );
+
+        const slotId = matched?.id || rawId || (num !== null ? `s${num}` : 'slot');
+        const slotLabel =
+          matched?.label ||
+          slotEl.textContent?.replace(/[\][]/g, '').trim() ||
+          `슬롯 #${num ?? ''}`;
+        const slotNumber = matched?.number ?? num ?? 1;
+        const slotPage = matched?.pageNumber ?? 1;
+        const slotBox = matched?.box_2d;
+
+        const rect = slotEl.getBoundingClientRect();
+        const anchorPos = {
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top,
+        };
+
+        setSelection({
+          nodeId: id,
+          nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+          docId: data.docId || (data.archive?.docId as string) || undefined,
+          docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+          scaffoldId: data.scaffoldId,
+          selectedElement: {
+            id: slotId,
+            label: slotLabel,
+            type: 'wireframe_slot',
+            page: slotPage,
+            box_2d: slotBox,
+            slotNumber,
+            slotId,
+            purpose: `와이어프레임 #${slotNumber} 슬롯 (${slotLabel})`,
+            structured_data: {
+              slotNumber,
+              slotId,
+              scaffoldId: data.scaffoldId,
+            },
+            anchorPos,
+          },
+        });
+        return;
+      }
+
+      // 슬롯이 아닌 카드 본체 영역 클릭 시: 서식 카드 전체 속성 선택
+      setSelection({
+        nodeId: id,
+        nodeType: SCAFFOLD_DOCUMENT_NODE_TYPE,
+        docId: data.docId || (data.archive?.docId as string) || undefined,
+        docTitle: data.title || data.sourcePdfFileName || '와이어프레임 서식',
+        scaffoldId: data.scaffoldId,
+        selectedElement: {
+          id: data.scaffoldId || id,
+          label: data.title || '와이어프레임 서식',
+          type: 'scaffold_card',
+          totalPages,
+          slotsCount,
+          difficulty: data.difficulty || 'medium',
+          sourceFile: data.sourcePdfFileName,
+          content_summary: data.description || data.taskSummary,
+        },
+      });
+    },
+    [
+      id,
+      data.docId,
+      data.archive?.docId,
+      data.title,
+      data.sourcePdfFileName,
+      data.scaffoldId,
+      data.slots,
+      data.difficulty,
+      data.description,
+      data.taskSummary,
+      totalPages,
+      slotsCount,
+      setSelection,
+    ]
+  );
+
+
+  const handleDelete = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setNodes((nds) => nds.filter((node) => node.id !== id));
+      setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+    },
+    [id, setNodes, setEdges]
+  );
+
+  const handleOpenFocus = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const targetScaffoldId =
+        data.scaffoldId ||
+        data.archive?.scaffoldId ||
+        ((data as Record<string, unknown>).archiveId as string | undefined);
+
+      if (targetScaffoldId) {
+        navigate(`/editor/${encodeURIComponent(targetScaffoldId)}`);
+      } else {
+        openFocus(id);
+      }
+    },
+    [data, id, navigate, openFocus]
+  );
+
+  // 카드 본문에서 Tiptap 내용이 편집될 때 노드 데이터 실시간 동기화
+  const handleUpdateHtml = useCallback(
+    (html: string) => {
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === id) {
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                htmlContent: html,
+              },
+            };
+          }
+          return n;
+        })
+      );
+    },
+    [id, setNodes]
+  );
+
+  const handleUpdateMarkdown = useCallback(
+    (md: string) => {
+      setNodes((nds) =>
+        nds.map((n) => {
+          if (n.id === id) {
+            return {
+              ...n,
+              data: {
+                ...n.data,
+                markdownContent: md,
+              },
+            };
+          }
+          return n;
+        })
+      );
+    },
+    [id, setNodes]
+  );
+
+  // 원본 참고 카드와 동급(=동일) 크기 산정
+  const cardStyle = useMemo(() => {
+    const width = data.width || SCAFFOLD_CARD_SIZE.width;
+    const height = data.height || SCAFFOLD_CARD_SIZE.height;
+    return {
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+  }, [data.width, data.height]);
+
+  // 세션에서 복원된 노드는 본문이 비어 있고 포인터만 있다. 그것도 완료 상태다.
+  const status = data.status || (data.htmlContent || data.scaffoldId ? 'completed' : 'generating');
+  return (
+    <div
+      style={cardStyle}
+      onClick={handleCardClick}
+      className={`
+        rounded-2xl border-2 transition-all duration-300 select-none
+        flex flex-col overflow-hidden bg-white text-slate-800 shadow-md relative [contain:layout_style]
+        ${
+          selected
+            ? 'border-indigo-500 ring-4 ring-indigo-400/20 z-30 shadow-indigo-900/10'
+            : 'border-slate-200 hover:border-slate-300 z-10 hover:z-20'
+        }
+      `}
+    >
+      {/* 1. 카드 상단 헤더 바 */}
+      <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2.5 min-w-0 pr-3">
+          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-xs shrink-0">
+            {status === 'generating' ? (
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
+            ) : (
+              <FileText className="w-4 h-4" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                {status === 'generating' ? 'AI 실시간 분석 중' : 'Tiptap 와이어프레임 서식'}
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {status === 'generating' ? '실행 중' : 'v1.0'}
+              </span>
+              {status === 'completed' && syncState !== 'idle' && (
+                <span
+                  className={`text-[10px] font-medium ${syncState === 'error' ? 'text-rose-500' : 'text-slate-400'}`}
+                  title="서식 보관함 동기화 상태"
+                >
+                  {SYNC_LABELS[syncState]}
+                </span>
+              )}
+            </div>
+            <h4 className="font-semibold text-sm text-slate-900 truncate leading-tight mt-0.5" title={data.title}>
+              {data.title}
+            </h4>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* 포커스(전체화면 3단 모달) 버튼 */}
+          <button
+            onClick={handleOpenFocus}
+            className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 hover:text-indigo-600 border border-slate-200 shadow-2xs transition-all nodrag cursor-pointer"
+            title="Playground 3단 전체 화면 포커스 편집"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+          {/* 노드 삭제 버튼 */}
+          <button
+            onClick={handleDelete}
+            className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 shadow-2xs transition-all nodrag cursor-pointer"
+            title="서식 카드 삭제"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* 1.5. 카드 상단: 에이전트 상태 및 작업 내용 요약 바 (사용자 요청 위치) */}
+      {status === 'completed' && showTaskBanner && (
+        <div className="px-4 py-2 bg-indigo-50/70 border-b border-indigo-100/80 flex items-center justify-between text-xs text-slate-700 shrink-0 gap-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <ProviderExecutionBadge execution={data.execution} />
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-semibold text-indigo-900 shrink-0 text-[11px] bg-indigo-100/90 border border-indigo-200/60 px-1.5 py-0.5 rounded">
+                작업 내용
+              </span>
+              <span
+                className="text-[11px] text-slate-700 truncate font-medium"
+                title={
+                  data.taskSummary ||
+                  data.description ||
+                  `원본 실측 기하 기반 와이어프레임 · 전체 ${totalPages}페이지 · 슬롯 ${
+                    (data.slots as SlotMappingItem[] | undefined)?.length ?? 0
+                  }개 구조화 완료`
+                }
+              >
+                {data.taskSummary ||
+                  data.description ||
+                  `원본 실측 기하 기반 와이어프레임 · 전체 ${totalPages}페이지 · 슬롯 ${
+                    (data.slots as SlotMappingItem[] | undefined)?.length ?? 0
+                  }개 구조화 완료`}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowTaskBanner(false)}
+            className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-200/50 transition-colors shrink-0 cursor-pointer"
+            title="작업 내용 배너 숨기기"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {status === 'generating' && (
+        <div className="px-4 py-2 bg-amber-50/90 border-b border-amber-200/80 flex items-center justify-between text-xs text-amber-900 shrink-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <ProviderExecutionBadge execution={data.execution} />
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-semibold text-amber-900 shrink-0 text-[11px] bg-amber-200/80 border border-amber-300/60 px-1.5 py-0.5 rounded">
+                작업 내용
+              </span>
+              <span className="text-[11px] text-amber-800 truncate font-medium">
+                {data.taskSummary || data.progressMessage || '문서 전체 페이지 기하 실측 및 서식 슬롯 구조화'}
+              </span>
+            </div>
+          </div>
+          <span className="text-[10px] text-amber-700 font-mono animate-pulse shrink-0 font-medium">
+            AI 분석 중...
+          </span>
+        </div>
+      )}
+
+      {/* 2. 카드 본문 뷰포트 (상태에 따른 분기) */}
+      <div className="flex-1 w-full h-full overflow-hidden flex flex-col bg-slate-50/50 relative">
+        {/* CASE 1: AI 프로세스 진행 중 (Thinking & Generating) */}
+        {status === 'generating' && (
+          <div className="flex-1 p-6 flex flex-col justify-between overflow-y-auto nowheel">
+            <div className="flex flex-col gap-5">
+              {/* 상단 펄스 타이틀 */}
+              <div className="p-4 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-indigo-600 text-white shadow-xs">
+                  <Sparkles className="w-5 h-5 animate-spin" />
+                </div>
+                <div>
+                  <h5 className="text-xs font-bold text-indigo-900">
+                    AI 서식 분석 엔진이 문서를 스캐폴딩하고 있습니다
+                  </h5>
+                  <p className="text-[11px] text-indigo-600/80 mt-0.5">
+                    {data.progressMessage || '문서 2D 레이아웃 및 Tiptap 구조 추론 중...'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ProviderExecutionBadge execution={data.execution} />
+                    <span className="text-xs font-semibold text-slate-800">
+                      {data.execution?.model || 'gemini-3.8-flash-low'}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+                    {providerExecutionMessage(data.execution)}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-600 border-t border-slate-100 pt-2 flex items-start gap-1.5">
+                  <span className="font-semibold text-slate-700 shrink-0 text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">
+                    작업 내용
+                  </span>
+                  <span className="text-slate-700 font-medium leading-relaxed">
+                    {data.taskSummary || '문서 전체 페이지 기하 실측 및 비전 멀티모달 서식 구조화'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                  <Loader2 className="size-4 animate-spin text-indigo-600" />
+                  문서 구조와 편집 슬롯을 생성하고 있습니다
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-full w-1/2 animate-pulse rounded-full bg-indigo-600" />
+                </div>
+                <p className="text-[11px] text-slate-500">공급자가 실제 단계별 진행률을 제공하지 않아 임의의 백분율은 표시하지 않습니다.</p>
+              </div>
+            </div>
+
+            {/* 하단 팁 */}
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500">
+              <span className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                완료 즉시 카드 상에 Tiptap 인터랙티브 편집기가 렌더링됩니다
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* CASE 2: 완료 시 원본 카드와 '= 동급'의 Tiptap 서식 에디터 화면 직접 렌더링 (핵심!) */}
+        {status === 'completed' && (
+          <div
+            ref={editorContainerRef}
+            className="flex-1 w-full h-full overflow-y-auto p-4 sm:p-6 bg-slate-50 nodrag nowheel"
+          >
+            <div className="max-w-full mx-auto">
+              <ScaffoldCanvasEditor
+                initialContent={data.htmlContent}
+                slots={data.slots as SlotMappingItem[] | undefined}
+                onChangeHtml={handleUpdateHtml}
+                onChangeMarkdown={handleUpdateMarkdown}
+                onHoverSlot={handleHoverSlot}
+                activeMappingNumber={activeNumberForEditor}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* CASE 3: 에러 발생 시 */}
+        {status === 'error' && (
+          <div className="flex-1 p-8 flex flex-col items-center justify-center text-center gap-4 text-slate-600">
+            <div className="w-12 h-12 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shadow-xs">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-slate-900">서식 추출에 실패했습니다</h4>
+              <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                {data.errorMessage || '문서 분석 중 오류가 발생했습니다. 원본 카드의 버튼을 눌러 다시 시도해 주세요.'}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 3. 하단 메타 바 */}
+      <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+        <div className="flex items-center gap-2">
+          <span>연동: {data.sourcePdfFileName || 'PDF'}</span>
+          {totalPages > 1 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 font-medium">
+              전체 {totalPages}페이지
+            </span>
+          )}
+          {data.slots && data.slots.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 font-medium">
+              슬롯 {data.slots.length}개
+            </span>
+          )}
+          {data.difficulty && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200/80 text-slate-700 uppercase font-mono font-medium">
+              {data.difficulty}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2.5">
+          {data.archive?.overlayImageUrl && (
+            <a
+              href={data.archive.overlayImageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-600 hover:text-purple-800 font-medium transition-colors flex items-center gap-1 cursor-pointer hover:underline"
+              title="슬롯 오버레이 비전 검증 이미지 열기"
+            >
+              <span>비전 검증 👁️</span>
+            </a>
+          )}
+          <button
+            onClick={handleOpenFocus}
+            className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer transition-colors flex items-center gap-1"
+          >
+            <span>Playground 전체화면 ↗</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 4. React Flow 엣지 핸들 (미로 스타일 연결점) */}
+      <Handle
+        type="target"
+        position={Position.Left}
+        id="target-left"
+        className="!w-3.5 !h-3.5 !bg-indigo-600 !border-2 !border-white !shadow-sm transition-transform hover:!scale-125"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="source-right"
+        className="!w-3.5 !h-3.5 !bg-indigo-600 !border-2 !border-white !shadow-sm transition-transform hover:!scale-125"
+      />
+    </div>
+  );
+});

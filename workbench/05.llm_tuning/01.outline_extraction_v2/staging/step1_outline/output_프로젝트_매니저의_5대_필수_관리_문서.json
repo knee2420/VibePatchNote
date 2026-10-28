@@ -1,0 +1,3272 @@
+{
+  "document_title": "프로젝트 매니저의 5대 필수 관리 문서.pdf",
+  "total_pages": 14,
+  "outlines": [
+    {
+      "id": "node-root",
+      "level": 1,
+      "title": "프로젝트 매니저의 5대 필수 관리 문서",
+      "type": "header",
+      "page": 1,
+      "box_2d": [
+        58,
+        72,
+        91,
+        709
+      ],
+      "purpose": null,
+      "elements": [],
+      "children": [
+        {
+          "id": "node-q1",
+          "level": 2,
+          "title": "Q1. Project Manager 필수 관리 문서 (기본 5종)",
+          "type": "header",
+          "page": 1,
+          "box_2d": [
+            131,
+            71,
+            204,
+            910
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q1",
+              "outline_id": "node-q1",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "Project Manager 에게 꼭 필요한 필수 관리 문서가 뭐라고 생각하나?",
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                131,
+                71,
+                204,
+                910
+              ],
+              "content_summary": null,
+              "structured_data": null
+            },
+            {
+              "id": "elem-r1-summary",
+              "outline_id": "node-q1",
+              "type": "paragraph",
+              "label": "Response 요약",
+              "value": "프로젝트 매니저(PM)가 일정, 리소스, 리스크를 통제하고 산출물을 방어하기 위해 반드시 유지해야 하는 핵심 관리 문서는 크게 5가지로 압축됩니다.",
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                131,
+                71,
+                204,
+                910
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-tab1",
+          "level": 2,
+          "title": "5대 필수 관리 문서 요약표",
+          "type": "table",
+          "page": 1,
+          "box_2d": [
+            223,
+            72,
+            556,
+            930
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-tab-summary",
+              "outline_id": "node-tab1",
+              "type": "table",
+              "label": "5대 필수 관리 문서 요약표",
+              "value": [
+                {
+                  "문서명": "프로젝트 차터 (Project Charter)",
+                  "업데이트주기": "프로젝트 착수 시 (이후 동결)",
+                  "핵심목적": "프로젝트 목표, 범위, 권한의 공식적 승인"
+                },
+                {
+                  "문서명": "요구사항 정의서 (PRD)",
+                  "업데이트주기": "기획 단계 (변경 시 엄격한 통제)",
+                  "핵심목적": "개발 및 구현해야 할 기능과 스펙의 명문화"
+                },
+                {
+                  "문서명": "작업 분할 구조도 (WBS)",
+                  "업데이트주기": "주간 단위 점검",
+                  "핵심목적": "전체 업무를 최소 단위로 분할하여 일정/담당자 할당"
+                },
+                {
+                  "문서명": "이슈 및 리스크 관리 대장",
+                  "업데이트주기": "상시 (데일리/위클리)",
+                  "핵심목적": "잠재적 위협 요소 식별 및 발생한 문제의 해결 추적"
+                },
+                {
+                  "문서명": "회의록 (Meeting Minutes)",
+                  "업데이트주기": "회의 종료 직후",
+                  "핵심목적": "합의된 주요 의사결정 사항과 액션 아이템 기록"
+                }
+              ],
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                223,
+                72,
+                556,
+                930
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-t1-r1",
+              "level": 3,
+              "title": "프로젝트 차터 (Project Charter)",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                223,
+                72,
+                280,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-t1-r1",
+                  "outline_id": "node-t1-r1",
+                  "type": "key_value",
+                  "label": "프로젝트 차터 (Project Charter)",
+                  "value": "핵심 목적: 프로젝트 목표, 범위, 권한의 공식적 승인 | 업데이트 주기: 프로젝트 착수 시 (이후 동결)",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    223,
+                    72,
+                    280,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-t1-r2",
+              "level": 3,
+              "title": "요구사항 정의서 (PRD)",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                280,
+                72,
+                335,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-t1-r2",
+                  "outline_id": "node-t1-r2",
+                  "type": "key_value",
+                  "label": "요구사항 정의서 (PRD)",
+                  "value": "핵심 목적: 개발 및 구현해야 할 기능과 스펙의 명문화 | 업데이트 주기: 기획 단계 (변경 시 엄격한 통제)",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    280,
+                    72,
+                    335,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-t1-r3",
+              "level": 3,
+              "title": "작업 분할 구조도 (WBS)",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                335,
+                72,
+                390,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-t1-r3",
+                  "outline_id": "node-t1-r3",
+                  "type": "key_value",
+                  "label": "작업 분할 구조도 (WBS)",
+                  "value": "핵심 목적: 전체 업무를 최소 단위로 분할하여 일정/담당자 할당 | 업데이트 주기: 주간 단위 점검",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    335,
+                    72,
+                    390,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-t1-r4",
+              "level": 3,
+              "title": "이슈 및 리스크 관리 대장",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                390,
+                72,
+                445,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-t1-r4",
+                  "outline_id": "node-t1-r4",
+                  "type": "key_value",
+                  "label": "이슈 및 리스크 관리 대장",
+                  "value": "핵심 목적: 잠재적 위협 요소 식별 및 발생한 문제의 해결 추적 | 업데이트 주기: 상시 (데일리/위클리)",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    390,
+                    72,
+                    445,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-t1-r5",
+              "level": 3,
+              "title": "회의록 (Meeting Minutes)",
+              "type": "key_value",
+              "page": 1,
+              "box_2d": [
+                445,
+                72,
+                556,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-t1-r5",
+                  "outline_id": "node-t1-r5",
+                  "type": "key_value",
+                  "label": "회의록 (Meeting Minutes)",
+                  "value": "핵심 목적: 합의된 주요 의사결정 사항과 액션 아이템 기록 | 업데이트 주기: 회의 종료 직후",
+                  "items": null,
+                  "page": 1,
+                  "box_2d": [
+                    445,
+                    72,
+                    556,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-sec1",
+          "level": 2,
+          "title": "1. 프로젝트 차터 (Project Charter)",
+          "type": "paragraph",
+          "page": 1,
+          "box_2d": [
+            580,
+            72,
+            605,
+            543
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-sec1-desc",
+              "outline_id": "node-sec1",
+              "type": "paragraph",
+              "label": "프로젝트 차터 상세",
+              "value": "프로젝트의 존재 이유와 PM의 권한을 공식적으로 선언하는 베이스캠프 역할을 합니다. 포함 내용: 프로젝트 배경, 최종 목표(KPI), 핵심 이해관계자, 대략적인 예산과 핵심 마일스톤. 활용: 프로젝트 진행 중 방향성이 흔들리거나 이해관계자 간 의견 충돌이 발생할 때, 최초 합의된 목표를 상기시키는 의사결정의 기준점이 됩니다.",
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                580,
+                72,
+                605,
+                543
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-sec2",
+          "level": 2,
+          "title": "2. 요구사항 정의서 (PRD / SRS)",
+          "type": "paragraph",
+          "page": 1,
+          "box_2d": [
+            761,
+            72,
+            786,
+            492
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-sec2-desc",
+              "outline_id": "node-sec2",
+              "type": "paragraph",
+              "label": "요구사항 정의서 상세",
+              "value": "이해관계자의 비즈니스 요구를 구체적인 기능과 제약 조건으로 번역한 문서입니다. 포함 내용: 유저 스토리, 기능 상세 스펙, 비기능적 요구사항(성능, 보안 등), 제외 범위(Out of Scope). 활용: Notion과 같은 문서 기반 협업 공간에 단일 진실 공급원(SSOT)으로 구축하여 기획, 개발, 디자인 파트가 동일한 목표를 보게 합니다. PM이 프로젝트 범위 크립(Scope Creep, 요구사항이 계속 늘어나는 현상)을 방어하는 가장 강력한 무기입니다.",
+              "items": null,
+              "page": 1,
+              "box_2d": [
+                761,
+                72,
+                786,
+                492
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-sec3",
+          "level": 2,
+          "title": "3. 작업 분할 구조도 (WBS)",
+          "type": "paragraph",
+          "page": 2,
+          "box_2d": [
+            96,
+            72,
+            120,
+            418
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-sec3-desc",
+              "outline_id": "node-sec3",
+              "type": "paragraph",
+              "label": "작업 분할 구조도 상세",
+              "value": "프로젝트 전체를 관리 가능한 최소 작업 단위(Work Package)로 쪼갠 일정 지도입니다. 포함 내용: 계층형 작업 목록, 각 작업의 시작/종료일, 선행/후행 작업 간의 의존성, 작업별 담당자. 활용: 단순한 To-Do 리스트를 넘어, 특정 작업이 지연될 때 전체 일정에 미치는 영향을 파악하고 리소스를 재분배하는 데 사용됩니다.",
+              "items": null,
+              "page": 2,
+              "box_2d": [
+                96,
+                72,
+                120,
+                418
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-sec4",
+          "level": 2,
+          "title": "4. 이슈 및 리스크 관리 대장 (Risk Register)",
+          "type": "paragraph",
+          "page": 2,
+          "box_2d": [
+            277,
+            72,
+            301,
+            644
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-sec4-desc",
+              "outline_id": "node-sec4",
+              "type": "paragraph",
+              "label": "이슈 및 리스크 관리 대장 상세",
+              "value": "불확실성을 선제적으로 통제하고, 이미 발생한 문제를 추적하여 해결하는 문서입니다. 포함 내용: 리스크 내용, 발생 확률(상/중/하), 비즈니스 영향도, 대응 전략(회피/완화/수용), 현재 진행 상태. 활용: Jira나 Trello 등의 칸반/티켓 기반 트래커와 연동하여 실시간으로 이슈 상태를 관리합니다. 정기 미팅에서 '현재 상태'를 모니터링하고 담당자의 조치를 압박하는 용도로 쓰입니다.",
+              "items": null,
+              "page": 2,
+              "box_2d": [
+                277,
+                72,
+                301,
+                644
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-sec5",
+          "level": 2,
+          "title": "5. 회의록 및 액션 아이템 (Meeting Minutes)",
+          "type": "paragraph",
+          "page": 2,
+          "box_2d": [
+            479,
+            72,
+            503,
+            662
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-sec5-desc",
+              "outline_id": "node-sec5",
+              "type": "paragraph",
+              "label": "회의록 및 액션 아이템 상세",
+              "value": "의사결정 히스토리를 증명하고 다음 행동을 강제하는 법적 효력에 가까운 기록입니다. 포함 내용: 회의 일시, 참석자, 주요 결정 사항, 액션 아이템(담당자와 완료 기한 필수 포함). 활용: 구두로만 합의된 내용은 반드시 휘발되거나 왜곡됩니다. Slack 등을 통해 회의 직후 관련자 모두에게 공유하여 합의 사항을 픽스하고, 다음 회의 시작 시 이전 액션 아이템의 완료 여부부터 점검합니다.",
+              "items": null,
+              "page": 2,
+              "box_2d": [
+                479,
+                72,
+                503,
+                662
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": []
+        },
+        {
+          "id": "node-q2",
+          "level": 2,
+          "title": "Q2. 범용적인 산업군 대상 5대 관리 문서",
+          "type": "header",
+          "page": 2,
+          "box_2d": [
+            580,
+            72,
+            660,
+            930
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q2",
+              "outline_id": "node-q2",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "흠.. 개발자에 치우쳐진 것 보다는 프로젝트를 좀 더 폭넓게 잡아봤으면 하는데, 프로젝트가 여러가지잖아",
+              "items": null,
+              "page": 2,
+              "box_2d": [
+                580,
+                72,
+                660,
+                930
+              ],
+              "content_summary": null,
+              "structured_data": null
+            },
+            {
+              "id": "elem-r2-summary",
+              "outline_id": "node-q2",
+              "type": "paragraph",
+              "label": "Response 요약",
+              "value": "IT나 소프트웨어 개발에 국한하지 않고 건설, 마케팅 캠페인 등 모든 산업군에 적용되는 범용적인 관점에서 PM이 쥐고 있어야 할 5대 관리 문서를 재정의합니다.",
+              "items": null,
+              "page": 2,
+              "box_2d": [
+                580,
+                72,
+                660,
+                930
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-tab-general",
+              "level": 3,
+              "title": "5대 범용 관리 문서 요약표",
+              "type": "table",
+              "page": 3,
+              "box_2d": [
+                51,
+                72,
+                385,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-tab-general",
+                  "outline_id": "node-tab-general",
+                  "type": "table",
+                  "label": "5대 범용 관리 문서 요약표",
+                  "value": [
+                    {
+                      "문서명": "프로젝트 차터 및 기안서",
+                      "주요관리대상": "목표, 스폰서, 총예산, 방향성",
+                      "핵심목적": "프로젝트의 존재 이유와 PM 권한의 공식 승인"
+                    },
+                    {
+                      "문서명": "통합 실행 계획서 (Scope & WBS)",
+                      "주요관리대상": "작업 단위, 마일스톤, 일정, 담당자",
+                      "핵심목적": "전체 과업 범위 확정 및 세부 일정 수립"
+                    },
+                    {
+                      "문서명": "예산 및 자원 집행 대장",
+                      "주요관리대상": "자금 흐름, 외주 비용, 장비/인력",
+                      "핵심목적": "투입되는 비용과 물리적/인적 자원 통제"
+                    },
+                    {
+                      "문서명": "이해관계자 커뮤니케이션 계획서",
+                      "주요관리대상": "보고 체계, 회의 주기, 승인 권한자",
+                      "핵심목적": "관련된 모든 사람/기관의 요구사항과 소통 방식 정리"
+                    },
+                    {
+                      "문서명": "리스크 및 이슈 대장",
+                      "주요관리대상": "돌발 변수(날씨, 벤더 파산 등), 대안",
+                      "핵심목적": "외부 변수 예측 및 발생한 문제의 조치 이력 관리"
+                    }
+                  ],
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    51,
+                    72,
+                    385,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-g-charter",
+                  "level": 4,
+                  "title": "프로젝트 차터 및 기안서",
+                  "type": "key_value",
+                  "page": 3,
+                  "box_2d": [
+                    107,
+                    83,
+                    160,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-g-charter",
+                      "outline_id": "node-g-charter",
+                      "type": "key_value",
+                      "label": "프로젝트 차터 및 기안서",
+                      "value": "핵심 목적: 프로젝트의 존재 이유와 PM 권한의 공식 승인 | 주요 관리 대상: 목표, 스폰서, 총예산, 방향성",
+                      "items": null,
+                      "page": 3,
+                      "box_2d": [
+                        107,
+                        83,
+                        160,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-g-wbs",
+                  "level": 4,
+                  "title": "통합 실행 계획서 (Scope & WBS)",
+                  "type": "key_value",
+                  "page": 3,
+                  "box_2d": [
+                    160,
+                    83,
+                    210,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-g-wbs",
+                      "outline_id": "node-g-wbs",
+                      "type": "key_value",
+                      "label": "통합 실행 계획서 (Scope & WBS)",
+                      "value": "핵심 목적: 전체 과업 범위 확정 및 세부 일정 수립 | 주요 관리 대상: 작업 단위, 마일스톤, 일정, 담당자",
+                      "items": null,
+                      "page": 3,
+                      "box_2d": [
+                        160,
+                        83,
+                        210,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-g-budget",
+                  "level": 4,
+                  "title": "예산 및 자원 집행 대장",
+                  "type": "key_value",
+                  "page": 3,
+                  "box_2d": [
+                    210,
+                    83,
+                    260,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-g-budget",
+                      "outline_id": "node-g-budget",
+                      "type": "key_value",
+                      "label": "예산 및 자원 집행 대장",
+                      "value": "핵심 목적: 투입되는 비용과 물리적/인적 자원 통제 | 주요 관리 대상: 자금 흐름, 외주 비용, 장비/인력",
+                      "items": null,
+                      "page": 3,
+                      "box_2d": [
+                        210,
+                        83,
+                        260,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-g-comm",
+                  "level": 4,
+                  "title": "이해관계자 커뮤니케이션 계획서",
+                  "type": "key_value",
+                  "page": 3,
+                  "box_2d": [
+                    260,
+                    83,
+                    310,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-g-comm",
+                      "outline_id": "node-g-comm",
+                      "type": "key_value",
+                      "label": "이해관계자 커뮤니케이션 계획서",
+                      "value": "핵심 목적: 관련된 모든 사람/기관의 요구사항과 소통 방식 정리 | 주요 관리 대상: 보고 체계, 회의 주기, 승인 권한자",
+                      "items": null,
+                      "page": 3,
+                      "box_2d": [
+                        260,
+                        83,
+                        310,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-g-risk",
+                  "level": 4,
+                  "title": "리스크 및 이슈 대장",
+                  "type": "key_value",
+                  "page": 3,
+                  "box_2d": [
+                    310,
+                    83,
+                    385,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-g-risk",
+                      "outline_id": "node-g-risk",
+                      "type": "key_value",
+                      "label": "리스크 및 이슈 대장",
+                      "value": "핵심 목적: 외부 변수 예측 및 발생한 문제의 조치 이력 관리 | 주요 관리 대상: 돌발 변수(날씨, 벤더 파산 등), 대안",
+                      "items": null,
+                      "page": 3,
+                      "box_2d": [
+                        310,
+                        83,
+                        385,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-g1-desc",
+              "level": 3,
+              "title": "1. 프로젝트 차터 및 기안서 (Project Charter)",
+              "type": "paragraph",
+              "page": 3,
+              "box_2d": [
+                408,
+                72,
+                433,
+                672
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-g1-desc",
+                  "outline_id": "node-g1-desc",
+                  "type": "paragraph",
+                  "label": "1. 프로젝트 차터 및 기안서 상세",
+                  "value": "프로젝트가 왜 필요한지(비즈니스 케이스), 예산은 얼마인지, 최종 결정권자는 누구인지 경영진으로부터 공식 승인을 받는 문서입니다. 비개발 프로젝트 예시: 신규 오프라인 매장 오픈 시 예상 기대 수익(ROI), 타겟 오픈일 등 명시. 핵심 가치: 최초 승인받은 목표와 예산 범위를 벗어난 무리한 요구를 방어하는 근거.",
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    408,
+                    72,
+                    433,
+                    672
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-g2-desc",
+              "level": 3,
+              "title": "2. 통합 실행 계획서 및 일정표 (Scope & WBS)",
+              "type": "paragraph",
+              "page": 3,
+              "box_2d": [
+                632,
+                72,
+                656,
+                675
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-g2-desc",
+                  "outline_id": "node-g2-desc",
+                  "type": "paragraph",
+                  "label": "2. 통합 실행 계획서 및 일정표 상세",
+                  "value": "우리가 '무엇을', '언제까지' 할 것인지 전체 지도를 그리는 문서입니다. 과업(Task) 중심으로 작성됩니다. 비개발 프로젝트 예시: 컨퍼런스 기획 작업 의존성과 일정 시각화. 핵심 가치: 특정 작업 지연 시 전체 마감 영향 즉각 파악 및 일정 조율.",
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    632,
+                    72,
+                    656,
+                    675
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-g3-desc",
+              "level": 3,
+              "title": "3. 예산 및 자원 집행 대장 (Budget & Resource Tracker)",
+              "type": "paragraph",
+              "page": 3,
+              "box_2d": [
+                856,
+                72,
+                880,
+                825
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-g3-desc",
+                  "outline_id": "node-g3-desc",
+                  "type": "paragraph",
+                  "label": "3. 예산 및 자원 집행 대장 상세",
+                  "value": "소프트웨어와 달리 일반 프로젝트는 돈과 실물 자산이 복잡하게 얽혀 있어 별도 예산 관리가 필수입니다. 비개발 프로젝트 예시: 장비 대여료, 원자재비, 용역비 등 기성금 지급 내역과 잔여 예산 매주 추적. 핵심 가치: 예산 초과(Over-budget) 방지 및 협력업체 작업 중단 사태 방지.",
+                  "items": null,
+                  "page": 3,
+                  "box_2d": [
+                    856,
+                    72,
+                    880,
+                    825
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-g4-desc",
+              "level": 3,
+              "title": "4. 이해관계자 커뮤니케이션 계획서 (Stakeholder & Comm. Plan)",
+              "type": "paragraph",
+              "page": 4,
+              "box_2d": [
+                195,
+                72,
+                251,
+                861
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-g4-desc",
+                  "outline_id": "node-g4-desc",
+                  "type": "paragraph",
+                  "label": "4. 이해관계자 커뮤니케이션 계획서 상세",
+                  "value": "프로젝트에 영향을 주거나 받는 모든 집단을 분류하고, 누구에게 언제 어떤 방식으로 보고할지 규정합니다. 비개발 프로젝트 예시: 발주처(월간 대면), 주민(공청회), 하도급(주간 실무) 등 소통 방식 세팅. 핵심 가치: '전달받은 적 없다'는 상황 원천 차단 및 신속한 의사결정 지원.",
+                  "items": null,
+                  "page": 4,
+                  "box_2d": [
+                    195,
+                    72,
+                    251,
+                    861
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-g5-desc",
+              "level": 3,
+              "title": "5. 리스크 및 이슈 대장 (Risk & Issue Log)",
+              "type": "paragraph",
+              "page": 4,
+              "box_2d": [
+                472,
+                72,
+                496,
+                629
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-g5-desc",
+                  "outline_id": "node-g5-desc",
+                  "type": "paragraph",
+                  "label": "5. 리스크 및 이슈 대장 상세",
+                  "value": "통제할 수 없는 외부 변수를 미리 예측하고 대비책을 세우며, 실제 터진 문제를 어떻게 수습했는지 기록합니다. 비개발 프로젝트 예시: 폭우 리스크 대응 플랜, 수입 통관 지연 이슈 조치 현황. 핵심 가치: PM이 플랜 B를 가동할 수 있게 하며 Lessons Learned로 축적.",
+                  "items": null,
+                  "page": 4,
+                  "box_2d": [
+                    472,
+                    72,
+                    496,
+                    629
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-q3",
+          "level": 2,
+          "title": "Q3. 고전적 문서 관리 vs 소프트웨어 기반 관리 비교",
+          "type": "header",
+          "page": 4,
+          "box_2d": [
+            55,
+            72,
+            91,
+            917
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q3",
+              "outline_id": "node-q3",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "고전적인 문서 관리 방식과 소프트웨어 베이스의 문서 관리 방식을 구분해서 표현하는 개념이 있나?",
+              "items": null,
+              "page": 4,
+              "box_2d": [
+                55,
+                72,
+                91,
+                917
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-p1-desc",
+              "level": 3,
+              "title": "1. 정적 문서 (Static Document) vs. 살아있는 문서 (Living Document)",
+              "type": "paragraph",
+              "page": 5,
+              "box_2d": [
+                55,
+                72,
+                91,
+                917
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p1-desc",
+                  "outline_id": "node-p1-desc",
+                  "type": "paragraph",
+                  "label": "정적 문서 vs 살아있는 문서",
+                  "value": "정적 문서: '작성 완료' 시점에 정보 박제, 기획서_v1.2_최종.docx 형태 파생. 살아있는 문서: Notion 등 워크스페이스에서 실시간 피드백과 현황이 덧붙여지며 계속 진화(Evolving).",
+                  "items": null,
+                  "page": 5,
+                  "box_2d": [
+                    55,
+                    72,
+                    91,
+                    917
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p2-desc",
+              "level": 3,
+              "title": "2. 파일 기반 (File-based) vs. 단일 진실 공급원 (SSOT, Single Source of Truth)",
+              "type": "paragraph",
+              "page": 5,
+              "box_2d": [
+                210,
+                72,
+                240,
+                917
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p2-desc",
+                  "outline_id": "node-p2-desc",
+                  "type": "paragraph",
+                  "label": "파일 기반 vs 단일 진실 공급원",
+                  "value": "파일 기반: 로컬 PC/폴더에 존재하여 최신 버전 혼란 발생. 단일 진실 공급원(SSOT): 고유 URL/DB를 바라보며 항상 최신 정보 유지 및 자동 버전 기록.",
+                  "items": null,
+                  "page": 5,
+                  "box_2d": [
+                    210,
+                    72,
+                    240,
+                    917
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-p3-desc",
+              "level": 3,
+              "title": "3. 문서 중심 (Document-centric) vs. 데이터 및 블록 중심 (Data/Block-centric)",
+              "type": "paragraph",
+              "page": 5,
+              "box_2d": [
+                380,
+                72,
+                410,
+                917
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-p3-desc",
+                  "outline_id": "node-p3-desc",
+                  "type": "paragraph",
+                  "label": "문서 중심 vs 데이터 및 블록 중심",
+                  "value": "문서 중심: 관리 최소 단위가 1개의 파일. 데이터/블록 중심: 텍스트 한 줄, 표의 셀 하나가 독립 데이터(Block)로 작동 (Jira 티켓, Trello 카드).",
+                  "items": null,
+                  "page": 5,
+                  "box_2d": [
+                    380,
+                    72,
+                    410,
+                    917
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-impact",
+              "level": 3,
+              "title": "💡 이 변화가 프로젝트 관리에 미친 실제 영향",
+              "type": "paragraph",
+              "page": 5,
+              "box_2d": [
+                616,
+                72,
+                640,
+                646
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-impact-p",
+                  "outline_id": "node-impact",
+                  "type": "paragraph",
+                  "label": "실제 영향 서술",
+                  "value": "문서를 단순히 '기록하는 종이'에서 '업무를 구동하는 시스템'으로 바꾸어 놓았습니다. 가장 큰 차이는 자동화와 연결성으로, Jira 티켓 상태 변경 시 Slack 알림 전송 등 문서가 프로젝트를 움직이는 트리거 역할을 수행합니다.",
+                  "items": null,
+                  "page": 5,
+                  "box_2d": [
+                    616,
+                    72,
+                    640,
+                    646
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-tab-comp",
+                  "level": 4,
+                  "title": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+                  "type": "table",
+                  "page": 5,
+                  "box_2d": [
+                    720,
+                    72,
+                    939,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-tab-comp",
+                      "outline_id": "node-tab-comp",
+                      "type": "table",
+                      "label": "고전적 vs 소프트웨어 기반 문서 관리 비교표",
+                      "value": [
+                        {
+                          "고전적문서관리": "파일명으로 수동 관리 (_최종의최종.xlsx)",
+                          "구분": "버전 관리",
+                          "소프트웨어기반관리": "시스템이 자동 기록 (무한 복원 가능)"
+                        },
+                        {
+                          "고전적문서관리": "다운로드 -> 수정 -> 재업로드",
+                          "구분": "접근 방식",
+                          "소프트웨어기반관리": "브라우저/앱에서 실시간 동시 편집"
+                        },
+                        {
+                          "고전적문서관리": "문서는 문서, 실무는 실무 (분리됨)",
+                          "구분": "단절 vs 연결",
+                          "소프트웨어기반관리": "문서 자체가 워크플로우와 연결됨"
+                        },
+                        {
+                          "고전적문서관리": "Word, Excel, 파일 폴더",
+                          "구분": "협업 도구",
+                          "소프트웨어기반관리": "Notion, Jira, Trello 등"
+                        }
+                      ],
+                      "items": null,
+                      "page": 5,
+                      "box_2d": [
+                        720,
+                        72,
+                        939,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "node-cp-r1",
+                      "level": 4,
+                      "title": "버전 관리",
+                      "type": "key_value",
+                      "page": 5,
+                      "box_2d": [
+                        760,
+                        72,
+                        800,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-cp-r1",
+                          "outline_id": "node-cp-r1",
+                          "type": "key_value",
+                          "label": "버전 관리",
+                          "value": "고전적 문서 관리: 파일명으로 수동 관리 (_최종의최종.xlsx) | 소프트웨어 기반 관리: 시스템이 자동 기록 (무한 복원 가능)",
+                          "items": null,
+                          "page": 5,
+                          "box_2d": [
+                            760,
+                            72,
+                            800,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-cp-r2",
+                      "level": 4,
+                      "title": "접근 방식",
+                      "type": "key_value",
+                      "page": 5,
+                      "box_2d": [
+                        800,
+                        72,
+                        850,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-cp-r2",
+                          "outline_id": "node-cp-r2",
+                          "type": "key_value",
+                          "label": "접근 방식",
+                          "value": "고전적 문서 관리: 다운로드 -> 수정 -> 재업로드 | 소프트웨어 기반 관리: 브라우저/앱에서 실시간 동시 편집",
+                          "items": null,
+                          "page": 5,
+                          "box_2d": [
+                            800,
+                            72,
+                            850,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-cp-r3",
+                      "level": 4,
+                      "title": "단절 vs 연결",
+                      "type": "key_value",
+                      "page": 5,
+                      "box_2d": [
+                        850,
+                        72,
+                        900,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-cp-r3",
+                          "outline_id": "node-cp-r3",
+                          "type": "key_value",
+                          "label": "단절 vs 연결",
+                          "value": "고전적 문서 관리: 문서는 문서, 실무는 실무 (분리됨) | 소프트웨어 기반 관리: 문서 자체가 워크플로우와 연결됨",
+                          "items": null,
+                          "page": 5,
+                          "box_2d": [
+                            850,
+                            72,
+                            900,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-cp-r4",
+                      "level": 4,
+                      "title": "협업 도구",
+                      "type": "key_value",
+                      "page": 6,
+                      "box_2d": [
+                        51,
+                        72,
+                        153,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-cp-r4",
+                          "outline_id": "node-cp-r4",
+                          "type": "key_value",
+                          "label": "협업 도구",
+                          "value": "고전적 문서 관리: Word, Excel, 파일 폴더 | 소프트웨어 기반 관리: Notion, Jira, Trello 등",
+                          "items": null,
+                          "page": 6,
+                          "box_2d": [
+                            51,
+                            72,
+                            153,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "node-q4",
+          "level": 2,
+          "title": "Q4. 에이전틱 워크스페이스와 능동형 문서의 진화",
+          "type": "header",
+          "page": 6,
+          "box_2d": [
+            312,
+            71,
+            413,
+            933
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q4",
+              "outline_id": "node-q4",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "살아있는 문서 (Living Document) 여기서 조금 더 파생해보자고. 에이전트를 통한 자동화 관점에서 회의관리와 일정/로드맵의 분리가 어떻게 융합되는지?",
+              "items": null,
+              "page": 6,
+              "box_2d": [
+                312,
+                71,
+                413,
+                933
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-tab-agentic",
+              "level": 3,
+              "title": "문서의 3단계 진화 과정 요약표",
+              "type": "table",
+              "page": 6,
+              "box_2d": [
+                626,
+                72,
+                901,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-tab-agentic",
+                  "outline_id": "node-tab-agentic",
+                  "type": "table",
+                  "label": "문서의 3단계 진화 과정 비교표",
+                  "value": [
+                    {
+                      "구분": "관리 주체",
+                      "살아있는문서": "사람 (팀 단위 동시 편집)",
+                      "에이전틱문서": "AI 에이전트 + 사람",
+                      "정적문서": "사람 (개인)"
+                    },
+                    {
+                      "구분": "정보의 성격",
+                      "살아있는문서": "실시간으로 갱신되는 현황",
+                      "에이전틱문서": "스스로 판단하고 실행하는 트리거",
+                      "정적문서": "박제된 기록"
+                    },
+                    {
+                      "구분": "도구 예시",
+                      "살아있는문서": "Notion, Google Docs",
+                      "에이전틱문서": "Notion AI, AI Agent + n8n/Zapier",
+                      "정적문서": "Word, HWP, Excel"
+                    },
+                    {
+                      "구분": "핵심 가치",
+                      "살아있는문서": "단일 진실 공급원 (SSOT) 유지",
+                      "에이전틱문서": "사일로(Silo) 붕괴 및 워크플로우 자동화",
+                      "정적문서": "보존 및 전달"
+                    }
+                  ],
+                  "items": null,
+                  "page": 6,
+                  "box_2d": [
+                    626,
+                    72,
+                    901,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-ag-r1",
+                  "level": 4,
+                  "title": "관리 주체",
+                  "type": "key_value",
+                  "page": 6,
+                  "box_2d": [
+                    680,
+                    72,
+                    730,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ag-r1",
+                      "outline_id": "node-ag-r1",
+                      "type": "key_value",
+                      "label": "관리 주체",
+                      "value": "정적 문서: 사람 (개인) | 살아있는 문서: 사람 (팀 단위 동시 편집) | 에이전틱 문서: AI 에이전트 + 사람",
+                      "items": null,
+                      "page": 6,
+                      "box_2d": [
+                        680,
+                        72,
+                        730,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ag-r2",
+                  "level": 4,
+                  "title": "정보의 성격",
+                  "type": "key_value",
+                  "page": 6,
+                  "box_2d": [
+                    730,
+                    72,
+                    780,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ag-r2",
+                      "outline_id": "node-ag-r2",
+                      "type": "key_value",
+                      "label": "정보의 성격",
+                      "value": "정적 문서: 박제된 기록 | 살아있는 문서: 실시간으로 갱신되는 현황 | 에이전틱 문서: 스스로 판단하고 실행하는 트리거",
+                      "items": null,
+                      "page": 6,
+                      "box_2d": [
+                        730,
+                        72,
+                        780,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ag-r3",
+                  "level": 4,
+                  "title": "도구 예시",
+                  "type": "key_value",
+                  "page": 6,
+                  "box_2d": [
+                    780,
+                    72,
+                    830,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ag-r3",
+                      "outline_id": "node-ag-r3",
+                      "type": "key_value",
+                      "label": "도구 예시",
+                      "value": "정적 문서: Word, HWP, Excel | 살아있는 문서: Notion, Google Docs | 에이전틱 문서: Notion AI, AI Agent + n8n/Zapier",
+                      "items": null,
+                      "page": 6,
+                      "box_2d": [
+                        780,
+                        72,
+                        830,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ag-r4",
+                  "level": 4,
+                  "title": "핵심 가치",
+                  "type": "key_value",
+                  "page": 6,
+                  "box_2d": [
+                    830,
+                    72,
+                    901,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ag-r4",
+                      "outline_id": "node-ag-r4",
+                      "type": "key_value",
+                      "label": "핵심 가치",
+                      "value": "정적 문서: 보존 및 전달 | 살아있는 문서: 단일 진실 공급원 (SSOT) 유지 | 에이전틱 문서: 사일로(Silo) 붕괴 및 워크플로우 자동화",
+                      "items": null,
+                      "page": 6,
+                      "box_2d": [
+                        830,
+                        72,
+                        901,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-conv",
+              "level": 3,
+              "title": "💡 문서 관리의 경계가 무너지는 '융합(Convergence)'",
+              "type": "paragraph",
+              "page": 6,
+              "box_2d": [
+                925,
+                72,
+                949,
+                780
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-conv-desc",
+                  "outline_id": "node-conv",
+                  "type": "paragraph",
+                  "label": "융합 현상 개요",
+                  "value": "회의 관리와 로드맵/일정의 분리가 사라지는 현상이 에이전틱 단계의 핵심입니다. MCP나 AI 파이프라인을 통해 회의록(텍스트)과 WBS(일정)가 유기적으로 연결됩니다.",
+                  "items": null,
+                  "page": 7,
+                  "box_2d": [
+                    925,
+                    72,
+                    949,
+                    780
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-c-step1",
+                  "level": 4,
+                  "title": "기존 (Living Document 시대)",
+                  "type": "list",
+                  "page": 7,
+                  "box_2d": [
+                    133,
+                    72,
+                    150,
+                    342
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-c-step1",
+                      "outline_id": "node-c-step1",
+                      "type": "list",
+                      "label": "기존 절차",
+                      "value": "1. PM이 Notion 회의록 작성 -> 2. 액션 아이템 발췌 -> 3. Jira 티켓 생성 -> 4. WBS 일정표 수정",
+                      "items": null,
+                      "page": 7,
+                      "box_2d": [
+                        133,
+                        72,
+                        150,
+                        342
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-c-step2",
+                  "level": 4,
+                  "title": "현재와 미래 (Agentic Document 시대)",
+                  "type": "list",
+                  "page": 7,
+                  "box_2d": [
+                    250,
+                    72,
+                    270,
+                    400
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-c-step2",
+                      "outline_id": "node-c-step2",
+                      "type": "list",
+                      "label": "현재와 미래 절차",
+                      "value": "1. AI 음성 인식 회의록 요약 -> 2. 일정 지연 데이터 추출 -> 3. Jira 티켓 마감일 자동 연기 트리거 -> 4. 후행 작업자 Slack 자동 알림 및 로드맵 반영",
+                      "items": null,
+                      "page": 7,
+                      "box_2d": [
+                        250,
+                        72,
+                        270,
+                        400
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-pm-role",
+              "level": 3,
+              "title": "프로젝트 매니저(PM)의 역할 변화",
+              "type": "paragraph",
+              "page": 7,
+              "box_2d": [
+                559,
+                72,
+                583,
+                500
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-pm-role",
+                  "outline_id": "node-pm-role",
+                  "type": "paragraph",
+                  "label": "PM의 역할 변화 상세",
+                  "value": "과거의 '현황 추적자(Tracker)'에서, 자동화 파이프라인과 프롬프트를 설계하는 '시스템 아키텍트(Architect)'이자 AI 판단을 승인하는 '검토자(Reviewer)'로 진화합니다. 문서는 프로젝트를 통제하는 '소프트웨어의 UI' 그 자체로 변모합니다.",
+                  "items": null,
+                  "page": 7,
+                  "box_2d": [
+                    559,
+                    72,
+                    583,
+                    500
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-q5",
+          "level": 2,
+          "title": "Q5. Docsumo 서비스 개요 및 기능 분석",
+          "type": "header",
+          "page": 7,
+          "box_2d": [
+            680,
+            72,
+            700,
+            400
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q5",
+              "outline_id": "node-q5",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "찾다보니 docsumo 라는 서비스가 있는데 자세히 알려줘",
+              "items": null,
+              "page": 7,
+              "box_2d": [
+                680,
+                72,
+                700,
+                400
+              ],
+              "content_summary": null,
+              "structured_data": null
+            },
+            {
+              "id": "elem-doc-intro",
+              "outline_id": "node-q5",
+              "type": "paragraph",
+              "label": "Docsumo 개요",
+              "value": "영수증, 송장, 은행 거래 내역서 등 비정형 문서에서 데이터를 자동으로 추출해 정형 데이터로 변환해 주는 지능형 문서 처리(IDP) 및 문서 AI 플랫폼입니다.",
+              "items": null,
+              "page": 7,
+              "box_2d": [
+                680,
+                72,
+                700,
+                400
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-doc-feat",
+              "level": 3,
+              "title": "주요 기능 및 특징",
+              "type": "list",
+              "page": 8,
+              "box_2d": [
+                117,
+                72,
+                141,
+                292
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-doc-feat",
+                  "outline_id": "node-doc-feat",
+                  "type": "list",
+                  "label": "주요 기능 및 특징 목록",
+                  "value": "1. 사전 학습된 문서 AI 모델 | 2. 스마트 표(Table) 추출 | 3. 지속적 학습 (Human-in-the-Loop) | 4. 자동 검증 및 교차 확인 | 5. API 및 웹훅 연동",
+                  "items": null,
+                  "page": 8,
+                  "box_2d": [
+                    117,
+                    72,
+                    141,
+                    292
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-doc-use",
+              "level": 3,
+              "title": "주요 활용 분야",
+              "type": "list",
+              "page": 8,
+              "box_2d": [
+                497,
+                72,
+                521,
+                256
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-doc-use",
+                  "outline_id": "node-doc-use",
+                  "type": "list",
+                  "label": "주요 활용 분야 목록",
+                  "value": "1. 재무 및 회계 (Accounts Payable) | 2. 물류 및 공급망 (BoL, 통관 서류) | 3. 금융 및 대출 심사 (은행 거래 내역서 등)",
+                  "items": null,
+                  "page": 8,
+                  "box_2d": [
+                    497,
+                    72,
+                    521,
+                    256
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-pricing",
+              "level": 3,
+              "title": "요금제 구조 (Pricing)",
+              "type": "header",
+              "page": 8,
+              "box_2d": [
+                700,
+                72,
+                724,
+                356
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-pricing-desc",
+                  "outline_id": "node-pricing",
+                  "type": "paragraph",
+                  "label": "요금제 구조 개요",
+                  "value": "처리하는 문서의 양(볼륨)과 요구되는 자동화 수준에 따라 나뉩니다.",
+                  "items": null,
+                  "page": 8,
+                  "box_2d": [
+                    700,
+                    72,
+                    724,
+                    356
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-tab-price",
+                  "level": 4,
+                  "title": "Docsumo 요금제 비교표",
+                  "type": "table",
+                  "page": 8,
+                  "box_2d": [
+                    782,
+                    72,
+                    941,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-tab-price",
+                      "outline_id": "node-tab-price",
+                      "type": "table",
+                      "label": "Docsumo 요금제 비교표",
+                      "value": [
+                        {
+                          "주요타겟": "플랫폼 도입을 테스트하는 팀",
+                          "플랜": "Free",
+                          "핵심제공사항": "14일 무료 체험, 1,000페이지 제공, 최대 10명의 유저 라이선스, 사전 학습 모델 무제한 사용"
+                        },
+                        {
+                          "주요타겟": "문서 처리를 자동화 및 확장하려는 기업",
+                          "플랜": "Business (Growth)",
+                          "핵심제공사항": "무제한 유저 라이선스, 자동 분류, 데이터베이스 매핑, 커스텀 문서 파이프라인"
+                        },
+                        {
+                          "주요타겟": "대규모 자동화 및 복잡한 워크플로우가 필요한 조직",
+                          "플랜": "Enterprise",
+                          "핵심제공사항": "커스텀 맞춤형 요금 (대량 처리 시 단가 하락), AI 기반 케이스 관리, 교차 문서 검증"
+                        }
+                      ],
+                      "items": null,
+                      "page": 8,
+                      "box_2d": [
+                        782,
+                        72,
+                        941,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "node-pl-r1",
+                      "level": 4,
+                      "title": "Free 플랜",
+                      "type": "key_value",
+                      "page": 8,
+                      "box_2d": [
+                        810,
+                        72,
+                        860,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-pl-r1",
+                          "outline_id": "node-pl-r1",
+                          "type": "key_value",
+                          "label": "Free 플랜",
+                          "value": "주요 타겟: 플랫폼 도입을 테스트하는 팀 | 핵심 제공 사항: 14일 무료 체험, 1,000페이지 제공, 최대 10명 유저, 사전 학습 모델 무제한",
+                          "items": null,
+                          "page": 8,
+                          "box_2d": [
+                            810,
+                            72,
+                            860,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-pl-r2",
+                      "level": 4,
+                      "title": "Business (Growth) 플랜",
+                      "type": "key_value",
+                      "page": 8,
+                      "box_2d": [
+                        860,
+                        72,
+                        920,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-pl-r2",
+                          "outline_id": "node-pl-r2",
+                          "type": "key_value",
+                          "label": "Business (Growth) 플랜",
+                          "value": "주요 타겟: 문서 처리를 자동화 및 확장하려는 기업 | 핵심 제공 사항: 무제한 유저 라이선스, 자동 분류, 데이터베이스 매핑, 커스텀 파이프라인",
+                          "items": null,
+                          "page": 8,
+                          "box_2d": [
+                            860,
+                            72,
+                            920,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-pl-r3",
+                      "level": 4,
+                      "title": "Enterprise 플랜",
+                      "type": "key_value",
+                      "page": 9,
+                      "box_2d": [
+                        107,
+                        83,
+                        143,
+                        898
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-pl-r3",
+                          "outline_id": "node-pl-r3",
+                          "type": "key_value",
+                          "label": "Enterprise 플랜",
+                          "value": "주요 타겟: 대규모 자동화 및 복잡한 워크플로우가 필요한 조직 | 핵심 제공 사항: 커스텀 맞춤형 요금, AI 기반 케이스 관리, 교차 문서 검증",
+                          "items": null,
+                          "page": 9,
+                          "box_2d": [
+                            107,
+                            83,
+                            143,
+                            898
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "node-q6",
+          "level": 2,
+          "title": "Q6. Docsumo vs Upstage 비교 분석",
+          "type": "header",
+          "page": 9,
+          "box_2d": [
+            300,
+            72,
+            330,
+            500
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q6",
+              "outline_id": "node-q6",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "그럼 upstage랑 같다고 보면 되지?",
+              "items": null,
+              "page": 9,
+              "box_2d": [
+                300,
+                72,
+                330,
+                500
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-tab-upstage",
+              "level": 3,
+              "title": "Docsumo vs Upstage 비교표",
+              "type": "table",
+              "page": 9,
+              "box_2d": [
+                576,
+                72,
+                851,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-tab-upstage",
+                  "outline_id": "node-tab-upstage",
+                  "type": "table",
+                  "label": "Docsumo vs Upstage 비교표",
+                  "value": [
+                    {
+                      "Docsumo": "재무, 회계, 물류 등 정형/반정형 문서 파이프라인",
+                      "Upstage": "한국어 인식, 복잡한 비정형 레이아웃, 필기체",
+                      "구분": "핵심 강점"
+                    },
+                    {
+                      "Docsumo": "영문 중심 글로벌 문서",
+                      "Upstage": "한국어 (세계 최고 수준), 영문 등 다국어",
+                      "구분": "주요 언어"
+                    },
+                    {
+                      "Docsumo": "문서 특화 ML + Human-in-the-loop (사용자 교정 학습)",
+                      "Upstage": "자체 LLM(Solar) 기반 레이아웃 및 맥락 이해",
+                      "구분": "기술 기반"
+                    },
+                    {
+                      "Docsumo": "글로벌 영문 인보이스, 은행 거래 내역서 처리",
+                      "Upstage": "국내 사업자등록증, 신분증, 진료비 영수증, 계약서",
+                      "구분": "주요 활용처"
+                    }
+                  ],
+                  "items": null,
+                  "page": 9,
+                  "box_2d": [
+                    576,
+                    72,
+                    851,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-ud-r1",
+                  "level": 4,
+                  "title": "핵심 강점",
+                  "type": "key_value",
+                  "page": 9,
+                  "box_2d": [
+                    620,
+                    72,
+                    670,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ud-r1",
+                      "outline_id": "node-ud-r1",
+                      "type": "key_value",
+                      "label": "핵심 강점",
+                      "value": "Docsumo: 재무, 회계, 물류 등 정형/반정형 문서 파이프라인 | Upstage: 한국어 인식, 복잡한 비정형 레이아웃, 필기체",
+                      "items": null,
+                      "page": 9,
+                      "box_2d": [
+                        620,
+                        72,
+                        670,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ud-r2",
+                  "level": 4,
+                  "title": "주요 언어",
+                  "type": "key_value",
+                  "page": 9,
+                  "box_2d": [
+                    670,
+                    72,
+                    720,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ud-r2",
+                      "outline_id": "node-ud-r2",
+                      "type": "key_value",
+                      "label": "주요 언어",
+                      "value": "Docsumo: 영문 중심 글로벌 문서 | Upstage: 한국어 (세계 최고 수준), 영문 등 다국어",
+                      "items": null,
+                      "page": 9,
+                      "box_2d": [
+                        670,
+                        72,
+                        720,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ud-r3",
+                  "level": 4,
+                  "title": "기술 기반",
+                  "type": "key_value",
+                  "page": 9,
+                  "box_2d": [
+                    720,
+                    72,
+                    770,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ud-r3",
+                      "outline_id": "node-ud-r3",
+                      "type": "key_value",
+                      "label": "기술 기반",
+                      "value": "Docsumo: 문서 특화 ML + Human-in-the-loop (사용자 교정 학습) | Upstage: 자체 LLM(Solar) 기반 레이아웃 및 맥락 이해",
+                      "items": null,
+                      "page": 9,
+                      "box_2d": [
+                        720,
+                        72,
+                        770,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-ud-r4",
+                  "level": 4,
+                  "title": "주요 활용처",
+                  "type": "key_value",
+                  "page": 9,
+                  "box_2d": [
+                    770,
+                    72,
+                    830,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-ud-r4",
+                      "outline_id": "node-ud-r4",
+                      "type": "key_value",
+                      "label": "주요 활용처",
+                      "value": "Docsumo: 글로벌 영문 인보이스, 은행 거래 내역서 처리 | Upstage: 국내 사업자등록증, 신분증, 진료비 영수증, 계약서",
+                      "items": null,
+                      "page": 9,
+                      "box_2d": [
+                        770,
+                        72,
+                        830,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-diff",
+              "level": 3,
+              "title": "핵심 차이점",
+              "type": "paragraph",
+              "page": 9,
+              "box_2d": [
+                875,
+                72,
+                899,
+                219
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-diff-desc",
+                  "outline_id": "node-diff",
+                  "type": "paragraph",
+                  "label": "핵심 차이점 상세 서술",
+                  "value": "1. 한국어 및 로컬라이제이션: Upstage는 한국어 OCR 및 행정 문서 모델 압도적. Docsumo는 영문 청구서 및 해외 물류 최적화. 2. 기술적 접근 방식: Upstage는 Solar LLM 기반 맥락 이해 강점, Docsumo는 ERP 연동 파이프라인 특화. 3. 제품 확장성: Docsumo는 단일 문서 추출 집중, Upstage는 챗봇 및 LLM API 등 포괄적 솔루션 제공.",
+                  "items": null,
+                  "page": 10,
+                  "box_2d": [
+                    875,
+                    72,
+                    899,
+                    219
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "node-q7",
+          "level": 2,
+          "title": "Q7. IDP 분야 대표 솔루션 및 대안 비교",
+          "type": "header",
+          "page": 10,
+          "box_2d": [
+            700,
+            72,
+            730,
+            450
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q7",
+              "outline_id": "node-q7",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "IDP 분야에서 가장 뛰어난 성능을 보인다고 평가받는 서비스는 뭐지? 독수모의 대안들을 알려줘",
+              "items": null,
+              "page": 10,
+              "box_2d": [
+                700,
+                72,
+                730,
+                450
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-top1",
+              "level": 3,
+              "title": "1. 글로벌 엔터프라이즈 최강자 (정확도 및 성능 표준)",
+              "type": "header",
+              "page": 10,
+              "box_2d": [
+                746,
+                72,
+                770,
+                738
+              ],
+              "purpose": null,
+              "elements": [],
+              "children": [
+                {
+                  "id": "node-abbyy",
+                  "level": 4,
+                  "title": "ABBYY (Vantage / FlexiCapture)",
+                  "type": "paragraph",
+                  "page": 10,
+                  "box_2d": [
+                    794,
+                    72,
+                    813,
+                    433
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-abbyy-desc",
+                      "outline_id": "node-abbyy",
+                      "type": "paragraph",
+                      "label": "ABBYY 설명",
+                      "value": "특징: 수십 년간 글로벌 OCR 시장 1위 업계 표준. 강점: 다중 페이지 및 왜곡 스캔본 최고 안정성. 추천 대상: 대규모 레거시 연동과 컴플라이언스 필요한 대기업.",
+                      "items": null,
+                      "page": 10,
+                      "box_2d": [
+                        794,
+                        72,
+                        813,
+                        433
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-hyper",
+                  "level": 4,
+                  "title": "Hyperscience",
+                  "type": "paragraph",
+                  "page": 11,
+                  "box_2d": [
+                    115,
+                    72,
+                    134,
+                    228
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-hyperscience-desc",
+                      "outline_id": "node-hyper",
+                      "type": "paragraph",
+                      "label": "Hyperscience 설명",
+                      "value": "특징: 비정형 문서 및 인간 필기체(Handwriting) 인식 최강자. 강점: 최대 99% 이상 정확도 및 신뢰도 기반 사람 검토 분기. 추천 대상: 수기 신청서, 보험 청구서 등 필기체 혼합 환경.",
+                      "items": null,
+                      "page": 11,
+                      "box_2d": [
+                        115,
+                        72,
+                        134,
+                        228
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-top2",
+              "level": 3,
+              "title": "2. 현대적 AI SaaS 대안 (Docsumo의 직접 경쟁군)",
+              "type": "header",
+              "page": 11,
+              "box_2d": [
+                331,
+                72,
+                355,
+                730
+              ],
+              "purpose": null,
+              "elements": [],
+              "children": [
+                {
+                  "id": "node-rossum",
+                  "level": 4,
+                  "title": "Rossum",
+                  "type": "paragraph",
+                  "page": 11,
+                  "box_2d": [
+                    379,
+                    72,
+                    398,
+                    163
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-rossum-desc",
+                      "outline_id": "node-rossum",
+                      "type": "paragraph",
+                      "label": "Rossum 설명",
+                      "value": "특징: 템플릿 없는 AI 선두 주자 클라우드 네이티브 IDP. 강점: 거래 문서 양식 변화 대응 및 직관적 교정 UI. 추천 대상: 다양한 양식 인보이스/공급망 문서 처리 기업.",
+                      "items": null,
+                      "page": 11,
+                      "box_2d": [
+                        379,
+                        72,
+                        398,
+                        163
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-nano",
+                  "level": 4,
+                  "title": "Nanonets",
+                  "type": "paragraph",
+                  "page": 11,
+                  "box_2d": [
+                    594,
+                    72,
+                    612,
+                    183
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-nanonets-desc",
+                      "outline_id": "node-nano",
+                      "type": "paragraph",
+                      "label": "Nanonets 설명",
+                      "value": "특징: 개발자 친화적 API와 직관적 웹 인터페이스. 강점: 사전 학습 모델 및 몇 분 만의 초고속 커스텀 모델 배포. 추천 대상: 빠른 PoC 및 즉각 API 연동 원하는 스타트업.",
+                      "items": null,
+                      "page": 11,
+                      "box_2d": [
+                        594,
+                        72,
+                        612,
+                        183
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-top3",
+              "level": 3,
+              "title": "3. 빅테크 클라우드 Document AI (비용 및 확장성)",
+              "type": "header",
+              "page": 11,
+              "box_2d": [
+                788,
+                72,
+                812,
+                728
+              ],
+              "purpose": null,
+              "elements": [],
+              "children": [
+                {
+                  "id": "node-azure",
+                  "level": 4,
+                  "title": "Azure AI Document Intelligence (구 Form Recognizer)",
+                  "type": "paragraph",
+                  "page": 11,
+                  "box_2d": [
+                    830,
+                    72,
+                    850,
+                    550
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-azure-desc",
+                      "outline_id": "node-azure",
+                      "type": "paragraph",
+                      "label": "Azure Document Intelligence 설명",
+                      "value": "강점: MS 생태계 완벽 연동, 최저 수준 대규모 데이터 처리 비용. 추천 대상: Azure 인프라 운영 기업.",
+                      "items": null,
+                      "page": 11,
+                      "box_2d": [
+                        830,
+                        72,
+                        850,
+                        550
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-gcp",
+                  "level": 4,
+                  "title": "Google Cloud Document AI",
+                  "type": "paragraph",
+                  "page": 12,
+                  "box_2d": [
+                    115,
+                    72,
+                    134,
+                    385
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-gcp-desc",
+                      "outline_id": "node-gcp",
+                      "type": "paragraph",
+                      "label": "Google Cloud Document AI 설명",
+                      "value": "강점: 구글 LLM 및 멀티모달 AI 결합 복잡 비정형 문서 의미 분석. 추천 대상: 문서 요약, 검색, 추출 통합 환경.",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        115,
+                        72,
+                        134,
+                        385
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "node-tab-alt",
+              "level": 4,
+              "title": "한눈에 보는 대안 비교표",
+              "type": "table",
+              "page": 12,
+              "box_2d": [
+                317,
+                72,
+                651,
+                930
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-tab-alt",
+                  "outline_id": "node-tab-alt",
+                  "type": "table",
+                  "label": "한눈에 보는 대안 비교표",
+                  "value": [
+                    {
+                      "난이도도입속도": "높음 (구축형/엔터프라이즈)",
+                      "서비스": "ABBYY",
+                      "적합한환경": "대기업, 금융권, 레거시 시스템",
+                      "주요강점": "글로벌 표준, 방대한 언어 및 문서 처리"
+                    },
+                    {
+                      "난이도도입속도": "보통~높음",
+                      "서비스": "Hyperscience",
+                      "적합한환경": "보험, 정부/공공, 대규모 백오피스",
+                      "주요강점": "필기체 인식 및 비정형 문서 최고 정확도"
+                    },
+                    {
+                      "난이도도입속도": "낮음 (SaaS 기반 즉시 도입)",
+                      "서비스": "Rossum",
+                      "적합한환경": "재무/회계 팀, 공급망/물류 기업",
+                      "주요강점": "템플릿 프리 인식, 뛰어난 검증 UI"
+                    },
+                    {
+                      "난이도도입속도": "낮음 (개발 친화적)",
+                      "서비스": "Nanonets",
+                      "적합한환경": "중소/중견기업, 빠른 도입을 원하는 개발팀",
+                      "주요강점": "빠른 커스텀 학습, 강력한 API 생태계"
+                    },
+                    {
+                      "난이도도입속도": "보통 (API 연동 필요)",
+                      "서비스": "Azure Document AI",
+                      "적합한환경": "Azure 클라우드 기반 인프라 운영 기업",
+                      "주요강점": "저렴한 대량 처리 단가, MS 제품군 연동"
+                    }
+                  ],
+                  "items": null,
+                  "page": 12,
+                  "box_2d": [
+                    317,
+                    72,
+                    651,
+                    930
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": [
+                {
+                  "id": "node-cmp-r1",
+                  "level": 4,
+                  "title": "ABBYY",
+                  "type": "key_value",
+                  "page": 12,
+                  "box_2d": [
+                    360,
+                    72,
+                    410,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-cmp-r1",
+                      "outline_id": "node-cmp-r1",
+                      "type": "key_value",
+                      "label": "ABBYY",
+                      "value": "주요 강점: 글로벌 표준, 방대한 언어 및 문서 처리 | 난이도/도입 속도: 높음 (구축형/엔터프라이즈) | 적합한 환경: 대기업, 금융권, 레거시 시스템",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        360,
+                        72,
+                        410,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-cmp-r2",
+                  "level": 4,
+                  "title": "Hyperscience",
+                  "type": "key_value",
+                  "page": 12,
+                  "box_2d": [
+                    410,
+                    72,
+                    460,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-cmp-r2",
+                      "outline_id": "node-cmp-r2",
+                      "type": "key_value",
+                      "label": "Hyperscience",
+                      "value": "주요 강점: 필기체 인식 및 비정형 문서 최고 정확도 | 난이도/도입 속도: 보통~높음 | 적합한 환경: 보험, 정부/공공, 대규모 백오피스",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        410,
+                        72,
+                        460,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-cmp-r3",
+                  "level": 4,
+                  "title": "Rossum",
+                  "type": "key_value",
+                  "page": 12,
+                  "box_2d": [
+                    460,
+                    72,
+                    510,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-cmp-r3",
+                      "outline_id": "node-cmp-r3",
+                      "type": "key_value",
+                      "label": "Rossum",
+                      "value": "주요 강점: 템플릿 프리 인식, 뛰어난 검증 UI | 난이도/도입 속도: 낮음 (SaaS 기반 즉시 도입) | 적합한 환경: 재무/회계 팀, 공급망/물류 기업",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        460,
+                        72,
+                        510,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-cmp-r4",
+                  "level": 4,
+                  "title": "Nanonets",
+                  "type": "key_value",
+                  "page": 12,
+                  "box_2d": [
+                    510,
+                    72,
+                    560,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-cmp-r4",
+                      "outline_id": "node-cmp-r4",
+                      "type": "key_value",
+                      "label": "Nanonets",
+                      "value": "주요 강점: 빠른 커스텀 학습, 강력한 API 생태계 | 난이도/도입 속도: 낮음 (개발 친화적) | 적합한 환경: 중소/중견기업, 빠른 도입을 원하는 개발팀",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        510,
+                        72,
+                        560,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                },
+                {
+                  "id": "node-cmp-r5",
+                  "level": 4,
+                  "title": "Azure Document AI",
+                  "type": "key_value",
+                  "page": 12,
+                  "box_2d": [
+                    560,
+                    72,
+                    620,
+                    930
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-cmp-r5",
+                      "outline_id": "node-cmp-r5",
+                      "type": "key_value",
+                      "label": "Azure Document AI",
+                      "value": "주요 강점: 저렴한 대량 처리 단가, MS 제품군 연동 | 난이도/도입 속도: 보통 (API 연동 필요) | 적합한 환경: Azure 클라우드 기반 인프라 운영 기업",
+                      "items": null,
+                      "page": 12,
+                      "box_2d": [
+                        560,
+                        72,
+                        620,
+                        930
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "node-q8",
+          "level": 2,
+          "title": "Q8. 문서 간 연결·동기화(Cross-document Linking) 및 에이전틱 아키텍처",
+          "type": "header",
+          "page": 12,
+          "box_2d": [
+            650,
+            72,
+            700,
+            500
+          ],
+          "purpose": null,
+          "elements": [
+            {
+              "id": "elem-q8",
+              "outline_id": "node-q8",
+              "type": "paragraph",
+              "label": "User prompt",
+              "value": "아니지 내 요구사항과 의도를 전혀 잘못 파악했네. OCR 과 비정형 데이터 처리가 메인이 아니라 각 문서 간의 연결, ADP 가 핵심 기능이라고. 혹시 독수모도 이정도 까지는 안되는건가?",
+              "items": null,
+              "page": 12,
+              "box_2d": [
+                650,
+                72,
+                700,
+                500
+              ],
+              "content_summary": null,
+              "structured_data": null
+            }
+          ],
+          "children": [
+            {
+              "id": "node-limit-desc",
+              "level": 3,
+              "title": "1. Docsumo의 구조적 한계",
+              "type": "paragraph",
+              "page": 13,
+              "box_2d": [
+                56,
+                72,
+                81,
+                431
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-limit-desc",
+                  "outline_id": "node-limit-desc",
+                  "type": "paragraph",
+                  "label": "Docsumo의 한계 상세",
+                  "value": "1. 단일 트랜잭션 중심: 개별 파일을 정형 데이터로 변환하는 '파이프'에 불과. 2. 맥락(Context) 부재: 회의록에서 WBS, PRD 등으로 의미론적 연결 및 변경 전파 기능 부재. 회계 필드 단순 대조(2-way/3-way Matching)만 지원.",
+                  "items": null,
+                  "page": 13,
+                  "box_2d": [
+                    56,
+                    72,
+                    81,
+                    431
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            },
+            {
+              "id": "node-trans",
+              "level": 3,
+              "title": "2. 문서 간 연결과 전파를 실제로 수행하는 도구 및 아키텍처",
+              "type": "header",
+              "page": 13,
+              "box_2d": [
+                244,
+                72,
+                269,
+                816
+              ],
+              "purpose": null,
+              "elements": [],
+              "children": [
+                {
+                  "id": "node-sub1",
+                  "level": 4,
+                  "title": "① 관계형 문서 및 워크스페이스 엔진 (Relational Workspace)",
+                  "type": "header",
+                  "page": 13,
+                  "box_2d": [
+                    351,
+                    72,
+                    370,
+                    708
+                  ],
+                  "purpose": null,
+                  "elements": [],
+                  "children": [
+                    {
+                      "id": "node-fibery",
+                      "level": 5,
+                      "title": "Fibery (가장 강력한 연결형 워크스페이스)",
+                      "type": "paragraph",
+                      "page": 13,
+                      "box_2d": [
+                        400,
+                        72,
+                        420,
+                        300
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-fibery-desc",
+                          "outline_id": "node-fibery",
+                          "type": "paragraph",
+                          "label": "Fibery 설명",
+                          "value": "회의록, 고객 피드백, PRD, 백로그, 리스크 대장이 개별 Entity이자 양방향 관계로 연결되어, 텍스트 지정 시 로드맵/PRD 실시간 동기화.",
+                          "items": null,
+                          "page": 13,
+                          "box_2d": [
+                            400,
+                            72,
+                            420,
+                            300
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-coda",
+                      "level": 5,
+                      "title": "Coda",
+                      "type": "paragraph",
+                      "page": 13,
+                      "box_2d": [
+                        600,
+                        72,
+                        620,
+                        200
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-coda-desc",
+                          "outline_id": "node-coda",
+                          "type": "paragraph",
+                          "label": "Coda 설명",
+                          "value": "표와 텍스트가 페이지 간 수식/데이터로 결합(Pack & Formula), 버튼 클릭으로 다른 페이지 로드맵 행 변경 자동화.",
+                          "items": null,
+                          "page": 13,
+                          "box_2d": [
+                            600,
+                            72,
+                            620,
+                            200
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "node-sub2",
+                  "level": 4,
+                  "title": "② 크로스 문서 AI 분석 및 매트릭스 엔진 (Cross-Document AI)",
+                  "type": "header",
+                  "page": 13,
+                  "box_2d": [
+                    751,
+                    72,
+                    770,
+                    715
+                  ],
+                  "purpose": null,
+                  "elements": [],
+                  "children": [
+                    {
+                      "id": "node-hebbia",
+                      "level": 5,
+                      "title": "Hebbia (Matrix)",
+                      "type": "paragraph",
+                      "page": 13,
+                      "box_2d": [
+                        800,
+                        72,
+                        820,
+                        250
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-hebbia-desc",
+                          "outline_id": "node-hebbia",
+                          "type": "paragraph",
+                          "label": "Hebbia 설명",
+                          "value": "수천 개 문서를 동시 분석하여 상관관계를 매트릭스(표) 형태로 추출/비교, 문서 간 일정/비용 상충 추론.",
+                          "items": null,
+                          "page": 13,
+                          "box_2d": [
+                            800,
+                            72,
+                            820,
+                            250
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    },
+                    {
+                      "id": "node-glean",
+                      "level": 5,
+                      "title": "Glean / Dust.tt",
+                      "type": "paragraph",
+                      "page": 14,
+                      "box_2d": [
+                        100,
+                        72,
+                        120,
+                        250
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-glean-desc",
+                          "outline_id": "node-glean",
+                          "type": "paragraph",
+                          "label": "Glean / Dust.tt 설명",
+                          "value": "Slack, Notion, Jira 등 조직 내 SaaS를 실시간 인덱싱하여 회의록 결정사항과 Jira/PRD 충돌 감지 및 연결고리 도출.",
+                          "items": null,
+                          "page": 14,
+                          "box_2d": [
+                            100,
+                            72,
+                            120,
+                            250
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "node-sub3",
+                  "level": 4,
+                  "title": "③ LLM 기반 에이전틱 파이프라인 (직접 구축 시)",
+                  "type": "header",
+                  "page": 14,
+                  "box_2d": [
+                    265,
+                    72,
+                    284,
+                    554
+                  ],
+                  "purpose": null,
+                  "elements": [
+                    {
+                      "id": "elem-pipe-intro",
+                      "outline_id": "node-sub3",
+                      "type": "paragraph",
+                      "label": "에이전틱 파이프라인 개요",
+                      "value": "회의록 -> 프로젝트 문서 자동 갱신 파이프라인을 구축할 때 사용하는 아키텍처입니다.",
+                      "items": null,
+                      "page": 14,
+                      "box_2d": [
+                        265,
+                        72,
+                        284,
+                        554
+                      ],
+                      "content_summary": null,
+                      "structured_data": null
+                    }
+                  ],
+                  "children": [
+                    {
+                      "id": "node-tab-pipeline",
+                      "level": 5,
+                      "title": "LLM 기반 에이전틱 파이프라인 4단계 표",
+                      "type": "table",
+                      "page": 14,
+                      "box_2d": [
+                        342,
+                        72,
+                        596,
+                        930
+                      ],
+                      "purpose": null,
+                      "elements": [
+                        {
+                          "id": "elem-tab-pipeline",
+                          "outline_id": "node-tab-pipeline",
+                          "type": "table",
+                          "label": "LLM 기반 에이전틱 파이프라인 4단계 표",
+                          "value": [
+                            {
+                              "단계": "1. 변경 감지",
+                              "사용기술도구": "Webhook / Zapier / n8n",
+                              "처리과정": "회의록/문서 업데이트 발생 시 텍스트 추출"
+                            },
+                            {
+                              "단계": "2. 영향도 분석",
+                              "사용기술도구": "Claude / GPT-4o / Solar",
+                              "처리과정": "LLM이 이전 문서 대비 변경된 결정 사항(Action Item, 일정) 추출"
+                            },
+                            {
+                              "단계": "3. 연관 문서 검색",
+                              "사용기술도구": "RAG / Vector DB / Knowledge Graph",
+                              "처리과정": "변경 사항과 관련된 PRD, WBS, 리스크 대장 검색"
+                            },
+                            {
+                              "단계": "4. 동기화 및 반영",
+                              "사용기술도구": "Notion/Jira API + n8n 워크플로우",
+                              "처리과정": "연관 문서의 해당 필드 자동 패치 및 변경 알림 전송"
+                            }
+                          ],
+                          "items": null,
+                          "page": 14,
+                          "box_2d": [
+                            342,
+                            72,
+                            596,
+                            930
+                          ],
+                          "content_summary": null,
+                          "structured_data": null
+                        }
+                      ],
+                      "children": [
+                        {
+                          "id": "node-pipe-r1",
+                          "level": 5,
+                          "title": "1. 변경 감지",
+                          "type": "key_value",
+                          "page": 14,
+                          "box_2d": [
+                            380,
+                            72,
+                            420,
+                            930
+                          ],
+                          "purpose": null,
+                          "elements": [
+                            {
+                              "id": "elem-pipe-r1",
+                              "outline_id": "node-pipe-r1",
+                              "type": "key_value",
+                              "label": "1. 변경 감지",
+                              "value": "처리 과정: 회의록/문서 업데이트 발생 시 텍스트 추출 | 사용 기술/도구: Webhook / Zapier / n8n",
+                              "items": null,
+                              "page": 14,
+                              "box_2d": [
+                                380,
+                                72,
+                                420,
+                                930
+                              ],
+                              "content_summary": null,
+                              "structured_data": null
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "id": "node-pipe-r2",
+                          "level": 5,
+                          "title": "2. 영향도 분석",
+                          "type": "key_value",
+                          "page": 14,
+                          "box_2d": [
+                            420,
+                            72,
+                            460,
+                            930
+                          ],
+                          "purpose": null,
+                          "elements": [
+                            {
+                              "id": "elem-pipe-r2",
+                              "outline_id": "node-pipe-r2",
+                              "type": "key_value",
+                              "label": "2. 영향도 분석",
+                              "value": "처리 과정: LLM이 이전 문서 대비 변경된 결정 사항(Action Item, 일정) 추출 | 사용 기술/도구: Claude / GPT-4o / Solar",
+                              "items": null,
+                              "page": 14,
+                              "box_2d": [
+                                420,
+                                72,
+                                460,
+                                930
+                              ],
+                              "content_summary": null,
+                              "structured_data": null
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "id": "node-pipe-r3",
+                          "level": 5,
+                          "title": "3. 연관 문서 검색",
+                          "type": "key_value",
+                          "page": 14,
+                          "box_2d": [
+                            460,
+                            72,
+                            500,
+                            930
+                          ],
+                          "purpose": null,
+                          "elements": [
+                            {
+                              "id": "elem-pipe-r3",
+                              "outline_id": "node-pipe-r3",
+                              "type": "key_value",
+                              "label": "3. 연관 문서 검색",
+                              "value": "처리 과정: 변경 사항과 관련된 PRD, WBS, 리스크 대장 검색 | 사용 기술/도구: RAG / Vector DB / Knowledge Graph",
+                              "items": null,
+                              "page": 14,
+                              "box_2d": [
+                                460,
+                                72,
+                                500,
+                                930
+                              ],
+                              "content_summary": null,
+                              "structured_data": null
+                            }
+                          ],
+                          "children": []
+                        },
+                        {
+                          "id": "node-pipe-r4",
+                          "level": 5,
+                          "title": "4. 동기화 및 반영",
+                          "type": "key_value",
+                          "page": 14,
+                          "box_2d": [
+                            500,
+                            72,
+                            550,
+                            930
+                          ],
+                          "purpose": null,
+                          "elements": [
+                            {
+                              "id": "elem-pipe-r4",
+                              "outline_id": "node-pipe-r4",
+                              "type": "key_value",
+                              "label": "4. 동기화 및 반영",
+                              "value": "처리 과정: 연관 문서의 해당 필드 자동 패치 및 변경 알림 전송 | 사용 기술/도구: Notion/Jira API + n8n 워크플로우",
+                              "items": null,
+                              "page": 14,
+                              "box_2d": [
+                                500,
+                                72,
+                                550,
+                                930
+                              ],
+                              "content_summary": null,
+                              "structured_data": null
+                            }
+                          ],
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "node-guide",
+              "level": 3,
+              "title": "3. 요약 및 선택 가이드",
+              "type": "list",
+              "page": 14,
+              "box_2d": [
+                619,
+                72,
+                644,
+                356
+              ],
+              "purpose": null,
+              "elements": [
+                {
+                  "id": "elem-guide-list",
+                  "outline_id": "node-guide",
+                  "type": "list",
+                  "label": "선택 가이드 요약 목록",
+                  "value": "1. Docsumo / ABBYY류 (IDP): 단일 문서 데이터 추출 도구 (요구사항 불일치) | 2. Fibery / Coda류: 문서 간 RDB 연결 및 워크플로우 고정 적합 | 3. Glean / Dust / 에이전트 파이프라인: AI 맥락 추론을 통한 다중 문서 분기/전파 자동화 적합",
+                  "items": null,
+                  "page": 14,
+                  "box_2d": [
+                    619,
+                    72,
+                    644,
+                    356
+                  ],
+                  "content_summary": null,
+                  "structured_data": null
+                }
+              ],
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

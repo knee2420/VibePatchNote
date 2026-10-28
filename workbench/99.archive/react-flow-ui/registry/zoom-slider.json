@@ -1,0 +1,23 @@
+﻿{
+  "name": "zoom-slider",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react",
+    "lucide-react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "button",
+    "slider"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "zoom-slider.tsx",
+      "content": "\"use client\";\n\nimport React from \"react\";\nimport { Maximize, Minus, Plus } from \"lucide-react\";\n\nimport {\n  Panel,\n  useViewport,\n  useStore,\n  useReactFlow,\n  type PanelProps,\n} from \"@xyflow/react\";\n\nimport { Slider } from \"@/components/ui/slider\";\nimport { Button } from \"@/components/ui/button\";\nimport { cn } from \"@/lib/utils\";\n\nexport function ZoomSlider({\n  className,\n  orientation = \"horizontal\",\n  ...props\n}: Omit<PanelProps, \"children\"> & {\n  orientation?: \"horizontal\" | \"vertical\";\n}) {\n  const { zoom } = useViewport();\n  const { zoomTo, zoomIn, zoomOut, fitView } = useReactFlow();\n  const minZoom = useStore((state) => state.minZoom);\n  const maxZoom = useStore((state) => state.maxZoom);\n\n  return (\n    <Panel\n      className={cn(\n        \"bg-primary-foreground text-foreground flex gap-1 rounded-md p-1\",\n        orientation === \"horizontal\" ? \"flex-row\" : \"flex-col\",\n        className,\n      )}\n      {...props}\n    >\n      <div\n        className={cn(\n          \"flex gap-1\",\n          orientation === \"horizontal\" ? \"flex-row\" : \"flex-col-reverse\",\n        )}\n      >\n        <Button\n          variant=\"ghost\"\n          size=\"icon\"\n          onClick={() => zoomOut({ duration: 300 })}\n        >\n          <Minus className=\"h-4 w-4\" />\n        </Button>\n        <Slider\n          className={cn(\n            orientation === \"horizontal\" ? \"w-[140px]\" : \"h-[140px]\",\n          )}\n          orientation={orientation}\n          value={[zoom]}\n          min={minZoom}\n          max={maxZoom}\n          step={0.01}\n          onValueChange={(values) => zoomTo(values[0])}\n        />\n        <Button\n          variant=\"ghost\"\n          size=\"icon\"\n          onClick={() => zoomIn({ duration: 300 })}\n        >\n          <Plus className=\"h-4 w-4\" />\n        </Button>\n      </div>\n      <Button\n        className={cn(\n          \"tabular-nums\",\n          orientation === \"horizontal\"\n            ? \"w-[140px] min-w-10\"\n            : \"h-[40px] w-[40px]\",\n        )}\n        variant=\"ghost\"\n        onClick={() => zoomTo(1, { duration: 300 })}\n      >\n        {(100 * zoom).toFixed(0)}%\n      </Button>\n      <Button\n        variant=\"ghost\"\n        size=\"icon\"\n        onClick={() => fitView({ duration: 300 })}\n      >\n        <Maximize className=\"h-4 w-4\" />\n      </Button>\n    </Panel>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}

@@ -1,0 +1,1 @@
+"""Independent visual segment aggregate."""

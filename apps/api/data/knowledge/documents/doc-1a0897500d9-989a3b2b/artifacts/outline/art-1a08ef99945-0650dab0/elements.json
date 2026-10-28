@@ -1,0 +1,247 @@
+[
+  {
+    "id": "elem-p1-date",
+    "outline_id": "node-p1-date",
+    "type": "key_value",
+    "label": "일    시",
+    "value": "2018.11.08",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      137,
+      160,
+      150,
+      350
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-place",
+    "outline_id": "node-p1-place",
+    "type": "key_value",
+    "label": "장    소",
+    "value": "6공학관 6108-1호",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      180,
+      160,
+      193,
+      401
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-attendees",
+    "outline_id": "node-p1-attendees",
+    "type": "key_value",
+    "label": "참 석 자",
+    "value": "4명",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      230,
+      160,
+      243,
+      294
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-agenda",
+    "outline_id": "node-p1-agenda",
+    "type": "key_value",
+    "label": "안    건",
+    "value": "GPS + 동영상 촬영 및 프로그램 테스트 최종 확인",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      283,
+      160,
+      296,
+      625
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-content",
+    "outline_id": "node-p1-content",
+    "type": "list",
+    "label": "회의내용",
+    "value": null,
+    "items": [
+      "1. 드론 비행 후 GPS 센서가 정상적으로 수집이 되는지 확인",
+      "2. 프로그램 최종 테스트 진행",
+      "3. 결과보고서 작성 회의"
+    ],
+    "page": 1,
+    "box_2d": [
+      310,
+      235,
+      420,
+      850
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-expense",
+    "outline_id": "node-p1-expense",
+    "type": "key_value",
+    "label": "지출금액",
+    "value": "₩40,000",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      430,
+      160,
+      465,
+      330
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p1-proof",
+    "outline_id": "node-p1-proof",
+    "type": "media",
+    "label": "증빙자료(신용카드 영수증, 현금영수증 등)",
+    "value": "영수증 증빙 부착란",
+    "items": null,
+    "page": 1,
+    "box_2d": [
+      475,
+      121,
+      854,
+      879
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-date",
+    "outline_id": "node-p2-date",
+    "type": "key_value",
+    "label": "일    시",
+    "value": "2018.11.16",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      137,
+      160,
+      150,
+      350
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-place",
+    "outline_id": "node-p2-place",
+    "type": "key_value",
+    "label": "장    소",
+    "value": "6공학관 6108-1호",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      180,
+      160,
+      193,
+      401
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-attendees",
+    "outline_id": "node-p2-attendees",
+    "type": "key_value",
+    "label": "참 석 자",
+    "value": "3명",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      230,
+      160,
+      243,
+      294
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-agenda",
+    "outline_id": "node-p2-agenda",
+    "type": "key_value",
+    "label": "안    건",
+    "value": "최종 점검, 결과보고서 작성",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      283,
+      160,
+      296,
+      461
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-content",
+    "outline_id": "node-p2-content",
+    "type": "list",
+    "label": "회의내용",
+    "value": null,
+    "items": [
+      "1. 제출 필요서류 최종 점검",
+      "2. 결과보고서 작성"
+    ],
+    "page": 2,
+    "box_2d": [
+      310,
+      235,
+      400,
+      850
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-expense",
+    "outline_id": "node-p2-expense",
+    "type": "key_value",
+    "label": "지출금액",
+    "value": "₩29,000",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      410,
+      160,
+      445,
+      330
+    ],
+    "content_summary": null,
+    "structured_data": null
+  },
+  {
+    "id": "elem-p2-proof",
+    "outline_id": "node-p2-proof",
+    "type": "media",
+    "label": "증빙자료(신용카드 영수증, 현금영수증 등)",
+    "value": "영수증 증빙 부착란",
+    "items": null,
+    "page": 2,
+    "box_2d": [
+      455,
+      121,
+      854,
+      879
+    ],
+    "content_summary": null,
+    "structured_data": null
+  }
+]

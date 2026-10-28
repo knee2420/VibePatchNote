@@ -1,0 +1,410 @@
+/**
+ * @file styles.css
+ * @description 옵시디언 플러그인의 스타일 묶음
+ *
+ * Tailwind 를 레이어 없이 불러온다. 옵시디언의 스타일은 레이어 밖에 있어서, 레이어 안에 넣으면 전부 진다.
+ * 빌드할 때 모든 선택자가 `.vibe-outliner` 안으로 가둬진다. (vite.config.ts)
+ */
+
+@import "tailwindcss/theme.css";
+@import "tailwindcss/preflight.css";
+@import "tailwindcss/utilities.css";
+
+/* 편집 화면(@vibe/outliner/editor)과 이 플러그인의 Tailwind 클래스를 찾는다. */
+@source "../../../packages/outliner/src/editor";
+@source "./";
+
+@import "@vibe/outliner/styles.css";
+
+/* 글꼴과 줄 간격은 옵시디언 테마를 따른다. (Tailwind 초기화 규칙이 정한 값을 되돌린다) */
+:root {
+  font-family: var(--font-text);
+  font-size: var(--font-text-size);
+  line-height: var(--line-height-normal);
+  color: var(--text-normal);
+}
+
+/*
+ * 옵시디언은 버튼과 입력 칸에 높이·안쪽 여백·그림자를 기본으로 준다.
+ * 우리 화면의 버튼과 입력 칸은 Tailwind 클래스로만 꾸미므로 그 기본값을 걷어낸다.
+ */
+button,
+input {
+  height: auto;
+  box-shadow: none;
+  background-color: transparent;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 0;
+}
+
+/*
+ * 마크다운 문서 내 코드블록/임베드 내부의 옵시디언 기본 마진/패딩/행간 침투 방어
+ * 옵시디언의 .markdown-rendered p/div/input 스타일이 아웃라인 트리를 벌어지게 하는 현상 차단
+ */
+.vibe-outliner {
+  text-align: left !important;
+}
+
+.vibe-outliner p {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+  text-align: left !important;
+}
+
+.vibe-outliner input {
+  height: auto !important;
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  text-align: left !important;
+}
+
+.vibe-outliner [data-row-text] {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  padding-block: 0 !important;
+  text-align: left !important;
+}
+
+/*
+ * 마크다운 렌더링 샌드박스: 옵시디언 테마의 블록 레벨 요소(p, ol, ul, li, blockquote, h1~h6 등) 침투 차단
+ * 아웃라인 불릿 텍스트 내부에서는 모든 자식 엘리먼트가 단일 인라인 흐름과 일정한 행간을 유지해야 함
+ */
+.vibe-outliner [data-row-text] *,
+.vibe-outliner [data-node-id] * {
+  margin: 0 !important;
+  margin-block: 0 !important;
+  margin-inline: 0 !important;
+  padding-block: 0 !important;
+  list-style: none !important;
+}
+
+.vibe-outliner [data-row-text] p,
+.vibe-outliner [data-row-text] ol,
+.vibe-outliner [data-row-text] ul,
+.vibe-outliner [data-row-text] li,
+.vibe-outliner [data-row-text] blockquote,
+.vibe-outliner [data-row-text] h1,
+.vibe-outliner [data-row-text] h2,
+.vibe-outliner [data-row-text] h3,
+.vibe-outliner [data-row-text] h4,
+.vibe-outliner [data-row-text] h5,
+.vibe-outliner [data-row-text] h6 {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+/* 태그(a.tag) 및 내부 링크(a.internal-link)의 baseline 수평 정렬 보정 */
+.vibe-outliner [data-row-text] a.tag,
+.vibe-outliner [data-row-text] a.internal-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: baseline !important;
+  line-height: 1.2 !important;
+}
+
+/* 위키링크(.internal-link) 칩 배지 스타일 */
+.vibe-outliner a.internal-link {
+  color: var(--link-color, var(--text-accent, #7057ff)) !important;
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 14%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--text-accent, #7057ff) 28%, transparent) !important;
+  padding: 0.05em 0.4em !important;
+  margin: 0 0.15em !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease-in-out !important;
+  cursor: pointer !important;
+}
+
+.vibe-outliner a.internal-link:hover {
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 24%, transparent) !important;
+  border-color: var(--text-accent, #7057ff) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text-accent, #7057ff) 20%, transparent) !important;
+}
+
+/* 태그(a.tag) 칩 배지 스타일 강화 */
+.vibe-outliner a.tag {
+  color: var(--tag-color, var(--text-accent, #7057ff)) !important;
+  background-color: var(--tag-background, color-mix(in srgb, var(--text-accent, #7057ff) 12%, transparent)) !important;
+  border: 1px solid color-mix(in srgb, var(--text-accent, #7057ff) 20%, transparent) !important;
+  border-radius: var(--tag-radius, 4px) !important;
+  padding: 0.05em 0.4em !important;
+  margin: 0 0.15em !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease-in-out !important;
+}
+
+.vibe-outliner a.tag:hover {
+  background-color: color-mix(in srgb, var(--text-accent, #7057ff) 22%, transparent) !important;
+  border-color: var(--text-accent, #7057ff) !important;
+}
+
+
+/*
+ * 캔버스 미러 (mirror/)
+ * 캔버스 카드와 미러 창은 우리 영역 밖에 있다. 선택자가 `.vibe-outliner` 로 시작하면 빌드 때 가둬지지 않는다.
+ */
+.vibe-outliner-mirror-card::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+  background: var(--interactive-accent);
+  pointer-events: none;
+}
+
+/* 미러 카드: 옵시디언이 그린 카드 내용은 감추고, 그 위에 불릿 입력칸을 덮는다. */
+.vibe-outliner-mirror-live .canvas-node-container {
+  position: relative;
+}
+
+.vibe-outliner-mirror-live .canvas-node-content {
+  visibility: hidden;
+}
+
+.vibe-outliner-mirror-editor {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.vibe-outliner-mirror-input {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 12px 24px;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  box-shadow: none;
+  resize: none;
+  overflow: auto;
+  font: inherit;
+  font-size: var(--font-text-size);
+  line-height: var(--line-height-normal);
+  color: var(--text-normal);
+  white-space: pre-wrap;
+  cursor: inherit;
+}
+
+.vibe-outliner-mirror-input:focus,
+.vibe-outliner-mirror-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  cursor: text;
+}
+
+/* 평소에는 불릿을 그려 보이고(mirror/mirrorCardContent.ts), 두 번 누르면 입력칸으로 바꾼다. */
+.vibe-outliner-mirror-editor:not(.is-editing) .vibe-outliner-mirror-input,
+.vibe-outliner-mirror-editor.is-editing .vibe-outliner-mirror-view {
+  display: none;
+}
+
+.vibe-outliner-mirror-view {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 24px;
+  overflow: auto;
+  font-size: var(--font-text-size);
+  line-height: var(--line-height-normal);
+  color: var(--text-normal);
+  overflow-wrap: anywhere;
+}
+
+.vibe-outliner-mirror-text > :first-child {
+  margin-top: 0;
+}
+
+.vibe-outliner-mirror-text > :last-child {
+  margin-bottom: 0;
+}
+
+.vibe-outliner-mirror-text p {
+  margin: 0;
+}
+
+.vibe-outliner-mirror-file {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.vibe-outliner-mirror-file[hidden] {
+  display: none;
+}
+
+.vibe-outliner-mirror-file-preview {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  object-position: left center;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+}
+
+.vibe-outliner-mirror-file-name {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vibe-outliner-mirror-file:hover .vibe-outliner-mirror-file-name {
+  color: var(--text-accent);
+}
+
+/*
+ * 캔버스 뷰 (mirror/outlineCanvas.ts): 아웃라인의 짝 캔버스에만 붙는다.
+ * 한눈에 읽히도록 카드는 차분하게, 선은 가늘고 옅게, 섹션은 옅은 바탕과 또렷한 이름으로.
+ */
+.vibe-outliner-canvas-view .canvas-node:not(.canvas-node-group) .canvas-node-container {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  background: var(--background-primary);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.vibe-outliner-canvas-view .canvas-node.is-focused:not(.canvas-node-group) .canvas-node-container,
+.vibe-outliner-canvas-view .canvas-node.is-selected:not(.canvas-node-group) .canvas-node-container {
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px hsla(var(--interactive-accent-hsl), 0.18);
+}
+
+.vibe-outliner-canvas-view .canvas-node-group .canvas-node-container {
+  border: none;
+  border-radius: 16px;
+  background: var(--background-secondary);
+  box-shadow: none;
+}
+
+.vibe-outliner-canvas-view .canvas-group-label {
+  font-size: 1.15em;
+  font-weight: 600;
+  color: var(--text-normal);
+  background: transparent;
+}
+
+.vibe-outliner-canvas-view .canvas-edges path.canvas-display-path {
+  stroke: var(--text-faint);
+  stroke-width: 1.5px;
+  opacity: 0.7;
+}
+
+/* 캔버스 뷰의 미러 카드 글자는 한 단계 작고 촘촘하게 */
+.vibe-outliner-canvas-view .vibe-outliner-mirror-input,
+.vibe-outliner-canvas-view .vibe-outliner-mirror-view {
+  padding: 13px 16px;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+.vibe-outliner-mirror-panel {
+  width: min(640px, 92vw);
+}
+
+.vibe-outliner-mirror-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vibe-outliner-mirror-row {
+  padding: 8px 12px;
+  border-radius: var(--radius-m);
+  cursor: pointer;
+}
+
+.vibe-outliner-mirror-row:hover,
+.vibe-outliner-mirror-row:focus-visible {
+  background: var(--background-modifier-hover);
+  outline: none;
+}
+
+.vibe-outliner-mirror-row.is-source {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+}
+
+.vibe-outliner-mirror-meta {
+  display: flex;
+  gap: 8px;
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.vibe-outliner-mirror-open {
+  font-weight: 400;
+  color: var(--text-accent);
+}
+
+.vibe-outliner-mirror-crumb {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: var(--font-ui-small);
+}
+
+.vibe-outliner-mirror-index {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--text-normal);
+}
+
+.vibe-outliner-mirror-sep {
+  flex-shrink: 0;
+  color: var(--text-faint);
+}
+
+.vibe-outliner-mirror-seg {
+  flex-shrink: 1;
+  min-width: 2em;
+  max-width: 12em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-muted);
+}
+
+.vibe-outliner-mirror-leaf {
+  flex-shrink: 1;
+  min-width: 4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-normal);
+}
+
+.vibe-outliner-mirror-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}

@@ -1,0 +1,33 @@
+[
+  {
+    "stage_id": "context_build",
+    "stage_name": "문서 컨텍스트 빌드",
+    "timestamp": "2026-09-12T06:51:52.664868Z",
+    "payload": {
+      "filename": "Atticus LLC_ Invoice 000081709.pdf",
+      "total_pages": 1,
+      "context_chars": 1111,
+      "context_file_path": "C:\\AI_Projects\\WebNovelAssistant\\VibePatchNote\\apps\\api\\cache\\documents\\doc-1a0897501c4-45f9155b\\context\\source.context.md"
+    }
+  },
+  {
+    "stage_id": "prompt_assembly",
+    "stage_name": "프롬프트 역분해 조립",
+    "timestamp": "2026-09-12T06:51:52.664868Z",
+    "payload": {
+      "constitution_chars": 5402,
+      "dynamic_context_chars": 1111,
+      "total_prompt_chars": 7958
+    }
+  },
+  {
+    "stage_id": "structured_parsing",
+    "stage_name": "아웃라인 파싱 및 보정",
+    "timestamp": "2026-09-12T06:51:58.762967Z",
+    "payload": {
+      "outlines_count": 5,
+      "total_elements": 7,
+      "is_valid": true
+    }
+  }
+]

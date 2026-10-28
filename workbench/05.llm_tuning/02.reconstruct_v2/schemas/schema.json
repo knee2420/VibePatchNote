@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "CellDecision": {
+      "description": "표의 특정 셀 또는 블록에 대한 비전 모델 판정.",
+      "properties": {
+        "id": {
+          "description": "블록 ID (예: 't0-r0c0', 'L1')",
+          "title": "Id",
+          "type": "string"
+        },
+        "role": {
+          "description": "역할: title, header, label, value, mixed, decoration",
+          "enum": [
+            "title",
+            "header",
+            "label",
+            "value",
+            "mixed",
+            "decoration",
+            "ignore"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "value_text": {
+          "default": "",
+          "description": "새로 채워야 할 인스턴스 값 텍스트 (원문 그대로)",
+          "title": "Value Text",
+          "type": "string"
+        },
+        "slot_label": {
+          "default": "",
+          "description": "사용자 안내용 한국어 슬롯 라벨 (예: '팀명', '과제명', '회의 일시')",
+          "title": "Slot Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "role"
+      ],
+      "title": "CellDecision",
+      "type": "object"
+    }
+  },
+  "description": "비전 모델이 페이지 이미지와 기하 힌트를 보고 산출하는 구조화 결과.",
+  "properties": {
+    "page": {
+      "default": 1,
+      "description": "페이지 번호",
+      "title": "Page",
+      "type": "integer"
+    },
+    "doc_title": {
+      "default": "",
+      "description": "문서 대제목 (H1)",
+      "title": "Doc Title",
+      "type": "string"
+    },
+    "decisions": {
+      "description": "모든 셀/블록의 역할 및 슬롯 판정 목록",
+      "items": {
+        "$ref": "#/$defs/CellDecision"
+      },
+      "title": "Decisions",
+      "type": "array"
+    }
+  },
+  "title": "PageVisionOutput",
+  "type": "object"
+}

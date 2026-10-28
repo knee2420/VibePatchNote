@@ -1,0 +1,25 @@
+---
+type: card
+title: "Web Reader Tool"
+description: "web_reader_tool.py 모듈의 1:1 매핑 지식 카드"
+resource: "../../../../../../99.archive/dify/api/core/tools/utils/web_reader_tool.py"
+timestamp: "2026-09-02"
+---
+
+# summary
+이 카드는 `web_reader_tool.py` 원문의 핵심 아키텍처와 인터페이스를 1:1로 매핑하여 캡슐화한다. 원문의 클래스와 함수 구조를 분석하여 요소화했다.
+
+# elements
+| id | kind | label | 무엇이 들어있나 | anchor |
+|---|---|---|---|---|
+| E1 | 규칙 | page_result | page_result 핵심 로직 및 프로시저 | `## def page_result` |
+| E2 | 규칙 | get_url | get_url 핵심 로직 및 프로시저 | `## def get_url` |
+| E3 | 아키텍처 | Article | Article 클래스 정의 및 추상화 | `## class Article` |
+| E4 | 규칙 | extract_using_readabilipy | extract_using_readabilipy 핵심 로직 및 프로시저 | `## def extract_using_readabilipy` |
+| E5 | 규칙 | get_image_upload_file_ids | get_image_upload_file_ids 핵심 로직 및 프로시저 | `## def get_image_upload_file_ids` |
+
+# 밖으로
+- ⚠️ 이 카드는 기계적으로 1:1 매핑된 뼈대 카드이며, 상세 맥락은 원문을 참조.
+
+# 원문
+[web_reader_tool.py](../../../../../../99.archive/dify/api/core/tools/utils/web_reader_tool.py)

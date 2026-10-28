@@ -1,0 +1,20 @@
+<!-- source: langchain-ai/docs  src/oss/javascript/integrations/long-term-memory/index.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Store integrations"
+sidebarTitle: Stores
+description: "Integrate with store backends for LangGraph long-term memory."
+---
+
+Stores enable [long-term memory](/oss/langgraph/stores) in LangGraph, allowing agents to persist and retrieve information across threads.
+
+To implement your own store for a custom storage backend, extend the [BaseStore](https://reference.langchain.com/javascript/langchain-langgraph-checkpoint/BaseStore) interface. To deploy a custom store on Agent Server, see [Add a custom store](/langsmith/custom-store).
+
+| Backend | Package | Source |
+|---------|---------|--------|
+| [In-memory](https://reference.langchain.com/javascript/langchain-langgraph-checkpoint/InMemoryStore) | [`@langchain/langgraph-checkpoint`](https://www.npmjs.com/package/@langchain/langgraph-checkpoint) | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs/tree/main/libs/checkpoint) |
+| [PostgreSQL](https://reference.langchain.com/javascript/langchain-langgraph-checkpoint-postgres/store/PostgresStore) | [`@langchain/langgraph-checkpoint-postgres`](https://www.npmjs.com/package/@langchain/langgraph-checkpoint-postgres) | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs/tree/main/libs/checkpoint-postgres) |
+| [Redis](https://reference.langchain.com/javascript/langchain-langgraph-checkpoint-redis/store/RedisStore) | [`@langchain/langgraph-checkpoint-redis`](https://www.npmjs.com/package/@langchain/langgraph-checkpoint-redis) | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs/tree/main/libs/checkpoint-redis) |
+| [MongoDB](/oss/integrations/memory/mongodb-long-term-memory) | [`@langchain/langgraph-checkpoint-mongodb`](https://www.npmjs.com/package/@langchain/langgraph-checkpoint-mongodb) | [langchain-ai/langgraphjs](https://github.com/langchain-ai/langgraphjs/tree/main/libs/checkpoint-mongodb) |

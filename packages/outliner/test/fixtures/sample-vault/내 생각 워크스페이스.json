@@ -1,0 +1,87 @@
+{
+  "version": "1.0.0",
+  "id": "h9D3wmqt3fpu",
+  "title": "내 생각 워크스페이스",
+  "projects": {
+    "aL97U3JP0OB9": {
+      "id": "aL97U3JP0OB9",
+      "title": "메인 기획",
+      "rootNodes": [
+        {
+          "id": "4jkI0JzUHefq",
+          "text": "메인 기획 개요",
+          "children": [
+            {
+              "id": "2hTY7sfWtSyf",
+              "text": "핵심 아이디어와 생각의 흐름을 여기에 작성하세요",
+              "children": [],
+              "isFolded": false,
+              "createdAt": 1791716304477,
+              "updatedAt": 1791716313997
+            },
+            {
+              "id": "qZ3LDb758LOO",
+              "text": "그럼 지금부터는 파일 시스템 정비 드가겠습니다잉",
+              "children": [],
+              "createdAt": 1791716313997,
+              "updatedAt": 1791716325365
+            }
+          ],
+          "isFolded": false,
+          "createdAt": 1791716304477,
+          "updatedAt": 1791716304477
+        },
+        {
+          "id": "0SlGLr7aYRRA",
+          "text": "파일 시스템 테스트 항목",
+          "children": [
+            {
+              "id": "wX4ZKFm2zKhF",
+              "text": "json 저장 형식",
+              "children": [],
+              "createdAt": 1791716330217,
+              "updatedAt": 1791716336821
+            },
+            {
+              "id": "FGdfwbNw0CYm",
+              "text": "불러오기",
+              "children": [],
+              "createdAt": 1791716336821,
+              "updatedAt": 1791716338520
+            },
+            {
+              "id": "JgEZ0qhVT2r2",
+              "text": "내보내기",
+              "children": [],
+              "createdAt": 1791716338520,
+              "updatedAt": 1791716342253
+            },
+            {
+              "id": "KLyRoLtvL8WA",
+              "text": "crud 반영",
+              "children": [],
+              "createdAt": 1791716342253,
+              "updatedAt": 1791716351430
+            },
+            {
+              "id": "Rhzp6jwLGQVy",
+              "text": "workspace 내용 반영",
+              "children": [],
+              "createdAt": 1791716351430,
+              "updatedAt": 1791716359494
+            }
+          ],
+          "createdAt": 1791716325365,
+          "updatedAt": 1791716330217,
+          "isFolded": false
+        }
+      ],
+      "defaultView": "bullets",
+      "createdAt": 1791716304477,
+      "updatedAt": 1791716359509
+    }
+  },
+  "activeProjectId": "aL97U3JP0OB9",
+  "createdAt": 1791716304477,
+  "updatedAt": 1791716359509
+}

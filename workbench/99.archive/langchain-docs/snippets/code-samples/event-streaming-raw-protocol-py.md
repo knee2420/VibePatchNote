@@ -1,0 +1,28 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/event-streaming-raw-protocol-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+stream = agent.stream_events(input, version="v3")
+
+text_deltas: list[str] = []
+for event in stream:
+    if event.get("method") != "messages":
+        continue
+
+    payload = event["params"]["data"][0]
+    if not isinstance(payload, dict):
+        continue
+    if payload.get("event") != "content-block-delta":
+        continue
+
+    block = payload.get("delta") or {}
+    if block.get("type") == "text-delta":
+        source = "subagent" if event["params"]["namespace"] else "coordinator"
+        print(f"[{source}] {block['text']}")
+        text_deltas.append(block["text"])
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/ffce9a73-0179-440a-9b4a-96b448b39c3c/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

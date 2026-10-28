@@ -1,0 +1,180 @@
+/* Tiptap 스캐폴딩 코어 CSS - 어떤 환경에서도 100% 보장되는 2단/3단 그리드 */
+
+.scaffold-prose {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+/* 1. 다단 그룹 (ColumnGroup): 인라인 및 강제 CSS 그리드 */
+div[data-type="column-group"],
+.column-group {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 1.25rem !important;
+  width: 100% !important;
+  margin: 0.75rem 0 !important;
+  box-sizing: border-box !important;
+}
+
+div[data-type="column-group"][data-cols="3"],
+.column-group[data-cols="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+div[data-type="column-group"][data-layout="header-asym"],
+.column-group[data-layout="header-asym"] {
+  grid-template-columns: 1.25fr 1fr !important;
+}
+
+/* 2. 개별 컬럼 (Column) */
+div[data-type="column"],
+.column-box {
+  display: block !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 3. 서식 슬롯 (ScaffoldSlot) */
+span[data-type="scaffold-slot"],
+.scaffold-slot {
+  box-sizing: border-box;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 3px;
+  border: 1px dashed #a855f7;
+  background-color: #faf5ff;
+  color: #7e22ce;
+  font-style: italic;
+  font-size: 0.82em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 블록 전체가 슬롯인 경우 칸을 꽉 채워 원본 영역과 1:1 로 대응시킨다. */
+span[data-type="scaffold-slot"].scaffold-slot-fill {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+span[data-type="scaffold-slot"]:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.85;
+}
+
+/* 우측 서식에서 호버된 슬롯. 좌측 원본 하이라이트와 1:1 짝을 이루며 텍스트 가독성을 보장한다. */
+span[data-type="scaffold-slot"].is-sync-hovered {
+  background-color: rgba(168, 85, 247, 0.22);
+  color: #6b21a8;
+  border: 1.5px solid #9333ea;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
+  font-weight: 600;
+}
+
+/* 4. 조립된 페이지 캔버스 — 원본 PDF 포인트와 1:1 px.
+   자식 블록과 표가 이 상자를 기준으로 절대 배치된다. */
+.scaffold-page {
+  position: relative;
+  margin: 0 auto;
+  background: #ffffff;
+  overflow: hidden;
+  transform-origin: top left;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* 다중 페이지 분할: 연속된 페이지 간 명확한 시각적 간격 및 종이 느낌 구분 */
+.scaffold-page + .scaffold-page {
+  margin-top: 28px !important;
+}
+
+/* 절대 배치 블록. 위치·크기·폰트는 전부 스키마 속성에서 인라인 스타일로 온다. */
+.scaffold-block {
+  box-sizing: border-box;
+}
+
+.scaffold-block-rule {
+  pointer-events: none;
+}
+
+.scaffold-table {
+  box-sizing: border-box;
+}
+
+.scaffold-table th,
+.scaffold-table td {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ProseMirror 가 블록마다 넣는 기본 여백이 절대 배치를 흔들지 않도록 차단 */
+.scaffold-page > .scaffold-block,
+.scaffold-page > .scaffold-table {
+  margin: 0 !important;
+}
+
+/* 편집 커서용 최소 높이가 빈 블록을 부풀리지 않게 한다 */
+.scaffold-block > p {
+  margin: 0 !important;
+}
+
+/* 5. 표 위치 고정 프레임.
+   Tiptap Table 의 NodeView 가 만드는 .tableWrapper 와 colgroup 이
+   실측 열 너비/행 높이를 덮지 않도록 이 안에서 무력화한다. */
+.scaffold-frame {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.scaffold-frame .tableWrapper {
+  position: static;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
+.scaffold-frame table {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  margin: 0 !important;
+  border: 1px solid #333;
+}
+
+/* NodeView 가 재생성하는 colgroup(min-width:25px)을 무시하고
+   첫 행 셀의 실측 width 가 열 너비를 결정하게 한다. */
+.scaffold-frame colgroup {
+  display: none;
+}
+
+/* NodeView 가 만든 <table> 에는 우리 클래스가 없다. 프레임 기준으로 걸어야
+   padding/border 가 실측 열 너비를 밀어내지 않는다. */
+.scaffold-frame th,
+.scaffold-frame td {
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Tiptap TableCell 의 content 는 block+ 이라 셀 안 텍스트가 <p> 로 감싸진다.
+   <p> 기본 여백(1em 위아래)을 그대로 두면 그것이 행 높이를 밀어내
+   실측 행 높이가 무시되고 모든 행이 균등해진다. */
+.scaffold-frame th > p,
+.scaffold-frame td > p {
+  margin: 0 !important;
+  line-height: 1.15;
+}
+
+/* 셀 내용이 실측 행 높이를 넘겨도 행을 부풀리지 못하게 잘라낸다. */
+.scaffold-frame tr {
+  overflow: hidden;
+}

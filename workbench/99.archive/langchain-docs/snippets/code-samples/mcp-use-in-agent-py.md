@@ -1,0 +1,28 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/mcp-use-in-agent-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+from langchain.agents import create_agent
+from langchain.mcp import MCPAdapter
+
+
+async def run_agent(server) -> dict:
+    # Discover the server's tools, then hand them to the agent like any other
+    # LangChain tools. The tools hold the client, so the agent stays usable
+    # for the life of the adapter context.
+    async with MCPAdapter(server) as adapter:
+        tools = await adapter.list_tools()
+        agent = create_agent("claude-sonnet-5", tools)
+        return await agent.ainvoke(
+            {
+                "messages": [
+                    {"role": "user", "content": "What is the forecast for Oslo?"}
+                ]
+            }
+        )
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/025418ad-e7bc-43a3-b700-d1a78b3a4856/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

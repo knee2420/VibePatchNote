@@ -1,0 +1,315 @@
+{
+  "meta": {
+    "id": "scaffold-v2-디딤돌_참가신청서_딥드론",
+    "title": "디딤돌_참가신청서_딥드론 와이어프레임 서식 (v2 Vision-Outline 통합형)",
+    "targetDoc": "디딤돌_참가신청서_딥드론.pdf",
+    "sourcePdfFileName": "디딤돌_참가신청서_딥드론.pdf",
+    "description": "비전 중심 아웃라인 기반 고정밀 와이어프레임 서식 (슬롯 25개)",
+    "difficulty": "normal",
+    "totalPages": 3
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.4\" data-y=\"105.7\" data-w=\"451.9\" data-h=\"616.1\" class=\"scaffold-frame\" style=\"position:absolute;left:66.4px;top:105.7px;width:451.9px;height:616.1px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.4px;top:105.7px;width:451.9px;height:616.1px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"팀명\"></span></p></td><td style=\"border:1px solid #334155;width:368.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"팀명\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"지원유형\"></span></p></td><td style=\"border:1px solid #334155;width:368.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"과제 목표\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"과제명\"></span></p></td><td style=\"border:1px solid #334155;width:368.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"과제명\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"예상 소요비용 표\"></span></p></td><td style=\"border:1px solid #334155;width:53.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"이름\"></span></p></td><td style=\"border:1px solid #334155;width:314.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"이름\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:53.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"전화번호\"></span></p></td><td style=\"border:1px solid #334155;width:314.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"전화번호\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:53.6px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"팀원 명단 표\"></span></p></td><td style=\"border:1px solid #334155;width:66.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"대학\"></span></p></td><td style=\"border:1px solid #334155;width:78.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s14\" data-mapping-num=\"14\" data-placeholder=\"학과(부)\"></span></p></td><td style=\"border:1px solid #334155;width:86.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s15\" data-mapping-num=\"15\" data-placeholder=\"학년\"></span></p></td><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s16\" data-mapping-num=\"16\" data-placeholder=\"학번\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:66.4px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s17\" data-mapping-num=\"17\" data-placeholder=\"대학\"></span></p></td><td style=\"border:1px solid #334155;width:78.1px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s18\" data-mapping-num=\"18\" data-placeholder=\"학과(부)\"></span></p></td><td style=\"border:1px solid #334155;width:86.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s19\" data-mapping-num=\"19\" data-placeholder=\"학년\"></span></p></td><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s20\" data-mapping-num=\"20\" data-placeholder=\"학번\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s21\" data-mapping-num=\"21\" data-placeholder=\"과제수행 기간\"></span></p></td><td style=\"border:1px solid #334155;width:368.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s22\" data-mapping-num=\"22\" data-placeholder=\"과제수행 기간\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:83.9px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">과제수행 계획 \n요약</p></th><td style=\"border:1px solid #334155;width:368.0px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">1. 프로젝트 도출 배경\n해파리는 세계 곳곳의 어장과 연안 관광지에 대량\n으로 출몰하고 있어 전 세계적으로 많은 문제들을 \n일으키고 있다. 해파리는 경우에 따라서 수백만 평반 \n마일을 뒤덮을 만큼 개체수가 늘어나기도 하는데, 이\n렇게 늘어난 해파리들은 어업과 관광업 그리고 연안 \n바닷물을 냉각수로 이용하는 원자력 발전소에 큰 피\n해를 일으킨다. \n2. CNN을 활용한 해파리 대량 발생 모니터링 드론 개발\n 저희 팀은 앞의 개발 필요성에 따라 사람의 수고를 줄이고, 정확도를 높일 수 있는 \n해파리 대량 발생 모니터링 시스템을 제안코자 합니다. 해파리 대량 발생 보고는 5\n월~12월까지 매주 발행해야하는 것으로 실제 집행부에서 많은 수고로움을 겪고 있습니\n다. 이에 특정 해역을 비행하고, 촬영을 한 뒤에 어떤 해파리가 얼마나 있는지 파악하\n여 실시간으로 분포도를 생성해주는 드론의 프로토타입을 개발하고자 합니다.</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:83.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s23\" data-mapping-num=\"23\" data-placeholder=\"지원요청금액\"></span></p></td><td style=\"border:1px solid #334155;width:368.0px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s24\" data-mapping-num=\"24\" data-placeholder=\"지원요청금액\"></span></p></td></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:451.9px;padding:0;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s25\" data-mapping-num=\"25\" data-placeholder=\"제출일자\"></span></p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:110.7px;top:73.2px;width:373.7px;height:18.5px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">[ACE⁺] 창의미래설계 디딤돌 사업 지원신청서</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:113.6px;top:73.2px;width:374.3px;height:18.5px;font-size:18.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">[ACE⁺] 창의미래설계 디딤돌 사업 활동계획서</div>\n<div data-type=\"scaffold-block\" data-variant=\"text\" class=\"scaffold-block\" style=\"position:absolute;left:64.9px;top:74.8px;width:92.8px;height:14.3px;font-size:14.0px;font-weight:bold;display:flex;align-items:center;color:#0f172a;\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:0px;top:0px;width:100px;height:20px;font-size:10px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;box-sizing:border-box\">4. 예상 소요비용</div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"2\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"222.8\" data-w=\"459.0\" data-h=\"209.5\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:222.8px;width:459.0px;height:209.5px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:222.8px;width:459.0px;height:209.5px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">구분</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">이름</p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">학과(부)</p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">학년</p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">학번</p></th><th style=\"border:1px solid #334155;width:177.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">연락처(전화, e-mail)</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">팀장</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">김태진</p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">정보컴퓨터공학부</p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">4</p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">201224443</p></th><th style=\"border:1px solid #334155;width:80.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">010-5599-7278</p></th><td style=\"border:1px solid #334155;width:97.3px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">kitto727@gmail.com</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">서민규</p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">기계공학부</p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">4</p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">201221253</p></th><th style=\"border:1px solid #334155;width:80.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">010-5594-9879</p></th><th style=\"border:1px solid #334155;width:97.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">knee2420@네이버</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">이혜인</p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">정보컴퓨터공학부</p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">4</p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">201524555</p></th><th style=\"border:1px solid #334155;width:80.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">010-8923-8649</p></th><td style=\"border:1px solid #334155;width:97.3px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">lhi714@naver.com</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">홍승우</p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">경영학과</p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">3</p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">201443362</p></th><th style=\"border:1px solid #334155;width:80.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">010-2707-7618</p></th><td style=\"border:1px solid #334155;width:97.3px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">bnbchd@naver.com</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:39.6px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">팀원</p></th><th style=\"border:1px solid #334155;width:49.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:86.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:36.0px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:69.8px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:80.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:97.3px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:459.0px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">◦팀원 구성 이유 및 역할\n 김태진 : 정보컴퓨터공학부 학생으로 높은 프로그래밍 실력을 갖추고, 여러 번의 프로젝트를 \n통해 리더쉽을 갖추고 있음\n 서민규 : 딥러닝 개발 경험이 있고, CNN 파트의 구현을 담당할 예정\n 이혜인 : 라즈베리파이, 아두이노 등의 IOT 코딩 경험이 많고, 드론 부분의 코딩을 담당할 예정\n 홍승우 : 해파리 문제에 많은 관심을 가지고 있고, 이 프로젝트의 실질적인 제안자. 기획과 \n보고서, PT 등을 담당할 예정</p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"477.9\" data-w=\"451.9\" data-h=\"21.3\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:477.9px;width:451.9px;height:21.3px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:477.9px;width:451.9px;height:21.3px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">주요과제 및 추진계획</p></th><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">추진일정</p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"520.5\" data-w=\"451.9\" data-h=\"42.8\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:520.5px;width:451.9px;height:42.8px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:520.5px;width:451.9px;height:42.8px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">▪ 프로그램과 제품의 전반적인 아키텍쳐 설계\n ▪ 필요한 물품 구입 및 개발 환경 셋팅</p></td><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">8월 1,2주</p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"584.6\" data-w=\"451.9\" data-h=\"55.5\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:584.6px;width:451.9px;height:55.5px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:584.6px;width:451.9px;height:55.5px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">▪ 해파리 인식에 관한 딥러닝 방법을 조사 및 구현\n   -  구현 후 성능을 높이는 작업은 과제가 끝날 때까지 지속되어야 할 것</p></td><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">8월 3,4주</p></td></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">3.  드론 개발</p></th><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">9월 1,2주</p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"661.4\" data-w=\"451.9\" data-h=\"21.2\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:661.4px;width:451.9px;height:21.2px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:661.4px;width:451.9px;height:21.2px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">4. 딥러닝 + 드론 연동</p></th><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">9월 3,4주</p></td></tr></tbody></table></div>\n<div data-type=\"scaffold-frame\" data-x=\"66.5\" data-y=\"704.0\" data-w=\"451.9\" data-h=\"21.2\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:704.0px;width:451.9px;height:21.2px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.5px;top:704.0px;width:451.9px;height:21.2px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><td style=\"border:1px solid #334155;width:380.7px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">5. 실제 테스트 및 오류 수정</p></td><td style=\"border:1px solid #334155;width:71.2px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">10월</p></td></tr></tbody></table></div>\n</div>\n\n<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"841\" data-page=\"3\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:841px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-frame\" data-x=\"66.3\" data-y=\"95.8\" data-w=\"451.9\" data-h=\"142.6\" class=\"scaffold-frame\" style=\"position:absolute;left:66.3px;top:95.8px;width:451.9px;height:142.6px;box-sizing:border-box;\" class=\"scaffold-frame\" style=\"position:absolute;left:66.3px;top:95.8px;width:451.9px;height:142.6px;box-sizing:border-box;\"><table class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\" class=\"scaffold-table\" style=\"width:100%;height:100%;border-collapse:collapse;table-layout:fixed;border:1.5px solid #334155;box-sizing:border-box;\"><tbody><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">지출항목</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">예산액</p></th><th style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">산출근거</p></th><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">비  고</p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">드론</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">200,000</p></th><th style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">드론 * 1</p></th><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">AWS GPU \n임대</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">300,000</p></th><td style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">머신러닝 GPU 임대료(1시간에 5,000)</p></td><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">라즈베리파이 \n및 센서들</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">200,000</p></th><td style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;color:#334155;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">라즈베리파이 + GPS, 카메라센서 등</p></td><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">회의비</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">300,000</p></th><th style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">전체 합계 *30%</p></th><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr><tr style=\"height:24.0px;\" style=\"\"><th style=\"border:1px solid #334155;width:70.5px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">합  계</p></th><th style=\"border:1px solid #334155;width:76.2px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\">1,000,000</p></th><th style=\"border:1px solid #334155;width:223.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th><th style=\"border:1px solid #334155;width:82.1px;padding:3px 6px;vertical-align:middle;background:#f8fafc;font-weight:600;text-align:center;\" style=\"border:1px solid #334155;vertical-align:middle;overflow:hidden;box-sizing:border-box;font-size:10px;text-align:center;font-weight:600;background:#f8fafc;color:#1e293b;padding:3px 6px\"><p style=\"margin:0;line-height:1.2;\"></p></th></tr></tbody></table></div>\n</div>",
+  "markdownContent": "# 디딤돌 참가신청서_딥드론.pdf\n\n# [ACE⁺] 창의미래설계 디딤돌 사업 지원신청서\n# [ACE⁺] 창의미래설계 디딤돌 사업 활동계획서\n## 4. 예상 소요비용\n\n---\n\n\n\n---\n\n",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "팀명",
+      "box_2d": [
+        126,
+        112,
+        151,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "팀명",
+      "box_2d": [
+        126,
+        253,
+        151,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "지원유형",
+      "box_2d": [
+        151,
+        112,
+        176,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "과제 목표",
+      "box_2d": [
+        151,
+        253,
+        176,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "과제명",
+      "box_2d": [
+        176,
+        112,
+        202,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "과제명",
+      "box_2d": [
+        176,
+        253,
+        202,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "예상 소요비용 표",
+      "box_2d": [
+        202,
+        112,
+        312,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "이름",
+      "box_2d": [
+        202,
+        253,
+        227,
+        343
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "이름",
+      "box_2d": [
+        202,
+        343,
+        227,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "전화번호",
+      "box_2d": [
+        227,
+        253,
+        261,
+        343
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "전화번호",
+      "box_2d": [
+        227,
+        343,
+        261,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "팀원 명단 표",
+      "box_2d": [
+        261,
+        253,
+        312,
+        343
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "대학",
+      "box_2d": [
+        261,
+        343,
+        286,
+        454
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s14",
+      "number": 14,
+      "label": "학과(부)",
+      "box_2d": [
+        261,
+        454,
+        286,
+        586
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s15",
+      "number": 15,
+      "label": "학년",
+      "box_2d": [
+        261,
+        586,
+        286,
+        730
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s16",
+      "number": 16,
+      "label": "학번",
+      "box_2d": [
+        261,
+        730,
+        286,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s17",
+      "number": 17,
+      "label": "대학",
+      "box_2d": [
+        286,
+        343,
+        312,
+        454
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s18",
+      "number": 18,
+      "label": "학과(부)",
+      "box_2d": [
+        286,
+        454,
+        312,
+        586
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s19",
+      "number": 19,
+      "label": "학년",
+      "box_2d": [
+        286,
+        586,
+        312,
+        730
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s20",
+      "number": 20,
+      "label": "학번",
+      "box_2d": [
+        286,
+        730,
+        312,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s21",
+      "number": 21,
+      "label": "과제수행 기간",
+      "box_2d": [
+        312,
+        112,
+        337,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s22",
+      "number": 22,
+      "label": "과제수행 기간",
+      "box_2d": [
+        312,
+        253,
+        337,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s23",
+      "number": 23,
+      "label": "지원요청금액",
+      "box_2d": [
+        609,
+        112,
+        634,
+        253
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s24",
+      "number": 24,
+      "label": "지원요청금액",
+      "box_2d": [
+        609,
+        253,
+        634,
+        871
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s25",
+      "number": 25,
+      "label": "제출일자",
+      "box_2d": [
+        634,
+        112,
+        858,
+        871
+      ],
+      "pageNumber": 1
+    }
+  ]
+}

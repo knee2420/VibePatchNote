@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiptap Scaffold Reconstruct Studio — 02.reconstruct</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- packages/tiptap-scaffold 의 실제 CSS 직접 로드 -->
+  <link rel="stylesheet" href="/static/scaffold.css">
+
+  <style>
+    /* 닷 그리드 캔버스 배경 */
+    .canvas-dot-bg {
+      background-color: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    /* A4 종이 섀도우 캔버스 */
+    .paper-shadow {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    /* 표 및 셀 테두리 강제 복원 (Tailwind Preflight 오버라이드) */
+    .scaffold-page {
+      position: relative !important;
+      background: #ffffff !important;
+      overflow: hidden !important;
+      margin: 0 auto !important;
+    }
+    .scaffold-frame {
+      position: absolute !important;
+      box-sizing: border-box !important;
+    }
+    .scaffold-frame table,
+    table.scaffold-table {
+      width: 100% !important;
+      height: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      border: 1.5px solid #334155 !important;
+    }
+    .scaffold-frame th,
+    .scaffold-frame td,
+    table.scaffold-table th,
+    table.scaffold-table td {
+      border: 1px solid #334155 !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    .scaffold-frame th,
+    table.scaffold-table th {
+      background-color: #f8fafc !important;
+      color: #1e293b !important;
+      text-align: center !important;
+      font-weight: 600 !important;
+      padding: 2px 4px !important;
+    }
+    .scaffold-frame td,
+    table.scaffold-table td {
+      color: #334155 !important;
+      padding: 2px 4px !important;
+    }
+    .scaffold-frame td[data-fill="true"],
+    .scaffold-frame th[data-fill="true"] {
+      padding: 0 !important;
+    }
+    .scaffold-block {
+      box-sizing: border-box !important;
+    }
+    .scaffold-block-rule {
+      background: #64748b !important;
+      pointer-events: none !important;
+    }
+
+    /* 슬롯 플레이스홀더 텍스트 표시 */
+    span[data-type="scaffold-slot"]:empty::before {
+      content: attr(data-placeholder);
+      opacity: 0.85;
+    }
+
+    /* 실시간 동기화 하이라이트 */
+    span[data-type="scaffold-slot"].is-sync-hovered {
+      background-color: rgba(168, 85, 247, 0.25) !important;
+      color: #6b21a8 !important;
+      border: 1.5px solid #9333ea !important;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.3) !important;
+      font-weight: 600 !important;
+    }
+
+    /* 스크롤바 정돈 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-screen flex flex-col font-sans overflow-hidden">
+  <div id="app" class="flex flex-col h-full">
+
+    <!-- 1. 최상단 네비게이션 헤더 -->
+    <header class="h-14 bg-slate-950 border-b border-slate-800 px-5 flex items-center justify-between shrink-0 z-30">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="layout-template" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-sm tracking-tight text-white">Tiptap Scaffold Reconstruct Studio</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">02.reconstruct</span>
+          </div>
+          <p class="text-[11px] text-slate-400">PDF 기하 실측 + LLM 슬롯 판정 + Tiptap 와이어프레임 100% 동기화</p>
+        </div>
+      </div>
+
+      <!-- 중앙: 문서 선택기 및 페이지 컨트롤 -->
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 shadow-inner">
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <select v-model="selectedDocId" @change="loadDocument" class="bg-transparent text-xs text-white focus:outline-none cursor-pointer max-w-xs truncate">
+            <option v-for="d in documents" :key="d.id" :value="d.id" class="bg-slate-900 text-white">
+              {{ d.filename }} ({{ d.size_kb }} KB)
+            </option>
+          </select>
+        </div>
+
+        <!-- 페이지 전환 -->
+        <div class="flex items-center space-x-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs">
+          <button @click="prevPage" :disabled="currentPage <= 1" class="p-1 hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-inherit cursor-pointer">
+            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+          </button>
+          <span class="font-mono text-[11px] px-1 text-slate-300">{{ currentPage }} / {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage >= totalPages" class="p-1 hover:text-indigo-400 disabled:opacity-30 disabled:hover:text-inherit cursor-pointer">
+            <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 우측: 상태 배지 및 정보 -->
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          {{ slots.length }}개 슬롯 활성화
+        </span>
+        <button @click="toggleDrawer" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="마크다운 및 슬롯 목록 토글">
+          <i data-lucide="code" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. 메인 뷰포트: 첨부 이미지 1, 2와 100% 동일한 좌우 2열 대시보드 -->
+    <main class="flex-1 flex overflow-hidden canvas-dot-bg p-4 gap-4 relative">
+
+      <!-- ================================================================= -->
+      <!-- [좌측 카드] 원본 PDF 뷰어 + OUTLINE 트리 패널 -->
+      <!-- ================================================================= -->
+      <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden text-slate-800">
+        
+        <!-- 카드 상단 바 -->
+        <div class="h-12 border-b border-slate-200 px-4 flex items-center justify-between bg-white shrink-0">
+          <div class="flex items-center space-x-2 min-w-0">
+            <div class="text-blue-600">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+            </div>
+            <span class="font-semibold text-xs text-slate-900 truncate">{{ currentDocName }}</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+              {{ totalPages }}p
+            </span>
+          </div>
+
+          <!-- 툴바 액션 아이콘들 -->
+          <div class="flex items-center space-x-1">
+            <button class="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors" title="AI 실시간 분석">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors" title="텍스트 뷰">
+              <i data-lucide="type" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors" title="실험실 튜닝">
+              <i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="p-1.5 rounded-md hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors" title="편집">
+              <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-rose-600 transition-colors" title="초기화">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 카드 본문: [PDF 이미지 캔버스] + [우측 OUTLINE 접이식 패널] -->
+        <div class="flex-1 flex overflow-hidden relative">
+
+          <!-- 1) 원본 PDF 고해상도 이미지 렌더링 캔버스 -->
+          <div class="flex-1 overflow-auto p-4 flex justify-center items-start bg-slate-50 relative">
+            <div class="relative bg-white paper-shadow border border-slate-200 rounded-sm" :style="{ width: pageWidthPt + 'px', height: pageHeightPt + 'px' }">
+              <!-- 원본 PDF 래스터 이미지 -->
+              <img
+                v-if="hasPdf"
+                :src="pageImageUrl"
+                alt="PDF Page"
+                class="w-full h-full object-contain pointer-events-none select-none block"
+                @load="onImageLoaded"
+              />
+              <div v-else class="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                <i data-lucide="file-x" class="w-8 h-8 mb-2 stroke-1"></i>
+                <span>원본 PDF 이미지가 없습니다</span>
+              </div>
+
+              <!-- 슬롯 실측 좌표 하이라이트 오버레이 (Hover Sync) -->
+              <div
+                v-if="hoveredSlot && hoveredSlot.pageNumber === currentPage"
+                class="absolute border-2 border-purple-600 bg-purple-500/25 pointer-events-none transition-all duration-150 z-20 rounded-xs flex items-start justify-end p-0.5 shadow-sm"
+                :style="getSlotBBoxStyle(hoveredSlot.box_2d)"
+              >
+                <span class="bg-purple-700 text-white text-[9px] font-bold px-1 rounded shadow-xs leading-tight">
+                  #{{ hoveredSlot.number }} {{ hoveredSlot.label }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2) 우측 OUTLINE 계층 패널 (토글 가능) -->
+          <div v-show="showOutlinePanel" class="w-64 border-l border-slate-200 bg-white flex flex-col shrink-0">
+            <div class="h-10 border-b border-slate-200 px-3 flex items-center justify-between bg-slate-50/50">
+              <span class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">OUTLINE ({{ outlineNodes.length }})</span>
+              <div class="flex items-center space-x-1 text-slate-400">
+                <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5 cursor-pointer hover:text-slate-600"></i>
+                <i data-lucide="rotate-cw" class="w-3.5 h-3.5 cursor-pointer hover:text-slate-600"></i>
+                <i data-lucide="x" class="w-3.5 h-3.5 cursor-pointer hover:text-slate-600" @click="showOutlinePanel = false"></i>
+              </div>
+            </div>
+
+            <!-- 검색 필터 인풋 -->
+            <div class="p-2 border-b border-slate-100">
+              <div class="flex items-center bg-slate-100 rounded-md px-2 py-1 text-xs text-slate-600">
+                <i data-lucide="search" class="w-3 h-3 mr-1.5 text-slate-400"></i>
+                <input v-model="outlineFilter" placeholder="아웃라인 및 엘리먼트 필터..." class="bg-transparent w-full focus:outline-none text-[11px]" />
+              </div>
+            </div>
+
+            <!-- 트리 목록 -->
+            <div class="flex-1 overflow-y-auto p-2 space-y-1">
+              <div v-for="node in filteredOutlineNodes" :key="node.id" class="text-xs group cursor-pointer">
+                <div
+                  class="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-purple-50 hover:text-purple-900 transition-colors"
+                  :class="{ 'bg-purple-50 text-purple-900 font-semibold': isNodeActive(node) }"
+                  @click="selectOutlineNode(node)"
+                >
+                  <div class="flex items-center space-x-1.5 truncate">
+                    <i data-lucide="folder" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i>
+                    <span class="truncate text-[11px]">{{ node.title || node.label }}</span>
+                  </div>
+                  <span class="text-[9px] text-slate-400 font-mono shrink-0 ml-1">p.{{ node.page }}</span>
+                </div>
+              </div>
+              <div v-if="filteredOutlineNodes.length === 0" class="p-4 text-center text-slate-400 text-xs">
+                표시할 아웃라인이 없습니다.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 좌측 카드 하단 푸터 -->
+        <div class="h-8 border-t border-slate-100 px-4 flex items-center justify-between text-[11px] text-slate-400 bg-slate-50/50 shrink-0">
+          <span>{{ currentDocName }}</span>
+          <span>{{ outlineNodes.length }} sections</span>
+        </div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- [중앙 연결 화살표 인디케이터] -->
+      <!-- ================================================================= -->
+      <div class="flex flex-col justify-center items-center z-10 shrink-0 select-none">
+        <div class="w-7 h-7 rounded-full bg-white border border-purple-300 shadow-sm flex items-center justify-center text-purple-600">
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </div>
+        <div class="w-0.5 h-12 border-l border-dashed border-purple-400 my-1"></div>
+        <span class="text-[9px] font-bold text-purple-600 uppercase tracking-widest rotate-90 my-2">RECON</span>
+        <div class="w-0.5 h-12 border-l border-dashed border-purple-400 my-1"></div>
+      </div>
+
+      <!-- ================================================================= -->
+      <!-- [우측 카드] TIPTAP 와이어프레임 서식 (실제 크기 캔버스 & 보라색 슬롯) -->
+      <!-- ================================================================= -->
+      <div class="flex-1 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden text-slate-800">
+        
+        <!-- 카드 상단 바 -->
+        <div class="h-12 border-b border-slate-200 px-4 flex items-center justify-between bg-white shrink-0">
+          <div class="flex items-center space-x-2.5 min-w-0">
+            <div class="w-6 h-6 rounded bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+              <i data-lucide="file-code" class="w-3.5 h-3.5"></i>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+              TIPTAP 와이어프레임 서식
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">v1.0</span>
+            <h4 class="font-semibold text-xs text-slate-900 truncate ml-1">{{ scaffoldMeta.title || currentDocName }}</h4>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <!-- 뷰 모드 전환 토글 (Tiptap DOM vs 비전 실측 렌더) -->
+            <div class="flex items-center bg-slate-100 p-0.5 rounded-lg text-[10px] font-semibold text-slate-600">
+              <button
+                @click="viewMode = 'dom'"
+                class="px-2.5 py-1 rounded-md transition-all cursor-pointer"
+                :class="viewMode === 'dom' ? 'bg-white text-indigo-700 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+              >
+                Tiptap 서식
+              </button>
+              <button
+                @click="viewMode = 'vision'"
+                class="px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1"
+                :class="viewMode === 'vision' ? 'bg-white text-indigo-700 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-800'"
+              >
+                <i data-lucide="eye" class="w-3 h-3"></i> 비전 실측 검증
+              </button>
+            </div>
+
+            <button class="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs transition-all cursor-pointer" title="전체화면">
+              <i data-lucide="maximize-2" class="w-3.5 h-3.5"></i>
+            </button>
+            <button class="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 shadow-2xs transition-all cursor-pointer" title="삭제">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 카드 본문: A4 캔버스 에디터 뷰 -->
+        <div class="flex-1 overflow-auto p-6 flex justify-center items-start bg-slate-50 relative" ref="scaffoldCanvasContainer">
+          
+          <!-- 1) Tiptap Interactive DOM 뷰 -->
+          <div
+            v-if="viewMode === 'dom'"
+            class="paper-shadow border border-slate-200 rounded-sm bg-white scaffold-prose relative"
+            v-html="currentPageHtml"
+            @mouseover="handleHtmlMouseOver"
+            @mouseleave="handleHtmlMouseLeave"
+          >
+          </div>
+
+          <!-- 2) 비전 실측 렌더링 뷰 (PyMuPDF 래스터 PNG 이미지) -->
+          <div
+            v-else
+            class="paper-shadow border border-slate-200 rounded-sm bg-white relative"
+            :style="{ width: pageWidthPt + 'px', height: pageHeightPt + 'px' }"
+          >
+            <img
+              :src="scaffoldImageUrl"
+              alt="Scaffold Vision Render"
+              class="w-full h-full object-contain pointer-events-none select-none block"
+            />
+          </div>
+
+        </div>
+
+        <!-- 우측 카드 하단 푸터 (첨부 이미지와 100% 동일) -->
+        <div class="h-9 border-t border-slate-200 px-5 flex items-center justify-between text-xs text-slate-500 bg-slate-50 shrink-0">
+          <div class="flex items-center space-x-2">
+            <span class="text-slate-600 font-medium">연동: {{ currentDocName }}</span>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">EASY</span>
+          </div>
+          <div class="flex items-center space-x-4 text-[11px] text-indigo-600 font-medium">
+            <button @click="viewMode = viewMode === 'dom' ? 'vision' : 'dom'" class="hover:underline font-semibold cursor-pointer flex items-center gap-1">
+              <i data-lucide="eye" class="w-3 h-3"></i>
+              {{ viewMode === 'dom' ? '비전 검증 전환' : '서식 뷰 전환' }}
+            </button>
+            <button class="hover:underline flex items-center gap-1 cursor-pointer">
+              Playground 전체화면 <i data-lucide="external-link" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- 3. 우측 서랍(Drawer): 마크다운 전문 & 슬롯 매핑 테이블 -->
+    <div
+      v-show="isDrawerOpen"
+      class="fixed inset-y-0 right-0 w-96 bg-slate-900 border-l border-slate-800 z-50 shadow-2xl flex flex-col text-slate-200 transform transition-transform duration-200"
+    >
+      <div class="h-12 border-b border-slate-800 px-4 flex items-center justify-between bg-slate-950">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="code-2" class="w-4 h-4 text-purple-400"></i>
+          <span class="font-bold text-xs">Markdown & Slots ({{ slots.length }})</span>
+        </div>
+        <button @click="isDrawerOpen = false" class="p-1 hover:text-white cursor-pointer">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- 탭 바 -->
+      <div class="flex border-b border-slate-800 bg-slate-900/50 text-xs">
+        <button
+          @click="activeDrawerTab = 'md'"
+          class="flex-1 py-2 font-medium border-b-2 transition-colors cursor-pointer"
+          :class="activeDrawerTab === 'md' ? 'border-purple-500 text-purple-400 font-semibold' : 'border-transparent text-slate-400 hover:text-slate-200'"
+        >
+          마크다운 전문
+        </button>
+        <button
+          @click="activeDrawerTab = 'slots'"
+          class="flex-1 py-2 font-medium border-b-2 transition-colors cursor-pointer"
+          :class="activeDrawerTab === 'slots' ? 'border-purple-500 text-purple-400 font-semibold' : 'border-transparent text-slate-400 hover:text-slate-200'"
+        >
+          슬롯 매핑표 ({{ slots.length }})
+        </button>
+      </div>
+
+      <!-- 서랍 본문 -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <!-- Markdown 뷰 -->
+        <pre v-if="activeDrawerTab === 'md'" class="text-[11px] font-mono whitespace-pre-wrap leading-relaxed text-slate-300 bg-slate-950 p-3 rounded border border-slate-800 select-all">{{ markdownContent }}</pre>
+
+        <!-- Slots 테이블 뷰 -->
+        <div v-else class="space-y-2">
+          <div
+            v-for="s in slots"
+            :key="s.id"
+            class="p-2.5 rounded-lg border border-slate-800 bg-slate-950 text-xs space-y-1 hover:border-purple-500/50 transition-colors cursor-pointer"
+            :class="{ 'ring-1 ring-purple-500 bg-purple-950/20': hoveredSlot && hoveredSlot.id === s.id }"
+            @mouseenter="onSlotHover(s)"
+            @mouseleave="onSlotLeave"
+          >
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-purple-400">#{{ s.number }} {{ s.id }}</span>
+              <span class="text-[10px] font-mono text-slate-400">p.{{ s.pageNumber }}</span>
+            </div>
+            <div class="text-slate-300 font-medium">{{ s.label }}</div>
+            <div class="text-[10px] font-mono text-slate-500">box_2d: {{ JSON.stringify(s.box_2d) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vue 3 앱 로직 -->
+  <script>
+    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+    createApp({
+      setup() {
+        const documents = ref([]);
+        const selectedDocId = ref('');
+        const currentPage = ref(1);
+        const totalPages = ref(1);
+        const hasPdf = ref(true);
+
+        const scaffoldMeta = ref({});
+        const fullHtmlContent = ref('');
+        const markdownContent = ref('');
+        const slots = ref([]);
+        const outlineData = ref({});
+
+        const showOutlinePanel = ref(true);
+        const outlineFilter = ref('');
+        const isDrawerOpen = ref(false);
+        const activeDrawerTab = ref('md');
+
+        const viewMode = ref('dom'); // 'dom' | 'vision'
+        const hoveredSlot = ref(null);
+        const pageWidthPt = ref(595);
+        const pageHeightPt = ref(842);
+
+        // 현재 문서 표시명
+        const currentDocName = computed(() => {
+          const found = documents.value.find(d => d.id === selectedDocId.value);
+          return found ? found.filename : selectedDocId.value + '.pdf';
+        });
+
+        // 현재 페이지의 고해상도 PDF 렌더링 이미지 URL
+        const pageImageUrl = computed(() => {
+          if (!selectedDocId.value) return '';
+          return `/api/document/${encodeURIComponent(selectedDocId.value)}/page-image/${currentPage.value}?t=${Date.now()}`;
+        });
+
+        // 비전 검증용 실측 Scaffold 래스터 PNG 이미지 URL
+        const scaffoldImageUrl = computed(() => {
+          if (!selectedDocId.value) return '';
+          return `/api/document/${encodeURIComponent(selectedDocId.value)}/scaffold-image/${currentPage.value}?t=${Date.now()}`;
+        });
+
+        // 클라이언트 사이드 Tiptap 인라인 스타일 보강 하이드레이터
+        function clientHydrate(rawHtml) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(rawHtml, 'text/html');
+
+          // 1. scaffold-page
+          doc.querySelectorAll('div[data-type="scaffold-page"]').forEach(el => {
+            const w = el.getAttribute('data-w') || '595';
+            const h = el.getAttribute('data-h') || '842';
+            el.style.position = 'relative';
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.background = '#ffffff';
+            el.style.margin = '0 auto';
+            el.style.overflow = 'hidden';
+          });
+
+          // 2. scaffold-frame (표 컨테이너)
+          doc.querySelectorAll('div[data-type="scaffold-frame"]').forEach(el => {
+            const x = el.getAttribute('data-x') || '0';
+            const y = el.getAttribute('data-y') || '0';
+            const w = el.getAttribute('data-w') || '500';
+            const h = el.getAttribute('data-h') || '300';
+            el.style.position = 'absolute';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.boxSizing = 'border-box';
+          });
+
+          // 3. table
+          doc.querySelectorAll('table').forEach(tbl => {
+            tbl.style.width = '100%';
+            tbl.style.height = '100%';
+            tbl.style.borderCollapse = 'collapse';
+            tbl.style.tableLayout = 'fixed';
+            tbl.style.border = '1.5px solid #334155';
+            tbl.style.boxSizing = 'border-box';
+          });
+
+          // 4. tr[data-hpx]
+          doc.querySelectorAll('tr').forEach(tr => {
+            const hpx = tr.getAttribute('data-hpx');
+            if (hpx) {
+              tr.style.height = hpx + 'px';
+              tr.style.boxSizing = 'border-box';
+            }
+          });
+
+          // 5. th & td
+          doc.querySelectorAll('th, td').forEach(cell => {
+            const wpx = cell.getAttribute('data-wpx');
+            const fs = cell.getAttribute('data-fs') || '10';
+            const isFill = cell.getAttribute('data-fill') === 'true';
+
+            cell.style.border = '1px solid #334155';
+            cell.style.verticalAlign = 'middle';
+            cell.style.overflow = 'hidden';
+            cell.style.boxSizing = 'border-box';
+            if (wpx) cell.style.width = wpx + 'px';
+            if (fs) cell.style.fontSize = fs + 'px';
+
+            if (cell.tagName.toLowerCase() === 'th') {
+              cell.style.textAlign = 'center';
+              cell.style.fontWeight = '600';
+              cell.style.backgroundColor = '#f8fafc';
+              cell.style.color = '#1e293b';
+            } else {
+              cell.style.color = '#334155';
+            }
+
+            if (isFill) {
+              cell.style.padding = '0';
+            } else {
+              cell.style.padding = '2px 4px';
+            }
+          });
+
+          // 6. scaffold-block
+          doc.querySelectorAll('div[data-type="scaffold-block"]').forEach(el => {
+            const x = el.getAttribute('data-x') || '0';
+            const y = el.getAttribute('data-y') || '0';
+            const w = el.getAttribute('data-w') || '100';
+            const h = el.getAttribute('data-h') || '20';
+            const fs = el.getAttribute('data-fs') || '10';
+            const align = el.getAttribute('data-align') || 'left';
+            const variant = el.getAttribute('data-variant') || 'text';
+
+            el.style.position = 'absolute';
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.fontSize = fs + 'px';
+            el.style.lineHeight = '1';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.whiteSpace = 'nowrap';
+            el.style.overflow = 'hidden';
+            el.style.boxSizing = 'border-box';
+
+            if (align === 'right') el.style.justifyContent = 'flex-end';
+            else if (align === 'center') el.style.justifyContent = 'center';
+            else el.style.justifyContent = 'flex-start';
+
+            if (variant === 'rule') {
+              el.style.backgroundColor = '#64748b';
+              el.style.pointerEvents = 'none';
+            } else if (variant === 'image') {
+              el.style.border = '1px dashed #cbd5e1';
+              el.style.backgroundColor = '#f8fafc';
+            }
+          });
+
+          return doc.body.innerHTML;
+        }
+
+        // 현재 페이지에 해당하는 Tiptap HTML 파싱
+        const currentPageHtml = computed(() => {
+          if (!fullHtmlContent.value) return '<div class="p-8 text-center text-slate-400">와이어프레임 데이터가 없습니다.</div>';
+          
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(fullHtmlContent.value, 'text/html');
+          const pages = doc.querySelectorAll('div[data-type="scaffold-page"]');
+          
+          let targetHtml = fullHtmlContent.value;
+          if (pages.length > 0) {
+            for (let p of pages) {
+              const pnum = parseInt(p.getAttribute('data-page') || '1', 10);
+              if (pnum === currentPage.value) {
+                targetHtml = p.outerHTML;
+                break;
+              }
+            }
+            if (targetHtml === fullHtmlContent.value) {
+              targetHtml = pages[0].outerHTML;
+            }
+          }
+
+          return clientHydrate(targetHtml);
+        });
+
+        // Outline 평탄화 목록
+        const outlineNodes = computed(() => {
+          const list = [];
+          function traverse(items) {
+            if (!items) return;
+            for (let it of items) {
+              list.push(it);
+              if (it.children) traverse(it.children);
+              if (it.elements) {
+                for (let el of it.elements) list.push(el);
+              }
+            }
+          }
+          traverse(outlineData.value.outlines || []);
+          return list;
+        });
+
+        // 필터링된 아웃라인
+        const filteredOutlineNodes = computed(() => {
+          if (!outlineFilter.value.trim()) return outlineNodes.value;
+          const q = outlineFilter.value.toLowerCase();
+          return outlineNodes.value.filter(n => {
+            const title = (n.title || n.label || '').toLowerCase();
+            return title.includes(q);
+          });
+        });
+
+        // 문서 목록 로드
+        async function fetchDocuments() {
+          try {
+            const res = await fetch('/api/documents');
+            const data = await res.json();
+            documents.value = data.documents || [];
+            if (documents.value.length > 0) {
+              selectedDocId.value = documents.value[0].id;
+              await loadDocument();
+            }
+          } catch (e) {
+            console.error('Failed to list documents:', e);
+          }
+        }
+
+        // 문서 데이터 로드
+        async function loadDocument() {
+          if (!selectedDocId.value) return;
+          try {
+            const res = await fetch(`/api/document/${encodeURIComponent(selectedDocId.value)}/reconstruct`);
+            if (!res.ok) throw new Error('API request failed');
+            const data = await res.json();
+
+            outlineData.value = data.outline || {};
+            const sc = data.scaffold || {};
+            scaffoldMeta.value = sc.meta || {};
+            fullHtmlContent.value = sc.htmlContent || '';
+            markdownContent.value = sc.markdownContent || '';
+            slots.value = sc.slots || [];
+
+            totalPages.value = sc.meta?.totalPages || 1;
+            currentPage.value = 1;
+
+            const docMeta = documents.value.find(d => d.id === selectedDocId.value);
+            hasPdf.value = docMeta ? docMeta.has_pdf : true;
+
+            await nextTick();
+            lucide.createIcons();
+          } catch (e) {
+            console.error('Failed to load document:', e);
+          }
+        }
+
+        function nextPage() {
+          if (currentPage.value < totalPages.value) {
+            currentPage.value++;
+            nextTick(() => lucide.createIcons());
+          }
+        }
+
+        function prevPage() {
+          if (currentPage.value > 1) {
+            currentPage.value--;
+            nextTick(() => lucide.createIcons());
+          }
+        }
+
+        function toggleDrawer() {
+          isDrawerOpen.value = !isDrawerOpen.value;
+          nextTick(() => lucide.createIcons());
+        }
+
+        function onImageLoaded(e) {
+          // 이미지의 원래 크기(pt) 반영
+          if (e.target.naturalWidth && e.target.naturalHeight) {
+            // A4 비율 기준
+            pageWidthPt.value = 595;
+            pageHeightPt.value = Math.round(595 * (e.target.naturalHeight / e.target.naturalWidth));
+          }
+        }
+
+        // 슬롯 [ymin, xmin, ymax, xmax] -> CSS 위치 (%) 변환
+        function getSlotBBoxStyle(box) {
+          if (!box || box.length !== 4) return {};
+          const [ymin, xmin, ymax, xmax] = box;
+          return {
+            top: (ymin / 10) + '%',
+            left: (xmin / 10) + '%',
+            width: ((xmax - xmin) / 10) + '%',
+            height: ((ymax - ymin) / 10) + '%',
+          };
+        }
+
+        function onSlotHover(slot) {
+          hoveredSlot.value = slot;
+          syncHighlightInEditor(slot.id, true);
+        }
+
+        function onSlotLeave() {
+          if (hoveredSlot.value) {
+            syncHighlightInEditor(hoveredSlot.value.id, false);
+          }
+          hoveredSlot.value = null;
+        }
+
+        // Tiptap 에디터 DOM 이벤트 감지
+        function handleHtmlMouseOver(e) {
+          const slotEl = e.target.closest('span[data-type="scaffold-slot"]');
+          if (slotEl) {
+            const slotId = slotEl.getAttribute('data-slot-id');
+            const found = slots.value.find(s => s.id === slotId);
+            if (found) {
+              hoveredSlot.value = found;
+              slotEl.classList.add('is-sync-hovered');
+            }
+          }
+        }
+
+        function handleHtmlMouseLeave(e) {
+          const slotEl = e.target.closest('span[data-type="scaffold-slot"]');
+          if (slotEl) {
+            slotEl.classList.remove('is-sync-hovered');
+          }
+          hoveredSlot.value = null;
+        }
+
+        function syncHighlightInEditor(slotId, active) {
+          const el = document.querySelector(`span[data-slot-id="${slotId}"]`);
+          if (el) {
+            el.classList.toggle('is-sync-hovered', active);
+          }
+        }
+
+        function selectOutlineNode(node) {
+          if (node.page) {
+            currentPage.value = node.page;
+          }
+          if (node.box_2d) {
+            hoveredSlot.value = {
+              id: node.id,
+              number: 0,
+              label: node.title || node.label || '노드',
+              box_2d: node.box_2d,
+              pageNumber: node.page,
+            };
+          }
+        }
+
+        function isNodeActive(node) {
+          return hoveredSlot.value && hoveredSlot.value.id === node.id;
+        }
+
+        onMounted(() => {
+          fetchDocuments();
+          lucide.createIcons();
+        });
+
+        return {
+          documents,
+          selectedDocId,
+          currentPage,
+          totalPages,
+          hasPdf,
+          scaffoldMeta,
+          fullHtmlContent,
+          markdownContent,
+          slots,
+          currentDocName,
+          pageImageUrl,
+          currentPageHtml,
+          outlineNodes,
+          filteredOutlineNodes,
+          showOutlinePanel,
+          outlineFilter,
+          isDrawerOpen,
+          viewMode,
+          scaffoldImageUrl,
+          hoveredSlot,
+          pageWidthPt,
+          pageHeightPt,
+          loadDocument,
+          nextPage,
+          prevPage,
+          toggleDrawer,
+          onImageLoaded,
+          getSlotBBoxStyle,
+          onSlotHover,
+          onSlotLeave,
+          handleHtmlMouseOver,
+          handleHtmlMouseLeave,
+          selectOutlineNode,
+          isNodeActive,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

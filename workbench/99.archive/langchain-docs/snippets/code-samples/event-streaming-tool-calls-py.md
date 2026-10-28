@@ -1,0 +1,28 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/event-streaming-tool-calls-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+stream = agent.stream_events(input, version="v3")
+
+coordinator_tool_names: list[str] = []
+for call in stream.tool_calls:
+    print("[coordinator tool]", call.tool_name, call.input)
+    print(call.completed, call.error)
+    coordinator_tool_names.append(call.tool_name)
+
+for subagent in stream.subagents:
+    for call in subagent.tool_calls:
+        print(f"[{subagent.name} tool]", call.tool_name, call.input)
+        for delta in call.output_deltas:
+            print(delta, end="", flush=True)
+
+        if call.completed and call.error is None:
+            print(call.output)
+        elif call.error is not None:
+            print(call.error)
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/c3a01f68-bece-422d-add0-703090a068a5/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

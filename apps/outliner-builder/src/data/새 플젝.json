@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "id": "7x4xOM1p1DOo",
+  "title": "새 플젝",
+  "rootNodes": [
+    {
+      "id": "V6Ey5GsNgadP",
+      "text": "새 플젝 개요",
+      "children": [
+        {
+          "id": "NocBO2r7cxU6",
+          "text": "핵심 아이디어와 생각의 흐름을 여기에 작성하세요",
+          "children": [],
+          "isFolded": false,
+          "createdAt": 1791779925149,
+          "updatedAt": 1791780669497
+        },
+        {
+          "id": "7h9tALkEF9L3",
+          "text": "이거이는 안내보내나?",
+          "children": [],
+          "createdAt": 1791780669498,
+          "updatedAt": 1791780674027
+        }
+      ],
+      "isFolded": false,
+      "createdAt": 1791779925149,
+      "updatedAt": 1791779925149
+    }
+  ],
+  "defaultView": "bullets",
+  "createdAt": 1791779925149,
+  "updatedAt": 1791780674027
+}

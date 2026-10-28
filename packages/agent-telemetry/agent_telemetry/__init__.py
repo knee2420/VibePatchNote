@@ -1,0 +1,58 @@
+"""Agent Telemetry & Tracing Library (Pure Host-Independent Contracts)"""
+
+from agent_telemetry.collector import (
+    StepCollector,
+    StepScope,
+    current_collector,
+    current_scope,
+    traceable,
+)
+from agent_telemetry.contracts import (
+    ExecutionProtocol,
+    FailureReason,
+    FallbackChainSummary,
+    ModelAttemptRecord,
+    PipelineTelemetry,
+    SpanError,
+    SpanMetadata,
+    SpanPhase,
+    SpanRecord,
+    SpanSource,
+    SpanStatus,
+    SpanType,
+    SpanUsage,
+    StageSnapshotRecord,
+    caller_source,
+    model_source,
+    source_of,
+    usage_from_product_dict,
+    usage_to_product_dict,
+)
+
+__all__ = [
+    "StepCollector",
+    "StepScope",
+    "traceable",
+    "current_collector",
+    "current_scope",
+
+    "SpanType",
+    "SpanStatus",
+    "SpanPhase",
+    "ExecutionProtocol",
+    "FailureReason",
+    "SpanUsage",
+    "SpanError",
+    "SpanMetadata",
+    "SpanRecord",
+    "SpanSource",
+    "source_of",
+    "caller_source",
+    "model_source",
+    "ModelAttemptRecord",
+    "FallbackChainSummary",
+    "StageSnapshotRecord",
+    "PipelineTelemetry",
+    "usage_to_product_dict",
+    "usage_from_product_dict",
+]

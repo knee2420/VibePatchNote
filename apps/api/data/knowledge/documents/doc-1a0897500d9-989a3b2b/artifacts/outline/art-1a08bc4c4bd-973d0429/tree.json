@@ -1,0 +1,22 @@
+{
+  "documentTitle": "11월 디딤돌 회의록.pdf",
+  "totalPages": 2,
+  "outlines": [
+    {
+      "id": "out-root",
+      "level": 1,
+      "title": "source.pdf",
+      "type": "key_value",
+      "page": 1,
+      "box_2d": [
+        50,
+        50,
+        950,
+        950
+      ],
+      "purpose": "문서 전체 (폴백)",
+      "elements": [],
+      "children": []
+    }
+  ]
+}

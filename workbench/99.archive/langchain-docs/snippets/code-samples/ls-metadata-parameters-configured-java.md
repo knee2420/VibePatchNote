@@ -1,0 +1,34 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/ls-metadata-parameters-configured-java.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```java Java
+import com.langchain.smith.tracing.RunType;
+import com.langchain.smith.tracing.TraceConfig;
+import com.langchain.smith.tracing.Tracing;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+Map<String, Object> metadata = new HashMap<>();
+metadata.put("ls_provider", "openai");
+metadata.put("ls_model_name", "gpt-5.5");
+metadata.put("ls_temperature", 0.7);
+metadata.put("ls_max_tokens", 4096);
+metadata.put("ls_stop", Collections.singletonList("END"));
+
+Map<String, Object> invocationParams = new HashMap<>();
+invocationParams.put("top_p", 0.9);
+invocationParams.put("frequency_penalty", 0.5);
+metadata.put("ls_invocation_params", invocationParams);
+
+Function<List<Map<String, String>>, String> myConfiguredLlm =
+    Tracing.traceFunction(
+        messages -> callLlm(messages),
+        TraceConfig.builder()
+            .runType(RunType.LLM)
+            .metadata(metadata)
+            .build());
+```

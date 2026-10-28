@@ -1,0 +1,26 @@
+{
+  "artifactId": "art-1a098c8e944-eb9151b5",
+  "kind": "outline",
+  "docId": "doc-1a0897500d9-989a3b2b",
+  "createdAt": "2026-09-13T03:21:38.884794Z",
+  "status": "SUCCESS",
+  "runId": "run-1a098c8a37f-62d9046c",
+  "traceId": "run-1a098c8a37f-62d9046c",
+  "model": "gemini-3.5-flash-lite",
+  "effort": null,
+  "promptHash": "e326164dd1695a7e",
+  "schemaHash": "50e68ddd8fcd3300",
+  "engineVersion": "0.1.0",
+  "cost": {
+    "input_tokens": 6896,
+    "output_tokens": 3538,
+    "thinking_tokens": 0,
+    "cache_read_tokens": 0,
+    "total_tokens": 10434
+  },
+  "summary": {
+    "totalPages": 2,
+    "totalOutlines": 16,
+    "totalElements": 14
+  }
+}

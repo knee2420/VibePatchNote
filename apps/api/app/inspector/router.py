@@ -1,0 +1,132 @@
+"""인스펙터 라우터 (관측 콘솔 전용 API)."""
+from typing import Annotated, Optional
+
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app.bootstrap.container import Container
+from app.inspector.schemas import (
+    MatrixResponse,
+    RunDetailResponse,
+    RunSummaryResponse,
+    SourceCodeResponse,
+    WorkflowInfo,
+)
+from app.inspector.service import InspectorService
+
+router = APIRouter()
+
+InspectorServiceDep = Annotated[
+    InspectorService,
+    Depends(Provide[Container.inspector_service]),
+]
+
+
+@router.get("/runs", response_model=list[RunSummaryResponse])
+@inject
+def list_runs(
+    service: InspectorServiceDep,
+    limit: int = Query(50, ge=1, le=200),
+    doc_id: Optional[str] = Query(None),
+):
+    """실행(Run) 이력 목록을 반환합니다."""
+    return service.list_runs(limit=limit, doc_id=doc_id)
+
+
+@router.get("/runs/{run_id}", response_model=RunDetailResponse)
+@inject
+def get_run(
+    run_id: str,
+    service: InspectorServiceDep,
+):
+    """특정 Run의 전체 원장(ledger)과 단계별 스냅샷을 반환합니다."""
+    run_detail = service.get_run(run_id)
+    if not run_detail:
+        raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found.")
+    return run_detail
+
+
+@router.delete("/runs/{run_id}")
+@inject
+def delete_run(
+    run_id: str,
+    service: InspectorServiceDep,
+):
+    """특정 Run의 이력을 영구 삭제합니다."""
+    success = service.delete_run(run_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Run '{run_id}' not found or cannot be deleted.")
+    return {"status": "DELETED", "run_id": run_id}
+
+
+@router.get("/runs/{run_id}/payloads/{digest}")
+@inject
+def get_payload(
+    run_id: str,
+    digest: str,
+    service: InspectorServiceDep,
+):
+    """스팬 페이로드의 대용량 본문을 반환합니다.
+
+    원장에는 포인터와 미리보기만 실린다. 본문을 상세 응답에 다시 끼워 넣으면
+    응답이 수 MB 가 되므로, 필요한 카드를 펼칠 때만 여기로 받아 간다.
+    """
+    content = service.get_payload(run_id, digest)
+    if content is None:
+        raise HTTPException(status_code=404, detail="Payload not found.")
+    return {"digest": digest, "content": content}
+
+
+@router.get("/workflows", response_model=list[WorkflowInfo])
+@inject
+def list_workflows(
+    service: InspectorServiceDep,
+):
+    """시스템이 실행한 적 있는 워크플로우와 그 단계 구조를 반환합니다.
+
+    손으로 쓴 매니페스트가 아니라 **기록된 실행에서 도출**한다. 매니페스트를
+    따로 관리하면 파이프라인이 바뀌어도 매니페스트는 안 바뀌고, 어긋나도
+    아무도 모른다 — 방금 없앤 하드코딩이 다른 형태로 돌아오는 셈이다.
+    """
+    return service.list_workflows()
+
+
+@router.get("/matrix", response_model=MatrixResponse)
+@inject
+def get_matrix(
+    service: InspectorServiceDep,
+):
+    """모델 지원 레지스트리 및 라우팅 상태를 반환합니다."""
+    return service.get_matrix()
+
+
+@router.get("/source", response_model=SourceCodeResponse)
+@inject
+def get_source_code(
+    service: InspectorServiceDep,
+    module: Optional[str] = Query(
+        None,
+        description="import 가능한 모듈 이름 (예: scaffold_engine.outline.pipeline). 가장 정확하다",
+    ),
+    file_path: Optional[str] = Query(
+        None,
+        description="저장소 루트 기준 **정확 경로**. 파일명만 주는 탐색은 지원하지 않는다",
+    ),
+    symbol: Optional[str] = Query(None, description="클래스명 또는 Class.method"),
+):
+    """지정된 코드 지점의 원본을 반환합니다.
+
+    `module` 과 `file_path` 중 하나는 있어야 한다. 둘 다 있으면 `module` 이 이긴다 —
+    import 해석은 정확하고, 경로는 리팩터링에 뒤처진다.
+    """
+    if not module and not file_path:
+        raise HTTPException(status_code=422, detail="module 또는 file_path 중 하나가 필요합니다.")
+
+    res = service.get_source_code(file_path=file_path, symbol=symbol, module=module)
+    if not res:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Source not found (module={module!r}, file_path={file_path!r}, symbol={symbol!r})",
+        )
+    return res
+

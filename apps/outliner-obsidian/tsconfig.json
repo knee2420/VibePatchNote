@@ -1,0 +1,9 @@
+{
+  "extends": "../../packages/config/tsconfig/react-library.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+    "types": ["vite/client", "node"],
+    "declaration": false
+  },
+  "include": ["src", "vite.config.ts"]
+}

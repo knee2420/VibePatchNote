@@ -1,0 +1,37 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/streaming-llm-tokens-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+current_source = ""
+
+for chunk in agent.stream(
+    {"messages": [{"role": "user", "content": "Research quantum computing advances"}]},
+    stream_mode="messages",
+    subgraphs=True,
+    version="v2",
+):
+    if chunk["type"] == "messages":
+        token, metadata = chunk["data"]
+
+        # Check if this event came from a subagent (namespace contains "tools:")
+        is_subagent = any(s.startswith("tools:") for s in chunk["ns"])
+
+        if is_subagent:
+            # Token from a subagent
+            subagent_ns = next(s for s in chunk["ns"] if s.startswith("tools:"))
+            if subagent_ns != current_source:
+                print(f"\n\n--- [subagent: {subagent_ns}] ---")
+                current_source = subagent_ns
+            if token.content:
+                print(token.content, end="", flush=True)
+        else:
+            # Token from the main agent
+            if "main" != current_source:
+                print("\n\n--- [main agent] ---")
+                current_source = "main"
+            if token.content:
+                print(token.content, end="", flush=True)
+
+print()
+```

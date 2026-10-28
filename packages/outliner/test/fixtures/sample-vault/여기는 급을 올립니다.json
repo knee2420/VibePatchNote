@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "id": "VJu3C6Lnpi7V",
+  "title": "여기는 급을 올립니다",
+  "parentProjectId": null,
+  "rootNodes": [
+    {
+      "id": "BnzLz0KXS7gl",
+      "text": "접어준다매",
+      "children": [],
+      "createdAt": 1791722517823,
+      "updatedAt": 1791772028612
+    },
+    {
+      "id": "cEDPrsDQ6tc4",
+      "text": "너그 대장 우대갔노",
+      "children": [
+        {
+          "id": "PIMjLCtjFwNp",
+          "text": "흠 이쪽 불릿도 조금 사양이 잘못됐네",
+          "children": [],
+          "createdAt": 1791772053312,
+          "updatedAt": 1791772064223
+        },
+        {
+          "id": "xd3kGFJTqNdr",
+          "text": "",
+          "children": [],
+          "createdAt": 1791772064224,
+          "updatedAt": 1791772064224
+        }
+      ],
+      "createdAt": 1791772028612,
+      "updatedAt": 1791772053312,
+      "isFolded": false
+    }
+  ],
+  "defaultView": "bullets",
+  "meta": {
+    "description": "프로젝트 '메인 기획'에서 별도 독립 프로젝트로 추출됨",
+    "tags": [
+      "standalone"
+    ]
+  },
+  "createdAt": 1791772019858,
+  "updatedAt": 1791772064224
+}

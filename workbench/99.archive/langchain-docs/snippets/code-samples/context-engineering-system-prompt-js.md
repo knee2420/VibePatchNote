@@ -1,0 +1,75 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/context-engineering-system-prompt-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+<CodeGroup>
+    ```ts Google
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "google-genai:gemini-3.6-flash",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts OpenAI
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "openai:gpt-5.5",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts Anthropic
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "anthropic:claude-sonnet-4-6",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts OpenRouter
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "openrouter:openrouter:z-ai/glm-5.2",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts Fireworks
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "fireworks:accounts/fireworks/models/glm-5p2",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts Baseten
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "baseten:zai-org/GLM-5.2",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+
+    ```ts Ollama
+    import { createDeepAgent } from "deepagents";
+    
+    const agent = await createDeepAgent({
+      model: "ollama:north-mini-code-1.0",
+      systemPrompt: `You are a research assistant specializing in scientific literature.
+      Always cite sources. Use subagents for parallel research on different topics.`,
+    });
+    ```
+</CodeGroup>

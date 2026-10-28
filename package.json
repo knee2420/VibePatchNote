@@ -1,0 +1,17 @@
+{
+  "name": "document-builder-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:inspector": "turbo run dev --filter=@vibe/inspector",
+    "dev:outliner": "turbo run dev --filter=@vibe/outliner-builder",
+    "dev:tuning": "python workbench/05.llm_tuning/studio/app.py",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "latest"
+  },
+  "packageManager": "pnpm@10.15.0"
+}

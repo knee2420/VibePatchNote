@@ -1,16 +1,49 @@
 # Dependencies
-frontend/node_modules/
-frontend/dist/
-frontend/dist-ssr/
-frontend/*.local
+node_modules/
+.pnpm-store/
+*.egg-info/
+venv/
+__pycache__/
 
-# Python Virtualenv and Cache
-backend/venv/
-backend/__pycache__/
-backend/*.py[cod]
-backend/*$py.class
-backend/.pytest_cache/
-backend/.env
+# Build / Output
+dist/
+dist-ssr/
+build/
+.turbo/
+*.tsbuildinfo
+scratch/*
+
+# Python & Pytest Temp
+*.py[cod]
+*$py.class
+**/*pytest_tmp*
+**/*pytest_temp*
+**/*pytest-tmp*
+**/*pytest-temp*
+**/.pytest_cache/
+**/.pytest_tmp/
+**/.pytest_temp/
+**/.pytest-tmp/
+**/.pytest-temp/
+**/.tmp_pytest*
+**/.pytest_temp*
+**/.pytest_tmp*
+apps/api/.import_linter_cache/
+apps/api/.ruff_cache/
+.env
+.env.*
+!.env.example
+
+# 런타임 데이터. 수명주기 등급이 곧 취급 방식이다.
+#   data/   원본·산출물·실행상태 — 지우면 복구 불가. 커밋하지 않고 백업 대상.
+#   cache/  결정적 파생        — 지워도 재계산으로 복구된다.
+#   state/  운영 상태·로그      — 지워도 무해.
+#   config/ 사용자 설정        — 사용자 선택이므로 커밋하지 않는다.
+apps/api/data/
+apps/api/cache/
+apps/api/state/
+apps/api/config/
+apps/api/.backup-pre-v2/
 
 # IDE / OS
 .DS_Store
@@ -18,3 +51,12 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Vite
+*.local
+
+# 구 레이아웃 잔여물 (v2 마이그레이션 이전 경로)
+apps/api/logs/
+apps/api/uploads/
+apps/api/storage/
+apps/api/workspaces_db.json

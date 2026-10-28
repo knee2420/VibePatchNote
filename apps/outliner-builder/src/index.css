@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* 편집 화면(@vibe/outliner/editor)의 Tailwind 클래스도 함께 찾는다. */
+@source "../../../packages/outliner/src/editor";
+@import "@vibe/outliner/styles.css";
+
+/* 1. Obsidian Design Tokens & Standard Variables */
+@import "./shared/styles/tokens.css";
+
+/* 2. What-s-in-my-head Obsidian Vault Snippets */
+@import "./shared/styles/obsidian/maruburi.css";
+@import "./shared/styles/obsidian/author-chips.css";
+@import "./shared/styles/obsidian/status-chips.css";
+@import "./shared/styles/obsidian/heading-link.css";
+@import "./shared/styles/obsidian/wide-page.css";
+@import "./shared/styles/obsidian/library-cards.css";
+
+@layer base {
+  body {
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-interface-theme);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+/* 스크롤바 미니멀 커스텀 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

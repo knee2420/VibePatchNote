@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "id": "XHdQQ8UGiY3a",
+  "title": "메인 기획",
+  "rootNodes": [
+    {
+      "id": "VyX1CKUyYuj9",
+      "text": "메인 기획 개요",
+      "children": [
+        {
+          "id": "H8lGiEBQKQpy",
+          "text": "핵심 아이디어와 생각의 흐름을 여기에 작성하세요",
+          "children": [],
+          "isFolded": false,
+          "createdAt": 1791720096143,
+          "updatedAt": 1791720102897
+        },
+        {
+          "id": "S0znniZITFQB",
+          "text": "신규 추가합니다",
+          "children": [
+            {
+              "id": "8SFgAyc2rVDO",
+              "text": "하나 더 추가용",
+              "children": [],
+              "createdAt": 1791772167772,
+              "updatedAt": 1791772172694
+            }
+          ],
+          "isFolded": true,
+          "viewMode": "bullets",
+          "createdAt": 1791720102898,
+          "updatedAt": 1791785808088
+        },
+        {
+          "id": "U9qN6unttoBZ",
+          "text": "호옹이 ",
+          "children": [],
+          "isFolded": false,
+          "note": "입력해봅니다\n다음 줄도",
+          "createdAt": 1791721561954,
+          "updatedAt": 1791785678058
+        },
+        {
+          "id": "qnumESfSiuwt",
+          "text": "티토리티토리로리리",
+          "children": [],
+          "createdAt": 1791720107209,
+          "updatedAt": 1791860998478
+        },
+        {
+          "id": "qeYrOhHsw74U",
+          "text": "그리고 여기도 씁니다",
+          "children": [],
+          "createdAt": 1791720107364,
+          "updatedAt": 1791873300137
+        },
+        {
+          "id": "E7h7neLhg6XQ",
+          "text": "하위에 씁니다",
+          "children": [],
+          "createdAt": 1791720117758,
+          "updatedAt": 1791873301487
+        },
+        {
+          "id": "e3glwFsez8me",
+          "text": "그렇습니다 메인은 아니지요",
+          "children": [],
+          "isFolded": false,
+          "createdAt": 1791720121643,
+          "updatedAt": 1791860994381
+        },
+        {
+          "id": "BL9i5aVM6NmS",
+          "text": "여기는 급을 올립니다",
+          "children": [],
+          "isFolded": false,
+          "createdAt": 1791720111159,
+          "updatedAt": 1791808591900
+        }
+      ],
+      "isFolded": false,
+      "createdAt": 1791720096143,
+      "updatedAt": 1791720096143
+    },
+    {
+      "id": "NqGG9pePcIp7",
+      "text": "추가되는군",
+      "children": [],
+      "createdAt": 1791771987943,
+      "updatedAt": 1791771992677
+    },
+    {
+      "id": "dnD9gva8EuR8",
+      "text": "하위를 추가해봅니다",
+      "children": [
+        {
+          "id": "xABgApOnIpuT",
+          "text": "하위에 하위 입니다",
+          "children": [],
+          "createdAt": 1791778043665,
+          "updatedAt": 1791850397573
+        },
+        {
+          "id": "mDUOa5PyRROd",
+          "text": "딘하위선",
+          "children": [],
+          "createdAt": 1791778050749,
+          "updatedAt": 1791873299717
+        },
+        {
+          "id": "INjY9OkAlChI",
+          "text": "압살",
+          "children": [],
+          "createdAt": 1791780980776,
+          "updatedAt": 1791861000207
+        }
+      ],
+      "isFolded": false,
+      "createdAt": 1791778039213,
+      "updatedAt": 1791852342510,
+      "ref": {
+        "type": "project",
+        "targetProjectId": "oczFo1KKbI5T",
+        "displayText": "하위를 추가해봅니다",
+        "relation": "child"
+      }
+    }
+  ],
+  "defaultView": "bullets",
+  "createdAt": 1791720096143,
+  "updatedAt": 1791873301487
+}

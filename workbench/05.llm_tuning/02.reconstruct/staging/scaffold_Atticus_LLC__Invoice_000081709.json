@@ -1,0 +1,279 @@
+{
+  "meta": {
+    "id": "scaffold-Atticus LLC_ Invoice 000081709",
+    "title": "Atticus LLC_ Invoice 000081709.pdf 와이어프레임 서식",
+    "targetDoc": "Atticus LLC_ Invoice 000081709.pdf",
+    "sourcePdfFileName": "Atticus LLC_ Invoice 000081709.pdf",
+    "description": "Tiptap 정밀 와이어프레임 서식 (슬롯 22개)",
+    "difficulty": "normal",
+    "totalPages": 1
+  },
+  "htmlContent": "<div data-type=\"scaffold-page\" data-w=\"595\" data-h=\"842\" data-page=\"1\" class=\"scaffold-page\" style=\"position:relative;width:595px;height:842px;background:#ffffff;overflow:hidden;margin:0 auto;\">\n<div data-type=\"scaffold-block\" data-bid=\"L0\" data-x=\"463.0\" data-y=\"29.7\" data-w=\"68.6\" data-h=\"9.0\" data-fs=\"7.8\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:463.0px;top:29.7px;width:68.6px;height:9.0px;font-size:7.8px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s1\" data-mapping-num=\"1\" data-placeholder=\"발행 일자\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L1\" data-x=\"469.6\" data-y=\"47.2\" data-w=\"64.7\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:469.6px;top:47.2px;width:64.7px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\">Company info</div>\n<div data-type=\"scaffold-block\" data-bid=\"L2\" data-x=\"473.8\" data-y=\"62.8\" data-w=\"60.5\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:473.8px;top:62.8px;width:60.5px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s2\" data-mapping-num=\"2\" data-placeholder=\"공급자 회사명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"img3\" data-x=\"60.3\" data-y=\"69.9\" data-w=\"258.1\" data-h=\"59.4\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"image\" class=\"scaffold-block scaffold-block-image\" style=\"position:absolute;left:60.3px;top:69.9px;width:258.1px;height:59.4px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;border:1px dashed #cbd5e1;background:#f8fafc\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s3\" data-mapping-num=\"3\" data-placeholder=\"회사 로고\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L4\" data-x=\"399.4\" data-y=\"74.8\" data-w=\"135.1\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:399.4px;top:74.8px;width:135.1px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s4\" data-mapping-num=\"4\" data-placeholder=\"공급자 상세주소\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L5\" data-x=\"493.6\" data-y=\"86.8\" data-w=\"40.9\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:493.6px;top:86.8px;width:40.9px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s5\" data-mapping-num=\"5\" data-placeholder=\"공급자 도시명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L6\" data-x=\"454.0\" data-y=\"98.8\" data-w=\"80.5\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:454.0px;top:98.8px;width:80.5px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s6\" data-mapping-num=\"6\" data-placeholder=\"공급자 주 및 우편번호\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L7\" data-x=\"472.0\" data-y=\"110.8\" data-w=\"62.0\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:472.0px;top:110.8px;width:62.0px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s7\" data-mapping-num=\"7\" data-placeholder=\"공급자 국가명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L8\" data-x=\"355.6\" data-y=\"125.6\" data-w=\"178.8\" data-h=\"7.7\" data-fs=\"6.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:355.6px;top:125.6px;width:178.8px;height:7.7px;font-size:6.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s8\" data-mapping-num=\"8\" data-placeholder=\"공급자 세금 등록번호\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L9\" data-x=\"444.4\" data-y=\"147.4\" data-w=\"90.1\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:444.4px;top:147.4px;width:90.1px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s9\" data-mapping-num=\"9\" data-placeholder=\"인보이스 번호\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L10\" data-x=\"60.3\" data-y=\"182.2\" data-w=\"46.1\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:60.3px;top:182.2px;width:46.1px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\">Billing info</div>\n<div data-type=\"scaffold-block\" data-bid=\"L11\" data-x=\"481.6\" data-y=\"182.2\" data-w=\"53.0\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:481.6px;top:182.2px;width:53.0px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\">Total (USD)</div>\n<div data-type=\"scaffold-block\" data-bid=\"L12\" data-x=\"464.2\" data-y=\"194.2\" data-w=\"70.1\" data-h=\"19.5\" data-fs=\"16.8\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:464.2px;top:194.2px;width:70.1px;height:19.5px;font-size:16.8px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s10\" data-mapping-num=\"10\" data-placeholder=\"청구 총금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L13\" data-x=\"60.3\" data-y=\"197.8\" data-w=\"34.3\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:60.3px;top:197.8px;width:34.3px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s11\" data-mapping-num=\"11\" data-placeholder=\"고객사명/조직명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L14\" data-x=\"60.3\" data-y=\"209.8\" data-w=\"60.5\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:60.3px;top:209.8px;width:60.5px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s12\" data-mapping-num=\"12\" data-placeholder=\"고객 성명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L15\" data-x=\"60.3\" data-y=\"221.8\" data-w=\"52.3\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:60.3px;top:221.8px;width:52.3px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s13\" data-mapping-num=\"13\" data-placeholder=\"고객 주소\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L16\" data-x=\"60.3\" data-y=\"233.8\" data-w=\"58.1\" data-h=\"11.2\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:60.3px;top:233.8px;width:58.1px;height:11.2px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s14\" data-mapping-num=\"14\" data-placeholder=\"고객 국가명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L17\" data-x=\"461.8\" data-y=\"216.9\" data-w=\"72.8\" data-h=\"9.1\" data-fs=\"7.8\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:461.8px;top:216.9px;width:72.8px;height:9.1px;font-size:7.8px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s15\" data-mapping-num=\"15\" data-placeholder=\"결제 수단\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L18\" data-x=\"63.3\" data-y=\"292.1\" data-w=\"52.9\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:63.3px;top:292.1px;width:52.9px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\">Description</div>\n<div data-type=\"scaffold-block\" data-bid=\"L19\" data-x=\"423.4\" data-y=\"292.1\" data-w=\"37.4\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:423.4px;top:292.1px;width:37.4px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\">Amount</div>\n<div data-type=\"scaffold-block\" data-bid=\"L20\" data-x=\"509.2\" data-y=\"292.1\" data-w=\"23.1\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:509.2px;top:292.1px;width:23.1px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\">Total</div>\n<div data-type=\"scaffold-block\" data-bid=\"L21\" data-x=\"63.3\" data-y=\"318.5\" data-w=\"32.0\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:63.3px;top:318.5px;width:32.0px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s16\" data-mapping-num=\"16\" data-placeholder=\"품목명\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L22\" data-x=\"421.6\" data-y=\"318.5\" data-w=\"39.1\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:421.6px;top:318.5px;width:39.1px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s17\" data-mapping-num=\"17\" data-placeholder=\"품목 단가/금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L23\" data-x=\"492.4\" data-y=\"318.5\" data-w=\"39.1\" data-h=\"11.1\" data-fs=\"9.6\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:492.4px;top:318.5px;width:39.1px;height:11.1px;font-size:9.6px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s18\" data-mapping-num=\"18\" data-placeholder=\"품목 합계 금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L24\" data-x=\"63.3\" data-y=\"332.1\" data-w=\"98.0\" data-h=\"7.6\" data-fs=\"6.6\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:63.3px;top:332.1px;width:98.0px;height:7.6px;font-size:6.6px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s19\" data-mapping-num=\"19\" data-placeholder=\"결제 조건 및 금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L25\" data-x=\"428.2\" data-y=\"358.6\" data-w=\"37.1\" data-h=\"9.8\" data-fs=\"8.4\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:428.2px;top:358.6px;width:37.1px;height:9.8px;font-size:8.4px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\">Subtotal:</div>\n<div data-type=\"scaffold-block\" data-bid=\"L26\" data-x=\"496.6\" data-y=\"358.6\" data-w=\"34.8\" data-h=\"9.8\" data-fs=\"8.4\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:496.6px;top:358.6px;width:34.8px;height:9.8px;font-size:8.4px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s20\" data-mapping-num=\"20\" data-placeholder=\"소계 금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L27\" data-x=\"442.0\" data-y=\"382.0\" data-w=\"23.3\" data-h=\"9.8\" data-fs=\"8.4\" data-align=\"left\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:442.0px;top:382.0px;width:23.3px;height:9.8px;font-size:8.4px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden\">Total:</div>\n<div data-type=\"scaffold-block\" data-bid=\"L28\" data-x=\"496.6\" data-y=\"382.0\" data-w=\"34.8\" data-h=\"9.8\" data-fs=\"8.4\" data-align=\"right\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:496.6px;top:382.0px;width:34.8px;height:9.8px;font-size:8.4px;line-height:1;display:flex;align-items:center;justify-content:flex-end;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s21\" data-mapping-num=\"21\" data-placeholder=\"총 합계 금액\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L29\" data-x=\"222.1\" data-y=\"583.7\" data-w=\"150.3\" data-h=\"9.7\" data-fs=\"8.4\" data-align=\"center\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:222.1px;top:583.7px;width:150.3px;height:9.7px;font-size:8.4px;line-height:1;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden\"><span data-type=\"scaffold-slot\" class=\"scaffold-slot scaffold-slot-fill\" data-slot-id=\"s22\" data-mapping-num=\"22\" data-placeholder=\"고객지원 문의처\"></span></div>\n<div data-type=\"scaffold-block\" data-bid=\"L30\" data-x=\"182.4\" data-y=\"600.3\" data-w=\"230.2\" data-h=\"7.7\" data-fs=\"6.6\" data-align=\"center\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:182.4px;top:600.3px;width:230.2px;height:7.7px;font-size:6.6px;line-height:1;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden\">Click here to manage your billing details and view purchase history</div>\n<div data-type=\"scaffold-block\" data-bid=\"L31\" data-x=\"159.9\" data-y=\"627.9\" data-w=\"274.6\" data-h=\"7.7\" data-fs=\"6.6\" data-align=\"center\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:159.9px;top:627.9px;width:274.6px;height:7.7px;font-size:6.6px;line-height:1;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden\">Your order was processed by ThriveCart. Copyright © 2026. All rights reserved.</div>\n<div data-type=\"scaffold-block\" data-bid=\"L32\" data-x=\"273.0\" data-y=\"813.8\" data-w=\"48.6\" data-h=\"9.3\" data-fs=\"8.0\" data-align=\"center\" data-variant=\"text\" class=\"scaffold-block scaffold-block-text\" style=\"position:absolute;left:273.0px;top:813.8px;width:48.6px;height:9.3px;font-size:8.0px;line-height:1;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden\">Page 1 of 1</div>\n<div data-type=\"scaffold-block\" data-bid=\"R0\" data-x=\"57.3\" data-y=\"352.0\" data-w=\"480.1\" data-h=\"0.6\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:57.3px;top:352.0px;width:480.1px;height:0.6px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R1\" data-x=\"60.3\" data-y=\"283.0\" data-w=\"332.5\" data-h=\"1.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:60.3px;top:283.0px;width:332.5px;height:1.8px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R2\" data-x=\"392.8\" data-y=\"283.0\" data-w=\"70.8\" data-h=\"1.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:392.8px;top:283.0px;width:70.8px;height:1.8px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R3\" data-x=\"463.6\" data-y=\"283.0\" data-w=\"70.8\" data-h=\"1.8\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:463.6px;top:283.0px;width:70.8px;height:1.8px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R4\" data-x=\"392.8\" data-y=\"375.4\" data-w=\"144.6\" data-h=\"0.6\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:392.8px;top:375.4px;width:144.6px;height:0.6px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R5\" data-x=\"392.8\" data-y=\"398.8\" data-w=\"144.6\" data-h=\"0.6\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:392.8px;top:398.8px;width:144.6px;height:0.6px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R6\" data-x=\"294.4\" data-y=\"592.4\" data-w=\"78.0\" data-h=\"0.6\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:294.4px;top:592.4px;width:78.0px;height:0.6px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n<div data-type=\"scaffold-block\" data-bid=\"R7\" data-x=\"182.1\" data-y=\"607.4\" data-w=\"229.9\" data-h=\"0.6\" data-fs=\"10.0\" data-align=\"left\" data-variant=\"rule\" class=\"scaffold-block scaffold-block-rule\" style=\"position:absolute;left:182.1px;top:607.4px;width:229.9px;height:0.6px;font-size:10.0px;line-height:1;display:flex;align-items:center;justify-content:flex-start;white-space:nowrap;overflow:hidden;background:#64748b;pointer-events:none\"></div>\n</div>",
+  "markdownContent": "# Atticus LLC_ Invoice 000081709.pdf\n\n[ 발행 일자 ]\n\nCompany info\n\n[ 공급자 회사명 ]\n\n[ 회사 로고 ]\n\n[ 공급자 상세주소 ]\n\n[ 공급자 도시명 ]\n\n[ 공급자 주 및 우편번호 ]\n\n[ 공급자 국가명 ]\n\n[ 공급자 세금 등록번호 ]\n\n[ 인보이스 번호 ]\n\nBilling info\n\nTotal (USD)\n\n[ 청구 총금액 ]\n\n[ 고객사명/조직명 ]\n\n[ 고객 성명 ]\n\n[ 고객 주소 ]\n\n[ 고객 국가명 ]\n\n[ 결제 수단 ]\n\nDescription\n\nAmount\n\nTotal\n\n[ 품목명 ]\n\n[ 품목 단가/금액 ]\n\n[ 품목 합계 금액 ]\n\n[ 결제 조건 및 금액 ]\n\nSubtotal:\n\n[ 소계 금액 ]\n\nTotal:\n\n[ 총 합계 금액 ]\n\n[ 고객지원 문의처 ]\n\nClick here to manage your billing details and view purchase history\n\nYour order was processed by ThriveCart. Copyright © 2026. All rights reserved.\n\nPage 1 of 1",
+  "slots": [
+    {
+      "id": "s1",
+      "number": 1,
+      "label": "발행 일자",
+      "box_2d": [
+        35,
+        778,
+        46,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s2",
+      "number": 2,
+      "label": "공급자 회사명",
+      "box_2d": [
+        75,
+        796,
+        88,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s3",
+      "number": 3,
+      "label": "회사 로고",
+      "box_2d": [
+        83,
+        101,
+        154,
+        535
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s4",
+      "number": 4,
+      "label": "공급자 상세주소",
+      "box_2d": [
+        89,
+        671,
+        102,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s5",
+      "number": 5,
+      "label": "공급자 도시명",
+      "box_2d": [
+        103,
+        830,
+        116,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s6",
+      "number": 6,
+      "label": "공급자 주 및 우편번호",
+      "box_2d": [
+        117,
+        763,
+        131,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s7",
+      "number": 7,
+      "label": "공급자 국가명",
+      "box_2d": [
+        132,
+        793,
+        145,
+        897
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s8",
+      "number": 8,
+      "label": "공급자 세금 등록번호",
+      "box_2d": [
+        149,
+        598,
+        158,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s9",
+      "number": 9,
+      "label": "인보이스 번호",
+      "box_2d": [
+        175,
+        747,
+        188,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s10",
+      "number": 10,
+      "label": "청구 총금액",
+      "box_2d": [
+        231,
+        780,
+        254,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s11",
+      "number": 11,
+      "label": "고객사명/조직명",
+      "box_2d": [
+        235,
+        101,
+        248,
+        159
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s12",
+      "number": 12,
+      "label": "고객 성명",
+      "box_2d": [
+        249,
+        101,
+        262,
+        203
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s13",
+      "number": 13,
+      "label": "고객 주소",
+      "box_2d": [
+        263,
+        101,
+        277,
+        189
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s14",
+      "number": 14,
+      "label": "고객 국가명",
+      "box_2d": [
+        278,
+        101,
+        291,
+        199
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s15",
+      "number": 15,
+      "label": "결제 수단",
+      "box_2d": [
+        258,
+        776,
+        268,
+        898
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s16",
+      "number": 16,
+      "label": "품목명",
+      "box_2d": [
+        378,
+        106,
+        391,
+        160
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s17",
+      "number": 17,
+      "label": "품목 단가/금액",
+      "box_2d": [
+        378,
+        709,
+        391,
+        774
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s18",
+      "number": 18,
+      "label": "품목 합계 금액",
+      "box_2d": [
+        378,
+        828,
+        391,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s19",
+      "number": 19,
+      "label": "결제 조건 및 금액",
+      "box_2d": [
+        394,
+        106,
+        403,
+        271
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s20",
+      "number": 20,
+      "label": "소계 금액",
+      "box_2d": [
+        426,
+        835,
+        438,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s21",
+      "number": 21,
+      "label": "총 합계 금액",
+      "box_2d": [
+        454,
+        835,
+        465,
+        893
+      ],
+      "pageNumber": 1
+    },
+    {
+      "id": "s22",
+      "number": 22,
+      "label": "고객지원 문의처",
+      "box_2d": [
+        693,
+        373,
+        705,
+        626
+      ],
+      "pageNumber": 1
+    }
+  ]
+}

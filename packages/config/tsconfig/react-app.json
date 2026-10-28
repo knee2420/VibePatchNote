@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Vibe React App (Vite)",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "allowArbitraryExtensions": true
+  }
+}

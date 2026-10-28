@@ -1,0 +1,15 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/smithdb-migration/runs-retrieve-not-found-before-sh.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```bash
+RUN_ID="<run-id>"
+
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+  "https://api.smith.langchain.com/api/v1/runs/$RUN_ID" \
+  -H "x-api-key: $LANGSMITH_API_KEY")
+
+if [ "$HTTP_STATUS" = "404" ]; then
+  echo "Run $RUN_ID not found"
+fi
+```

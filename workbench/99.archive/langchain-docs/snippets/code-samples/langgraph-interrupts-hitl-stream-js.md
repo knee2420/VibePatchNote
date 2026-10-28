@@ -1,0 +1,37 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/langgraph-interrupts-hitl-stream-js.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```ts
+import { Command } from "@langchain/langgraph";
+
+let streamInput: Record<string, unknown> | Command = initialInput;
+
+while (true) {
+  const stream = await graph.streamEvents(streamInput, {
+    ...config,
+    version: "v3",
+  });
+
+  // Stream LLM message chunks (including any in subgraphs) as they arrive.
+  for await (const message of stream.messages) {
+    for await (const token of message.text) {
+      displayStreamingContent(token);
+    }
+  }
+
+  // After the run finishes (or pauses), check for interrupts and resume.
+  if (!stream.interrupted) {
+    const finalState = await stream.output;
+    break;
+  }
+
+  const interruptInfo = stream.interrupts[0].payload;
+  const userResponse = await getUserInput(interruptInfo);
+  streamInput = new Command({ resume: userResponse });
+}
+```
+
+<Card title="View example trace" icon="chart-line" href="https://smith.langchain.com/public/2f053efa-abf1-42a0-9c10-df949570681a/r" arrow horizontal>
+  Open a public LangSmith run for this example.
+</Card>

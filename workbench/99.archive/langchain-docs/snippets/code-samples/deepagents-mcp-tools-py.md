@@ -1,0 +1,180 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/deepagents-mcp-tools-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+<CodeGroup>
+    ```python Google
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="google_genai:gemini-3.6-flash",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python OpenAI
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="openai:gpt-5.5",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python Anthropic
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="anthropic:claude-sonnet-4-6",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python OpenRouter
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="openrouter:z-ai/glm-5.2",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python Fireworks
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="fireworks:accounts/fireworks/models/glm-5p2",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python Baseten
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="baseten:zai-org/GLM-5.2",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+
+    ```python Ollama
+    import asyncio
+    
+    from deepagents import create_deep_agent
+    from langchain.mcp import MCPAdapter
+    
+    
+    async def main():
+        config = {"mcpServers": {"my_server": {"url": "http://localhost:8000/mcp"}}}
+        async with MCPAdapter(config) as adapter:
+            tools = await adapter.list_tools()
+            agent = create_deep_agent(
+                model="ollama:north-mini-code-1.0",
+                tools=tools,
+            )
+            await agent.ainvoke(
+                {
+                    "messages": [
+                        {"role": "user", "content": "Use the MCP server to help me."}
+                    ]
+                },
+                config={"configurable": {"thread_id": "1"}},
+            )
+    ```
+</CodeGroup>

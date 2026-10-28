@@ -1,0 +1,9 @@
+{
+  "id": "gaeddong-outliner",
+  "name": "Gaeddong Outliner",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.7",
+  "description": ".outline 파일을 불릿 아웃라인과 보드로 열어 편집합니다.",
+  "author": "knee2420",
+  "isDesktopOnly": true
+}

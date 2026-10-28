@@ -1,0 +1,35 @@
+<!-- source: langchain-ai/docs  src/oss/python/integrations/providers/dell.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+---
+title: "Dell integrations"
+description: "Integrate with Dell using LangChain Python."
+---
+
+Dell is a global technology company that provides a range of hardware, software, and
+services, including AI solutions. Their AI portfolio includes purpose-built
+infrastructure for AI workloads, including Dell PowerScale storage systems optimized
+for AI data management.
+
+## PowerScale
+
+Dell [PowerScale](https://www.dell.com/en-us/shop/powerscale-family/sf/powerscale) is
+an enterprise scale out storage system that hosts industry leading OneFS filesystem
+that can be hosted on-prem or deployed in the cloud.
+
+### Installation and setup
+
+<CodeGroup>
+```bash pip
+pip install powerscale-rag-connector
+```
+
+```bash uv
+uv add powerscale-rag-connector
+```
+</CodeGroup>
+
+### Document loaders
+
+For more information, see [available PowerScale loaders](/oss/integrations/document_loaders/powerscale).

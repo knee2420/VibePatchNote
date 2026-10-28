@@ -1,0 +1,87 @@
+[
+  {
+    "id": "elem-1-0",
+    "outline_id": "out-1-0",
+    "type": "key_value",
+    "label": "Header Meta",
+    "page": 1,
+    "value": {
+      "brand_logo": "Atticus",
+      "invoice_number": "000081709",
+      "issue_date": "August 25th 2026"
+    }
+  },
+  {
+    "id": "elem-1-1",
+    "outline_id": "out-1-1",
+    "type": "paragraph",
+    "label": "Company info",
+    "page": 1,
+    "value": {
+      "company_name": "Atticus LLC",
+      "street_address": "1309 Coffeen Ave. Ste. 2513",
+      "city": "Sheridan",
+      "state_zip": "Wyoming, 82801",
+      "country": "United States",
+      "sales_tax_id_eu": "VAT - EU372031974",
+      "sales_tax_id_uk": "UK - GB383499055"
+    }
+  },
+  {
+    "id": "elem-1-2",
+    "outline_id": "out-1-2",
+    "type": "paragraph",
+    "label": "Billing info",
+    "page": 1,
+    "value": {
+      "account": "qround",
+      "recipient_name": "SEO MINGYU",
+      "street_address": "seoul, 40-6",
+      "country": "South Korea"
+    }
+  },
+  {
+    "id": "elem-1-3",
+    "outline_id": "out-1-3",
+    "type": "key_value",
+    "label": "Total (USD)",
+    "page": 1,
+    "value": {
+      "total_amount": "$147.00",
+      "currency": "USD",
+      "payment_status": "Paid via credit card"
+    }
+  },
+  {
+    "id": "elem-1-4",
+    "outline_id": "out-1-4",
+    "type": "table",
+    "label": "Description",
+    "page": 1,
+    "value": {
+      "columns": ["Description", "Amount", "Total"],
+      "items": [
+        {
+          "item_name": "Atticus",
+          "item_option": "One-time payment ($147.00)",
+          "amount": "$147.00",
+          "total": "$147.00"
+        }
+      ],
+      "subtotal": "$147.00",
+      "total": "$147.00"
+    }
+  },
+  {
+    "id": "elem-1-5",
+    "outline_id": "out-1-5",
+    "type": "paragraph",
+    "label": "Contact support",
+    "page": 1,
+    "value": {
+      "support_email": "support@atticus.io",
+      "management_note": "Click here to manage your billing details and view purchase history",
+      "processor_notice": "Your order was processed by ThriveCart. Copyright © 2026. All rights reserved."
+    }
+  }
+]

@@ -1,0 +1,19 @@
+<!-- source: langchain-ai/docs  src/snippets/code-samples/mcp-tool-errors-py.mdx -->
+<!-- commit: 3e4afc107f12c31131662fa178b53d7a14b7e681 -->
+<!-- fetched: 2026-09-11 -->
+
+```python
+from langchain.mcp import MCPAdapter
+
+
+async def divide_by_zero(server):
+    async with MCPAdapter(server) as adapter:
+        [divide] = await adapter.list_tools()
+
+    # A server error (isError=True) reaches the model as a failed ToolMessage,
+    # so the agent can read the server's own message and retry. Transport
+    # failures still raise, because a model cannot act on those.
+    return await divide.ainvoke(
+        {"name": "divide", "args": {"a": 10, "b": 0}, "id": "1", "type": "tool_call"}
+    )
+```

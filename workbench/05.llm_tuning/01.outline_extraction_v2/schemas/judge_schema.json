@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "cognitive_score": {
+      "description": "인간 인지 만족도 종합 점수 (1~100)",
+      "title": "Cognitive Score",
+      "type": "integer"
+    },
+    "verdict": {
+      "description": "종합 판정 ('EXCELLENT', 'ACCEPTABLE', 'NEEDS_IMPROVEMENT')",
+      "title": "Verdict",
+      "type": "string"
+    },
+    "core_coverage_pct": {
+      "description": "인간이 기대하는 핵심 랜드마크 구획 커버리지 비율 (0.0 ~ 100.0)",
+      "title": "Core Coverage Pct",
+      "type": "number"
+    },
+    "rationale": {
+      "description": "인간 관점에서의 간결한 채점 총평",
+      "title": "Rationale",
+      "type": "string"
+    },
+    "well_captured_blocks": {
+      "description": "합리적으로 잘 짚어낸 주요 구획 목록",
+      "items": {
+        "type": "string"
+      },
+      "title": "Well Captured Blocks",
+      "type": "array"
+    },
+    "critical_omissions": {
+      "description": "사람이 보기에 아쉬운 치명적 누락 구획 목록",
+      "items": {
+        "type": "string"
+      },
+      "title": "Critical Omissions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "cognitive_score",
+    "verdict",
+    "core_coverage_pct",
+    "rationale"
+  ],
+  "title": "LLMJudgeResult",
+  "type": "object"
+}

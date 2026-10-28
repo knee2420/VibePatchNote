@@ -1,0 +1,22 @@
+﻿{
+  "name": "button-edge",
+  "type": "registry:component",
+  "dependencies": [
+    "@xyflow/react",
+    "lucide-react"
+  ],
+  "devDependencies": [],
+  "registryDependencies": [
+    "button"
+  ],
+  "files": [
+    {
+      "type": "registry:component",
+      "path": "button-edge.tsx",
+      "content": "import { type ReactNode } from \"react\";\n\nimport {\n  BaseEdge,\n  EdgeLabelRenderer,\n  getBezierPath,\n  type EdgeProps,\n} from \"@xyflow/react\";\n\nexport function ButtonEdge({\n  sourceX,\n  sourceY,\n  targetX,\n  targetY,\n  sourcePosition,\n  targetPosition,\n  style = {},\n  markerEnd,\n  children,\n}: EdgeProps & { children: ReactNode }) {\n  const [edgePath, labelX, labelY] = getBezierPath({\n    sourceX,\n    sourceY,\n    sourcePosition,\n    targetX,\n    targetY,\n    targetPosition,\n  });\n\n  return (\n    <>\n      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />\n      <EdgeLabelRenderer>\n        <div\n          className=\"nodrag nopan pointer-events-auto absolute\"\n          style={{\n            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,\n          }}\n        >\n          {children}\n        </div>\n      </EdgeLabelRenderer>\n    </>\n  );\n}\n"
+    }
+  ],
+  "tailwind": {},
+  "cssVars": {},
+  "meta": {}
+}
