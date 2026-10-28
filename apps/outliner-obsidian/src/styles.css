@@ -213,6 +213,72 @@ input {
   cursor: text;
 }
 
+/* 평소에는 불릿을 그려 보이고(mirror/mirrorCardContent.ts), 두 번 누르면 입력칸으로 바꾼다. */
+.vibe-outliner-mirror-editor:not(.is-editing) .vibe-outliner-mirror-input,
+.vibe-outliner-mirror-editor.is-editing .vibe-outliner-mirror-view {
+  display: none;
+}
+
+.vibe-outliner-mirror-view {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 24px;
+  overflow: auto;
+  font-size: var(--font-text-size);
+  line-height: var(--line-height-normal);
+  color: var(--text-normal);
+  overflow-wrap: anywhere;
+}
+
+.vibe-outliner-mirror-text > :first-child {
+  margin-top: 0;
+}
+
+.vibe-outliner-mirror-text > :last-child {
+  margin-bottom: 0;
+}
+
+.vibe-outliner-mirror-text p {
+  margin: 0;
+}
+
+.vibe-outliner-mirror-file {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.vibe-outliner-mirror-file[hidden] {
+  display: none;
+}
+
+.vibe-outliner-mirror-file-preview {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  object-position: left center;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+}
+
+.vibe-outliner-mirror-file-name {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vibe-outliner-mirror-file:hover .vibe-outliner-mirror-file-name {
+  color: var(--text-accent);
+}
+
 /*
  * 캔버스 뷰 (mirror/outlineCanvas.ts): 아웃라인의 짝 캔버스에만 붙는다.
  * 한눈에 읽히도록 카드는 차분하게, 선은 가늘고 옅게, 섹션은 옅은 바탕과 또렷한 이름으로.
@@ -253,7 +319,8 @@ input {
 }
 
 /* 캔버스 뷰의 미러 카드 글자는 한 단계 작고 촘촘하게 */
-.vibe-outliner-canvas-view .vibe-outliner-mirror-input {
+.vibe-outliner-canvas-view .vibe-outliner-mirror-input,
+.vibe-outliner-canvas-view .vibe-outliner-mirror-view {
   padding: 13px 16px;
   font-size: 0.95em;
   line-height: 1.5;

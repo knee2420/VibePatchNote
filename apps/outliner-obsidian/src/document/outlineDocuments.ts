@@ -110,6 +110,12 @@ export class OutlineDocuments {
     return this.storeOf(path)?.getState().project?.rootNodes;
   }
 
+  /** 불릿 하나 (글자, 딸린 파일 등). 문서를 아직 읽지 못했거나 불릿이 없으면 undefined */
+  nodeOf(path: string, nodeId: NodeId): OutlineNode | undefined {
+    const roots = this.rootsOf(path);
+    return roots ? (findNode(roots, nodeId) ?? undefined) : undefined;
+  }
+
   /** 불릿의 지금 글자. 문서를 아직 읽지 못했거나 불릿이 없으면 undefined */
   textOf(path: string, nodeId: NodeId): string | undefined {
     const roots = this.storeOf(path)?.getState().project?.rootNodes;

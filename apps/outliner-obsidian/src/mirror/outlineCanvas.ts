@@ -20,6 +20,7 @@ import { type App, type EventRef, type WorkspaceLeaf, TFile } from 'obsidian';
 import type { NodeId, OutlineNode } from '@vibe/outliner/core';
 import type { OutlineDocuments } from '../document/outlineDocuments';
 import type { CanvasInstance } from '../surfaces/entries/CanvasSelectionSync';
+import { fileHeightOf } from './mirrorCardContent';
 import { openCanvasOf } from './mirrorSwitch';
 
 const CARD_PREFIX = 'vo-';
@@ -40,6 +41,8 @@ const MIN_HEIGHT = 52;
 const LINE_HEIGHT = 24;
 /** 카드 안쪽 위아래 여백 합 */
 const PADDING_Y = 24;
+/** 글자와 딸린 파일 사이 */
+const FILE_GAP = 8;
 /** 카드 한 줄에 들어가는 글자 폭 (한글 한 글자 = 1, 영문·숫자 = 0.55) */
 const LINE_UNITS = 13;
 /** 불릿 구조가 바뀐 뒤 캔버스를 고치기까지 기다리는 시간 */
@@ -131,19 +134,24 @@ function flatten(
   return into;
 }
 
-/** 캔버스를 다시 그려야 하는 것: 불릿 구조와 섹션 이름(맨 위 불릿 글자). 다른 글자는 미러 카드가 보여 준다. */
+/**
+ * 캔버스를 다시 그려야 하는 것: 불릿 구조, 딸린 파일(카드 높이가 바뀐다), 섹션 이름(맨 위 불릿 글자).
+ * 다른 글자는 미러 카드가 보여 준다.
+ */
 function structureOf(roots: OutlineNode[]): string {
   const tree = flatten(roots)
-    .map((b) => `${b.node.id}<${b.parentId ?? ''}`)
+    .map((b) => `${b.node.id}<${b.parentId ?? ''}:${b.node.file?.target ?? ''}`)
     .join(',');
   return `${tree}|${roots.map((root) => root.text).join('\u0000')}`;
 }
 
-function cardHeight(text: string): number {
+/** 카드 높이: 글자 줄 수로 어림잡고, 딸린 파일(이미지·PDF 미리보기)이 있으면 그만큼 더한다. */
+function cardHeight(node: OutlineNode): number {
   let units = 0;
-  for (const char of text) units += char.charCodeAt(0) > 0x2e80 ? 1 : 0.55;
+  for (const char of node.text) units += char.charCodeAt(0) > 0x2e80 ? 1 : 0.55;
   const lines = Math.max(1, Math.ceil(units / LINE_UNITS));
-  return Math.max(MIN_HEIGHT, PADDING_Y + lines * LINE_HEIGHT);
+  const fileHeight = fileHeightOf(node.file);
+  return Math.max(MIN_HEIGHT, PADDING_Y + lines * LINE_HEIGHT + (fileHeight ? fileHeight + FILE_GAP : 0));
 }
 
 /**
@@ -157,7 +165,7 @@ function layoutMindMap(roots: OutlineNode[], origin: Point): Map<NodeId, Box> {
   const heightOf = (node: OutlineNode): number => {
     let height = heights.get(node.id);
     if (height === undefined) {
-      height = Math.max(cardHeight(node.text), blockOf(node.children));
+      height = Math.max(cardHeight(node), blockOf(node.children));
       heights.set(node.id, height);
     }
     return height;
@@ -166,7 +174,7 @@ function layoutMindMap(roots: OutlineNode[], origin: Point): Map<NodeId, Box> {
   const boxes = new Map<NodeId, Box>();
   const place = (node: OutlineNode, x: number, top: number) => {
     const span = heightOf(node);
-    const height = cardHeight(node.text);
+    const height = cardHeight(node);
     boxes.set(node.id, { x, y: Math.round(top + (span - height) / 2), width: CARD_WIDTH, height });
     let childTop = top + (span - blockOf(node.children)) / 2;
     for (const child of node.children) {
@@ -269,6 +277,9 @@ export function syncCanvasData(
     ) {
       Object.assign(card, box);
       card.vibeOutline = { ...card.vibeOutline, auto, under, origin };
+    } else if (isGeneratedCard(card)) {
+      // 손으로 옮긴 카드도 높이는 내용(딸린 파일)에 맞춘다.
+      card.height = box.height;
     }
   }
 

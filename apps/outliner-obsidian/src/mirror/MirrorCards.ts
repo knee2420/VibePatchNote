@@ -2,8 +2,9 @@
  * @file MirrorCards.ts
  * @description 미러 카드를 그 불릿을 보여 주고 고치는 창으로 만든다. (실험)
  *
- * 미러 카드에는 글자가 따로 없다. 카드 위에 불릿 입력칸을 덮어씌우고, 그 칸은 불릿 하나를 읽고 고친다.
+ * 미러 카드에는 글자가 따로 없다. 카드 위에 불릿을 덮어 그리고, 그 불릿 하나를 읽고 고친다.
  * 아웃라인 탭과 카드가 같은 문서(OutlineDocuments)를 보므로, 어디서 치든 다른 쪽이 같은 순간에 바뀐다.
+ * - 평소에는 불릿을 아웃라인에서처럼 그린다: 링크는 눌러서 열고, 딸린 이미지·PDF 는 미리보기로 (mirrorCardContent)
  * - 한 번 누르면 카드를 고르고(끌기·선택 맞추기 그대로), 두 번 누르면 입력칸에 글자를 친다. (캔버스 텍스트 카드와 같다)
  * - 옵시디언이 그리는 카드 내용은 감춰 둔다. 카드 데이터의 글자는 플러그인이 꺼졌을 때 보일 예비용으로만 맞춰 둔다.
  * - 글자만 같아서 미러로 본 카드는 처음 볼 때 불릿 id 를 심어 진짜 미러로 만든다.
@@ -14,6 +15,7 @@ import type { App, EventRef, TFile } from 'obsidian';
 import type { NodeId } from '@vibe/outliner/core';
 import type { OutlineDocuments } from '../document/outlineDocuments';
 import type { CanvasInstance, CanvasNode } from '../surfaces/entries/CanvasSelectionSync';
+import { MirrorCardContent } from './mirrorCardContent';
 import { type MirrorIndex, toRawCard } from './mirrorIndex';
 
 /** 입력칸을 올린 카드 (옵시디언의 카드 내용을 감춘다) */
@@ -50,11 +52,13 @@ class MirrorCardEditor {
   private documents: OutlineDocuments;
   private onMissing: () => void;
   private el: HTMLElement;
+  private content: MirrorCardContent;
   private input: HTMLTextAreaElement;
   private unwatch: () => void;
   private cacheTimer: number | null = null;
 
   constructor(
+    app: App,
     card: LiveCanvasNode,
     canvas: CanvasLeafView['canvas'] & object,
     target: Target,
@@ -71,12 +75,13 @@ class MirrorCardEditor {
     const doc = card.nodeEl.ownerDocument;
     this.el = doc.createElement('div');
     this.el.className = 'vibe-outliner-mirror-editor';
+    this.content = new MirrorCardContent(app, this.path, doc);
     this.input = doc.createElement('textarea');
     this.input.className = 'vibe-outliner-mirror-input';
     this.input.spellcheck = false;
     this.input.tabIndex = -1;
     this.input.value = card.getData().text ?? '';
-    this.el.appendChild(this.input);
+    this.el.append(this.content.el, this.input);
     this.bindEvents();
 
     this.ensureMounted();
@@ -95,6 +100,7 @@ class MirrorCardEditor {
     this.writeCache();
     if (this.cacheTimer !== null) window.clearTimeout(this.cacheTimer);
     this.unwatch();
+    this.content.destroy();
     this.el.remove();
     this.card.nodeEl.classList.remove(LIVE_CLASS);
   }
@@ -103,18 +109,28 @@ class MirrorCardEditor {
     return this.input.ownerDocument.activeElement === this.input;
   }
 
-  /** 불릿 글자를 입력칸에 보인다. 치고 있는 입력칸은 건드리지 않는다. (그 글자가 곧 불릿 글자다) */
+  /** 불릿을 그린다. 치고 있는 입력칸은 건드리지 않는다. (그 글자가 곧 불릿 글자다) */
   private render(): void {
-    const text = this.documents.textOf(this.path, this.nodeId);
-    if (text === undefined) {
+    const node = this.documents.nodeOf(this.path, this.nodeId);
+    if (!node) {
       // 문서를 읽었는데 불릿이 없으면 지워진 불릿이다. 카드는 보통 카드로 돌아간다.
       if (this.documents.loaded(this.path)) this.onMissing();
+      else this.content.update(this.card.getData().text ?? '', undefined);
       this.input.readOnly = true;
       return;
     }
     this.input.readOnly = false;
-    if (!this.focused && this.input.value !== text) this.input.value = text;
-    if (!this.focused) this.scheduleCache();
+    if (this.focused) return;
+    this.content.update(node.text, node.file);
+    if (this.input.value !== node.text) this.input.value = node.text;
+    this.scheduleCache();
+  }
+
+  private startEditing(): void {
+    if (this.input.readOnly) return;
+    this.el.classList.add('is-editing');
+    this.input.focus();
+    this.input.setSelectionRange(this.input.value.length, this.input.value.length);
   }
 
   private bindEvents(): void {
@@ -123,9 +139,7 @@ class MirrorCardEditor {
     el.addEventListener('dblclick', (event) => {
       event.stopPropagation();
       event.preventDefault();
-      if (input.readOnly) return;
-      input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
+      this.startEditing();
     });
     // 치는 동안에는 캔버스가 누르기·휠·키를 가져가지 않게 한다. (끌기, 카드 지우기 단축키 등)
     for (const type of ['pointerdown', 'mousedown', 'wheel'] as const) {
@@ -150,7 +164,11 @@ class MirrorCardEditor {
       if (text !== input.value) input.value = text;
       this.documents.setText(this.path, this.nodeId, text);
     });
-    input.addEventListener('blur', () => this.writeCache());
+    input.addEventListener('blur', () => {
+      this.el.classList.remove('is-editing');
+      this.render();
+      this.writeCache();
+    });
   }
 
   private scheduleCache(): void {
@@ -268,7 +286,7 @@ export class MirrorCards {
       existing.ensureMounted();
       return;
     }
-    const editor = new MirrorCardEditor(card, canvas, target, this.documents, () => {
+    const editor = new MirrorCardEditor(this.app, card, canvas, target, this.documents, () => {
       this.orphans.set(card, target.nodeId);
       this.editors.get(card)?.destroy();
       this.editors.delete(card);
