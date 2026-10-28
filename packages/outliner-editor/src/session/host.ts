@@ -83,6 +83,11 @@ export interface OutlineHost {
   showMirrors?: (nodeId: NodeId) => void;
   /** (선택) 불릿 하나의 메뉴에 호스트가 더하는 항목. 메뉴를 열 때마다 묻는다. */
   nodeMenuItems?: (nodeId: NodeId) => OutlineHostMenuItem[];
+  /**
+   * (선택) 아웃라인을 캔버스로 펼쳐 연다. 있으면 헤더에 "캔버스" 단추가 생긴다.
+   * `focusId` 는 줌인해 있던 불릿 (캔버스에서 그 카드로 간다). 맨 위면 null.
+   */
+  openCanvasView?: (focusId: NodeId | null) => void;
   /** (선택) 불릿에 파일을 붙이고 여는 능력. 없으면 붙어 있는 파일은 이름만 보인다. */
   files?: OutlineFileHost;
 }

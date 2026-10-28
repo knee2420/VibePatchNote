@@ -11,15 +11,15 @@
  *   - HEAD 위에 조상 경로 브레드크럼(Home > ... > 현재 노드) 표시
  *   - HEAD 제목 = 현재 줌인된 불릿 노드의 text (activeNode.text)
  *   - 제목 변경 시 실시간 및 blur 시 editorStore.updateText(activeRootId, text) 호출
- * - 우측: 뷰 모드(불릿 vs 보드) 토글 버튼 및 사용자 지정 액션 컨트롤
+ * - 우측: 뷰 모드(불릿 vs 보드) 토글 버튼, 호스트가 캔버스를 열 수 있으면 캔버스 단추, 사용자 지정 액션 컨트롤
  */
 
 import React, { useState } from 'react';
-import { LayoutGrid, List } from 'lucide-react';
+import { LayoutGrid, List, Network } from 'lucide-react';
 import { OutlineBreadcrumb } from './OutlineBreadcrumb';
 import { useZoom } from '../model/useZoom';
 import { useOutlineView } from '../model/useOutlineView';
-import { useEditorStore } from '../session/context';
+import { useEditorStore, useOutlineHost } from '../session/context';
 
 interface HeadTitleFieldProps {
   initialTitle: string;
@@ -117,6 +117,7 @@ export const OutlineHeader: React.FC<OutlineHeaderProps> = ({
   const { isZoomed, activeNode, activeRootId } = useZoom();
   const { view, toggleView } = useOutlineView();
   const updateText = useEditorStore((s) => s.updateText);
+  const { openCanvasView } = useOutlineHost();
 
   // 줌인 여부에 따라 표시할 제목 결정
   const targetTitle = isZoomed ? (activeNode?.text ?? '') : rootTitle;
@@ -166,6 +167,19 @@ export const OutlineHeader: React.FC<OutlineHeaderProps> = ({
                   <span className="hidden sm:inline">불릿 뷰</span>
                 </>
               )}
+            </button>
+          )}
+
+          {/* 캔버스로 펼쳐 보기 (호스트가 열 수 있을 때만) */}
+          {showViewToggle && openCanvasView && (
+            <button
+              type="button"
+              onClick={() => openCanvasView(activeRootId)}
+              title="캔버스로 펼쳐 보기 (카드는 이 불릿들의 미러)"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-(--background-secondary) border border-(--background-modifier-border) hover:border-(--background-modifier-border-hover) text-(--text-muted) hover:text-(--text-normal) text-xs transition-colors cursor-pointer"
+            >
+              <Network className="w-3.5 h-3.5 text-(--interactive-accent)" />
+              <span className="hidden sm:inline">캔버스 뷰</span>
             </button>
           )}
 

@@ -6,11 +6,11 @@
  * - host/     편집 화면이 옵시디언에 부탁하는 일
  * - document/ 파일 ↔ 내용
  * - vault/    아웃라인 밖의 옵시디언(그래프·백링크·노트 편집기)에 아웃라인을 알리는 일
- * - mirror/   불릿과 그 미러인 캔버스 카드 (색인, 카드 안 불릿 입력칸, 켜고 끄기, 미러 창)
+ * - mirror/   불릿과 그 미러인 캔버스 카드 (색인, 카드 안 불릿 입력칸, 켜고 끄기, 미러 창, 캔버스 뷰)
  */
 
 import './styles.css';
-import { type TAbstractFile, Plugin, TFile } from 'obsidian';
+import { type TAbstractFile, Notice, Plugin, TFile } from 'obsidian';
 import { OutlineSettingTab } from './commands/OutlineSettingTab';
 import { registerNodeLinkProtocol } from './commands/nodeLinkProtocol';
 import { registerOutlineCommands } from './commands/outlineCommands';
@@ -19,6 +19,7 @@ import { loadPluginSettings } from './host/pluginSettings';
 import { MirrorIndex, toRawCard } from './mirror/mirrorIndex';
 import { MirrorCards } from './mirror/MirrorCards';
 import { MirrorSwitch } from './mirror/mirrorSwitch';
+import { OutlineCanvas } from './mirror/outlineCanvas';
 import { OutlineDocuments } from './document/outlineDocuments';
 import { registerCanvasSyncCommands } from './commands/canvasSyncCommands';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
@@ -36,6 +37,7 @@ export default class VibeOutlinerPlugin extends Plugin {
   private livePreviewWatcher: LivePreviewEmbedWatcher | null = null;
   private canvasSelectionSync: CanvasSelectionSync | null = null;
   private sidePeek: SidePeek | null = null;
+  private outlineCanvas: OutlineCanvas | null = null;
 
   async onload(): Promise<void> {
     // 0. 설정을 먼저 불러 둔다. (화면이 뜨자마자 딸린 파일의 기본 크기를 묻는다)
@@ -47,7 +49,13 @@ export default class VibeOutlinerPlugin extends Plugin {
       VIEW_TYPE_OUTLINE,
       (leaf) =>
         new OutlineFileView(leaf, {
-          extendHost: (view) => this.sidePeek?.hostFor(view) ?? {},
+          extendHost: (view) => ({
+            ...this.sidePeek?.hostFor(view),
+            openCanvasView: (focusId) => {
+              const roots = view.outline.getState().project?.rootNodes;
+              if (view.file && roots) void this.outlineCanvas?.open(view.leaf, view.file, roots, focusId);
+            },
+          }),
         })
     );
     this.registerExtensions([OUTLINE_EXTENSION], VIEW_TYPE_OUTLINE);
@@ -91,6 +99,21 @@ export default class VibeOutlinerPlugin extends Plugin {
     // 4-3. 불릿 ↔ 미러 카드를 오른쪽 반쪽 화면에 열기, 미러 메뉴와 미러 창 (실험)
     this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync, mirrorIndex, mirrorSwitch);
     this.sidePeek.register(this);
+
+    // 4-4. 캔버스 뷰: 아웃라인을 짝 캔버스에 미러 카드와 선으로 펼치고, 불릿 구조를 따라간다. (실험)
+    this.outlineCanvas = new OutlineCanvas(this.app, documents, this.sidePeek);
+    this.register(this.outlineCanvas.init());
+    this.addCommand({
+      id: 'tidy-outline-canvas',
+      name: '캔버스 뷰 다시 늘어놓기 (손으로 옮긴 카드까지)',
+      callback: async () => {
+        const view =
+          this.app.workspace.getActiveViewOfType(OutlineFileView) ?? this.canvasSelectionSync?.lastView;
+        const roots = view?.outline.getState().project?.rootNodes;
+        const done = view?.file && roots ? await this.outlineCanvas?.tidy(view.file, roots) : false;
+        if (!done) new Notice('아웃라인 탭에서 캔버스 뷰를 먼저 열어 주세요.');
+      },
+    });
 
     // 5. 호버 링크 미리보기 소스 등록 (Page Preview)
     this.registerHoverLinkSource(VIEW_TYPE_OUTLINE, {
@@ -163,6 +186,7 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.canvasSelectionSync?.destroy();
     this.canvasSelectionSync = null;
     this.sidePeek = null;
+    this.outlineCanvas = null;
     this.livePreviewWatcher?.destroy();
     this.livePreviewWatcher = null;
   }

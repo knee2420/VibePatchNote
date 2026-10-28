@@ -105,6 +105,11 @@ export class OutlineDocuments {
     return Boolean(this.storeOf(path)?.getState().project);
   }
 
+  /** 문서의 지금 불릿 트리. 아직 읽지 못했으면 undefined */
+  rootsOf(path: string): OutlineNode[] | undefined {
+    return this.storeOf(path)?.getState().project?.rootNodes;
+  }
+
   /** 불릿의 지금 글자. 문서를 아직 읽지 못했거나 불릿이 없으면 undefined */
   textOf(path: string, nodeId: NodeId): string | undefined {
     const roots = this.storeOf(path)?.getState().project?.rootNodes;

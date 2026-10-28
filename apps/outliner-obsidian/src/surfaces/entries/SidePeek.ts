@@ -259,10 +259,12 @@ export class SidePeek {
     ).open();
   }
 
-  private async openCard(fromLeaf: WorkspaceLeaf, canvasPath: string, cardId: string): Promise<void> {
+  /** 캔버스를 오른쪽 칸(또는 이미 열린 칸)에 열고, 카드가 있으면 그 카드로 간다. */
+  async openCard(fromLeaf: WorkspaceLeaf, canvasPath: string, cardId: string | null): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(canvasPath);
     if (!(file instanceof TFile)) return;
     const leaf = await this.leafFor(fromLeaf, file);
+    if (!cardId) return;
     const canvas = await waitFor(
       () => (canvasOf(leaf)?.nodes.has(cardId) ? canvasOf(leaf) : null),
       LOAD_FRAMES
