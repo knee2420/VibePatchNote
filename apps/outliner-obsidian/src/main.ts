@@ -6,7 +6,7 @@
  * - host/     편집 화면이 옵시디언에 부탁하는 일
  * - document/ 파일 ↔ 내용
  * - vault/    아웃라인 밖의 옵시디언(그래프·백링크·노트 편집기)에 아웃라인을 알리는 일
- * - mirror/   불릿과 그 미러인 캔버스 카드 (색인, 글자 맞추기, 미러 창)
+ * - mirror/   불릿과 그 미러인 캔버스 카드 (색인, 카드 안 불릿 입력칸, 켜고 끄기, 미러 창)
  */
 
 import './styles.css';
@@ -17,7 +17,9 @@ import { registerOutlineCommands } from './commands/outlineCommands';
 import { OUTLINE_EXTENSION, VIEW_TYPE_OUTLINE } from './document/outlineFiles';
 import { loadPluginSettings } from './host/pluginSettings';
 import { MirrorIndex, toRawCard } from './mirror/mirrorIndex';
-import { MirrorSync } from './mirror/mirrorSync';
+import { MirrorCards } from './mirror/MirrorCards';
+import { MirrorSwitch } from './mirror/mirrorSwitch';
+import { OutlineDocuments } from './document/outlineDocuments';
 import { registerCanvasSyncCommands } from './commands/canvasSyncCommands';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
 import { CanvasSelectionSync } from './surfaces/entries/CanvasSelectionSync';
@@ -73,17 +75,21 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.canvasSelectionSync.init();
     registerCanvasSyncCommands(this, this.canvasSelectionSync);
 
-    // 4-2. 미러: 불릿을 가리키는 캔버스 카드. 색인을 만들고, 글자를 맞추고, 선택 맞추기도 미러를 따른다. (실험)
+    // 4-2. 미러: 불릿을 보여 주고 고치는 캔버스 카드. 아웃라인 문서는 파일마다 하나만 메모리에 두고,
+    //      탭과 미러 카드가 같은 문서를 본다. 선택 맞추기도 미러를 따른다. (실험)
     const mirrorIndex = new MirrorIndex(this.app);
-    const mirrorSync = new MirrorSync(this.app, mirrorIndex);
-    this.register(mirrorSync.init());
+    const documents = new OutlineDocuments(this.app);
+    this.register(documents.init());
+    const mirrorCards = new MirrorCards(this.app, mirrorIndex, documents);
+    this.register(mirrorCards.init());
+    const mirrorSwitch = new MirrorSwitch(this.app, mirrorIndex, documents);
     this.canvasSelectionSync.resolveCard = (data) => {
       const card = toRawCard(data);
       return card ? mirrorIndex.resolve(card) : null;
     };
 
     // 4-3. 불릿 ↔ 미러 카드를 오른쪽 반쪽 화면에 열기, 미러 메뉴와 미러 창 (실험)
-    this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync, mirrorIndex, mirrorSync);
+    this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync, mirrorIndex, mirrorSwitch);
     this.sidePeek.register(this);
 
     // 5. 호버 링크 미리보기 소스 등록 (Page Preview)

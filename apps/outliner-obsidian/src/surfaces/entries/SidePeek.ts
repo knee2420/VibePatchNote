@@ -27,7 +27,7 @@ import type { OutlineHost, OutlineHostMenuItem } from '@vibe/outliner-editor';
 import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
 import { type MirrorPlace, MirrorPanelModal, pathSegments } from '../../mirror/MirrorPanelModal';
 import { type MirrorIndex, toRawCard } from '../../mirror/mirrorIndex';
-import type { MirrorSync } from '../../mirror/mirrorSync';
+import type { MirrorSwitch } from '../../mirror/mirrorSwitch';
 import { OutlineFileView } from '../tab/OutlineFileView';
 import {
   type CanvasInstance,
@@ -69,11 +69,11 @@ export class SidePeek {
   private app: App;
   private sync: CanvasSelectionSync;
   private index: MirrorIndex;
-  private mirrors: MirrorSync;
+  private mirrors: MirrorSwitch;
   /** 옆으로 열 때 다시 쓰는 오른쪽 칸 */
   private asideLeaf: WorkspaceLeaf | null = null;
 
-  constructor(app: App, sync: CanvasSelectionSync, index: MirrorIndex, mirrors: MirrorSync) {
+  constructor(app: App, sync: CanvasSelectionSync, index: MirrorIndex, mirrors: MirrorSwitch) {
     this.app = app;
     this.sync = sync;
     this.index = index;
