@@ -153,3 +153,103 @@ input {
   border-color: var(--text-accent, #7057ff) !important;
 }
 
+
+/*
+ * 캔버스 미러 (mirror/)
+ * 캔버스 카드와 미러 창은 우리 영역 밖에 있다. 선택자가 `.vibe-outliner` 로 시작하면 빌드 때 가둬지지 않는다.
+ */
+.vibe-outliner-mirror-card::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+  background: var(--interactive-accent);
+  pointer-events: none;
+}
+
+.vibe-outliner-mirror-panel {
+  width: min(640px, 92vw);
+}
+
+.vibe-outliner-mirror-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vibe-outliner-mirror-row {
+  padding: 8px 12px;
+  border-radius: var(--radius-m);
+  cursor: pointer;
+}
+
+.vibe-outliner-mirror-row:hover,
+.vibe-outliner-mirror-row:focus-visible {
+  background: var(--background-modifier-hover);
+  outline: none;
+}
+
+.vibe-outliner-mirror-row.is-source {
+  background: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
+}
+
+.vibe-outliner-mirror-meta {
+  display: flex;
+  gap: 8px;
+  font-size: var(--font-ui-smaller);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.vibe-outliner-mirror-open {
+  font-weight: 400;
+  color: var(--text-accent);
+}
+
+.vibe-outliner-mirror-crumb {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: var(--font-ui-small);
+}
+
+.vibe-outliner-mirror-index {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--text-normal);
+}
+
+.vibe-outliner-mirror-sep {
+  flex-shrink: 0;
+  color: var(--text-faint);
+}
+
+.vibe-outliner-mirror-seg {
+  flex-shrink: 1;
+  min-width: 2em;
+  max-width: 12em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-muted);
+}
+
+.vibe-outliner-mirror-leaf {
+  flex-shrink: 1;
+  min-width: 4em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-normal);
+}
+
+.vibe-outliner-mirror-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}

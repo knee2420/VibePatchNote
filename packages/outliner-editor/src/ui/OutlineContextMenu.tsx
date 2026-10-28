@@ -24,7 +24,12 @@ import {
   PanelRight,
 } from 'lucide-react';
 import { TURN_INTO_OPTIONS, useNodeActions } from '../model/useNodeActions';
-import { useEditorStore, useEditorWindow, useOutlineHost } from '../session/context';
+import {
+  useEditorStore,
+  useEditorWindow,
+  useMirrorCount,
+  useOutlineHost,
+} from '../session/context';
 import { useFileAttach } from '../attachments/useFileAttach';
 
 interface OutlineContextMenuProps {
@@ -97,6 +102,7 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
   const host = useOutlineHost();
   const win = useEditorWindow();
   const [isTypeListOpen, setIsTypeListOpen] = useState(false);
+  const mirrorCount = useMirrorCount(item.id);
 
   const isSingle = targetIds.length === 1;
   const currentType = item.node.viewMode === 'board' ? 'board' : (item.node.nodeType ?? 'bullet');
@@ -126,6 +132,23 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
       className="outline-menu-pop fixed z-[100] py-1 max-h-[calc(100vh-16px)] overflow-y-auto rounded-lg bg-(--background-secondary)/95 border border-(--background-modifier-border) backdrop-blur-md shadow-2xl shadow-black/60 select-none"
     >
+      {isSingle && mirrorCount > 1 && (
+        <>
+          <div className="px-3 py-1.5 flex items-center justify-center gap-1.5 text-[11px] text-(--text-muted)">
+            <span>미러 {mirrorCount}곳에 있음.</span>
+            {host.showMirrors && (
+              <button
+                type="button"
+                onClick={run(() => host.showMirrors?.(item.id))}
+                className="underline underline-offset-2 hover:text-(--text-normal) cursor-pointer"
+              >
+                보기
+              </button>
+            )}
+          </div>
+          <Separator />
+        </>
+      )}
       {!isSingle && (
         <div className="px-3 py-1 text-[10px] font-semibold text-(--text-accent)">
           고른 불릿 {targetIds.length}개에 적용

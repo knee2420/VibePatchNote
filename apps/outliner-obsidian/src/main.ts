@@ -6,6 +6,7 @@
  * - host/     편집 화면이 옵시디언에 부탁하는 일
  * - document/ 파일 ↔ 내용
  * - vault/    아웃라인 밖의 옵시디언(그래프·백링크·노트 편집기)에 아웃라인을 알리는 일
+ * - mirror/   불릿과 그 미러인 캔버스 카드 (색인, 글자 맞추기, 미러 창)
  */
 
 import './styles.css';
@@ -15,6 +16,8 @@ import { registerNodeLinkProtocol } from './commands/nodeLinkProtocol';
 import { registerOutlineCommands } from './commands/outlineCommands';
 import { OUTLINE_EXTENSION, VIEW_TYPE_OUTLINE } from './document/outlineFiles';
 import { loadPluginSettings } from './host/pluginSettings';
+import { MirrorIndex, toRawCard } from './mirror/mirrorIndex';
+import { MirrorSync } from './mirror/mirrorSync';
 import { registerCanvasSyncCommands } from './commands/canvasSyncCommands';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
 import { CanvasSelectionSync } from './surfaces/entries/CanvasSelectionSync';
@@ -42,7 +45,7 @@ export default class VibeOutlinerPlugin extends Plugin {
       VIEW_TYPE_OUTLINE,
       (leaf) =>
         new OutlineFileView(leaf, {
-          nodeMenuItems: (view, nodeId) => this.sidePeek?.bulletMenuItems(view, nodeId) ?? [],
+          extendHost: (view) => this.sidePeek?.hostFor(view) ?? {},
         })
     );
     this.registerExtensions([OUTLINE_EXTENSION], VIEW_TYPE_OUTLINE);
@@ -70,8 +73,17 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.canvasSelectionSync.init();
     registerCanvasSyncCommands(this, this.canvasSelectionSync);
 
-    // 4-2. 불릿 ↔ 카드를 오른쪽 반쪽 화면에 열기 (실험)
-    this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync);
+    // 4-2. 미러: 불릿을 가리키는 캔버스 카드. 색인을 만들고, 글자를 맞추고, 선택 맞추기도 미러를 따른다. (실험)
+    const mirrorIndex = new MirrorIndex(this.app);
+    const mirrorSync = new MirrorSync(this.app, mirrorIndex);
+    this.register(mirrorSync.init());
+    this.canvasSelectionSync.resolveCard = (data) => {
+      const card = toRawCard(data);
+      return card ? mirrorIndex.resolve(card) : null;
+    };
+
+    // 4-3. 불릿 ↔ 미러 카드를 오른쪽 반쪽 화면에 열기, 미러 메뉴와 미러 창 (실험)
+    this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync, mirrorIndex, mirrorSync);
     this.sidePeek.register(this);
 
     // 5. 호버 링크 미리보기 소스 등록 (Page Preview)
@@ -93,6 +105,16 @@ export default class VibeOutlinerPlugin extends Plugin {
     };
     this.registerEvent(this.app.vault.on('modify', syncIfOutline));
     this.registerEvent(this.app.vault.on('create', syncIfOutline));
+    // 미러 색인도 아웃라인·캔버스 파일이 바뀔 때마다 따라간다.
+    this.registerEvent(this.app.vault.on('modify', (file) => void mirrorIndex.update(file)));
+    this.registerEvent(this.app.vault.on('create', (file) => void mirrorIndex.update(file)));
+    this.registerEvent(this.app.vault.on('delete', (file) => mirrorIndex.remove(file.path)));
+    this.registerEvent(
+      this.app.vault.on('rename', (file, oldPath) => {
+        mirrorIndex.remove(oldPath);
+        void mirrorIndex.update(file);
+      })
+    );
     // 이름이 바뀌거나 지워진 파일의 옛 색인은 남겨 두지 않는다.
     this.registerEvent(
       this.app.vault.on('rename', (file, oldPath) => {
@@ -118,10 +140,14 @@ export default class VibeOutlinerPlugin extends Plugin {
       }
     };
 
-    if (this.app.workspace.layoutReady) {
+    const onReady = () => {
       syncAllOutlines();
+      void mirrorIndex.build();
+    };
+    if (this.app.workspace.layoutReady) {
+      onReady();
     } else {
-      this.app.workspace.onLayoutReady(syncAllOutlines);
+      this.app.workspace.onLayoutReady(onReady);
     }
   }
 

@@ -19,7 +19,6 @@ import { type OutlineNode, type ViewMode, findNode, toOutlineText } from '@vibe/
 import {
   type OutlineEditorStore,
   type OutlineHost,
-  type OutlineHostMenuItem,
   createOutlineEditorStore,
 } from '@vibe/outliner-editor';
 import { OutlineFileApp } from './OutlineFileApp';
@@ -38,8 +37,8 @@ const SCOPE_CLASS = 'vibe-outliner';
 
 /** 플러그인이 탭 화면에 더해 주는 것 */
 export interface OutlineFileViewOptions {
-  /** 불릿 메뉴에 더할 항목 (캔버스에서 보기 등) */
-  nodeMenuItems?: (view: OutlineFileView, nodeId: string) => OutlineHostMenuItem[];
+  /** 편집 화면의 호스트 기능에 더할 것 (미러 표시, 불릿 메뉴 항목 등) */
+  extendHost?: (view: OutlineFileView) => Partial<OutlineHost>;
 }
 
 export class OutlineFileView extends TextFileView {
@@ -61,7 +60,6 @@ export class OutlineFileView extends TextFileView {
       setDefaultView: (defaultView) => this.updateProject({ defaultView }),
     });
 
-    const { nodeMenuItems } = options;
     this.host = {
       ...createObsidianHost({
         app: this.app,
@@ -69,7 +67,7 @@ export class OutlineFileView extends TextFileView {
         getPortalRoot: () => this.getPortalRoot(),
         component: this,
       }),
-      ...(nodeMenuItems ? { nodeMenuItems: (nodeId: string) => nodeMenuItems(this, nodeId) } : {}),
+      ...options.extendHost?.(this),
     };
 
     // 줌 위치가 바뀌면 옵시디언이 탭 상태를 다시 저장하게 한다. (다시 열 때 그 자리로 돌아온다)

@@ -1,13 +1,14 @@
 /**
  * @file SidePeek.ts
- * @description 불릿 ↔ 캔버스 카드를 오른쪽 반쪽 화면에 열기 (노션의 옆으로 열기처럼, 실험)
- * - 불릿 메뉴 "캔버스에서 보기": 짝 카드가 있는 캔버스를 오른쪽에 열고, 그 카드를 골라 줌인한다.
- * - 카드 도구 막대 단추·우클릭 메뉴 "아웃라인에서 보기": 짝 불릿이 있는 아웃라인을 오른쪽에 열고, 그 불릿을 골라 스크롤한다.
+ * @description 불릿 ↔ 미러 카드를 오른쪽 반쪽 화면에 열기, 그리고 미러 메뉴 (노션의 옆으로 열기처럼, 실험)
+ * - 불릿 메뉴: "미러 n곳에 있음. 보기" 머리말, "캔버스에서 보기", "미러 끄기" / "미러 다시 켜기"
+ * - 카드 도구 막대 단추·우클릭 메뉴: "아웃라인에서 보기", "미러 보기", "미러 끄기" / "미러 켜기"
+ * - 미러가 여러 곳이면 미러 창에서 고른다. 하나면 바로 연다.
+ * - 미러 카드에는 모서리에 작은 다이아몬드를 붙인다.
  *
- * 짝을 찾는 규칙은 CanvasSelectionSync 와 같다. (카드의 vibeOutline.nodeId, 없으면 글자가 같은 텍스트 카드)
- * 짝이 여러 개(여러 캔버스, 여러 아웃라인)면 고르는 창을 띄우고, 하나면 바로 연다.
- * 고른 짝이 다른 칸에 이미 열려 있으면 새로 열지 않고 그 칸을 앞으로 가져온다.
- * 오른쪽 화면은 한 칸을 계속 다시 쓴다. (열 때마다 화면이 반씩 쪼개지지 않게)
+ * 무엇이 미러인지는 미러 색인(mirror/mirrorIndex.ts)이 정한다.
+ * 고른 곳이 다른 탭 묶음에 이미 열려 있으면 그 칸을 앞으로 가져오고, 아니면 오른쪽 칸에 연다.
+ * 오른쪽 칸은 하나를 계속 다시 쓴다. (열 때마다 화면이 반씩 쪼개지지 않게)
  */
 
 import {
@@ -15,99 +16,40 @@ import {
   type EventRef,
   type Menu,
   type Plugin,
-  type TFile,
-  FileView,
   type WorkspaceLeaf,
+  FileView,
   Notice,
+  TFile,
   setIcon,
 } from 'obsidian';
-import {
-  type FlatOutlineTree,
-  type NodeId,
-  type OutlineNode,
-  ROOT_ID,
-  getFlatNode,
-} from '@vibe/outliner-core';
-import { parseProjectFile } from '@vibe/outliner-dto';
-import type { OutlineHostMenuItem } from '@vibe/outliner-editor';
-import { OUTLINE_EXTENSION, VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
-import { PairPickerModal } from '../../host/dialogs/PairPickerModal';
+import type { NodeId } from '@vibe/outliner-core';
+import type { OutlineHost, OutlineHostMenuItem } from '@vibe/outliner-editor';
+import { VIEW_TYPE_OUTLINE } from '../../document/outlineFiles';
+import { type MirrorPlace, MirrorPanelModal, pathSegments } from '../../mirror/MirrorPanelModal';
+import { type MirrorIndex, toRawCard } from '../../mirror/mirrorIndex';
+import type { MirrorSync } from '../../mirror/mirrorSync';
 import { OutlineFileView } from '../tab/OutlineFileView';
 import {
   type CanvasInstance,
   type CanvasNode,
   type CanvasSelectionSync,
-  linkOf,
-  textOf,
+  openCanvases,
   waitFor,
   zoomToCard,
 } from './CanvasSelectionSync';
 
 const PEEK_BUTTON_CLASS = 'vibe-outliner-peek-button';
-const PEEK_LABEL_TO_OUTLINE = '아웃라인에서 보기';
-const PEEK_LABEL_TO_CANVAS = '캔버스에서 보기';
+const MIRROR_CARD_CLASS = 'vibe-outliner-mirror-card';
 /** 막 연 파일이 다 올라오기를 기다리는 프레임 수 (약 2초) */
 const LOAD_FRAMES = 120;
 
-/** 우클릭 메뉴로 넘어오는 카드는 자기 캔버스를 안다. */
-type CardWithCanvas = CanvasNode & { canvas?: CanvasInstance };
-
 interface CanvasNodeMenuEvents {
-  on: (name: 'canvas:node-menu', callback: (menu: Menu, card: CardWithCanvas) => void) => EventRef;
-}
-
-/** 캔버스 파일(JSON) 안의 카드가 이 불릿의 짝인지. 0: 아님, 2: 심어 둔 id 가 같음, 1: 글자가 같음 */
-function cardMatch(card: unknown, nodeId: NodeId, text: string | undefined): 0 | 1 | 2 {
-  const data = card as { type?: unknown; text?: unknown; vibeOutline?: { nodeId?: unknown } };
-  const linked = data.vibeOutline?.nodeId;
-  if (typeof linked === 'string' && linked !== '') return linked === nodeId ? 2 : 0;
-  return text && data.type === 'text' && typeof data.text === 'string' && data.text.trim() === text
-    ? 1
-    : 0;
+  on: (name: 'canvas:node-menu', callback: (menu: Menu, card: CanvasNode) => void) => EventRef;
 }
 
 function canvasOf(leaf: WorkspaceLeaf): CanvasInstance | null {
   const canvas = (leaf.view as { canvas?: CanvasInstance }).canvas;
   return canvas?.nodes ? canvas : null;
-}
-
-function findBulletByText(tree: FlatOutlineTree, text: string): NodeId | null {
-  for (const node of tree.nodes.values()) {
-    if (node.id !== ROOT_ID && node.text.trim() === text) return node.id;
-  }
-  return null;
-}
-
-function findInNodes(nodes: OutlineNode[], match: (node: OutlineNode) => boolean): NodeId | null {
-  for (const node of nodes) {
-    if (match(node)) return node.id;
-    const found = findInNodes(node.children, match);
-    if (found) return found;
-  }
-  return null;
-}
-
-/** 짝 후보 하나: 그 파일, 지금 열려 있는 칸(없으면 null), 심어 둔 id 로 이어졌는지 */
-interface PairCandidate {
-  file: TFile;
-  byId: boolean;
-  leaf: WorkspaceLeaf | null;
-}
-
-interface CanvasCandidate extends PairCandidate {
-  cardId: string;
-}
-
-interface OutlineCandidate extends PairCandidate {
-  nodeId: NodeId;
-}
-
-/** 고르는 창에서 제목 아래 보이는 글자 */
-function describeCandidate(candidate: PairCandidate): string {
-  const folder = candidate.file.parent?.isRoot() ? '/' : (candidate.file.parent?.path ?? '');
-  return [folder, candidate.leaf ? '열려 있음' : null, candidate.byId ? 'id로 연결됨' : '글자만 같음']
-    .filter(Boolean)
-    .join(' · ');
 }
 
 function fileOf(leaf: WorkspaceLeaf): TFile | null {
@@ -119,122 +61,208 @@ function focusCard(canvas: CanvasInstance, card: CanvasNode): void {
   zoomToCard(canvas, card);
 }
 
+function shorten(text: string, max = 24): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
 export class SidePeek {
   private app: App;
   private sync: CanvasSelectionSync;
+  private index: MirrorIndex;
+  private mirrors: MirrorSync;
   /** 옆으로 열 때 다시 쓰는 오른쪽 칸 */
   private asideLeaf: WorkspaceLeaf | null = null;
 
-  constructor(app: App, sync: CanvasSelectionSync) {
+  constructor(app: App, sync: CanvasSelectionSync, index: MirrorIndex, mirrors: MirrorSync) {
     this.app = app;
     this.sync = sync;
+    this.index = index;
+    this.mirrors = mirrors;
   }
 
   register(plugin: Plugin): void {
-    this.sync.onCardMenu = (canvas, card, menuEl) => this.addPeekButton(canvas, card, menuEl);
+    this.sync.onCardMenu = (_canvas, card, menuEl) => this.addPeekButton(card, menuEl);
 
     const workspace = this.app.workspace as unknown as CanvasNodeMenuEvents;
     plugin.registerEvent(
-      workspace.on('canvas:node-menu', (menu, card) => {
-        if (!linkOf(card) && !textOf(card)) return;
-        menu.addItem((item) =>
-          item
-            .setTitle(PEEK_LABEL_TO_OUTLINE)
-            .setIcon('panel-right')
-            .onClick(() => void this.openOutlineForCard(card, card.canvas))
-        );
-      })
+      workspace.on('canvas:node-menu', (menu, card) => this.addCardMenuItems(menu, card))
     );
+
+    // 미러가 바뀌거나 캔버스를 새로 열면 카드의 다이아몬드를 다시 붙인다.
+    plugin.register(this.index.onChange(() => this.decorateCanvases()));
+    plugin.registerEvent(this.app.workspace.on('layout-change', () => this.decorateCanvases()));
   }
 
-  /** 불릿 메뉴에 더할 항목 */
-  bulletMenuItems(view: OutlineFileView, nodeId: NodeId): OutlineHostMenuItem[] {
-    return [{ label: PEEK_LABEL_TO_CANVAS, run: () => void this.openCanvasForBullet(view, nodeId) }];
-  }
-
-  // ── 불릿 → 캔버스 ──
-
-  /** 짝 카드가 있는 캔버스가 하나면 바로 열고, 여러 개면 고르게 한다. */
-  async openCanvasForBullet(view: OutlineFileView, nodeId: NodeId): Promise<void> {
-    const text = getFlatNode(view.editor.getState().getTree(), nodeId)?.text.trim();
-    const candidates = this.sortCandidates(await this.findCanvasCandidates(nodeId, text));
-    const open = (candidate: CanvasCandidate) => void this.openCanvasCandidate(view, candidate);
-
-    if (candidates.length === 0) {
-      new Notice('이 불릿과 짝인 캔버스 카드가 없습니다.');
-    } else if (candidates.length === 1 && candidates[0]) {
-      open(candidates[0]);
-    } else {
-      new PairPickerModal(
-        this.app,
-        `${PEEK_LABEL_TO_CANVAS} — 짝 카드가 있는 캔버스 ${candidates.length}개`,
-        candidates.map((candidate) => ({
-          value: candidate,
-          title: candidate.file.basename,
-          note: describeCandidate(candidate),
-        })),
-        open
-      ).open();
-    }
-  }
-
-  /**
-   * 짝 카드가 있는 캔버스를 모두 찾는다. 캔버스 하나에 후보 하나 (id 로 이어진 카드를 먼저 쓴다).
-   * 열린 캔버스는 저장 전 내용까지 보이도록 화면에서 찾고, 나머지는 파일에서 찾는다.
-   */
-  private async findCanvasCandidates(
-    nodeId: NodeId,
-    text: string | undefined
-  ): Promise<CanvasCandidate[]> {
-    const byPath = new Map<string, CanvasCandidate>();
-    const consider = (candidate: CanvasCandidate) => {
-      const current = byPath.get(candidate.file.path);
-      if (!current || (candidate.byId && !current.byId)) byPath.set(candidate.file.path, candidate);
+  /** 아웃라인 탭의 편집 화면에 더해 줄 호스트 기능 (다이아몬드 불릿, 메뉴 머리말, 메뉴 항목) */
+  hostFor(view: OutlineFileView): Partial<OutlineHost> {
+    return {
+      mirrorCount: (nodeId) => 1 + this.index.mirrorsOf(nodeId).length,
+      subscribeMirrors: (listener) => this.index.onChange(listener),
+      showMirrors: (nodeId) => this.showMirrors(nodeId, view.leaf),
+      nodeMenuItems: (nodeId) => this.bulletMenuItems(view, nodeId),
     };
-
-    const openPaths = new Set<string>();
-    for (const leaf of this.app.workspace.getLeavesOfType('canvas')) {
-      const canvas = canvasOf(leaf);
-      const file = fileOf(leaf);
-      if (!canvas || !file) continue;
-      openPaths.add(file.path);
-      for (const card of canvas.nodes.values()) {
-        const match = cardMatch(card.getData(), nodeId, text);
-        if (match > 0) consider({ file, cardId: card.id, byId: match === 2, leaf });
-      }
-    }
-
-    for (const file of this.app.vault.getFiles()) {
-      if (file.extension !== 'canvas' || openPaths.has(file.path)) continue;
-      let nodes: unknown[] = [];
-      try {
-        const data = JSON.parse(await this.app.vault.cachedRead(file)) as { nodes?: unknown[] };
-        nodes = Array.isArray(data.nodes) ? data.nodes : [];
-      } catch {
-        continue;
-      }
-      for (const card of nodes) {
-        const match = cardMatch(card, nodeId, text);
-        const cardId = (card as { id?: unknown }).id;
-        if (match > 0 && typeof cardId === 'string') {
-          consider({ file, cardId, byId: match === 2, leaf: null });
-        }
-      }
-    }
-    return [...byPath.values()];
   }
 
-  /** 다른 칸에 열려 있으면 그 칸에서, 아니면(같은 탭 묶음이라 아웃라인이 가려지면) 옆 칸에 연다. */
-  private async openCanvasCandidate(
-    view: OutlineFileView,
-    candidate: CanvasCandidate
-  ): Promise<void> {
-    const { leaf: openLeaf, file, cardId } = candidate;
-    const leaf =
-      openLeaf && openLeaf.parent !== view.leaf.parent ? openLeaf : this.asideOf(view.leaf);
-    if (leaf === openLeaf) await this.app.workspace.revealLeaf(leaf);
-    else if (fileOf(leaf)?.path !== file.path) await leaf.openFile(file);
+  private bulletMenuItems(view: OutlineFileView, nodeId: NodeId): OutlineHostMenuItem[] {
+    const on = this.index.mirrorsOf(nodeId).length;
+    const off = this.index.offMirrorsOf(nodeId).length;
+    const items: OutlineHostMenuItem[] = [];
+    if (on > 0) {
+      items.push(
+        { label: '캔버스에서 보기', run: () => void this.openCanvasForBullet(view, nodeId) },
+        { label: `미러 끄기 (카드 ${on}장)`, run: () => void this.setBulletMirrors(nodeId, false) }
+      );
+    }
+    if (off > 0) {
+      items.push({
+        label: `미러 다시 켜기 (카드 ${off}장)`,
+        run: () => void this.setBulletMirrors(nodeId, true),
+      });
+    }
+    return items;
+  }
 
+  private async setBulletMirrors(nodeId: NodeId, on: boolean): Promise<void> {
+    const count = await this.mirrors.setBulletMirrors(nodeId, on);
+    new Notice(on ? `미러 카드 ${count}장을 다시 켰습니다.` : `미러 카드 ${count}장을 껐습니다.`);
+  }
+
+  // ── 카드 쪽 ──
+
+  /** 카드가 있는 칸과 파일, 카드가 미러인 불릿 */
+  private cardContext(card: CanvasNode) {
+    const leaf =
+      this.app.workspace
+        .getLeavesOfType('canvas')
+        .find((l) => canvasOf(l)?.nodes.get(card.id) === card) ?? null;
+    const raw = toRawCard(card.getData());
+    return {
+      leaf,
+      raw,
+      canvasPath: leaf ? fileOf(leaf)?.path : undefined,
+      nodeId: raw ? this.index.resolve(raw) : null,
+    };
+  }
+
+  private addCardMenuItems(menu: Menu, card: CanvasNode): void {
+    const { leaf, raw, canvasPath, nodeId } = this.cardContext(card);
+    if (!raw || !canvasPath || !leaf) return;
+
+    if (nodeId) {
+      menu.addItem((item) =>
+        item
+          .setTitle('아웃라인에서 보기')
+          .setIcon('panel-right')
+          .onClick(() => void this.openOutlineForCard(card))
+      );
+      menu.addItem((item) =>
+        item
+          .setTitle(`미러 ${1 + this.index.mirrorsOf(nodeId).length}곳 보기`)
+          .setIcon('diamond')
+          .onClick(() => this.showMirrors(nodeId, leaf))
+      );
+      menu.addItem((item) =>
+        item
+          .setTitle('미러 끄기')
+          .setIcon('x')
+          .onClick(() => void this.mirrors.setCardMirror(canvasPath, card.id, false))
+      );
+    } else if (raw.link?.off && this.index.bullet(raw.link.nodeId)) {
+      menu.addItem((item) =>
+        item
+          .setTitle('미러 켜기')
+          .setIcon('diamond')
+          .onClick(() => void this.mirrors.setCardMirror(canvasPath, card.id, true))
+      );
+    }
+  }
+
+  /** 카드 도구 막대에 "아웃라인에서 보기" 단추를 더한다. 미러 카드에만 붙는다. */
+  private addPeekButton(card: CanvasNode, menuEl: HTMLElement): void {
+    menuEl.querySelector(`.${PEEK_BUTTON_CLASS}`)?.remove();
+    const raw = toRawCard(card.getData());
+    if (!raw || !this.index.resolve(raw)) return;
+
+    const button = menuEl.createEl('button', {
+      cls: `clickable-icon ${PEEK_BUTTON_CLASS}`,
+      attr: { 'aria-label': '아웃라인에서 보기', 'data-tooltip-position': 'top' },
+    });
+    setIcon(button, 'panel-right');
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      void this.openOutlineForCard(card);
+    });
+  }
+
+  /** 열린 캔버스의 미러 카드에 다이아몬드를 붙이고, 미러가 아닌 카드에서는 뗀다. */
+  private decorateCanvases(): void {
+    for (const canvas of openCanvases(this.app)) {
+      canvas.nodes.forEach((card) => {
+        const raw = toRawCard(card.getData());
+        card.nodeEl.classList.toggle(MIRROR_CARD_CLASS, Boolean(raw && this.index.resolve(raw)));
+      });
+    }
+  }
+
+  // ── 열기 ──
+
+  /** 미러 카드가 하나면 바로 열고, 여러 개면 미러 창을 띄운다. */
+  async openCanvasForBullet(view: OutlineFileView, nodeId: NodeId): Promise<void> {
+    const cards = this.index.mirrorsOf(nodeId);
+    const only = cards.length === 1 ? cards[0] : undefined;
+    if (cards.length === 0) new Notice('이 불릿의 미러 카드가 없습니다.');
+    else if (only) await this.openCard(view.leaf, only.canvasPath, only.cardId);
+    else this.showMirrors(nodeId, view.leaf);
+  }
+
+  /** 카드의 원본 불릿을 연다. (원본은 하나뿐이다) */
+  async openOutlineForCard(card: CanvasNode): Promise<void> {
+    const { leaf, nodeId } = this.cardContext(card);
+    const bullet = nodeId ? this.index.bullet(nodeId) : undefined;
+    const source = leaf ?? this.app.workspace.getMostRecentLeaf();
+    if (!bullet || !source) {
+      new Notice('이 카드는 미러가 아닙니다.');
+      return;
+    }
+    await this.openBullet(source, bullet.outlinePath, bullet.nodeId);
+  }
+
+  /** 미러 창: 원본 불릿과 미러 카드가 있는 곳을 경로로 보여준다. */
+  showMirrors(nodeId: NodeId, fromLeaf: WorkspaceLeaf): void {
+    const bullet = this.index.bullet(nodeId);
+    if (!bullet) return;
+    const cards = this.index.mirrorsOf(nodeId);
+
+    const places: MirrorPlace[] = [
+      {
+        kind: 'source',
+        segments: [...pathSegments(bullet.outlinePath), ...bullet.ancestors, bullet.text],
+        isOpen: Boolean(this.openLeafOf(bullet.outlinePath, fromLeaf)),
+        open: () => void this.openBullet(fromLeaf, bullet.outlinePath, nodeId),
+      },
+      ...cards.map(
+        (card): MirrorPlace => ({
+          kind: 'card',
+          segments: [...pathSegments(card.canvasPath), card.text],
+          isOpen: Boolean(this.openLeafOf(card.canvasPath, fromLeaf)),
+          open: () => void this.openCard(fromLeaf, card.canvasPath, card.cardId),
+        })
+      ),
+    ];
+    new MirrorPanelModal(
+      this.app,
+      `"${shorten(bullet.text)}" 미러 ${places.length}곳`,
+      places,
+      cards.length > 0
+        ? [{ label: '미러 모두 끄기', run: () => void this.setBulletMirrors(nodeId, false) }]
+        : []
+    ).open();
+  }
+
+  private async openCard(fromLeaf: WorkspaceLeaf, canvasPath: string, cardId: string): Promise<void> {
+    const file = this.app.vault.getAbstractFileByPath(canvasPath);
+    if (!(file instanceof TFile)) return;
+    const leaf = await this.leafFor(fromLeaf, file);
     const canvas = await waitFor(
       () => (canvasOf(leaf)?.nodes.has(cardId) ? canvasOf(leaf) : null),
       LOAD_FRAMES
@@ -243,90 +271,14 @@ export class SidePeek {
     if (canvas && card) focusCard(canvas, card);
   }
 
-  // ── 카드 → 아웃라인 ──
-
-  /** 짝 불릿이 있는 아웃라인이 하나면 바로 열고, 여러 개면 고르게 한다. */
-  async openOutlineForCard(card: CanvasNode, canvas?: CanvasInstance): Promise<void> {
-    const linkedId = linkOf(card);
-    const text = linkedId ? null : textOf(card);
-    if (!linkedId && !text) return;
-
-    const source =
-      this.app.workspace.getLeavesOfType('canvas').find((leaf) => canvasOf(leaf) === canvas) ??
-      this.app.workspace.getMostRecentLeaf();
-    if (!source) return;
-
-    const candidates = this.sortCandidates(
-      await this.findOutlineCandidates(linkedId, text),
-      card.getData().vibeOutline?.file
-    );
-    const open = (candidate: OutlineCandidate) => void this.openOutlineCandidate(source, candidate);
-
-    if (candidates.length === 0) {
-      new Notice('이 카드와 짝인 불릿이 없습니다.');
-    } else if (candidates.length === 1 && candidates[0]) {
-      open(candidates[0]);
-    } else {
-      new PairPickerModal(
-        this.app,
-        `${PEEK_LABEL_TO_OUTLINE} — 짝 불릿이 있는 아웃라인 ${candidates.length}개`,
-        candidates.map((candidate) => ({
-          value: candidate,
-          title: candidate.file.basename,
-          note: describeCandidate(candidate),
-        })),
-        open
-      ).open();
-    }
-  }
-
-  /** 짝 불릿이 있는 아웃라인을 모두 찾는다. 파일 하나에 후보 하나 (같은 글자가 여러 번 있으면 맨 위의 것). */
-  private async findOutlineCandidates(
-    linkedId: NodeId | null,
-    text: string | null
-  ): Promise<OutlineCandidate[]> {
-    const byId = linkedId !== null;
-    const candidates: OutlineCandidate[] = [];
-
-    const openPaths = new Set<string>();
-    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_OUTLINE)) {
-      const view = leaf.view;
-      if (!(view instanceof OutlineFileView) || !view.file || !view.outline.getState().project) {
-        continue;
-      }
-      if (openPaths.has(view.file.path)) continue;
-      openPaths.add(view.file.path);
-      const tree = view.editor.getState().getTree();
-      const nodeId = linkedId
-        ? getFlatNode(tree, linkedId)
-          ? linkedId
-          : null
-        : findBulletByText(tree, text ?? '');
-      if (nodeId) candidates.push({ file: view.file, nodeId, byId, leaf });
-    }
-
-    const match = (node: OutlineNode) =>
-      linkedId ? node.id === linkedId : node.text.trim() === text;
-    for (const file of this.app.vault.getFiles()) {
-      if (file.extension !== OUTLINE_EXTENSION || openPaths.has(file.path)) continue;
-      const parsed = parseProjectFile(await this.app.vault.cachedRead(file));
-      if (!parsed.success) continue;
-      const nodeId = findInNodes(parsed.project.rootNodes, match);
-      if (nodeId) candidates.push({ file, nodeId, byId, leaf: null });
-    }
-    return candidates;
-  }
-
-  /** 다른 칸에 열려 있으면 그 칸에서, 아니면(같은 탭 묶음이라 캔버스가 가려지면) 옆 칸에 연다. */
-  private async openOutlineCandidate(
-    source: WorkspaceLeaf,
-    candidate: OutlineCandidate
+  private async openBullet(
+    fromLeaf: WorkspaceLeaf,
+    outlinePath: string,
+    nodeId: NodeId
   ): Promise<void> {
-    const { leaf: openLeaf, file, nodeId } = candidate;
-    const leaf = openLeaf && openLeaf.parent !== source.parent ? openLeaf : this.asideOf(source);
-    if (leaf === openLeaf) await this.app.workspace.revealLeaf(leaf);
-    else if (fileOf(leaf)?.path !== file.path) await leaf.openFile(file);
-
+    const file = this.app.vault.getAbstractFileByPath(outlinePath);
+    if (!(file instanceof TFile)) return;
+    const leaf = await this.leafFor(fromLeaf, file);
     const view = await waitFor(
       () =>
         leaf.view instanceof OutlineFileView && leaf.view.outline.getState().project
@@ -338,26 +290,30 @@ export class SidePeek {
   }
 
   /**
-   * 후보 순서: 지금 열린 것 → 최근에 연 것 → id 로 이어진 것 → 글자만 같은 것 → 이름순.
-   * `preferredPath` (카드에 적힌 아웃라인 파일) 가 있으면 맨 앞에 둔다.
+   * 파일을 보여줄 칸: 다른 탭 묶음에 이미 열려 있으면 그 칸을 앞으로,
+   * 아니면(안 열렸거나 같은 탭 묶음이라 지금 화면이 가려지면) 오른쪽 칸에 연다.
    */
-  private sortCandidates<T extends PairCandidate>(candidates: T[], preferredPath?: string): T[] {
-    const recent = this.app.workspace.getLastOpenFiles();
-    const recency = (candidate: T) => {
-      const index = recent.indexOf(candidate.file.path);
-      return index === -1 ? Number.MAX_SAFE_INTEGER : index;
-    };
-    return [...candidates].sort(
-      (a, b) =>
-        Number(b.file.path === preferredPath) - Number(a.file.path === preferredPath) ||
-        Number(Boolean(b.leaf)) - Number(Boolean(a.leaf)) ||
-        recency(a) - recency(b) ||
-        Number(b.byId) - Number(a.byId) ||
-        a.file.basename.localeCompare(b.file.basename)
-    );
+  private async leafFor(fromLeaf: WorkspaceLeaf, file: TFile): Promise<WorkspaceLeaf> {
+    const open = this.openLeafOf(file.path, fromLeaf);
+    if (open) {
+      await this.app.workspace.revealLeaf(open);
+      return open;
+    }
+    const leaf = this.asideOf(fromLeaf);
+    if (fileOf(leaf)?.path !== file.path) await leaf.openFile(file);
+    return leaf;
   }
 
-  // ── 화면 ──
+  /** 그 파일을 연 칸 가운데, `fromLeaf` 와 다른 탭 묶음에 있는 것 */
+  private openLeafOf(path: string, fromLeaf: WorkspaceLeaf): WorkspaceLeaf | null {
+    const leaves = [
+      ...this.app.workspace.getLeavesOfType('canvas'),
+      ...this.app.workspace.getLeavesOfType(VIEW_TYPE_OUTLINE),
+    ];
+    return (
+      leaves.find((leaf) => fileOf(leaf)?.path === path && leaf.parent !== fromLeaf.parent) ?? null
+    );
+  }
 
   /** 옆으로 열 칸: 전에 연 오른쪽 칸이 남아 있으면 다시 쓰고, 없으면 지금 칸을 세로로 나눈다. */
   private asideOf(source: WorkspaceLeaf): WorkspaceLeaf {
@@ -365,21 +321,5 @@ export class SidePeek {
     if (aside && aside !== source && aside.view.containerEl.isConnected) return aside;
     this.asideLeaf = this.app.workspace.createLeafBySplit(source, 'vertical');
     return this.asideLeaf;
-  }
-
-  /** 카드 도구 막대에 "아웃라인에서 보기" 단추를 더한다. */
-  private addPeekButton(canvas: CanvasInstance, card: CanvasNode, menuEl: HTMLElement): void {
-    menuEl.querySelector(`.${PEEK_BUTTON_CLASS}`)?.remove();
-    if (!linkOf(card) && !textOf(card)) return;
-
-    const button = menuEl.createEl('button', {
-      cls: `clickable-icon ${PEEK_BUTTON_CLASS}`,
-      attr: { 'aria-label': PEEK_LABEL_TO_OUTLINE, 'data-tooltip-position': 'top' },
-    });
-    setIcon(button, 'panel-right');
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      void this.openOutlineForCard(card, canvas);
-    });
   }
 }

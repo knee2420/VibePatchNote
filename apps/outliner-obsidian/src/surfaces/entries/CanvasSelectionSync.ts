@@ -4,8 +4,7 @@
  * - 불릿에 커서를 두거나 불릿을 고르면, 열린 캔버스에서 짝 카드를 골라 그쪽으로 줌인한다.
  * - 캔버스에서 카드 하나를 고르면, 열린 아웃라인 탭에서 짝 불릿을 골라 화면 가운데로 스크롤한다.
  *
- * 짝: 카드 데이터의 `vibeOutline.nodeId` 가 불릿 id 와 같으면 짝이다.
- * 태그가 없는 텍스트 카드는 글자가 똑같은 불릿과 짝으로 본다.
+ * 짝: 카드가 그 불릿의 미러이면 짝이다. 무엇이 미러인지는 `resolveCard` 가 정한다. (미러 색인)
  * 캔버스의 선택·줌·카드 만들기는 옵시디언의 공개 API 밖의 기능이라, 옵시디언이 바뀌면 동작하지 않을 수 있다.
  */
 
@@ -30,6 +29,7 @@ interface CanvasNodeData {
 
 export interface CanvasNode {
   id: string;
+  nodeEl: HTMLElement;
   x: number;
   y: number;
   width: number;
@@ -113,6 +113,9 @@ export class CanvasSelectionSync {
   onCardMenu: ((canvas: CanvasInstance, card: CanvasNode, menuEl: HTMLElement) => void) | null =
     null;
 
+  /** 카드 데이터가 미러인 불릿. 미러가 아니면 null (플러그인이 미러 색인으로 채운다) */
+  resolveCard: (data: unknown) => NodeId | null = () => null;
+
   constructor(app: App) {
     this.app = app;
   }
@@ -183,7 +186,7 @@ export class CanvasSelectionSync {
       if (!nodeId) return;
       this.lastView = view;
       this.lastBullet.set(view, nodeId);
-      if (!this.applyingToOutline) this.revealInCanvases(view, nodeId);
+      if (!this.applyingToOutline) this.revealInCanvases(nodeId);
     });
     this.outlineSubs.set(view, unsubscribe);
   }
@@ -250,21 +253,11 @@ export class CanvasSelectionSync {
     if (this.lastCard.get(canvas) === card.id) return;
     this.lastCard.set(canvas, card.id);
 
-    const link = linkOf(card);
-    const text = link ? null : textOf(card);
+    const nodeId = this.resolveCard(card.getData());
+    if (!nodeId) return;
     for (const view of this.outlineSubs.keys()) {
-      const nodeId = link ?? (text ? this.findBulletByText(view, text) : null);
-      if (nodeId && getFlatNode(view.editor.getState().getTree(), nodeId)) {
-        this.revealBullet(view, nodeId);
-      }
+      if (getFlatNode(view.editor.getState().getTree(), nodeId)) this.revealBullet(view, nodeId);
     }
-  }
-
-  private findBulletByText(view: OutlineFileView, text: string): NodeId | null {
-    for (const node of view.editor.getState().getTree().nodes.values()) {
-      if (node.id !== ROOT_ID && node.text.trim() === text) return node.id;
-    }
-    return null;
   }
 
   /** 불릿이 보이게(줌 밖이면 줌아웃, 접힌 조상은 펼침) 한 뒤 골라 두고 가운데로 스크롤한다. 입력 포커스는 가져오지 않는다. */
@@ -300,13 +293,9 @@ export class CanvasSelectionSync {
 
   // ── 아웃라인 → 캔버스 ──
 
-  private revealInCanvases(view: OutlineFileView, nodeId: NodeId): void {
-    const text = getFlatNode(view.editor.getState().getTree(), nodeId)?.text.trim();
+  private revealInCanvases(nodeId: NodeId): void {
     for (const canvas of this.canvasRestores.keys()) {
-      const cards = [...canvas.nodes.values()];
-      const card =
-        cards.find((c) => linkOf(c) === nodeId) ??
-        (text ? cards.find((c) => !linkOf(c) && textOf(c) === text) : undefined);
+      const card = [...canvas.nodes.values()].find((c) => this.resolveCard(c.getData()) === nodeId);
       if (!card) continue;
       if (canvas.selection.size === 1 && canvas.selection.has(card)) continue;
 

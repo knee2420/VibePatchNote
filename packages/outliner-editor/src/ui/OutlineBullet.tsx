@@ -4,6 +4,7 @@
  * - 손잡이: 행에 마우스가 올라오면 보이고, 올리거나 누르면 노드 메뉴가 열린다.
  * - 화살표: 클릭은 한 단계 접기/펼치기, 더블클릭은 하위 전체 접기/펼치기
  * - 불릿 점: 호버 링, 좌클릭 줌인, 우클릭 노드 메뉴, 잡고 끌면 이동 (Alt 를 누른 채 놓으면 복제)
+ *   미러가 있는 불릿은 점 대신 다이아몬드로 보인다.
  */
 
 import React from 'react';
@@ -17,6 +18,8 @@ interface OutlineBulletProps {
   isTodo?: boolean;
   /** 평소에는 불릿 점을 숨기는 종류(문단)인지 */
   isDotSubtle?: boolean;
+  /** 다른 곳에 미러가 있는 불릿인지 (다이아몬드로 보인다) */
+  isMirrored?: boolean;
   onToggleFold: () => void;
   onToggleFoldDeep: () => void;
   onZoom: () => void;
@@ -33,6 +36,7 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
   isAncestorCompleted = false,
   isTodo = false,
   isDotSubtle = false,
+  isMirrored = false,
   onToggleFold,
   onToggleFoldDeep,
   onZoom,
@@ -104,10 +108,12 @@ export const OutlineBullet: React.FC<OutlineBulletProps> = ({
           onOpenMenu(e.clientX, e.clientY);
         }}
         className="w-5 h-5 flex items-center justify-center rounded-full ring-0 ring-(--interactive-accent)/0 hover:bg-(--background-modifier-hover) hover:ring-4 hover:ring-(--interactive-accent)/40 transition-all duration-150 cursor-grab active:cursor-grabbing group/dot"
-        title="클릭: 줌인 · 끌기: 이동 (Alt: 복제) · 우클릭: 메뉴"
+        title={`${isMirrored ? '미러가 있는 불릿 · ' : ''}클릭: 줌인 · 끌기: 이동 (Alt: 복제) · 우클릭: 메뉴`}
       >
         <span
-          className={`rounded-full transition-all duration-150 ${
+          className={`transition-all duration-150 ${
+            isMirrored ? 'rotate-45 rounded-[2px] !bg-(--interactive-accent)' : 'rounded-full'
+          } ${
             isCompleted || isAncestorCompleted ? 'opacity-50' : ''
           } ${
             isDotSubtle && !hasChildren ? 'opacity-0 group-hover/row:opacity-100' : ''

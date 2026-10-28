@@ -19,7 +19,7 @@ import { NODE_TEXT_SIZE, OutlineInput } from './OutlineInput';
 import { OutlineNote } from './OutlineNote';
 import { useKeyOrchestrator } from '../model/useKeyOrchestrator';
 import { useZoom } from '../model/useZoom';
-import { useEditorStore } from '../session/context';
+import { useEditorStore, useMirrorCount } from '../session/context';
 import { FileBlock } from '../attachments/FileBlock';
 import { useFileAttach } from '../attachments/useFileAttach';
 
@@ -54,6 +54,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
   const setFoldDeep = useEditorStore((s) => s.setFoldDeep);
   const toggleCompleted = useEditorStore((s) => s.toggleCompleted);
   const isNoteEditing = useEditorStore((s) => s.noteEditingNodeId === item.id);
+  const mirrorCount = useMirrorCount(item.id);
   const { zoomIn } = useZoom();
   const { handleKeyDown } = useKeyOrchestrator(item.id, navigableNodes);
   const { canAttach, isDraggingFile, dropOnNode } = useFileAttach();
@@ -118,6 +119,7 @@ export const OutlineRow: React.FC<OutlineRowProps> = ({
           isAncestorCompleted={item.isAncestorCompleted}
           isTodo={nodeType === 'todo'}
           isDotSubtle={nodeType === 'paragraph'}
+          isMirrored={mirrorCount > 1}
           onToggleFold={() => toggleFold(item.id)}
           onToggleFoldDeep={() => setFoldDeep(item.id, isFullyExpanded(node))}
           onZoom={() => zoomIn(item.id)}

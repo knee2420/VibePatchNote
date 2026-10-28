@@ -72,6 +72,15 @@ export interface OutlineHost {
     inputEl: HTMLDivElement,
     onSelect: (insertedText: string, newCaretOffset: number) => void
   ) => () => void;
+  /**
+   * (선택) 이 불릿이 있는 곳의 수 (불릿 자신 포함). 2 이상이면 미러가 있는 불릿이다.
+   * 미러는 호스트가 정한다 (옵시디언: 같은 불릿을 가리키는 캔버스 카드).
+   */
+  mirrorCount?: (nodeId: NodeId) => number;
+  /** (선택) 미러가 바뀔 때 알림을 받는다. 돌려주는 함수로 그만 받는다. */
+  subscribeMirrors?: (listener: () => void) => () => void;
+  /** (선택) 이 불릿의 미러 목록을 보여준다. */
+  showMirrors?: (nodeId: NodeId) => void;
   /** (선택) 불릿 하나의 메뉴에 호스트가 더하는 항목. 메뉴를 열 때마다 묻는다. */
   nodeMenuItems?: (nodeId: NodeId) => OutlineHostMenuItem[];
   /** (선택) 불릿에 파일을 붙이고 여는 능력. 없으면 붙어 있는 파일은 이름만 보인다. */

@@ -6,7 +6,7 @@
  * 내용은 호스트가 주인이라 props 로 받고, 바뀔 때마다 호스트가 다시 넘겨준다.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import { useStore } from 'zustand';
 import type { OutlineNode, ViewMode } from '@vibe/outliner-core';
 import type { OutlineEditorState, OutlineEditorStore } from './editorStore';
@@ -52,6 +52,17 @@ function useOutlineEditorContext(): OutlineEditorContextValue {
 /** 편집 상태의 일부를 구독한다. */
 export function useEditorStore<T>(selector: (state: OutlineEditorState) => T): T {
   return useStore(useOutlineEditorContext().store, selector);
+}
+
+const noSubscribe = () => () => {};
+
+/** 이 불릿이 있는 곳의 수 (불릿 자신 포함). 호스트가 미러를 모르면 1 이다. */
+export function useMirrorCount(nodeId: string): number {
+  const { host } = useOutlineEditorContext();
+  return useSyncExternalStore(
+    host.subscribeMirrors ?? noSubscribe,
+    () => host.mirrorCount?.(nodeId) ?? 1
+  );
 }
 
 /** 구독하지 않고 그때그때의 편집 상태를 읽을 때 쓴다. (이벤트 처리 안에서) */
