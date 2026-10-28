@@ -18,6 +18,7 @@ import { loadPluginSettings } from './host/pluginSettings';
 import { registerCanvasSyncCommands } from './commands/canvasSyncCommands';
 import { CanvasCardWatcher } from './surfaces/entries/CanvasCardWatcher';
 import { CanvasSelectionSync } from './surfaces/entries/CanvasSelectionSync';
+import { SidePeek } from './surfaces/entries/SidePeek';
 import { LivePreviewEmbedWatcher } from './surfaces/entries/LivePreviewEmbedWatcher';
 import { registerOutlineCodeBlockProcessor } from './surfaces/entries/codeBlock';
 import { registerOutlineMarkdownEmbedProcessor } from './surfaces/entries/readingEmbed';
@@ -29,6 +30,7 @@ export default class VibeOutlinerPlugin extends Plugin {
   private canvasCardWatcher: CanvasCardWatcher | null = null;
   private livePreviewWatcher: LivePreviewEmbedWatcher | null = null;
   private canvasSelectionSync: CanvasSelectionSync | null = null;
+  private sidePeek: SidePeek | null = null;
 
   async onload(): Promise<void> {
     // 0. 설정을 먼저 불러 둔다. (화면이 뜨자마자 딸린 파일의 기본 크기를 묻는다)
@@ -36,7 +38,13 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.addSettingTab(new OutlineSettingTab(this.app, this));
 
     // 1. .outline 확장자를 단독 탭 뷰에 등록
-    this.registerView(VIEW_TYPE_OUTLINE, (leaf) => new OutlineFileView(leaf));
+    this.registerView(
+      VIEW_TYPE_OUTLINE,
+      (leaf) =>
+        new OutlineFileView(leaf, {
+          nodeMenuItems: (view, nodeId) => this.sidePeek?.bulletMenuItems(view, nodeId) ?? [],
+        })
+    );
     this.registerExtensions([OUTLINE_EXTENSION], VIEW_TYPE_OUTLINE);
 
     // 2. 마크다운 인라인 임베드 (![[...]]) 등록 (Reading 모드)
@@ -61,6 +69,10 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.canvasSelectionSync = new CanvasSelectionSync(this.app);
     this.canvasSelectionSync.init();
     registerCanvasSyncCommands(this, this.canvasSelectionSync);
+
+    // 4-2. 불릿 ↔ 카드를 오른쪽 반쪽 화면에 열기 (실험)
+    this.sidePeek = new SidePeek(this.app, this.canvasSelectionSync);
+    this.sidePeek.register(this);
 
     // 5. 호버 링크 미리보기 소스 등록 (Page Preview)
     this.registerHoverLinkSource(VIEW_TYPE_OUTLINE, {
@@ -118,6 +130,7 @@ export default class VibeOutlinerPlugin extends Plugin {
     this.canvasCardWatcher = null;
     this.canvasSelectionSync?.destroy();
     this.canvasSelectionSync = null;
+    this.sidePeek = null;
     this.livePreviewWatcher?.destroy();
     this.livePreviewWatcher = null;
   }

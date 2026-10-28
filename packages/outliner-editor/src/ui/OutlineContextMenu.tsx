@@ -21,6 +21,7 @@ import {
   Download,
   Trash2,
   ChevronRight,
+  PanelRight,
 } from 'lucide-react';
 import { TURN_INTO_OPTIONS, useNodeActions } from '../model/useNodeActions';
 import { useEditorStore, useEditorWindow, useOutlineHost } from '../session/context';
@@ -225,6 +226,14 @@ export const OutlineContextMenu: React.FC<OutlineContextMenuProps> = ({
             label="내부 링크 복사"
             onSelect={run(() => void actions.copyNodeLink(item.id))}
           />
+          {host.nodeMenuItems?.(item.id).map((extra) => (
+            <MenuItem
+              key={extra.label}
+              icon={<PanelRight className="w-3.5 h-3.5 text-(--text-muted)" />}
+              label={extra.label}
+              onSelect={run(extra.run)}
+            />
+          ))}
         </>
       )}
       <MenuItem

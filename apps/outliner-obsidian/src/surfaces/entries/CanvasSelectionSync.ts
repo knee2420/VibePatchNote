@@ -47,6 +47,8 @@ interface CanvasBBox {
 
 export interface CanvasInstance {
   nodes: Map<string, CanvasNode>;
+  /** 카드를 고르면 그 위에 뜨는 작은 도구 막대 */
+  menu?: { menuEl?: HTMLElement; render?: (...args: unknown[]) => unknown };
   selection: Set<unknown>;
   selectOnly: (item: CanvasNode) => void;
   zoomToSelection: () => void;
@@ -70,7 +72,7 @@ export function linkOf(card: CanvasNode): NodeId | null {
   return typeof nodeId === 'string' && nodeId !== '' ? nodeId : null;
 }
 
-function textOf(card: CanvasNode): string | null {
+export function textOf(card: CanvasNode): string | null {
   const data = card.getData();
   return data.type === 'text' && typeof data.text === 'string' ? data.text.trim() : null;
 }
@@ -106,6 +108,10 @@ export class CanvasSelectionSync {
   /** 명령이 쓰는 값: 마지막으로 만진 아웃라인 탭과, 탭마다 마지막으로 커서를 둔 불릿 */
   lastView: OutlineFileView | null = null;
   private lastBullet = new Map<OutlineFileView, NodeId>();
+
+  /** (선택) 카드 하나를 골라 도구 막대가 그려질 때마다 불린다. 막대에 단추를 더하는 자리다. */
+  onCardMenu: ((canvas: CanvasInstance, card: CanvasNode, menuEl: HTMLElement) => void) | null =
+    null;
 
   constructor(app: App) {
     this.app = app;
@@ -202,6 +208,23 @@ export class CanvasSelectionSync {
         else delete target[name];
       });
     }
+
+    // 도구 막대는 선택이 바뀔 때마다 다시 그려지므로, 그릴 때마다 단추를 더한다.
+    const menu = canvas.menu;
+    const originalRender = menu?.render;
+    if (menu && typeof originalRender === 'function') {
+      menu.render = (...args: unknown[]) => {
+        const result = originalRender.apply(menu, args);
+        const cards = selectedCards(canvas);
+        if (cards.length === 1 && cards[0] && menu.menuEl) {
+          this.onCardMenu?.(canvas, cards[0], menu.menuEl);
+        }
+        return result;
+      };
+      restores.push(() => {
+        menu.render = originalRender;
+      });
+    }
     this.canvasRestores.set(canvas, () => restores.forEach((restore) => restore()));
   }
 
@@ -245,7 +268,7 @@ export class CanvasSelectionSync {
   }
 
   /** 불릿이 보이게(줌 밖이면 줌아웃, 접힌 조상은 펼침) 한 뒤 골라 두고 가운데로 스크롤한다. 입력 포커스는 가져오지 않는다. */
-  private revealBullet(view: OutlineFileView, nodeId: NodeId): void {
+  revealBullet(view: OutlineFileView, nodeId: NodeId): void {
     const state = view.editor.getState();
     const tree = state.getTree();
     if (state.activeRootId && !isInSubtree(tree, state.activeRootId, nodeId)) state.setZoom(null);
@@ -269,10 +292,10 @@ export class CanvasSelectionSync {
     this.lastView = view;
     this.lastBullet.set(view, nodeId);
 
-    requestAnimationFrame(() => {
-      const row = view.contentEl.querySelector(`[data-node-id="${CSS.escape(nodeId)}"]`);
-      row?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    });
+    // 막 연 탭은 줄이 아직 그려지지 않았을 수 있어서, 줄이 생길 때까지 몇 프레임 기다린다.
+    void waitFor(() => view.contentEl.querySelector(`[data-node-id="${CSS.escape(nodeId)}"]`)).then(
+      (row) => row?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    );
   }
 
   // ── 아웃라인 → 캔버스 ──
@@ -293,6 +316,19 @@ export class CanvasSelectionSync {
       zoomToCard(canvas, card);
     }
   }
+}
+
+/** `find` 가 값을 돌려줄 때까지 프레임마다 다시 본다. 끝내 없으면 null */
+export function waitFor<T>(find: () => T | null | undefined, frames = 60): Promise<T | null> {
+  return new Promise((resolve) => {
+    const tick = (left: number) => {
+      const found = find();
+      if (found) resolve(found);
+      else if (left <= 0) resolve(null);
+      else requestAnimationFrame(() => tick(left - 1));
+    };
+    tick(frames);
+  });
 }
 
 /** 카드가 화면의 1/3쯤 차지하게 주변까지 넣어 줌한다. (카드만 꽉 차게 줌하면 너무 크다) */
