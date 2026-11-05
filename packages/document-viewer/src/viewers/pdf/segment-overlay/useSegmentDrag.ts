@@ -131,10 +131,7 @@ export function useSegmentDrag({
       if (splitRequest) return;
       if (e.target !== containerRef.current) return;
 
-      if (!isShiftDown && !e.shiftKey) {
-        setSelectedId(null);
-        return;
-      }
+      // Shift 없이도 isEditMode(영역 선택 모드)이면 마우스 드래그로 즉시 신규 영역 생성을 시작합니다.
 
       e.stopPropagation();
       e.preventDefault();

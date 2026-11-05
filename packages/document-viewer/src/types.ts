@@ -115,6 +115,26 @@ export interface SegmentOverlayProps {
 
 export interface DocumentViewerProps extends DocumentViewBaseProps, SegmentOverlayProps {}
 
+export type WebViewerMode = 'reader' | 'snapshot' | 'live';
+
+export interface WebArticlePayload {
+  title?: string;
+  byline?: string;
+  siteName?: string;
+  excerpt?: string;
+  contentHtml?: string;
+  textContent?: string;
+  publishedTime?: string;
+}
+
+export interface WebViewerProps extends DocumentViewBaseProps {
+  initialMode?: WebViewerMode;
+  snapshotUrl?: string;
+  article?: WebArticlePayload;
+  onExtractText?: (text: string) => void;
+  onExtractHtml?: (html: string) => void;
+}
+
 export interface ViewerDefinition {
   id: string;
   canSpread: boolean; // 가로 펼치기(Spread) 지원 여부

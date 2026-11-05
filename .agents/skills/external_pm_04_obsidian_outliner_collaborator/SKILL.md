@@ -38,10 +38,10 @@ description: "사용자가 옵시디언의 아웃라인(.outline) 파일을 제�
 
 ```mermaid
 flowchart TD
-    A["사용자의 .outline 조작 요청"] --> B["[Step 1] 01_seek_outline_tree.py\n(경량 텍스트로 트리 탐색 및 노드 ID 확인)"]
+    A["사용자의 .outline 조작 요청"] --> B["[Step 1] 01_seek_outline_tree.py\n(디스크 최신 형상 조회 및 사용자 수동 변경분 사전 대조)"]
     B --> C{"대규모 변경인가?"}
     C -- "YES (10개 이상 노드 또는 구조 재배치)" --> D["[Step 2] 03_lease_guard.py acquire\n(동시성 락 선점)"]
-    C -- "NO (단순 1~2개 노드 수정)" --> E["[Step 3] 02_patch_outline_tree.py\n(원자적 트랜잭션 패치/이동)"]
+    C -- "NO (단순 1~2개 노드 수정)" --> E["[Step 3] 02_patch_outline_tree.py\n(사용자 작업분 상속 위 원자적 핀포인트 패치)"]
     D --> E
     E --> F{"미디어 첨부 필요?"}
     F -- "YES" --> G["[Step 4] 04_manage_attachments.py attach\n(에셋 폴더 복사 및 바인딩)"]
@@ -52,9 +52,9 @@ flowchart TD
     J --> K["사용자에게 완료 보고"]
 ```
 
-### [Step 1] 탐색 및 지형도 파악 (Seek)
+### [Step 1] 최신 형상 조회 및 사용자 변경분 대조 (Seek & Diff Check)
 ```bash
-# 전체 트리를 1단계 깊이까지만 초경량으로 조망하여 노드 ID 확인
+# 전체 트리를 1단계 깊이까지만 초경량으로 조망하여 디스크 최신 상태 및 사용자 수동 작업분 파악
 python .agents/tools/obsidian/outliner/01_seek_outline_tree.py "<아웃라인파일경로>" --depth 1
 
 # 특정 키워드가 포함된 노드와 그 상위 족보(upward) 역추적
@@ -102,14 +102,18 @@ python .agents/tools/obsidian/outline_validator/validate_outline.py "<아웃라�
 
 ## 🧠 4. 아웃라인 작업 가이드라인 (Guardrails)
 
-1. **원시 JSON 텍스트 직접 치환 절대 금지 (No Raw String Patching)** :
+1. **⭐️ 사용자 수동 변경분 사전 대조 및 절대 보존 원칙 (Pre-update User Edit Check & Baseline Preservation)** :
+   - **사전 최신 상태 대조 필수**: 에이전트가 트리를 변경/패치하기 직전, 반드시 `01_seek_outline_tree.py`를 실행하여 파일의 최신 디스크 형상을 확인하고, 이전 턴 대비 **사용자가 옵시디언에서 직접 타이핑하거나 수정한 노드가 있는지 먼저 대조(Diff/Inspection)**해야 합니다.
+   - **사용자 작업분 최우선 상속**: 사용자가 수정한 텍스트나 새로 추가한 불릿이 확인될 경우, 이를 에이전트의 이전 기억이나 고정 스크립트로 덮어쓰거나 롤백해서는 안 되며, **반드시 사용자의 수정본을 기준선(Baseline)으로 상속**하여 그 위에 요청된 작업만 정밀하게 덧붙여야 합니다.
+   - **루트 노드 통째 덮어쓰기 엄격 금지 (No Blind Whole-Tree Overwrite)**: 전체 트리를 초기화하듯 통째로 갈아치우는 스크립트 실행(일괄 덮어쓰기)을 전면 차단합니다. 반드시 `02_patch_outline_tree.py`의 원자적 커맨드(`--replace`, `--insert`, `--move`, `--delete`)를 통해서만 필요한 노드를 핀포인트로 부분 변경하십시오.
+2. **원시 JSON 텍스트 직접 치환 절대 금지 (No Raw String Patching)** :
    - `.outline` 파일에 대해 `replace_file_content`나 정규식 치환을 직접 실행해서는 안 됩니다. 쉼표(`,`) 하나로 전체 파서가 크래시납니다. 반드시 `02_patch_outline_tree.py`를 거치십시오.
-2. **1+1 메타 마크다운 카드 동기화 확인** :
+3. **1+1 메타 마크다운 카드 동기화 확인** :
    - 아웃라인의 제목이나 핵심 내용이 변경된 경우, 볼트 보드에서 카드가 실시간 반영될 수 있도록 인접한 동명의 `*.md` 카드의 속성(`요약`, `상태`)도 함께 점검하십시오.
-3. **토큰 낭비 방지 (Token Blast Prevention)** :
+4. **토큰 낭비 방지 (Token Blast Prevention)** :
    - 아웃라인의 내용을 파악할 때 `view_file`로 수천 줄의 JSON을 통째로 읽지 마십시오. 반드시 `01_seek_outline_tree.py --depth 1`로 먼저 전체 지형도를 확인하십시오.
-4. **도메인 정체성 엄격 준수** :
+5. **도메인 정체성 엄격 준수** :
    - 본 프로젝트는 **범용 문서 빌더/스캐폴딩 엔진, 리치 텍스트·캔버스 시각화, 도메인 중립 Agent 런타임 시스템**입니다. 소설, 웹소설 등 창작 용어나 비유는 일체 사용하지 않습니다.
-5. **사전 중복 검색 및 계층화 (Pre-mutation Seek & Hierarchical Deduplication)** :
+6. **사전 중복 검색 및 계층화 (Pre-mutation Seek & Hierarchical Deduplication)** :
    - 노드를 신규 추가(`insert`)하거나 이동하기 전에 반드시 `01_seek_outline_tree.py --query "<키워드 또는 도메인>"`을 통해 트리에 동일하거나 유사한 엔티티가 이미 존재하는지 먼저 조회해야 합니다.
    - 동일 플랫폼이나 공통 상위 범주에 속하는 파생 항목(예: 동일 도메인의 서로 다른 서식·포맷)은 트리의 최상위에 평면적으로 분산 나열하지 말고, **상위 공통 불릿 아래의 자식 노드(서브트리, `inside` 또는 `move`)로 몰아넣어 계층화**해야 합니다.

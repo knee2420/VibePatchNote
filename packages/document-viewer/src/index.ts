@@ -6,4 +6,5 @@ export * from './coordinates';
 export * from './viewerRegistry';
 export * from './viewers/pdf/PdfViewer';
 export * from './viewers/image/ImageViewer';
+export * from './viewers/web';
 export * from './viewers/fallback/IframeFallbackViewer';
